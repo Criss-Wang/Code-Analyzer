@@ -1,4 +1,4 @@
-# Team 39
+# Team 00
 
 > Please fill in this Readme with the required information, and delete this box.
 > 
@@ -29,4 +29,4 @@ No additional instructions required.
 
 Name | Mobile | Email | Development OS/Toolchain
 -:|:-:|:-|-|
-Tan Xi Zhe | 89226306 | tanxizhe@u.nus.edu | MacOS Catalina/Visual Studio 2021
+John Doe | 99887766 | john@doe.com | Windows 10/Visual Studio 2019
