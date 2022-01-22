@@ -30,3 +30,4 @@ No additional instructions required.
 Name | Mobile | Email | Development OS/Toolchain
 -:|:-:|:-|-|
 Tan Xi Zhe | 89226306 | tanxizhe@u.nus.edu | MacOS Catalina/Visual Studio 2021
+Lim Zheng Wei | 82826694 | limzhengwei@u.nus.edu | MacOS Monterey
