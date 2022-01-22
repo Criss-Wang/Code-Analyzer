@@ -31,3 +31,4 @@ Name | Mobile | Email | Development OS/Toolchain
 -:|:-:|:-|-|
 Tan Xi Zhe | 89226306 | tanxizhe@u.nus.edu | MacOS Catalina/Visual Studio 2021
 Lim Zheng Wei | 82826694 | limzhengwei@u.nus.edu | MacOS Monterey
+Lauren Lee | 98861248 | lauren.lee@u.nus.edu | Windows 11/Visual Studio 2019
