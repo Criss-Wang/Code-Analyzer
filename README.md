@@ -33,3 +33,4 @@ Tan Xi Zhe | 89226306 | tanxizhe@u.nus.edu | MacOS Catalina/Visual Studio 2021
 Lim Zheng Wei | 82826694 | limzhengwei@u.nus.edu | MacOS Monterey
 Lauren Lee | 98861248 | lauren.lee@u.nus.edu | Windows 11/Visual Studio 2019
 Zhu Yuxuan | 91268402 | e0424709@u.nus.edu | Windows 11/Visual Studio 2019
+Loh Guo Jun | 84236806 | e0407790@u.nus.edu | Windows 11/Visual Studio 2019
