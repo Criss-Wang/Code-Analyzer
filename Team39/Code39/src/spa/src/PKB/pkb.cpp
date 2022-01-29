@@ -5,13 +5,13 @@
 
 using namespace std;
 
-#include "PKB.h"
-#include "TNode.h"
+#include "pkb.h"
+#include "../TNode.h"
 
-int PKB::setProcToAST(PROC p, TNode* r) {
+int Pkb::setProcToAST(PROC p, TNode* r) {
 	return 0;
 }
 
-TNode* PKB::getRootAST (PROC p){
+TNode* Pkb::getRootAST (PROC p){
 	return nullptr;
 }

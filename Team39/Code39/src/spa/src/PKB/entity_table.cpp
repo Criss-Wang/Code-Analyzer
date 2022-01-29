@@ -98,7 +98,7 @@ vector<int> StmtTable::GetEntityLstByProp(const int stmt_prop)
 	}
 }
 
-bool VarTable::CheckValidProp(const int var_prop)
+bool NonStmtTable::CheckValidProp(const int var_prop)
 {
 	if (var_prop >= var_idx_ && var_prop <= proc_idx_)
 	{

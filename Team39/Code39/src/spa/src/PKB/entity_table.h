@@ -16,7 +16,7 @@ This is an abstract class for tables to record key infos for entities in SIMPLE 
 class EntityTable
 {
 protected:
-	unordered_map<const int, int> entity_table_;
+	unordered_map<int, int> entity_table_;
 
 	// Check if the property index passed is a valid one
 	virtual bool CheckValidEntityIdx(int entity_idx);
@@ -60,7 +60,7 @@ public:
 
 	StmtTable() = default;
 
-	// TODO(Zhelin): Check if virtual destructor needed here
+	// TODO(Zhenlin): Check if virtual destructor needed here
 
 	int AddEntity(int stmt_idx, int stmt_prop) override;
 
@@ -70,7 +70,7 @@ public:
 
 };
 
-class VarTable final : public EntityTable
+class NonStmtTable final : public EntityTable
 {
 private:
 	bool CheckValidProp(int var_prop) override;
@@ -82,13 +82,13 @@ public:
 	static constexpr int operator_idx_ = 5;
 	static constexpr int proc_idx_ = 6;
 
-	VarTable() = default;
+	NonStmtTable() = default;
 
-	// TODO(Zhelin): Check if virtual destructor needed here
+	// TODO(Zhenlin): Check if virtual destructor needed here
 
-	int AddEntity(int stmt_idx, int stmt_prop) override;
+	int AddEntity(int var_idx, int var_prop) override;
 
-	int GetEntityByIdx(int stmt_idx) override;
+	int GetEntityByIdx(int var_idx) override;
 
-	vector<int> GetEntityLstByProp(int stmt_prop) override;
+	vector<int> GetEntityLstByProp(int var_prop) override;
 };

@@ -4,7 +4,7 @@
 #include <list>
 
 // include your other headers here
-#include "entitytable.h"
+#include "entity_table.h"
 
 /*
  exception class for pkb, not in use right now
@@ -13,7 +13,7 @@
 class invalidargumentexception : public exception
 {
 private:
-	static const string invalidstmtpropmsg = "invalid property index, expected values between " + to_string(StmtTable.assignidx) + " to " + to_string(StmtTable.whileidx) + ".";
+	static const string invalidstmtpropmsg = "invalid property index, expected values between " + to_string(StmtTable.assign_idx_) + " to " + to_string(StmtTable.while_idx_) + ".";
 public:
 	//invalidargumentexception
 };
