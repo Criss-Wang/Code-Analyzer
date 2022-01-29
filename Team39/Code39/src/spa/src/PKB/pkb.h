@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "entity_table.h"
+
 using namespace std;
 typedef short Proc;
 
@@ -12,7 +14,7 @@ class TNode;
 
 class PqlArg;
 
-class EntityTable;  // no need to #include "VarTable.h" as all I need is pointer
+//class EntityTable;  // no need to #include "NonStmtTable.h" as all I need is pointer
 
 class Pkb {
 
@@ -25,9 +27,9 @@ private:
 
 public:
 	static vector<int> SearchWithAssociations(string assoc_type, bool is_all, bool is_first, int stmt_no_1);
-	static EntityTable* var_table;
+	static EntityTable<string, int>* var_table_;
 
-	static AstTable ast_table_;
+	//static AstTable ast_table_;
 	static int setProcToAST(Proc p, TNode* r);
 
 };
