@@ -136,3 +136,27 @@ string NonStmtTable::GetVarById(const int var_id)
 		return result;
 	}
 }
+
+int NonStmtTable::AddVarByName(const string& var_name)
+{
+	const int new_id = GetTableSize() + initial_id_;
+	const int addition_signal = AddEntity(var_name, new_id);
+	return addition_signal;
+}
+
+string NonStmtTable::GetTableType() const
+{
+	switch(entity_type_id_)
+	{
+		case var_id_:
+			return "Variable";
+		case proc_id_:
+			return "Procedure";
+		case const_id_:
+			return "constant";
+		case operator_id_:
+			return "operator";
+		default:
+			throw invalid_argument("Invalid entity type");
+	}
+};

@@ -17,7 +17,7 @@ protected:
 	// A hash table for entity with index with values being the property indicators of the entity
 	unordered_map<T1, T2> entity_table_;
 
-	// Return the size of the table
+	// Return the size of the table, cast type from unsigned long long to int
 	virtual int GetTableSize()
 	{
 		return static_cast<int>(entity_table_.size());
@@ -110,7 +110,7 @@ public:
 	static constexpr int if_idx_ = 7;
 	static constexpr int while_idx_ = 8;
 
-	static constexpr int initial_index_ = 1;
+	static constexpr int initial_index_ = 1; // first index, also used as offset
 	
 
 	// TODO(Zhenlin): Check if virtual destructor needed here
@@ -142,5 +142,7 @@ public:
 	// TODO(Zhenlin): Check if virtual destructor needed here
 	NonStmtTable(const int entity_type) : EntityTable{}, entity_type_id_{ entity_type } {}
 
+	int AddVarByName(const string& var_name);
 	string GetVarById(int var_id);
+	string GetTableType() const;
 };
