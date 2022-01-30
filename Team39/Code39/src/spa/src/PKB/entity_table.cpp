@@ -1,67 +1,6 @@
 #include "entity_table.h"
 
-//template <typename T1, typename T2>
-//bool EntityTable<T1,T2>::CheckValidEntityKey(const T1 entity_idx)
-//{
-//	if (entity_table_.contains(entity_idx))
-//	{
-//		return true;
-//	} 
-//	{
-//		return false;
-//	}
-//}
-
-//template <typename T1, typename T2>
-//Ull EntityTable::GetTableSize()
-//{
-//	return entity_table_.size();
-//}
-
-//StmtTable::StmtTable() = default;
-
-//StmtTable::~StmtTable()
-//{
-//	delete[] &entity_table_;
-//}
-
-//int StmtTable::AddEntity(const int stmt_idx, const int stmt_prop)
-//{
-//	try
-//	{
-//		if (CheckValidProp(stmt_prop))
-//		{
-//			entity_table_[stmt_idx] = stmt_prop;
-//			return 1;
-//		} 
-//		{
-//			throw invalid_argument(to_string(stmt_prop));
-//		}
-//	} catch (invalid_argument& e)
-//	{
-//		// TODO(Zhenlin): add error to the logger if possible
-//		return 0;
-//	}
-//}
-
-//int StmtTable::GetEntityByKey(const int stmt_idx)
-//{
-//	try
-//	{
-//		if (CheckValidEntityKey(stmt_idx))
-//		{
-//			return entity_table_[stmt_idx];
-//		}
-//		{
-//			throw invalid_argument(to_string(stmt_idx));
-//		}
-//	}
-//	catch (invalid_argument& e)
-//	{
-//		// TODO(Zhenlin): add error to the logger if possible
-//		return 0;
-//	}
-//}
+#include <algorithm>
 
 bool StmtTable::CheckValidProp(const int stmt_prop)
 {
@@ -99,29 +38,31 @@ vector<int> StmtTable::GetStmtLstByProp(const int stmt_prop)
 	}
 }
 
-bool NonStmtTable::CheckValidProp(const int var_id)
+
+
+bool NonStmtIdTable::CheckValidProp(const int entity_id)
 {
-	return var_id >= initial_id_ && var_id <= GetTableSize();
+	return entity_id >= initial_id_ && entity_id <= GetTableSize();
 }
 
 /**
  * Set to true currently. Will make changes if any appropriate criteria surfaces.
  */
-bool NonStmtTable::CheckValidEntityKey(const string var_name)
+bool NonStmtIdTable::CheckValidEntityKey(const string entity_name)
 {
 	return true;
 }
 
-string NonStmtTable::GetVarById(const int var_id)
+string NonStmtIdTable::GetEntityById(const int entity_id)
 {
 	string result; // default construction is "", use result.empty() to verify
 	try
 	{
-		if (this->CheckValidProp(var_id))
+		if (this->CheckValidProp(entity_id))
 		{
 			for (const auto& [key, value] : entity_table_) // this is "Structured binding"
 			{
-				if ((value) == var_id) result = key;
+				if ((value) == entity_id) result = key;
 			}
 			return result;
 		}
@@ -137,21 +78,21 @@ string NonStmtTable::GetVarById(const int var_id)
 	}
 }
 
-int NonStmtTable::AddVarByName(const string& var_name)
+int NonStmtIdTable::AddEntityByName(const string& entity_name)
 {
 	const int new_id = GetTableSize() + initial_id_;
-	const int addition_signal = AddEntity(var_name, new_id);
+	const int addition_signal = AddEntity(entity_name, new_id);
 	return addition_signal;
 }
 
-string NonStmtTable::GetTableType() const
+string NonStmtIdTable::GetTableType() const
 {
 	switch(entity_type_id_)
 	{
 		case var_id_:
 			return "Variable";
-		//case proc_id_:
-		//	return "Procedure";
+		case proc_id_:
+			return "Procedure";
 		case const_id_:
 			return "Constant";
 		case operator_id_:
@@ -160,3 +101,49 @@ string NonStmtTable::GetTableType() const
 			throw invalid_argument("Invalid entity type");
 	}
 };
+
+
+bool ProcRangeTable::CheckValidProp(const pair<int, int> stmt_range)
+{
+	for (const auto& [key, value]: entity_table_)
+	{
+		if (value.first <= stmt_range.first && value.second >= stmt_range.first)
+		{
+			return false;
+		}
+		if (value.first <= stmt_range.second && value.second >= stmt_range.second)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+bool ProcRangeTable::CheckValidEntityKey(const int proc_id)
+{
+	return proc_id >= initial_proc_id_;
+}
+
+int ProcRangeTable::AddProcRange(const int proc_id, const pair<int, int>stmt_range)
+{
+	const int addition_signal = AddEntity(proc_id, stmt_range);
+	return addition_signal;
+}
+
+int ProcRangeTable::FindProcIdByStmt(const int stmt_no)
+{
+	try
+	{
+		for (const auto& [key, value] : entity_table_)
+		{
+			if (value.first <= stmt_no && value.second >= stmt_no)
+			{
+				return key;
+			}
+		}
+		throw invalid_argument("statement not in any procedure recorded");
+	} catch (invalid_argument& e)
+	{
+		return 0; // meaning stmt_no
+	}
+
+}

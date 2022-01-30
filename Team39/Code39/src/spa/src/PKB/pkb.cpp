@@ -9,39 +9,13 @@ using namespace std;
 
 #include "pkb.h"
 
-void Bfs(TNode* r)
-{
-	// Create a queue for BFS
-	list<string> queue;
-	queue.push_back(r->GetValue());
-
-	list<string>::iterator i;
-
-	while (!queue.empty())
-	{
-		// Dequeue a vertex from queue and print it
-		r = queue.front();
-		queue.pop_front();
-
-
-		for (i = r.begin(); i != adj[s].end(); ++i)
-		{
-			if (!visited[*i])
-			{
-				visited[*i] = true;
-				queue.push_back(*i);
-			}
-		}
-	}
-}
-
 // TODO: convert AstTable stub to actual implementation
 int AstTable::SetProcToAst(Proc p, TNode* r)
 {
 	return 0;
 }
 
-TNode* AstTable::GetRootAst(Proc p)
+TNode* AstTable::GetRootAst(int proc_id)
 {
 	return nullptr;
 }
@@ -76,17 +50,144 @@ StmtResults Pkb::SearchWithAssociations(const char assoc_type, const bool is_all
 	}
 }
 
-StmtResults Pkb::SearchWithParent(bool is_all, bool is_first, int stmt_no)
+StmtResults Pkb::SearchWithFollows(const bool is_all, const bool is_first, const int stmt_no)
 {
-	
+	const int proc_id = proc_range_table_.FindProcIdByStmt(stmt_no);
+	TNode* r_node = ast_table_.GetRootAst(proc_id);
+
+	StmtResults result;
+
+	// Create a queue for BFS
+	queue<vector<TNode*>> queue;
+	queue.push({ r_node });
+
+	vector<TNode*> current_stmt_lst;
+
+	while (!queue.empty())
+	{
+		current_stmt_lst = queue.front();
+		queue.pop();
+
+		for (const auto t: current_stmt_lst)
+		{
+			if (t->GetValue() == stmt_no) break;
+			queue.push(t->GetChildNodes());
+		}
+
+	}
+
+	// A doubly linked list to process the result
+	deque<int> result_dll;
+
+	for (const auto t : current_stmt_lst)
+	{
+		result_dll.push_back(t->GetValue());
+	}
+
+	if (is_first)
+	{
+		while (result_dll.front() != stmt_no)
+		{
+			result_dll.pop_front();
+		}
+		result_dll.pop_front();
+		if (!is_all)
+		{
+			result.AddResult(result_dll.front());
+			return result;
+		}
+	}
+	{
+		while (result_dll.back() != stmt_no)
+		{
+			result_dll.pop_back();
+		}
+		result_dll.pop_back();
+		if (!is_all)
+		{
+			result.AddResult(result_dll.back());
+			return result;
+		}
+	}
+	while (!result_dll.empty())
+	{
+		result.AddResult(result_dll.front());
+		result_dll.pop_front();
+	}
+	return result;
 }
 
-StmtResults Pkb::SearchWithFollows(bool is_all, bool is_first, int stmt_no)
+void Dfs(TNode* r_node, const int stmt_no, bool& found_stmt, stack<int>& stmt_stack, TNode*& curr_node)
 {
-	
+	if (r_node->GetValue() == stmt_no)
+	{
+		found_stmt = true;
+	}
+
+	for (const auto t : r_node->GetChildNodes())
+	{
+		if (found_stmt) break;
+		curr_node = t;
+		stmt_stack.push(t->GetValue());
+		Dfs(t, stmt_no, found_stmt, stmt_stack, curr_node);
+		stmt_stack.pop();
+	}
 }
 
-int Pkb::AddStmt(const int stmt_idx, const string& stmt_type)
+StmtResults Pkb::SearchWithParent(const bool is_all, const bool is_first, const int stmt_no)
+{
+	const int proc_id = proc_range_table_.FindProcIdByStmt(stmt_no);
+	TNode* r_node = ast_table_.GetRootAst(proc_id);
+
+	StmtResults result;
+
+	bool found_stmt = false;
+	stack<int> stmt_stack;
+	TNode* curr_node = r_node;
+
+	Dfs(r_node, stmt_no, found_stmt, stmt_stack, curr_node);
+
+	if (!is_first)
+	{
+		if (is_all)
+		{
+			while (!stmt_stack.empty())
+			{
+				result.AddResult(stmt_stack.top());
+				stmt_stack.pop();
+			}
+		}
+		{
+			result.AddResult(stmt_stack.top());
+		}
+	}
+	{
+		if (is_all)
+		{
+			queue<TNode*> queue;
+			queue.push(curr_node);
+			while (!queue.empty())
+			{
+				TNode* n = queue.front();
+				queue.pop();
+				for (const auto t: n->GetChildNodes())
+				{
+					result.AddResult(t->GetValue());
+					queue.push(t);
+				}
+			}
+		}
+		{
+			for (const auto t: curr_node->GetChildNodes())
+			{
+				result.AddResult(t->GetValue());
+			}
+		}
+	}
+	return result;
+}
+
+int Pkb::AddStmtInfo(const int stmt_idx, const string& stmt_type)
 {
 	// TODO(Zhenlin) : check if const can be applied to this function as requested by the suggestion
 	// Decided not to use string ENUM as it is even more complicated
@@ -127,28 +228,42 @@ int Pkb::AddStmt(const int stmt_idx, const string& stmt_type)
 		return 0;
 	}
 
-	stmt_table_->AddEntity(stmt_idx, stmt_prop);
+	stmt_table_.AddEntity(stmt_idx, stmt_prop);
 	return 1;
 }
 
-int Pkb::AddNonStmt(const string& entity_val, const string& entity_type)
+int Pkb::AddNonStmtId(const string& entity_val, const string& entity_type)
 {
 	try
 	{
 		if (entity_type == "variable")
 		{
-			var_table_->AddEntity(entity_val, NonStmtTable::var_id_);
+			var_table_.AddEntityByName(entity_val);
 		} else if (entity_type == "constant")
 		{
-			const_table_->AddEntity(entity_val, NonStmtTable::const_id_);
-		//} else if (entity_type == "procedure")
-		//{
-		//	proc_table_->AddEntity(entity_val, NonStmtTable::proc_id_);
+			const_table_.AddEntityByName(entity_val);
+		} else if (entity_type == "procedure")
+		{
+			proc_table_.AddEntityByName(entity_val);
 		} else
 		{
 			throw invalid_argument("invalid entity type");
 		}
 	} catch (invalid_argument& e)
+	{
+		return 0;
+	}
+	return 1;
+}
+
+int Pkb::AddProcRange(const string& proc_name, const pair<int, int> stmt_range)
+{
+	try
+	{
+		const int proc_id = proc_table_.GetPropByKey(proc_name);
+		proc_range_table_.AddProcRange(proc_id, stmt_range);
+	}
+	catch (invalid_argument& e)
 	{
 		return 0;
 	}

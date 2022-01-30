@@ -25,10 +25,10 @@ protected:
 
 private:
 	// Check if the entity key passed in is a valid one
-	virtual bool CheckValidEntityKey(const T1 entity_key) = 0;
+	virtual bool CheckValidEntityKey(T1 entity_key) = 0;
 
 	// Check if the entity property passed is a valid one
-	virtual bool CheckValidProp(const T2 entity_prop) = 0;
+	virtual bool CheckValidProp(T2 entity_prop) = 0;
 
 	// Return if the table has the element with entity_key
 	virtual bool HasEntityWithKey(const T1 entity_key)
@@ -70,23 +70,15 @@ public:
 	}
 
 	// Get an entity via its index
-	virtual int GetPropByKey(T1 entity_key)
+	virtual T2 GetPropByKey(T1 entity_key)
 	{
-		try
+		if (CheckValidEntityKey(entity_key))
 		{
-			if (CheckValidEntityKey(entity_key))
-			{
-				return entity_table_[entity_key];
-			}
-			{
-				//throw invalid_argument(to_string(entity_idx));
-				throw invalid_argument("Invalid key");
-			}
+			return entity_table_[entity_key];
 		}
-		catch (invalid_argument& e)
 		{
-			// TODO(Zhenlin): add error to the logger if possible
-			return 0;
+			//throw invalid_argument(to_string(entity_idx));
+			throw invalid_argument("Invalid key");
 		}
 	}
 };
@@ -98,8 +90,8 @@ public:
 class StmtTable final : public EntityTable<int,int>
 {
 private:
-	bool CheckValidProp(const int stmt_prop) override;
-	bool CheckValidEntityKey(const int stmt_idx) override;
+	bool CheckValidProp(int stmt_prop) override;
+	bool CheckValidEntityKey(int stmt_idx) override;
 
 public:
 	// TODO(Zhenlin): Check if replace following with Enum class after code review (can require quite a lot of refactoring though)
@@ -111,46 +103,53 @@ public:
 	static constexpr int while_idx_ = 8;
 
 	static constexpr int initial_index_ = 1; // first index, also used as offset
-	
 
-	// TODO(Zhenlin): Check if virtual destructor needed here
 	StmtTable() = default;
+	// TODO(Zhenlin): Check if virtual destructor needed here
 
 	// Get the set of entities with the same property via the property indicator value
 	vector<int> GetStmtLstByProp(int stmt_prop);
-
 };
 
 /**
  * The table with keys being the non-statement entity name string and values being the index of the variable
  */
-class VarTable final : public EntityTable<string, int>
+class NonStmtIdTable final : public EntityTable<string, int>
 {
 private:
-	bool CheckValidProp(int var_id) override;
-	bool CheckValidEntityKey(const string var_name) override;
 	int entity_type_id_;
+
+	[[nodiscard]] string GetTableType() const;
+
+	bool CheckValidProp(int entity_id) override;
+	bool CheckValidEntityKey(string entity_name) override;
 
 public:
 	static constexpr int var_id_ = 1;
 	static constexpr int const_id_ = 2;
 	static constexpr int operator_id_ = 3;
-	//static constexpr int proc_id_ = 4;
+	static constexpr int proc_id_ = 4;
 
 	static constexpr int initial_id_ = 1;
 
 	// TODO(Zhenlin): Check if virtual destructor needed here
-	VarTable(const int entity_type) : EntityTable{}, entity_type_id_{ entity_type } {}
+	NonStmtIdTable(const int entity_type) : EntityTable{}, entity_type_id_{ entity_type } {}
 
-	int AddVarByName(const string& var_name);
-	string GetVarById(int var_id);
-	[[nodiscard]] string GetTableType() const;
+	int AddEntityByName(const string& entity_name);
+	string GetEntityById(int entity_id);
 };
 
-class ProcTable final : public EntityTable<int, pair<int, int>>
+class ProcRangeTable final : public EntityTable<int, pair<int, int>>
 {
-public:
-	static constexpr int
+private:
+	bool CheckValidProp(pair<int, int> stmt_range) override;
+	bool CheckValidEntityKey(int proc_id) override;
 
-	string ge
+public:
+	static constexpr int initial_proc_id_ = 1;
+
+	int AddProcRange(int proc_id, pair<int, int>stmt_range);
+	int FindProcIdByStmt(int stmt_no);
 };
+
+class ProcAdjacencyTable : public EntityTable<int, list<int>>{};
