@@ -150,12 +150,12 @@ string NonStmtTable::GetTableType() const
 	{
 		case var_id_:
 			return "Variable";
-		case proc_id_:
-			return "Procedure";
+		//case proc_id_:
+		//	return "Procedure";
 		case const_id_:
-			return "constant";
+			return "Constant";
 		case operator_id_:
-			return "operator";
+			return "Operator";
 		default:
 			throw invalid_argument("Invalid entity type");
 	}

@@ -70,7 +70,7 @@ public:
 	}
 
 	// Get an entity via its index
-	virtual int GetEntityByKey(T1 entity_key)
+	virtual int GetPropByKey(T1 entity_key)
 	{
 		try
 		{
@@ -124,7 +124,7 @@ public:
 /**
  * The table with keys being the non-statement entity name string and values being the index of the variable
  */
-class NonStmtTable final : public EntityTable<string,int>
+class VarTable final : public EntityTable<string, int>
 {
 private:
 	bool CheckValidProp(int var_id) override;
@@ -134,15 +134,23 @@ private:
 public:
 	static constexpr int var_id_ = 1;
 	static constexpr int const_id_ = 2;
-	static constexpr int proc_id_ = 3;
-	static constexpr int operator_id_ = 4;
+	static constexpr int operator_id_ = 3;
+	//static constexpr int proc_id_ = 4;
 
 	static constexpr int initial_id_ = 1;
 
 	// TODO(Zhenlin): Check if virtual destructor needed here
-	NonStmtTable(const int entity_type) : EntityTable{}, entity_type_id_{ entity_type } {}
+	VarTable(const int entity_type) : EntityTable{}, entity_type_id_{ entity_type } {}
 
 	int AddVarByName(const string& var_name);
 	string GetVarById(int var_id);
-	string GetTableType() const;
+	[[nodiscard]] string GetTableType() const;
+};
+
+class ProcTable final : public EntityTable<int, pair<int, int>>
+{
+public:
+	static constexpr int
+
+	string ge
 };
