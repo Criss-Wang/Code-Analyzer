@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
-#include <vector>
-#include <map>
 
 #include "entity_table.h"
 #include "results.h"
@@ -15,7 +13,7 @@ typedef short Proc;
 
 //class TNode;
 
-class PqlArg;
+//class PqlArg;
 
 class AstTable
 {

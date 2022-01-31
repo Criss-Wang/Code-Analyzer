@@ -1,7 +1,5 @@
 #include "entity_table.h"
 
-#include <algorithm>
-
 bool StmtTable::CheckValidProp(const int stmt_prop)
 {
 	return (stmt_prop >= assign_idx_ && stmt_prop <= while_idx_);
@@ -20,16 +18,13 @@ vector<int> StmtTable::GetStmtLstByProp(const int stmt_prop)
 	{
 		if (this->CheckValidProp(stmt_prop))
 		{
-			for (const auto & [key, value] : entity_table_)
+			for (const auto& [key, value] : entity_table_)
 			{
 				if ((value) == stmt_prop) results.push_back(key);
 			}
 			return results;
 		}
-		else
-		{
-			throw invalid_argument(to_string(stmt_prop));
-		}
+		throw invalid_argument(to_string(stmt_prop));
 	}
 	catch (invalid_argument& e)
 	{
@@ -37,7 +32,6 @@ vector<int> StmtTable::GetStmtLstByProp(const int stmt_prop)
 		return results;
 	}
 }
-
 
 
 bool NonStmtIdTable::CheckValidProp(const int entity_id)
@@ -66,10 +60,7 @@ string NonStmtIdTable::GetEntityById(const int entity_id)
 			}
 			return result;
 		}
-		else
-		{
-			throw invalid_argument("invalid ID");
-		}
+		throw invalid_argument("invalid ID");
 	}
 	catch (invalid_argument& e)
 	{
@@ -87,25 +78,25 @@ int NonStmtIdTable::AddEntityByName(const string& entity_name)
 
 string NonStmtIdTable::GetTableType() const
 {
-	switch(entity_type_id_)
+	switch (entity_type_id_)
 	{
-		case var_id_:
-			return "Variable";
-		case proc_id_:
-			return "Procedure";
-		case const_id_:
-			return "Constant";
-		case operator_id_:
-			return "Operator";
-		default:
-			throw invalid_argument("Invalid entity type");
+	case var_id_:
+		return "Variable";
+	case proc_id_:
+		return "Procedure";
+	case const_id_:
+		return "Constant";
+	case operator_id_:
+		return "Operator";
+	default:
+		throw invalid_argument("Invalid entity type");
 	}
 };
 
 
 bool ProcRangeTable::CheckValidProp(const pair<int, int> stmt_range)
 {
-	for (const auto& [key, value]: entity_table_)
+	for (const auto& [key, value] : entity_table_)
 	{
 		if (value.first <= stmt_range.first && value.second >= stmt_range.first)
 		{
@@ -118,12 +109,13 @@ bool ProcRangeTable::CheckValidProp(const pair<int, int> stmt_range)
 	}
 	return true;
 }
+
 bool ProcRangeTable::CheckValidEntityKey(const int proc_id)
 {
 	return proc_id >= initial_proc_id_;
 }
 
-int ProcRangeTable::AddProcRange(const int proc_id, const pair<int, int>stmt_range)
+int ProcRangeTable::AddProcRange(const int proc_id, const pair<int, int> stmt_range)
 {
 	const int addition_signal = AddEntity(proc_id, stmt_range);
 	return addition_signal;
@@ -141,9 +133,9 @@ int ProcRangeTable::FindProcIdByStmt(const int stmt_no)
 			}
 		}
 		throw invalid_argument("statement not in any procedure recorded");
-	} catch (invalid_argument& e)
+	}
+	catch (invalid_argument& e)
 	{
 		return 0; // meaning stmt_no
 	}
-
 }

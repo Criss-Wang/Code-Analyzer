@@ -8,7 +8,7 @@
 using namespace std;
 
 /*
-This is an abstract class for tables to record key infos for entities in SIMPLE program
+This is an abstract class for tables to record key info for entities in SIMPLE program
 */
 template <typename T1, typename T2>
 class EntityTable
@@ -87,7 +87,7 @@ public:
 /**
  * The Statement table with keys being the statement index and values being the type of the statement
  */
-class StmtTable final : public EntityTable<int,int>
+class StmtTable final : public EntityTable<int, int>
 {
 private:
 	bool CheckValidProp(int stmt_prop) override;
@@ -133,7 +133,9 @@ public:
 	static constexpr int initial_id_ = 1;
 
 	// TODO(Zhenlin): Check if virtual destructor needed here
-	NonStmtIdTable(const int entity_type) : EntityTable{}, entity_type_id_{ entity_type } {}
+	NonStmtIdTable(const int entity_type) : EntityTable{}, entity_type_id_{entity_type}
+	{
+	}
 
 	int AddEntityByName(const string& entity_name);
 	string GetEntityById(int entity_id);
@@ -148,8 +150,10 @@ private:
 public:
 	static constexpr int initial_proc_id_ = 1;
 
-	int AddProcRange(int proc_id, pair<int, int>stmt_range);
+	int AddProcRange(int proc_id, pair<int, int> stmt_range);
 	int FindProcIdByStmt(int stmt_no);
 };
 
-class ProcAdjacencyTable : public EntityTable<int, list<int>>{};
+class ProcAdjacencyTable : public EntityTable<int, list<int>>
+{
+};

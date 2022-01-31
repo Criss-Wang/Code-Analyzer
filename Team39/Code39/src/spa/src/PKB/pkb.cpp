@@ -20,14 +20,15 @@ TNode* AstTable::GetRootAst(int proc_id)
 	return nullptr;
 }
 
-template<typename T>
+template <typename T>
 vector<T> SearchResult()
 {
 	vector<T> result;
 	return result;
 }
 
-StmtResults Pkb::SearchWithAssociations(const char assoc_type, const bool is_all, const bool is_first, const int stmt_no)
+StmtResults Pkb::SearchWithAssociations(const char assoc_type, const bool is_all, const bool is_first,
+                                        const int stmt_no)
 {
 	// TODO(Zhenlin): check if multiple stmt_no's need to be passed in (adjust with int* stmt_no_lst)
 	try
@@ -36,14 +37,15 @@ StmtResults Pkb::SearchWithAssociations(const char assoc_type, const bool is_all
 		{
 			return SearchWithParent(is_all, is_first, stmt_no);
 		}
-		else if (assoc_type == follows_rel_)
+		if (assoc_type == follows_rel_)
 		{
 			return SearchWithFollows(is_all, is_first, stmt_no);
 		}
 		{
 			throw exception("Bad type given");
 		}
-	} catch (exception& e)
+	}
+	catch (exception& e)
 	{
 		StmtResults result;
 		return result;
@@ -59,7 +61,7 @@ StmtResults Pkb::SearchWithFollows(const bool is_all, const bool is_first, const
 
 	// Create a queue for BFS
 	queue<vector<TNode*>> queue;
-	queue.push({ r_node });
+	queue.push({r_node});
 
 	vector<TNode*> current_stmt_lst;
 
@@ -68,12 +70,11 @@ StmtResults Pkb::SearchWithFollows(const bool is_all, const bool is_first, const
 		current_stmt_lst = queue.front();
 		queue.pop();
 
-		for (const auto t: current_stmt_lst)
+		for (const auto t : current_stmt_lst)
 		{
 			if (t->GetValue() == stmt_no) break;
 			queue.push(t->GetChildNodes());
 		}
-
 	}
 
 	// A doubly linked list to process the result
@@ -170,7 +171,7 @@ StmtResults Pkb::SearchWithParent(const bool is_all, const bool is_first, const 
 			{
 				TNode* n = queue.front();
 				queue.pop();
-				for (const auto t: n->GetChildNodes())
+				for (const auto t : n->GetChildNodes())
 				{
 					result.AddResult(t->GetValue());
 					queue.push(t);
@@ -178,7 +179,7 @@ StmtResults Pkb::SearchWithParent(const bool is_all, const bool is_first, const 
 			}
 		}
 		{
-			for (const auto t: curr_node->GetChildNodes())
+			for (const auto t : curr_node->GetChildNodes())
 			{
 				result.AddResult(t->GetValue());
 			}
@@ -223,7 +224,8 @@ int Pkb::AddStmtInfo(const int stmt_idx, const string& stmt_type)
 		{
 			throw invalid_argument("invalid statement type passed");
 		}
-	} catch (invalid_argument& e)
+	}
+	catch (invalid_argument& e)
 	{
 		return 0;
 	}
@@ -239,17 +241,21 @@ int Pkb::AddNonStmtId(const string& entity_val, const string& entity_type)
 		if (entity_type == "variable")
 		{
 			var_table_.AddEntityByName(entity_val);
-		} else if (entity_type == "constant")
+		}
+		else if (entity_type == "constant")
 		{
 			const_table_.AddEntityByName(entity_val);
-		} else if (entity_type == "procedure")
+		}
+		else if (entity_type == "procedure")
 		{
 			proc_table_.AddEntityByName(entity_val);
-		} else
+		}
+		else
 		{
 			throw invalid_argument("invalid entity type");
 		}
-	} catch (invalid_argument& e)
+	}
+	catch (invalid_argument& e)
 	{
 		return 0;
 	}
