@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include <iostream>
+#include <typeinfo>
 #include "TNode.h"
 
 void TNode::insertFront(TNode* node) {
@@ -21,8 +22,8 @@ vector<TNode*> TNode::getChildNodes()
 }
 
 bool TNode::isEqual(TNode* node) {
-	cout << "comparing " + this->data + " " + node->data + "\n";
-	if (this->data == node->data) {
+
+	if (typeid(*this) == typeid(*node) && this->data == node->data) {
 
 		while (!this->childNodes.empty()) {
 			if (node->childNodes.empty()) {
@@ -67,8 +68,8 @@ string AST::print(string prefix, TNode* node, int pos) {
 
 		cout << ("---");
 
-		// print the value of the node
-		cout << node->getData() << endl;
+		// print the type and value of the node
+		cout << node->getData() << ":" << typeid(*node).name() << endl;
 
 		// enter the next tree level - left and right branch
 		int pos = node->getChildNodes().size() - 1;
@@ -89,7 +90,6 @@ void AST::buildtree(list<string> input) {
 	int line_no = 1;
 	for (auto it = input.begin(); it != input.end(); ++it)
 	{
-		cout << "Token: " << * it << "\n";
 		if (*it == "read") {
 			auto var = next(it, 1);
 			stmts.push_back(new readTNode(to_string(line_no), *var));
@@ -111,21 +111,4 @@ void AST::buildtree(list<string> input) {
 bool AST::isEqual(AST ast)
 {
 	return this->root->isEqual(ast.root);
-}
-
-vector<string> split(const char* str, char c = ' ')
-{
-	vector<string> result;
-
-	do
-	{
-		const char* begin = str;
-
-		while (*str != c && *str)
-			str++;
-
-		result.push_back(string(begin, str));
-	} while (0 != *str++);
-
-	return result;
 }

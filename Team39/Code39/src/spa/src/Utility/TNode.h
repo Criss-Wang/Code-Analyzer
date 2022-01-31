@@ -7,12 +7,13 @@ using namespace std;
 class TNode {
 
 private:
-
+	
 	string data;
 	vector<TNode*> childNodes;
 
 public:
 
+	virtual ~TNode() = default;
 	TNode() {
 		this->data = "";
 	}
