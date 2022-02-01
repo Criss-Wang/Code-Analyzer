@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include "Utility/TNode.h"
+#include "Utility/AST.h"
 
 #include "catch.hpp"
 using namespace std;
@@ -28,30 +29,34 @@ TEST_CASE("Read - Test 1") {
 
 	list<string> input = { "read", "a", ";" };
 
-	TNode* stmt = new readTNode("1", "a");
-	AST expectedAST(new stmtLstTNode(stmt));
+	TNode* stmt1 = new readTNode("1", "a");
+	vector<TNode*> stmts;
+	stmts.push_back(stmt1);
+	AST expectedAST(new stmtLstTNode(stmts));
 
 	AST actualAST;
 	actualAST.buildtree(input);
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require((actualAST).isEqual(expectedAST));
+	require(actualAST.isEqual(expectedAST));
 }
 
 TEST_CASE("Read - Test 2") {
 
 	list<string> input = { "read", "a", ";" };
 
-	TNode* stmt = new printTNode("1", "a");
-	AST expectedAST(new stmtLstTNode(stmt));
+	TNode* stmt1 = new printTNode("1", "a");
+	vector<TNode*> stmts;
+	stmts.push_back(stmt1);
+	AST expectedAST(new stmtLstTNode(stmts));
 
 	AST actualAST;
 	actualAST.buildtree(input);
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require(!(actualAST).isEqual(expectedAST));
+	require(!actualAST.isEqual(expectedAST));
 }
 
 TEST_CASE("Read - Test 3") {
@@ -122,8 +127,10 @@ TEST_CASE("Print - Test 1") {
 
 	list<string> input = { "print", "a", ";" };
 
-	TNode* stmt = new printTNode("1", "a");
-	AST expectedAST(new stmtLstTNode(stmt));
+	TNode* stmt1 = new printTNode("1", "a");
+	vector<TNode*> stmts;
+	stmts.push_back(stmt1);
+	AST expectedAST(new stmtLstTNode(stmts));
 
 	AST actualAST;
 	actualAST.buildtree(input);
@@ -137,8 +144,10 @@ TEST_CASE("Print - Test 2") {
 
 	list<string> input = { "print", "a", ";" };
 
-	TNode* stmt = new readTNode("1", "a");
-	AST expectedAST(new stmtLstTNode(stmt));
+	TNode* stmt1 = new readTNode("1", "a");
+	vector<TNode*> stmts;
+	stmts.push_back(stmt1);
+	AST expectedAST(new stmtLstTNode(stmts));
 
 	AST actualAST;
 	actualAST.buildtree(input);
