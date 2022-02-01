@@ -36,7 +36,7 @@ vector<int> StmtTable::GetStmtLstByProp(const int stmt_prop)
 
 bool NonStmtIdTable::CheckValidProp(const int entity_id)
 {
-	return entity_id >= initial_id_ && entity_id <= GetTableSize();
+	return entity_id >= GetTableSize();
 }
 
 /**
@@ -47,19 +47,23 @@ bool NonStmtIdTable::CheckValidEntityKey(const string entity_name)
 	return true;
 }
 
+int NonStmtIdTable::AddEntityByName(const string& entity_name)
+{
+	const int new_id = GetTableSize() + initial_id_;
+	const int addition_signal = AddEntity(entity_name, new_id);
+	return addition_signal;
+}
+
 string NonStmtIdTable::GetEntityById(const int entity_id)
 {
 	string result; // default construction is "", use result.empty() to verify
 	try
 	{
-		if (this->CheckValidProp(entity_id))
+		for (const auto& [key, value] : entity_table_) // this is "Structured binding"
 		{
-			for (const auto& [key, value] : entity_table_) // this is "Structured binding"
-			{
-				if ((value) == entity_id) result = key;
-			}
-			return result;
+			if ((value) == entity_id) result = key;
 		}
+		return result;
 		throw invalid_argument("invalid ID");
 	}
 	catch (invalid_argument& e)
@@ -67,13 +71,6 @@ string NonStmtIdTable::GetEntityById(const int entity_id)
 		// TODO(Zhenlin): add error to the logger if possible
 		return result;
 	}
-}
-
-int NonStmtIdTable::AddEntityByName(const string& entity_name)
-{
-	const int new_id = GetTableSize() + initial_id_;
-	const int addition_signal = AddEntity(entity_name, new_id);
-	return addition_signal;
 }
 
 string NonStmtIdTable::GetTableType() const

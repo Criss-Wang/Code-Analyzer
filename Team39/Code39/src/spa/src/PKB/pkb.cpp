@@ -40,10 +40,8 @@ StmtResults Pkb::SearchWithAssociations(const char assoc_type, const bool is_all
 		if (assoc_type == follows_rel_)
 		{
 			return SearchWithFollows(is_all, is_first, stmt_no);
-		}
-		{
-			throw exception("Bad type given");
-		}
+		} 
+		throw exception("Bad type given");
 	}
 	catch (exception& e)
 	{
@@ -59,9 +57,13 @@ StmtResults Pkb::SearchWithFollows(const bool is_all, const bool is_first, const
 
 	StmtResults result;
 
+
 	// Create a queue for BFS
 	queue<vector<TNode*>> queue;
 	queue.push({r_node});
+
+	// Boolean to determine when to stop the BFS
+	bool found_stmt = false;
 
 	vector<TNode*> current_stmt_lst;
 
@@ -72,9 +74,11 @@ StmtResults Pkb::SearchWithFollows(const bool is_all, const bool is_first, const
 
 		for (const auto t : current_stmt_lst)
 		{
-			if (t->GetValue() == stmt_no) break;
+			if (t->GetValue() == stmt_no) found_stmt = true;
 			queue.push(t->GetChildNodes());
 		}
+
+		if (found_stmt) break;
 	}
 
 	// A doubly linked list to process the result
@@ -97,7 +101,7 @@ StmtResults Pkb::SearchWithFollows(const bool is_all, const bool is_first, const
 			result.AddResult(result_dll.front());
 			return result;
 		}
-	}
+	} else
 	{
 		while (result_dll.back() != stmt_no)
 		{
@@ -120,6 +124,7 @@ StmtResults Pkb::SearchWithFollows(const bool is_all, const bool is_first, const
 
 void Dfs(TNode* r_node, const int stmt_no, bool& found_stmt, stack<int>& stmt_stack, TNode*& curr_node)
 {
+	stmt_stack.push(r_node->GetValue());
 	if (r_node->GetValue() == stmt_no)
 	{
 		found_stmt = true;
@@ -129,10 +134,10 @@ void Dfs(TNode* r_node, const int stmt_no, bool& found_stmt, stack<int>& stmt_st
 	{
 		if (found_stmt) break;
 		curr_node = t;
-		stmt_stack.push(t->GetValue());
+		
 		Dfs(t, stmt_no, found_stmt, stmt_stack, curr_node);
-		stmt_stack.pop();
 	}
+	if (!found_stmt) stmt_stack.pop();
 }
 
 StmtResults Pkb::SearchWithParent(const bool is_all, const bool is_first, const int stmt_no)
@@ -150,6 +155,7 @@ StmtResults Pkb::SearchWithParent(const bool is_all, const bool is_first, const 
 
 	if (!is_first)
 	{
+		stmt_stack.pop();
 		if (is_all)
 		{
 			while (!stmt_stack.empty())
@@ -157,11 +163,11 @@ StmtResults Pkb::SearchWithParent(const bool is_all, const bool is_first, const 
 				result.AddResult(stmt_stack.top());
 				stmt_stack.pop();
 			}
-		}
+		} else
 		{
 			result.AddResult(stmt_stack.top());
 		}
-	}
+	} else
 	{
 		if (is_all)
 		{
@@ -177,7 +183,7 @@ StmtResults Pkb::SearchWithParent(const bool is_all, const bool is_first, const 
 					queue.push(t);
 				}
 			}
-		}
+		} else
 		{
 			for (const auto t : curr_node->GetChildNodes())
 			{

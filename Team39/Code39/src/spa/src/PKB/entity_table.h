@@ -7,9 +7,9 @@
 
 using namespace std;
 
-/*
-This is an abstract class for tables to record key info for entities in SIMPLE program
-*/
+/**
+ * This is an generic class for tables to record key info for entities in SIMPLE program
+ */
 template <typename T1, typename T2>
 class EntityTable
 {
@@ -72,14 +72,12 @@ public:
 	// Get an entity via its index
 	virtual T2 GetPropByKey(T1 entity_key)
 	{
-		if (CheckValidEntityKey(entity_key))
+		if (CheckValidEntityKey(entity_key) && HasEntityWithKey(entity_key))
 		{
 			return entity_table_[entity_key];
 		}
-		{
-			//throw invalid_argument(to_string(entity_idx));
-			throw invalid_argument("Invalid key");
-		}
+		//throw invalid_argument(to_string(entity_idx));
+		throw invalid_argument("Invalid key");
 	}
 };
 
@@ -141,6 +139,7 @@ public:
 	string GetEntityById(int entity_id);
 };
 
+// TODO(Zhenlin): Complete it and its test cases in future iterations
 class ProcRangeTable final : public EntityTable<int, pair<int, int>>
 {
 private:
