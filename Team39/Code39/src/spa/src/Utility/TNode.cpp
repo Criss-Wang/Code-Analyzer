@@ -33,11 +33,9 @@ bool TNode::isEqual(TNode* node) {
 				vector<TNode*> myChild = this->childNodes;
 				vector<TNode*> compareChild = node->childNodes;
 
-				int pos = 0;
 				bool equal = true;
-				for each (TNode* myNode in myChild) {
-					equal = equal && myNode->isEqual(compareChild.at(pos));
-					pos++;
+				for (int pos = 0; pos < myChild.size(); pos++) {
+					equal = equal && myChild.at(pos)->isEqual(compareChild.at(pos));
 				}
 				return equal;
 			}
