@@ -11,13 +11,11 @@ void TNode::insertBack(TNode* node) {
 	this->childNodes.push_back(node);
 }
 
-string TNode::getData()
-{
+string TNode::getData() {
 	return this->data;
 }
 
-vector<TNode*> TNode::getChildNodes()
-{
+vector<TNode*> TNode::getChildNodes() {
 	return this->childNodes;
 }
 
@@ -28,8 +26,7 @@ bool TNode::isEqual(TNode* node) {
 		while (!this->childNodes.empty()) {
 			if (node->childNodes.empty()) {
 				return false;
-			}
-			else {
+			} else {
 				vector<TNode*> myChild = this->childNodes;
 				vector<TNode*> compareChild = node->childNodes;
 
@@ -43,12 +40,10 @@ bool TNode::isEqual(TNode* node) {
 
 		if (node->childNodes.empty()) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
-	}
-	else {
+	} else {
 		return false;
 	}
 }

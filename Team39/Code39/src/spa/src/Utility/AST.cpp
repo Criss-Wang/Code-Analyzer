@@ -3,15 +3,13 @@
 #include <typeinfo>
 #include "AST.h"
 
-TNode* AST::getRoot()
-{
+TNode* AST::getRoot() {
 	return this->root;
 }
 
 string AST::print(string prefix, TNode* node, int pos) {
 
-	if (node != nullptr)
-	{
+	if (node != nullptr) {
 		cout << prefix;
 
 		cout << ("---");
@@ -35,19 +33,16 @@ void AST::buildtree(list<string> input) {
 	vector<TNode*> stmts;
 
 	int line_no = 1;
-	for (auto it = input.begin(); it != input.end(); ++it)
-	{
+	for (auto it = input.begin(); it != input.end(); ++it) {
 		if (*it == "read") {
 			auto var = next(it, 1);
 			stmts.push_back(new readTNode(to_string(line_no), *var));
 			line_no++;
-		}
-		else if (*it == "print") {
+		} else if (*it == "print") {
 			auto var = next(it, 1);
 			stmts.push_back(new printTNode(to_string(line_no), *var));
 			line_no++;
-		}
-		else {
+		} else {
 			continue;
 		}
 	}
@@ -55,7 +50,6 @@ void AST::buildtree(list<string> input) {
 	this->root = new stmtLstTNode(stmts);
 }
 
-bool AST::isEqual(AST ast)
-{
+bool AST::isEqual(AST ast) {
 	return this->root->isEqual(ast.root);
 }

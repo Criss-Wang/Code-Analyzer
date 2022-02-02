@@ -18,10 +18,12 @@ public:
 
 	TNode() {
 		this->data = "";
+		this->childNodes = { };
 	}
 
 	TNode(string data) {
 		this->data = data;
+		this->childNodes = { };
 	}
 
 	TNode(string data, vector<TNode*> nodes) {
@@ -31,7 +33,7 @@ public:
 
 	TNode(string data, TNode* node) {
 		this->data = data;
-		this->childNodes.push_back(node);
+		this->childNodes = { node };
 	}
 
 	/* WIP, should merge into one insert function only. */
