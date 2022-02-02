@@ -9,28 +9,9 @@ using namespace std;
 
 #include "pkb.h"
 
-// TODO: convert AstTable stub to actual implementation
-int AstTable::SetProcToAst(Proc p, TNode* r)
-{
-	return 0;
-}
-
-TNode* AstTable::GetRootAst(int proc_id)
-{
-	return nullptr;
-}
-
-template <typename T>
-vector<T> SearchResult()
-{
-	vector<T> result;
-	return result;
-}
-
 StmtResults Pkb::SearchWithAssociations(const char assoc_type, const bool is_all, const bool is_first,
                                         const int stmt_no)
 {
-	// TODO(Zhenlin): check if multiple stmt_no's need to be passed in (adjust with int* stmt_no_lst)
 	try
 	{
 		if (assoc_type == parent_rel_)
@@ -74,8 +55,14 @@ StmtResults Pkb::SearchWithFollows(const bool is_all, const bool is_first, const
 
 		for (const auto t : current_stmt_lst)
 		{
-			if (t->GetValue() == stmt_no) found_stmt = true;
-			queue.push(t->GetChildNodes());
+			// if not a stmtlst node or a stmt node, skip
+			if (!t->isStmtLst() && !t->isStmt()) continue;
+			// If statement data (i.e. line number) matches the stmt_no, stop the BFS
+			if (t->isStmt() && stoi(t->getData()) == stmt_no)
+			{
+				found_stmt = true;
+			}
+			queue.push(t->getChildNodes());
 		}
 
 		if (found_stmt) break;
@@ -86,7 +73,7 @@ StmtResults Pkb::SearchWithFollows(const bool is_all, const bool is_first, const
 
 	for (const auto t : current_stmt_lst)
 	{
-		result_dll.push_back(t->GetValue());
+		if (t->isStmt()) result_dll.push_back(stoi(t->getData()));
 	}
 
 	if (is_first)
@@ -122,22 +109,28 @@ StmtResults Pkb::SearchWithFollows(const bool is_all, const bool is_first, const
 	return result;
 }
 
+// TODO(Zhenlin): [SE Practice] Decide if put this auxilary function as private class member fn later
 void Dfs(TNode* r_node, const int stmt_no, bool& found_stmt, stack<int>& stmt_stack, TNode*& curr_node)
 {
-	stmt_stack.push(r_node->GetValue());
-	if (r_node->GetValue() == stmt_no)
-	{
-		found_stmt = true;
-	}
+	if (!r_node->isStmt() && !r_node->isStmtLst()) return;
 
-	for (const auto t : r_node->GetChildNodes())
+	if (r_node->isStmt())
+	{
+		int curr_stmt_no = stoi(r_node->getData());
+		stmt_stack.push(curr_stmt_no);
+		if (curr_stmt_no == stmt_no)
+		{
+			found_stmt = true;
+		}
+	}
+	for (const auto t : r_node->getChildNodes())
 	{
 		if (found_stmt) break;
 		curr_node = t;
-		
+
 		Dfs(t, stmt_no, found_stmt, stmt_stack, curr_node);
 	}
-	if (!found_stmt) stmt_stack.pop();
+	if (r_node->isStmt() && !found_stmt) stmt_stack.pop();
 }
 
 StmtResults Pkb::SearchWithParent(const bool is_all, const bool is_first, const int stmt_no)
@@ -177,17 +170,18 @@ StmtResults Pkb::SearchWithParent(const bool is_all, const bool is_first, const 
 			{
 				TNode* n = queue.front();
 				queue.pop();
-				for (const auto t : n->GetChildNodes())
+				for (const auto t : n->getChildNodes())
 				{
-					result.AddResult(t->GetValue());
+					if (!t->isStmt() && !t->isStmtLst()) continue;
+					if (t->isStmt()) result.AddResult(stoi(t->getData()));
 					queue.push(t);
 				}
 			}
 		} else
 		{
-			for (const auto t : curr_node->GetChildNodes())
+			for (const auto t : curr_node->getChildNodes())
 			{
-				result.AddResult(t->GetValue());
+				if (t->isStmt()) result.AddResult(stoi(t->getData()));
 			}
 		}
 	}
@@ -196,7 +190,6 @@ StmtResults Pkb::SearchWithParent(const bool is_all, const bool is_first, const 
 
 int Pkb::AddStmtInfo(const int stmt_idx, const string& stmt_type)
 {
-	// TODO(Zhenlin) : check if const can be applied to this function as requested by the suggestion
 	// Decided not to use string ENUM as it is even more complicated
 	int stmt_prop;
 
@@ -274,6 +267,20 @@ int Pkb::AddProcRange(const string& proc_name, const pair<int, int> stmt_range)
 	{
 		const int proc_id = proc_table_.GetPropByKey(proc_name);
 		proc_range_table_.AddProcRange(proc_id, stmt_range);
+	}
+	catch (invalid_argument& e)
+	{
+		return 0;
+	}
+	return 1;
+}
+
+int Pkb::AddAst(const string& proc_name, AST ast)
+{
+	try
+	{
+		const int proc_id = proc_table_.GetPropByKey(proc_name);
+		ast_table_.AddEntity(proc_id, ast);
 	}
 	catch (invalid_argument& e)
 	{

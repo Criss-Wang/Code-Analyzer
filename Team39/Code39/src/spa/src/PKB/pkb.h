@@ -6,29 +6,12 @@
 
 #include "entity_table.h"
 #include "results.h"
-#include "../TNode.h"
+#include "../Utility/TNode.h"
+#include "../Utility/AST.h"
 
 using namespace std;
-typedef short Proc;
-
-//class TNode;
 
 //class PqlArg;
-
-class AstTable
-{
-private:
-	unordered_map<int, TNode*> ast_table_;
-
-public:
-	// Getting the AST from the AstTable using the procedure object given
-	TNode* GetRootAst(int proc_id);
-
-	// The function assumes that the number of procedures is found, so that we build initial array of TNode pointers with fixed sizes
-	int SetProcToAst(Proc p, TNode* r);
-};
-
-//class EntityTable;  // no need to #include "NonStmtTable.h" as all I need is pointer
 
 class Pkb {
 
@@ -48,15 +31,20 @@ public:
 	NonStmtIdTable var_table_ = NonStmtIdTable(NonStmtIdTable::var_id_);
 	NonStmtIdTable const_table_ = NonStmtIdTable(NonStmtIdTable::const_id_);
 	NonStmtIdTable proc_table_ = NonStmtIdTable(NonStmtIdTable::proc_id_);
-	StmtTable stmt_table_ = StmtTable();
 
+	StmtTable stmt_table_ = StmtTable();
 	AstTable ast_table_;
 
+	// TODO(Zhenlin): [Performance] Add more variations using function overloading or generic templates
+	// One example is Parent(8, 9) which takes in 2 argument. Faster if we directly traverse the tree only to verify if 8 IsParentOf 9.
+	// Thus the stmt_no should be replaced by {stmt_no_1, stmt_no_2} below
 	StmtResults SearchWithAssociations(char assoc_type, bool is_all, bool is_first, int stmt_no);
 
 	int AddStmtInfo(int stmt_idx, const string& stmt_type);
 
 	int AddNonStmtId(const string& entity_val, const string& entity_type);
+
+	int AddAst(const string& proc_name, AST ast);
 
 	int AddProcRange(const string& proc_name, pair<int, int> stmt_range);
 

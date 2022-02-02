@@ -10,6 +10,11 @@ bool StmtTable::CheckValidEntityKey(const int stmt_idx)
 	return stmt_idx >= initial_index_;
 }
 
+bool StmtTable::MatchProp(const int stored_prop, const int stmt_prop)
+{
+	return stored_prop == stmt_prop;
+}
+
 
 vector<int> StmtTable::GetStmtLstByProp(const int stmt_prop)
 {
@@ -28,7 +33,7 @@ vector<int> StmtTable::GetStmtLstByProp(const int stmt_prop)
 	}
 	catch (invalid_argument& e)
 	{
-		// TODO(Zhenlin): add error to the logger if possible
+		// TODO(Zhenlin): [Utility] add error to the logger if possible
 		return results;
 	}
 }
@@ -47,6 +52,12 @@ bool NonStmtIdTable::CheckValidEntityKey(const string entity_name)
 	return true;
 }
 
+bool NonStmtIdTable::MatchProp(const int stored_id, const int entity_id)
+{
+	return stored_id == entity_id;
+}
+
+
 int NonStmtIdTable::AddEntityByName(const string& entity_name)
 {
 	const int new_id = GetTableSize() + initial_id_;
@@ -61,14 +72,15 @@ string NonStmtIdTable::GetEntityById(const int entity_id)
 	{
 		for (const auto& [key, value] : entity_table_) // this is "Structured binding"
 		{
-			if ((value) == entity_id) result = key;
+			if ((value) == entity_id) return key;
+			
 		}
-		return result;
+		
 		throw invalid_argument("invalid ID");
 	}
 	catch (invalid_argument& e)
 	{
-		// TODO(Zhenlin): add error to the logger if possible
+		// TODO(Zhenlin): [Utility] add error to the logger if possible
 		return result;
 	}
 }
@@ -90,6 +102,30 @@ string NonStmtIdTable::GetTableType() const
 	}
 };
 
+/**
+ * Set to true currently. Will make changes if any appropriate criteria surfaces.
+ */
+bool AstTable::CheckValidProp(AST ast)
+{
+	return true;
+}
+
+bool AstTable::CheckValidEntityKey(const Proc proc_id)
+{
+	return proc_id >= NonStmtIdTable::initial_id_;
+}
+
+bool AstTable::MatchProp(AST stored_prop, const AST arg_prop)
+{
+	return stored_prop.isEqual(arg_prop);
+}
+
+
+TNode* AstTable::GetRootAst(const Proc proc_id)
+{
+	AST proc_ast = GetPropByKey(proc_id);
+	return proc_ast.getRoot();
+}
 
 bool ProcRangeTable::CheckValidProp(const pair<int, int> stmt_range)
 {
@@ -109,7 +145,12 @@ bool ProcRangeTable::CheckValidProp(const pair<int, int> stmt_range)
 
 bool ProcRangeTable::CheckValidEntityKey(const int proc_id)
 {
-	return proc_id >= initial_proc_id_;
+	return proc_id >= NonStmtIdTable::initial_id_;
+}
+
+bool ProcRangeTable::MatchProp(pair<int, int> stored_range, pair<int, int> stmt_range)
+{
+	return stored_range == stmt_range;
 }
 
 int ProcRangeTable::AddProcRange(const int proc_id, const pair<int, int> stmt_range)

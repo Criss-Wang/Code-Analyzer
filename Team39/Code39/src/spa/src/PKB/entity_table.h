@@ -5,7 +5,13 @@
 #include <vector>
 #include <unordered_map>
 
+#include "Utility/AST.h"
+#include "Utility/TNode.h"
 using namespace std;
+
+// TODO(Zhenlin): [SE Practice] Check if use typedef as a good SE practice
+
+typedef int Proc; 
 
 /**
  * This is an generic class for tables to record key info for entities in SIMPLE program
@@ -30,11 +36,15 @@ private:
 	// Check if the entity property passed is a valid one
 	virtual bool CheckValidProp(T2 entity_prop) = 0;
 
+	// Check if the entity property passed matches an existing property;
+	virtual bool MatchProp(T2 stored_prop, T2 entity_prop) = 0;
+
 	// Return if the table has the element with entity_key
 	virtual bool HasEntityWithKey(const T1 entity_key)
 	{
 		return entity_table_.find(entity_key) != entity_table_.end();
 	}
+
 
 public:
 	virtual ~EntityTable() = default;
@@ -54,7 +64,7 @@ public:
 			{
 				throw invalid_argument("Invalid key");
 			}
-			if (HasEntityWithKey(entity_key) && entity_table_[entity_key] != entity_prop)
+			if (HasEntityWithKey(entity_key) && !MatchProp(entity_table_[entity_key], entity_prop))
 			{
 				//throw invalid_argument(to_string(entity_prop));
 				throw invalid_argument("Clashing with stored property [property_content here]");
@@ -64,7 +74,7 @@ public:
 		}
 		catch (invalid_argument& e)
 		{
-			// TODO(Zhenlin): add error to the logger if possible
+			// TODO(Zhenlin): [Utility] add error to the logger if possible
 			return 0;
 		}
 	}
@@ -90,9 +100,9 @@ class StmtTable final : public EntityTable<int, int>
 private:
 	bool CheckValidProp(int stmt_prop) override;
 	bool CheckValidEntityKey(int stmt_idx) override;
-
+	bool MatchProp(int stored_prop, int stmt_prop) override;
 public:
-	// TODO(Zhenlin): Check if replace following with Enum class after code review (can require quite a lot of refactoring though)
+	// TODO(Zhenlin): [SE Practice] Check if replace following with Enum class after code review (can require quite a lot of refactoring though)
 	static constexpr int assign_idx_ = 3;
 	static constexpr int read_idx_ = 4;
 	static constexpr int print_idx_ = 5;
@@ -103,7 +113,7 @@ public:
 	static constexpr int initial_index_ = 1; // first index, also used as offset
 
 	StmtTable() = default;
-	// TODO(Zhenlin): Check if virtual destructor needed here
+	// TODO(Zhenlin): [SE Practice] Check if virtual destructor needed here
 
 	// Get the set of entities with the same property via the property indicator value
 	vector<int> GetStmtLstByProp(int stmt_prop);
@@ -121,6 +131,7 @@ private:
 
 	bool CheckValidProp(int entity_id) override;
 	bool CheckValidEntityKey(string entity_name) override;
+	bool MatchProp(int stored_id, int entity_id) override;
 
 public:
 	static constexpr int var_id_ = 1;
@@ -139,20 +150,34 @@ public:
 	string GetEntityById(int entity_id);
 };
 
-// TODO(Zhenlin): Complete it and its test cases in future iterations
+// TODO(Zhenlin): [SE Practice] Check if we can make ProcInfoTable a parent class for the following three tables
+
+class AstTable final : public EntityTable<Proc, AST>
+{
+private:
+	bool CheckValidProp(AST ast) override;
+	bool CheckValidEntityKey(Proc proc_id) override;
+	bool MatchProp(AST stored_prop, AST arg_prop) override;
+public:
+	// Getting the AST root node from the AstTable using the procedure object given
+	TNode* GetRootAst(Proc proc_id);
+};
+
+/**
+ * This is a table to store procedure's statement number range; The table may be merged/discarded/modified for better computational efficiency in future iterations.
+ */
 class ProcRangeTable final : public EntityTable<int, pair<int, int>>
 {
 private:
 	bool CheckValidProp(pair<int, int> stmt_range) override;
 	bool CheckValidEntityKey(int proc_id) override;
-
+	bool MatchProp(pair<int, int> stored_range, pair<int, int> stmt_range) override;
 public:
-	static constexpr int initial_proc_id_ = 1;
-
 	int AddProcRange(int proc_id, pair<int, int> stmt_range);
 	int FindProcIdByStmt(int stmt_no);
 };
 
+// TODO(Zhenlin): [Implementation] Complete it and its test cases in future iterations
 class ProcAdjacencyTable : public EntityTable<int, list<int>>
 {
 };

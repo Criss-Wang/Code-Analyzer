@@ -1,3 +1,3 @@
 #include "results.h"
 
-StmtResults::~StmtResults() = default;
+//StmtResults::~StmtResults() = default;
