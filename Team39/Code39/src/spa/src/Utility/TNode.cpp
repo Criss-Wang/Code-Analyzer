@@ -47,3 +47,18 @@ bool TNode::isEqual(TNode* node) {
 		return false;
 	}
 }
+
+bool varTNode::isStmt()
+{
+	return false;
+}
+
+bool stmtLstTNode::isStmt()
+{
+	return false;
+}
+
+bool stmtLstTNode::isStmtLst()
+{
+	return true;
+}

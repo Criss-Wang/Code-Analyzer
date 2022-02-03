@@ -1,0 +1,173 @@
+// Online C++ compiler to run C++ program online
+#include <stdio.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <stack>
+#include <queue>
+
+using namespace std;
+
+class TNode
+{
+public:
+	vector<TNode*> child_nodes_;
+	int Value;
+	const bool is_leaf_ = true;
+	
+    TNode(int value) {
+        Value = value;
+    }
+	int GetValue()
+	{
+		return Value;
+	}
+
+	vector<TNode*> GetChildNodes(){
+	    return child_nodes_;
+	}
+
+	bool IsLeaf()
+	{
+		return true;
+	}
+};
+
+
+TNode* buildNodes(){
+    TNode* r_node = new TNode(0);
+    TNode* node1 = new TNode(1);
+    TNode* node2 = new TNode(2);
+    TNode* node3 = new TNode(3);
+    TNode* node4 = new TNode(4);
+    TNode* node5 = new TNode(5);
+    TNode* node6 = new TNode(6);
+    TNode* node7 = new TNode(7);
+    TNode* node8 = new TNode(8);
+    TNode* node9 = new TNode(9);
+    TNode* node10 = new TNode(10);
+    TNode* node11 = new TNode(11);
+    TNode* node12 = new TNode(12);
+    
+    (r_node->child_nodes_).push_back(node1);
+    (r_node->child_nodes_).push_back(node2);
+    (r_node->child_nodes_).push_back(node3);
+    
+    (node1->child_nodes_).push_back(node4);
+    
+    (node2->child_nodes_).push_back(node5);
+    (node2->child_nodes_).push_back(node6);
+    
+    (node3->child_nodes_).push_back(node7);
+    (node3->child_nodes_).push_back(node8);
+    (node3->child_nodes_).push_back(node9);
+    
+    (node6->child_nodes_).push_back(node11);
+    (node6->child_nodes_).push_back(node12);
+    
+    (node8->child_nodes_).push_back(node10);
+
+    return r_node;
+}
+
+
+void Dfs(TNode* r_node, const int stmt_no, bool& found_stmt, stack<int>& stmt_stack, TNode*& curr_node)
+{
+    // cout << "current node: " << r_node->GetValue() << endl;
+    stmt_stack.push(r_node->GetValue());
+	
+//     stack<int> temp_stack;
+//     while (!stmt_stack.empty())
+// 	{
+// 		cout << stmt_stack.top() << endl;
+// 		temp_stack.push(stmt_stack.top());
+// 		stmt_stack.pop();
+// 	}
+// 	cout << " " << endl;
+// 	while (!temp_stack.empty())
+// 	{
+// 		stmt_stack.push(temp_stack.top());
+// 		temp_stack.pop();
+// 	}
+    
+	if (r_node->GetValue() == stmt_no)
+	{
+		found_stmt = true;
+	}
+
+
+	for (const auto t : r_node->GetChildNodes())
+	{
+		if (found_stmt) {
+		    break;
+		}
+		curr_node = t;
+		Dfs(t, stmt_no, found_stmt, stmt_stack, curr_node);
+	}
+	if (!found_stmt) stmt_stack.pop();
+}
+
+vector<int> SearchWithParent(const bool is_all, const bool is_first, const int stmt_no, TNode* r_node)
+{
+	vector<int> result;
+
+	bool found_stmt = false;
+	stack<int> stmt_stack;
+	TNode* curr_node = r_node;
+
+	Dfs(r_node, stmt_no, found_stmt, stmt_stack, curr_node);
+
+	if (!is_first)
+	{
+	    stmt_stack.pop();
+		if (is_all)
+		{
+			while (!stmt_stack.empty())
+			{
+				result.push_back(stmt_stack.top());
+				stmt_stack.pop();
+			}
+		} else
+		{
+			result.push_back(stmt_stack.top());
+		}
+	} else
+	{
+		if (is_all)
+		{
+			queue<TNode*> queue;
+			queue.push(curr_node);
+			while (!queue.empty())
+			{
+				TNode* n = queue.front();
+				queue.pop();
+				for (const auto t : n->GetChildNodes())
+				{
+					result.push_back(t->GetValue());
+					queue.push(t);
+				}
+			}
+		} else
+		{
+			for (const auto t : curr_node->GetChildNodes())
+			{
+				result.push_back(t->GetValue());
+			}
+		}
+	}
+	return result;
+}
+
+int main() {
+    
+    TNode* r = buildNodes();
+    
+    vector<int> res = SearchWithParent(true, true, 3, r);
+    
+    cout << "working" << endl;
+
+    for (auto t: res) {
+        cout << t << endl;
+    }
+    return 0;
+}

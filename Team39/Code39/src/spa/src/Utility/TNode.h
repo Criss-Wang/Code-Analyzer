@@ -49,14 +49,27 @@ public:
 	/*Compares the type and data of 2 TNodes. Used for testing.*/
 	bool isEqual(TNode* node);
 
+	/**
+	 * TODO(Zhenlin): [Implementation] I added some temporary functions below to help with search functions in PKB. Can be delete if the SP side is not okay with it.
+	 */
+	virtual bool isStmt()
+	{
+		return true;
+	}
+
+	virtual bool isStmtLst()
+	{
+		return false;
+	}
 };
 
+// TODO(Zhenlin): [Implementation] Currently treating all the expr/rel_expr/constant as variables (non-statements)
 class varTNode : public TNode {
 public:
 
 	/*data = var_name, childNodes = empty.*/
 	varTNode(string var_name) : TNode(var_name) { }
-
+	bool isStmt() override;
 };
 
 class readTNode : public TNode {
@@ -80,5 +93,6 @@ public:
 
 	/*data = "stmtLst", childNodes = list of nodes.*/
 	stmtLstTNode(vector<TNode*> nodes) : TNode("stmtLst", nodes) { }
-
+	bool isStmt() override;
+	bool isStmtLst() override;
 };
