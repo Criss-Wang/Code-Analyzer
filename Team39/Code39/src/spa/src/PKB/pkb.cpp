@@ -22,7 +22,7 @@ StmtResults Pkb::SearchWithAssociations(const char assoc_type, const bool is_all
 		{
 			return SearchWithFollows(is_all, is_first, stmt_no);
 		} 
-		throw exception("Bad type given");
+		throw invalid_argument("Bad type given");
 	}
 	catch (exception& e)
 	{

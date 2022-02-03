@@ -18,7 +18,7 @@ class Pkb {
 private:
 	StmtResults SearchWithParent(bool is_all, bool is_first, int stmt_no);
 	StmtResults SearchWithFollows(bool is_all, bool is_first, int stmt_no);
-
+		
 	ProcRangeTable proc_range_table_ = ProcRangeTable();
 
 public:
