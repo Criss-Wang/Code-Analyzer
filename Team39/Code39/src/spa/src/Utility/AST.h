@@ -32,4 +32,6 @@ public:
 
 	/*Compares the root of 2 ASTs. Used for testing.*/
 	bool isEqual(AST ast);
+
+	bool operator==(const AST& rhs) const;
 };

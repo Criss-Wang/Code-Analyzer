@@ -53,3 +53,5 @@ void AST::buildtree(list<string> input) {
 bool AST::isEqual(AST ast) {
 	return this->root->isEqual(ast.root);
 }
+
+
