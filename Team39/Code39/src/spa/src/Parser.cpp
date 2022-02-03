@@ -1,19 +1,12 @@
 #include<stdio.h>
 #include <iostream>
-#include <string>
 #include <vector>
 
 using namespace std;
 
-<<<<<<< HEAD
 #include "Parser.h"
-#include "PKB.h"
-=======
-#include "PKB/pkb.h"
-#include "Utility/TNode.h"
->>>>>>> 9b6b81faab7bc66b1369f9387349897ccd4bc3d4
 
-void parse (string sourceProgramInput) {
+void parse(vector<Token> input) {
 
 	/* 
 	* Tokenizer tokenizer;
@@ -27,20 +20,9 @@ void parse (string sourceProgramInput) {
 	* }
 	*/
 
-	// TODO (Yuxuan): [Integration] Use actual vector<Token> returned by Tokenizer to populate
-	struct Token {
-		string type;
-		string text;
-		int line_num;
-	};
-
-	Token token1{ "procedure", "procName", 1 };
-	Token token2{ "read", "x", 1 };
-	Token token3{ "print", "y", 1 };
-	vector<Token> input = { token1, token2, token3 };
 
 	// TODO (Yuxuan): [Integration] Use PKB declared globally
-	PKB pkb;
+	Pkb pkb;
 
 	// Stores parent/previous stmt's line number for Parent/Follows relationship
 	int parent = -1;
@@ -48,54 +30,102 @@ void parse (string sourceProgramInput) {
 	bool is_rhs_of_assignment = false;
 
 	for (auto token = begin(input); token != end(input); ++token) {
-		if (token->type == "procedure") {
-			pkb->proc_table_.AddEntityByName(token->text);
-			parent = token->line_num;
 
-		} else if (token->type == "variable") {
-			pkb->var_table_.AddEntityByName(token->text);
+		if (token->type == "procedure") {
+			string proc_name = next(token, 1)->text;
+			pkb.proc_table_.AddEntityByName(proc_name);
+			parent = token->line_num;
+			cout << "add procedure: " << proc_name << endl;
+
+		} else if (token->type == "variable" || token->type == "name") {
+			pkb.var_table_.AddEntityByName(token->text);
+			cout << "add variable: " << token->text << endl;
+
 			bool is_assignment = next(token, 1)->text == "=";
 			if (is_assignment) {
 				// TODO (Yuxuan): populate modifies relationship using API given by PKB
-				pkb->modifies_table_.AddEntity(token->line_num, token->text);
+				cout << "add modifies: " << token->line_num << ", " << token->text << endl;
+
 			} else if (is_rhs_of_assignment) {
 				// TODO (Yuxuan): populate uses relationship using API given by PKB
-				pkb->uses_table_.AddEntity(token->line_num, token->text);
+				cout << "add uses: " << token->line_num << ", " << token->text << endl;
 			}
 		} else if (token->type == "constant") {
-			pkb->const_table_.AddEntityByName(token->text);
+			pkb.const_table_.AddEntityByName(token->text);
+			cout << "add constant: " << token->text << endl;
 
 		} else if (token->type == "read") {
-			pkb->stmt_table.AddEntity(token->line_num, StmtTable::read_idx_);
+			string read_var = next(token, 1)->text;
+			pkb.stmt_table_.AddEntity(token->line_num, StmtTable::read_idx_);
+			cout << "add read stmt: line " << token->line_num << endl;
+
+			// TODO (Yuxuan): populate modifies relationship using API given by PKB
+			cout << "add modifies: " << token->line_num << ", " << read_var << endl;
+
 			if (previous != -1) {
 				// TODO (Yuxuan): populate follows relationship using API given by PKB
-				pkb->follows_table_.AddEntity(previous, token->line_num);
+				cout << "add follows: " << previous << ", " << token->line_num << endl;
 			}
 			if (parent != -1) {
 				// TODO (Yuxuan): populate parent relationship using API given by PKB
-				pkb->parent_table_.AddEntity(parent, token->line_num);
+				cout << "add parent: " << parent << ", " << token->line_num << endl;
 			}
-			previous = token->line_num;
 
-		} else if (token->type == "write") {
-			pkb->stmt_table.AddEntity(token->line_num, StmtTable::print_idx_);
+		} else if (token->type == "print") {
+			string print_var = next(token, 1)->text;
+			pkb.stmt_table_.AddEntity(token->line_num, StmtTable::print_idx_);
+			cout << "add print stmt: line " << token->line_num << endl;
 
-		} else if (token->type == "assign") {
-			pkb->stmt_table.AddEntity(token->line_num, StmtTable::assign_idx_);
+			// TODO (Yuxuan): populate modifies relationship using API given by PKB
+			cout << "add uses: " << token->line_num << ", " <<  print_var << endl;
+
+			if (previous != -1) {
+				// TODO (Yuxuan): populate follows relationship using API given by PKB
+				cout << "add follows: " << previous << ", " << token->line_num << endl;
+			}
+			if (parent != -1) {
+				// TODO (Yuxuan): populate parent relationship using API given by PKB
+				cout << "add parent: " << parent << ", " << token->line_num << endl;
+			}
+
+		} else if (token->type == "assign") { // kiv, tokenType no assign var?
+			pkb.stmt_table_.AddEntity(token->line_num, StmtTable::assign_idx_);
 
 		} else if (token->type == "call") {
-			pkb->stmt_table.AddEntity(token->line_num, StmtTable::call_idx_);
+			pkb.stmt_table_.AddEntity(token->line_num, StmtTable::call_idx_);
 
 		} else if (token->type == "while") {
-			pkb->stmt_table.AddEntity(token->line_num, StmtTable::while_idx_);
+			pkb.stmt_table_.AddEntity(token->line_num, StmtTable::while_idx_);
 
 		} else if (token->type == "if") {
-			pkb->stmt_table.AddEntity(token->line_num, StmtTable::if_idx_);
+			pkb.stmt_table_.AddEntity(token->line_num, StmtTable::if_idx_);
 
+		} else if (token->type == "{") {
+			parent = token->line_num;
+
+		} else if (token->type == "}") {
+			parent = -1;
+
+		} else if (token->type == ";") {
+			previous = token->line_num;
+			is_rhs_of_assignment = false;
+
+		} else if (token->type == "operator") {
+			if (token->text == "=") {
+				is_rhs_of_assignment = true;
+				cout << "add assign stmt: line " << token->line_num << endl;
+
+				if (previous != -1) {
+					// TODO (Yuxuan): populate follows relationship using API given by PKB
+					cout << "add follows: " << previous << ", " << token->line_num << endl;
+				}
+				if (parent != -1) {
+					// TODO (Yuxuan): populate parent relationship using API given by PKB
+					cout << "add parent: " << parent << ", " << token->line_num << endl;
+				}
+			}
 		} else {
-			cout << "Error: Token type not recognized";
+			cout << "Error: Token type not recognized" << endl;
 		}
 	}
-
-	return 0;
 }
