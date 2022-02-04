@@ -57,3 +57,6 @@ class Table {
       }
     }
 };
+
+// An
+//class IndexTable : public Table<string, Table*> {};

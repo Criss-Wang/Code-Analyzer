@@ -27,6 +27,9 @@ class Pkb {
     ModifiesStmtToVariablesTable *modifies_stmt_to_variables_table_ = new ModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable *modifies_variable_to_stmts_table_ = new ModifiesVariableToStmtsTable();
 
+    // A table to store pointers to all tables
+    //IndexTable* index_table_ = new IndexTable();
+
   public:
     // TODO(Zhenlin): https://github.com/nus-cs3203/21s2-cp-spa-team-39/issues/20
 };
