@@ -3,7 +3,7 @@
 
 #include "catch.hpp"
 using namespace std;
-void require(bool b) {
+void RequirePopulation(bool b) {
     REQUIRE(b);
 }
 
@@ -17,22 +17,22 @@ TEST_CASE("Test populate PKB") {
 	*	print y;
 	* }
 	*/
-	Token token1{ "procedure", "", 1 };
+	Token token1{ "name", "procedure", 1 };
 	Token token2{ "name", "procName", 1 };
-	Token token3{ "{", "", 1 };
-	Token token4{ "read", "", 2 };
+	Token token3{ "{", "{", 1 };
+	Token token4{ "name", "read", 2 };
 	Token token5{ "variable", "x", 2 };
-	Token token6{ ";", "", 2 };
-	Token token7{ "print", "", 3 };
+	Token token6{ ";", ";", 2 };
+	Token token7{ "name", "print", 3 };
 	Token token8{ "variable", "y", 3 };
-	Token token9{ ";", "", 3 };
-	Token token10{ "}", "", 4 };
+	Token token9{ ";", ";", 3 };
+	Token token10{ "}", "}", 4 };
 	vector<Token> input = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10 };
 	
-	parse(input);
+	Parse(input);
 	cout << endl;
 
-	REQUIRE(1 == 1);
+	RequirePopulation(1 == 1);
 }
 
 TEST_CASE("Test populate PKB 2") {
@@ -63,7 +63,7 @@ TEST_CASE("Test populate PKB 2") {
 	vector<Token> input = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10, token11, token12,
 		token13, token14, token15, token16 };
 
-	parse(input);
+	Parse(input);
 
-	REQUIRE(1 == 1);
+	RequirePopulation(1 == 1);
 }

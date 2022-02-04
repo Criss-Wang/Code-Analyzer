@@ -14,4 +14,4 @@ struct Token {
 };
 
 // change back to parse(string source_program_input) after tokenizer is done.
-void parse(vector<Token> input);
+void Parse(vector<Token> input);
