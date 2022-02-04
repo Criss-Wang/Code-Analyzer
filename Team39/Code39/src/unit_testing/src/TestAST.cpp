@@ -18,39 +18,39 @@ void require(bool b) {
 TEST_CASE("1st Test") {
 
     TNode T;
-	
-	
-	
+  
+  
+  
     require(1 == 1);
 }
 
 TEST_CASE("Run tokenizer with file input") {
-	ifstream myFile("SourceProgramInput.txt"); // Put input file in same folder as unit_testing.exe
-	Tokenizer tokenizer;
-	Parser parser;
-	Validator validator;
-	string sourceProg;
-	vector<Token> actualTokensList;
+  ifstream myFile("SourceProgramInput.txt"); // Put input file in same folder as unit_testing.exe
+  Tokenizer tokenizer;
+  Parser parser;
+  Validator validator;
+  string sourceProg;
+  vector<Token> actualTokensList;
 
-	if (myFile.is_open()) {
-		while (getline(myFile, sourceProg)) {
-			vector<Token> actualTokensList = tokenizer.parse(sourceProg);
+  if (myFile.is_open()) {
+    while (getline(myFile, sourceProg)) {
+      vector<Token> actualTokensList = tokenizer.parse(sourceProg);
 
-			for (Token currToken : actualTokensList) {
-				currToken.print();
-			}
-			
-			if (actualTokensList.size() != 0) {
-				//validator.validate(actualTokensList);
-			} else {
-				cout << "No tokens";
-			}
-		}
-		myFile.close();
-	} else {
-		cout << "Unable to open file";
-	}
-	require(1 == 1);
+      for (Token currToken : actualTokensList) {
+        currToken.print();
+      }
+      
+      if (actualTokensList.size() != 0) {
+        //validator.validate(actualTokensList);
+      } else {
+        cout << "No tokens";
+      }
+    }
+    myFile.close();
+  } else {
+    cout << "Unable to open file";
+  }
+  require(1 == 1);
 }
 
 
