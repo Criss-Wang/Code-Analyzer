@@ -214,5 +214,7 @@ string Token::print() {
     string output = tokenTypeStrings[type] + ", \"" + text + "\", " + to_string(stmtNum);
     cout << output << endl;
     return output;
+  } else {
+    return "Syntax Error";
   }
 }

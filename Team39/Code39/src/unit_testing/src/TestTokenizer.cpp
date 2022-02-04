@@ -1,6 +1,6 @@
 #include "Tokenizer.h"
 #include "Validator.h"
-#include "Parser.h"
+//#include "Parser.h"
 #include "TNode.h"
 #include "catch.hpp"
 
@@ -27,7 +27,6 @@ TEST_CASE("1st Test") {
 TEST_CASE("Run tokenizer with file input") {
   ifstream myFile("SourceProgramInput.txt"); // Put input file in same folder as unit_testing.exe
   Tokenizer tokenizer;
-  Parser parser;
   Validator validator;
   string sourceProg;
   vector<Token> actualTokensList;
