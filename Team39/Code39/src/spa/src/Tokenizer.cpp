@@ -9,21 +9,17 @@
 #include "Tokenizer.h"
 
 using namespace std; 
-bool isSyntaxError = false;
 
 // Tokenizes a given source program  
 vector<Token> Tokenizer::parse(const string& sourceProgram) {
   int curlyBracketsCount = 0; // 0 for syntactically correct program
   int parenCount = 0;
 
-  vector<Token> tokensList;
-  Token currentToken;
-  Token prevToken;
+  vector<Token> tokens_list;
+  Token current_token;
+  Token prev_token;
 
   for (char currChar : sourceProgram) {
-    if (isSyntaxError) {
-      return tokensList;
-    }
 
     switch (currChar) {
       // Digits
@@ -37,84 +33,80 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
       case '7':
       case '8':
       case '9':
-        if (currentToken.type == WHITESPACE) {
-          currentToken.type = DIGIT;
-        } else if (currentToken.type == DIGIT || currentToken.type == INTEGER) {
-          currentToken.type = INTEGER;
+        if (current_token.type == WHITESPACE) {
+          current_token.type = DIGIT;
+        } else if (current_token.type == DIGIT || current_token.type == INTEGER) {
+          current_token.type = INTEGER;
         }
-        currentToken.text.append(1, currChar);
+        current_token.text.append(1, currChar);
         break;
 
       // Brackets
       case '{':
-        if (prevToken.type == INTEGER || prevToken.type == DIGIT
-          || prevToken.type == OPERATOR || prevToken.type == SEMICOLON) {
-          isSyntaxError = true;
-          continue;
+        if (prev_token.type == INTEGER || prev_token.type == DIGIT
+          || prev_token.type == OPERATOR || prev_token.type == SEMICOLON) {
+          throw invalid_argument("Syntax error");
         }
 
-        if (currentToken.type != WHITESPACE) {
-          endToken(currentToken, tokensList);
+        if (current_token.type != WHITESPACE) {
+          endToken(current_token, tokens_list);
         }
 
-        currentToken.type = LEFT_CURLY;
-        currentToken.text.append(1, currChar);
-        endToken(currentToken, tokensList);
+        current_token.type = LEFT_CURLY;
+        current_token.text.append(1, currChar);
+        endToken(current_token, tokens_list);
         curlyBracketsCount++;
         break;
 
       case '}':
-        if (currentToken.type != WHITESPACE) {
-          endToken(currentToken, tokensList);
+        if (current_token.type != WHITESPACE) {
+          endToken(current_token, tokens_list);
         }
 
         if (curlyBracketsCount <= 0) {
-          isSyntaxError = true;
-          continue;
+          throw invalid_argument("Syntax error");
         }
 
-        currentToken.type = RIGHT_CURLY;
-        currentToken.text.append(1, currChar);
-        endToken(currentToken, tokensList);
+        current_token.type = RIGHT_CURLY;
+        current_token.text.append(1, currChar);
+        endToken(current_token, tokens_list);
         curlyBracketsCount--;
 
         if (curlyBracketsCount != 0 || parenCount != 0) {
-          isSyntaxError = true;
-          continue;
+          throw invalid_argument("Syntax error");
         }
         break;
 
       case '(':
-        if (currentToken.type != WHITESPACE) {
-          endToken(currentToken, tokensList);			
+        if (current_token.type != WHITESPACE) {
+          endToken(current_token, tokens_list);			
         }
-        currentToken.type = LEFT_PAREN;
-        currentToken.text.append(1, currChar);
-        endToken(currentToken, tokensList);
+        current_token.type = LEFT_PAREN;
+        current_token.text.append(1, currChar);
+        endToken(current_token, tokens_list);
         parenCount++;
         break;
 
       case ')':
-        if (currentToken.type != WHITESPACE) {
-          endToken(currentToken, tokensList);
+        if (current_token.type != WHITESPACE) {
+          endToken(current_token, tokens_list);
         }
 
         if (parenCount <= 0) {
-          isSyntaxError = true;
-          continue;
+          throw invalid_argument("Syntax error");
         }
 
-        currentToken.type = RIGHT_PAREN;
-        currentToken.text.append(1, currChar);
-        endToken(currentToken, tokensList);
+        current_token.type = RIGHT_PAREN;
+        current_token.text.append(1, currChar);
+        endToken(current_token, tokens_list);
         parenCount--;
         break;
 
       // Space and tab
       case ' ':
       case '	': 
-        prevToken = currentToken;
-        endToken(currentToken, tokensList);
+        prev_token = current_token;
+        endToken(current_token, tokens_list);
         break;
 
       // Operators
@@ -126,61 +118,57 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
       case '=':
       case '<':
       case '>':
-        if (prevToken.type != LETTER && prevToken.type != NAME
-          && prevToken.type != DIGIT && prevToken.type != INTEGER
-          && currentToken.type != RIGHT_PAREN) {
-          isSyntaxError = true;
-          continue;
+        if (prev_token.type != LETTER && prev_token.type != NAME
+          && prev_token.type != DIGIT && prev_token.type != INTEGER
+          && current_token.type != RIGHT_PAREN) {
+          throw invalid_argument("Syntax error");
         }
 
-        endToken(currentToken, tokensList);
-        currentToken.type = OPERATOR;
-        currentToken.text.append(1, currChar);
+        endToken(current_token, tokens_list);
+        current_token.type = OPERATOR;
+        current_token.text.append(1, currChar);
         break;
 
       // Semicolon
       case ';':
-        if (currentToken.type == OPERATOR || currentToken.type == LEFT_CURLY
-          || currentToken.type == LEFT_PAREN) {
-          isSyntaxError = true;
-          continue;
+        if (current_token.type == OPERATOR || current_token.type == SEMICOLON
+          || current_token.type == LEFT_CURLY || current_token.type == LEFT_PAREN) {
+          throw invalid_argument("Syntax error");
         } 
 
-        if (currentToken.type == WHITESPACE) {
-          if (prevToken.type == OPERATOR || prevToken.type == LEFT_CURLY
-            || prevToken.type == LEFT_PAREN) {
-            isSyntaxError = true;
-            continue;
+        if (current_token.type == WHITESPACE) {
+          if (prev_token.type == OPERATOR || prev_token.type == LEFT_CURLY
+            || prev_token.type == LEFT_PAREN) {
+            throw invalid_argument("Syntax error");
           }
         }
 
-        if (currentToken.type != WHITESPACE) {
-          endToken(currentToken, tokensList);
+        if (current_token.type != WHITESPACE) {
+          endToken(current_token, tokens_list);
         }
 
-        currentToken.type = SEMICOLON;
-        currentToken.text.append(1, currChar);
-        currentToken.increaseStmtNum();
+        current_token.type = SEMICOLON;
+        current_token.text.append(1, currChar);
+        current_token.increaseStmtNum();
         break;
 
       // Letters
       default:
-        if (currentToken.type == WHITESPACE) {
-          currentToken.type = LETTER;
-          currentToken.text.append(1, currChar);
-        } else if (currentToken.type == LETTER || currentToken.type == NAME) {
-          currentToken.type = NAME;
-          currentToken.text.append(1, currChar);
-        } else if (currentToken.type == DIGIT || currentToken.type == INTEGER) {
-          isSyntaxError = true;
-          continue;
+        if (current_token.type == WHITESPACE) {
+          current_token.type = LETTER;
+          current_token.text.append(1, currChar);
+        } else if (current_token.type == LETTER || current_token.type == NAME) {
+          current_token.type = NAME;
+          current_token.text.append(1, currChar);
+        } else if (current_token.type == DIGIT || current_token.type == INTEGER) {
+          throw invalid_argument("Syntax error");
         } 
         break;
     }
   }
 
-  endToken(currentToken, tokensList);
-  return tokensList;
+  endToken(current_token, tokens_list);
+  return tokens_list;
 }
 
 // Resets current token to WHITESPACE
@@ -210,11 +198,7 @@ void Tokenizer::checkStmtType(Token &token) {
 }
 
 string Token::print() {
-  if (!isSyntaxError) {
-    string output = tokenTypeStrings[type] + ", \"" + text + "\", " + to_string(stmtNum);
+    string output = tokenTypeStrings[type] + ", \"" + text + "\", " + to_string(stmt_num_);
     cout << output << endl;
     return output;
-  } else {
-    return "Syntax Error";
-  }
 }

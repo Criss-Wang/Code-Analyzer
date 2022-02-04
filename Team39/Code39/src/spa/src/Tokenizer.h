@@ -42,24 +42,24 @@ static const string tokenTypeStrings[] = {
 };
 
 class Token {
-public:
-  enum TokenType type { WHITESPACE }; // Initialised to WHITESPACE
-  string text { 0 };
-  int stmtNum = 1;
+  public:
+    enum TokenType type { WHITESPACE }; // Initialised to WHITESPACE
+    string text { 0 };
+    int stmt_num_ = 1;
     
-  string print();
+    string print();
 
-  void increaseStmtNum() {
-    stmtNum += 1;
-  }
+    void increaseStmtNum() {
+      stmt_num_ += 1;
+    }
 };
 
 class Tokenizer {
-public:
-  vector<Token> parse(const string& sourceProgram);
+  public:
+    vector<Token> parse(const string& sourceProgram);
 
-private:
-  void endToken(Token& token, vector<Token>& tokens);
-  void checkStmtType(Token& token);
+  private:
+    void endToken(Token& token, vector<Token>& tokens);
+    void checkStmtType(Token& token);
 };
 
