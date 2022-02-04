@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include "table.h"
 
@@ -9,3 +10,15 @@ class AssignTable : public Table<int, string> {};
 
 // Line number will be the key and the single variable being read will be the value
 class ReadTable : public Table<int, string> {};
+
+// Line number will be the key and the single variable being printed will be the value
+class PrintTable : public Table<int, string> {};
+
+// Line number will be the key and the list of constants will be the value
+class ConstantTable : public Table<int, vector<int>> {};
+
+// Line number will be the key and the list of variables in the condition expression will be the value
+class IfTable : public Table<int, vector<string>> {};
+
+// Line number will be the key and the list of variables in the condition expression will be the value
+class WhileTable : public Table<int, vector<string>> {};
