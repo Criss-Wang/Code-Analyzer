@@ -1,5 +1,5 @@
-#include "Tokenizer.h"
-#include "Validator.h"
+#include "SP/Tokenizer.h"
+#include "SP/Validator.h"
 //#include "Parser.h"
 #include "catch.hpp"
 
@@ -9,14 +9,14 @@
 
 using namespace std;
 
-void require(bool b) {
+void requireTokenizer(bool b) {
     REQUIRE(b);
 }
 
 TEST_CASE("Run tokenizer with file input") {
   ifstream myFile("SourceProgramInput.txt"); // Put input file in same folder as unit_testing.exe
   Tokenizer tokenizer;
-  Validator validator;
+  //Validator validator;
   string sourceProg;
   vector<Token> actualTokensList;
 
@@ -42,7 +42,7 @@ TEST_CASE("Run tokenizer with file input") {
   } else {
     cout << "Unable to open file";
   }
-  require(1 == 1);
+  requireTokenizer(1 == 1);
 }
 
 
