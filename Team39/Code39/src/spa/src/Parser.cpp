@@ -7,8 +7,7 @@ using namespace std;
 #include "Parser.h"
 #include "SP/validator.h"
 
-<<<<<<< HEAD
-void Parse(vector<Token> input) {
+void Parse(vector<TokenTemp> input) {
 
   /*
   * Tokenizer tokenizer;
@@ -35,12 +34,12 @@ void Parse(vector<Token> input) {
     for (auto token = begin(input); token != end(input); ++token) {
       if (token->type == "procedure") {
         string proc_name = next(token, 1)->text;
-        pkb.proc_table_.AddEntityByName(proc_name);
+        //pkb.proc_table_.AddEntityByName(proc_name);
         parent = token->line_num;
         cout << "add procedure: " << proc_name << endl;
 
       } else if (token->type == "variable" || token->type == "name") {
-        pkb.var_table_.AddEntityByName(token->text);
+        //pkb.var_table_.AddEntityByName(token->text);
         cout << "add variable: " << token->text << endl;
 
         bool is_assignment = next(token, 1)->text == "=";
@@ -53,12 +52,12 @@ void Parse(vector<Token> input) {
           cout << "add uses: " << token->line_num << ", " << token->text << endl;
         }
       } else if (token->type == "constant") {
-        pkb.const_table_.AddEntityByName(token->text);
+        //pkb.const_table_.AddEntityByName(token->text);
         cout << "add constant: " << token->text << endl;
 
       } else if (token->type == "read") {
         string read_var = next(token, 1)->text;
-        pkb.stmt_table_.AddEntity(token->line_num, StmtTable::read_idx_);
+        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::read_idx_);
         cout << "add read stmt: line " << token->line_num << endl;
 
         // TODO (Yuxuan): populate modifies relationship using API given by PKB
@@ -75,7 +74,7 @@ void Parse(vector<Token> input) {
 
       } else if (token->type == "print") {
         string print_var = next(token, 1)->text;
-        pkb.stmt_table_.AddEntity(token->line_num, StmtTable::print_idx_);
+        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::print_idx_);
         cout << "add print stmt: line " << token->line_num << endl;
 
         // TODO (Yuxuan): populate modifies relationship using API given by PKB
@@ -91,16 +90,16 @@ void Parse(vector<Token> input) {
         }
 
       } else if (token->type == "assign") { // kiv, tokenType no assign var?
-        pkb.stmt_table_.AddEntity(token->line_num, StmtTable::assign_idx_);
+        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::assign_idx_);
 
       } else if (token->type == "call") {
-        pkb.stmt_table_.AddEntity(token->line_num, StmtTable::call_idx_);
+        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::call_idx_);
 
       } else if (token->type == "while") {
-        pkb.stmt_table_.AddEntity(token->line_num, StmtTable::while_idx_);
+        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::while_idx_);
 
       } else if (token->type == "if") {
-        pkb.stmt_table_.AddEntity(token->line_num, StmtTable::if_idx_);
+        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::if_idx_);
 
       } else if (token->type == "{") {
         parent = token->line_num;
@@ -132,9 +131,3 @@ void Parse(vector<Token> input) {
     }
   }
 }
-=======
-int Parse() {
-
-  return 0;
-}
->>>>>>> 91459c69eecf45cdca5b3c470bb29ccddf960d2e

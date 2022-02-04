@@ -7,11 +7,11 @@ using namespace std;
 
 // TODO (Yuxuan): [Integration] Use actual vector<Token> returned by Tokenizer to populate
 // To be deleted after tokenizer is completed.
-struct Token {
+struct TokenTemp {
 	string type;
 	string text;
 	int line_num;
 };
 
 // change back to parse(string source_program_input) after tokenizer is done.
-void Parse(vector<Token> input);
+void Parse(vector<TokenTemp> input);

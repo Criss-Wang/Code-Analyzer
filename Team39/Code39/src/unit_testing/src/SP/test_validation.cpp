@@ -15,14 +15,14 @@ TEST_CASE("Valid programs") {
 		*	read y;
 		* }
 		*/
-		Token token1{ "name", "procedure", 1 };
-		Token token2{ "name", "procName", 1 };
-		Token token3{ "{", "{", 1 };
-		Token token4{ "name", "read", 2 };
-		Token token5{ "variable", "y", 2 };
-		Token token6{ ";", ";", 2 };
-		Token token7{ "}", "}", 3 };
-		vector<Token> input = { token1, token2, token3, token4, token5, token6, token7 };
+		TokenTemp TokenTemp1{ "name", "procedure", 1 };
+		TokenTemp TokenTemp2{ "name", "procName", 1 };
+		TokenTemp TokenTemp3{ "{", "{", 1 };
+		TokenTemp TokenTemp4{ "name", "read", 2 };
+		TokenTemp TokenTemp5{ "variable", "y", 2 };
+		TokenTemp TokenTemp6{ ";", ";", 2 };
+		TokenTemp TokenTemp7{ "}", "}", 3 };
+		vector<TokenTemp> input = { TokenTemp1, TokenTemp2, TokenTemp3, TokenTemp4, TokenTemp5, TokenTemp6, TokenTemp7 };
 
 		RequireValidation(Validate(input));
 	}
@@ -34,17 +34,17 @@ TEST_CASE("Valid programs") {
 		*	print y;
 		* }
 		*/
-		Token token1{ "name", "procedure", 1 };
-		Token token2{ "name", "procName", 1 };
-		Token token3{ "{", "{", 1 };
-		Token token4{ "name", "read", 2 };
-		Token token5{ "variable", "x", 2 };
-		Token token6{ ";", ";", 2 };
-		Token token7{ "name", "print", 3 };
-		Token token8{ "variable", "y", 3 };
-		Token token9{ ";", ";", 3 };
-		Token token10{ "}", "}", 4 };
-		vector<Token> input = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10 };
+		TokenTemp TokenTemp1{ "name", "procedure", 1 };
+		TokenTemp TokenTemp2{ "name", "procName", 1 };
+		TokenTemp TokenTemp3{ "{", "{", 1 };
+		TokenTemp TokenTemp4{ "name", "read", 2 };
+		TokenTemp TokenTemp5{ "variable", "x", 2 };
+		TokenTemp TokenTemp6{ ";", ";", 2 };
+		TokenTemp TokenTemp7{ "name", "print", 3 };
+		TokenTemp TokenTemp8{ "variable", "y", 3 };
+		TokenTemp TokenTemp9{ ";", ";", 3 };
+		TokenTemp TokenTemp10{ "}", "}", 4 };
+		vector<TokenTemp> input = { TokenTemp1, TokenTemp2, TokenTemp3, TokenTemp4, TokenTemp5, TokenTemp6, TokenTemp7, TokenTemp8, TokenTemp9, TokenTemp10 };
 
 		RequireValidation(Validate(input));
 	}
@@ -56,21 +56,21 @@ TEST_CASE("Valid programs") {
 		* print x;
 		* }
 		*/
-		Token token1{ "name", "procedure", 1 };
-		Token token2{ "name", "procName", 1 };
-		Token token3{ "{", "{", 1 };
-		Token token4{ "variable", "x", 2 };
-		Token token5{ "operator", "=", 2 };
-		Token token6{ "variable", "y", 2 };
-		Token token7{ "operator", "*", 2 };
-		Token token8{ "variable", "3", 2 };
-		Token token9{ ";", ";", 2 };
-		Token token10{ "name", "print", 3 };
-		Token token11{ "variable", "x", 3 };
-		Token token12{ ";", ";", 3 };
-		Token token13{ "}", "}", 4 };
-		vector<Token> input = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10, token11,
-			token12, token13 };
+		TokenTemp TokenTemp1{ "name", "procedure", 1 };
+		TokenTemp TokenTemp2{ "name", "procName", 1 };
+		TokenTemp TokenTemp3{ "{", "{", 1 };
+		TokenTemp TokenTemp4{ "variable", "x", 2 };
+		TokenTemp TokenTemp5{ "operator", "=", 2 };
+		TokenTemp TokenTemp6{ "variable", "y", 2 };
+		TokenTemp TokenTemp7{ "operator", "*", 2 };
+		TokenTemp TokenTemp8{ "variable", "3", 2 };
+		TokenTemp TokenTemp9{ ";", ";", 2 };
+		TokenTemp TokenTemp10{ "name", "print", 3 };
+		TokenTemp TokenTemp11{ "variable", "x", 3 };
+		TokenTemp TokenTemp12{ ";", ";", 3 };
+		TokenTemp TokenTemp13{ "}", "}", 4 };
+		vector<TokenTemp> input = { TokenTemp1, TokenTemp2, TokenTemp3, TokenTemp4, TokenTemp5, TokenTemp6, TokenTemp7, TokenTemp8, TokenTemp9, TokenTemp10, TokenTemp11,
+			TokenTemp12, TokenTemp13 };
 
 		RequireValidation(Validate(input));
 	}
@@ -81,22 +81,22 @@ TEST_CASE("Valid programs") {
 		*	x = y + (5 + z);
 		* }
 		*/
-		Token token1{ "name", "procedure", 1 };
-		Token token2{ "name", "procName", 1 };
-		Token token3{ "{", "{", 1 };
-		Token token4{ "variable", "x", 2 };
-		Token token5{ "operator", "=", 2 };
-		Token token6{ "variable", "y", 2 };
-		Token token7{ "operator", "+", 2 };
-		Token token8{ "bracket", "(", 2 };
-		Token token9{ "variable", "5", 2 };
-		Token token10{ "operator", "+", 2 };
-		Token token11{ "variable", "z", 2 };
-		Token token12{ "bracket", ")", 2 };
-		Token token13{ ";", ";", 2 };
-		Token token14{ "}", "}", 3 };
-		vector<Token> input = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10, token11,
-			token12, token13, token14 };
+		TokenTemp TokenTemp1{ "name", "procedure", 1 };
+		TokenTemp TokenTemp2{ "name", "procName", 1 };
+		TokenTemp TokenTemp3{ "{", "{", 1 };
+		TokenTemp TokenTemp4{ "variable", "x", 2 };
+		TokenTemp TokenTemp5{ "operator", "=", 2 };
+		TokenTemp TokenTemp6{ "variable", "y", 2 };
+		TokenTemp TokenTemp7{ "operator", "+", 2 };
+		TokenTemp TokenTemp8{ "bracket", "(", 2 };
+		TokenTemp TokenTemp9{ "variable", "5", 2 };
+		TokenTemp TokenTemp10{ "operator", "+", 2 };
+		TokenTemp TokenTemp11{ "variable", "z", 2 };
+		TokenTemp TokenTemp12{ "bracket", ")", 2 };
+		TokenTemp TokenTemp13{ ";", ";", 2 };
+		TokenTemp TokenTemp14{ "}", "}", 3 };
+		vector<TokenTemp> input = { TokenTemp1, TokenTemp2, TokenTemp3, TokenTemp4, TokenTemp5, TokenTemp6, TokenTemp7, TokenTemp8, TokenTemp9, TokenTemp10, TokenTemp11,
+			TokenTemp12, TokenTemp13, TokenTemp14 };
 
 		RequireValidation(Validate(input));
 	}
@@ -111,24 +111,24 @@ TEST_CASE("Invalid Programs") {
 	*	print x;
 	* }
 	*/
-	Token token1{ "name", "procedre", 1 };
-	Token token2{ "name", "procName", 1 };
-	Token token3{ "{", "", 1 };
-	Token token4{ "read", "", 2 };
-	Token token5{ "variable", "y", 2 };
-	Token token6{ ";", "", 2 };
-	Token token7{ "variable", "x", 3 };
-	Token token8{ "operator", "=", 3 };
-	Token token9{ "variable", "y", 3 };
-	Token token10{ "operator", "+", 3 };
-	Token token11{ "constant", "1", 3 };
-	Token token12{ ";", "", 3 };
-	Token token13{ "print", "", 4 };
-	Token token14{ "variable", "x", 4 };
-	Token token15{ ";", "", 4 };
-	Token token16{ "}", "", 5 };
-	vector<Token> input = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10, token11, token12,
-		token13, token14, token15, token16 };
+	TokenTemp TokenTemp1{ "name", "procedre", 1 };
+	TokenTemp TokenTemp2{ "name", "procName", 1 };
+	TokenTemp TokenTemp3{ "{", "", 1 };
+	TokenTemp TokenTemp4{ "read", "", 2 };
+	TokenTemp TokenTemp5{ "variable", "y", 2 };
+	TokenTemp TokenTemp6{ ";", "", 2 };
+	TokenTemp TokenTemp7{ "variable", "x", 3 };
+	TokenTemp TokenTemp8{ "operator", "=", 3 };
+	TokenTemp TokenTemp9{ "variable", "y", 3 };
+	TokenTemp TokenTemp10{ "operator", "+", 3 };
+	TokenTemp TokenTemp11{ "constant", "1", 3 };
+	TokenTemp TokenTemp12{ ";", "", 3 };
+	TokenTemp TokenTemp13{ "print", "", 4 };
+	TokenTemp TokenTemp14{ "variable", "x", 4 };
+	TokenTemp TokenTemp15{ ";", "", 4 };
+	TokenTemp TokenTemp16{ "}", "", 5 };
+	vector<TokenTemp> input = { TokenTemp1, TokenTemp2, TokenTemp3, TokenTemp4, TokenTemp5, TokenTemp6, TokenTemp7, TokenTemp8, TokenTemp9, TokenTemp10, TokenTemp11, TokenTemp12,
+		TokenTemp13, TokenTemp14, TokenTemp15, TokenTemp16 };
 
 	RequireValidation(!Validate(input));
 }

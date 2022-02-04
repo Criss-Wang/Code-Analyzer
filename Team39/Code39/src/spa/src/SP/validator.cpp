@@ -6,7 +6,7 @@ using namespace std;
 
 #include "validator.h"
 
-bool Validate(vector<Token> input) {
+bool Validate(vector<TokenTemp> input) {
 
   string symbols[] = { "=", "<", ">", "(", ")", "+", "-", "*", "/", ";" };
   string statements[] = { "read", "print" };
