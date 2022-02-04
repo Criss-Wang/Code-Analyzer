@@ -2,6 +2,7 @@
 
 #include "tables/entity_tables.h"
 #include "tables/relation_tables.h"
+#include "pkb_exceptions.h"
 
 class Pkb {
   private:
@@ -31,5 +32,42 @@ class Pkb {
     //IndexTable* index_table_ = new IndexTable();
 
   public:
-    // TODO(Zhenlin): https://github.com/nus-cs3203/21s2-cp-spa-team-39/issues/20
+    enum class Identifier {
+      kAssign, kRead, kPrint, kConstant, kIf, kWhile,
+      kFollowsBy,kFollowsAfter, kFollowsByStar, kFollowsAfterStar,
+      kParent, kChild, kParentStar, kChildStar,
+      kUsesVarToStmt, kUsesStmtToVar, kModifiesVarToStmt, kModifiesStmtToVar
+    };
+    
+    template<typename T1, typename T2>
+    bool AddInfoToTable(const Identifier table_identifier, T1 key, T2 value) {
+      try {
+        switch (table_identifier) {
+          case Identifier::kAssign: return assign_table_->AddKeyValuePair(key, value);
+          case Identifier::kRead: return read_table_->AddKeyValuePair(key, value);
+          case Identifier::kPrint: return print_table_->AddKeyValuePair(key, value);
+          case Identifier::kConstant: return constant_table_->AddKeyValuePair(key, value);
+          case Identifier::kIf: return if_table_->AddKeyValuePair(key, value);
+          case Identifier::kWhile: return while_table_->AddKeyValuePair(key, value);
+          case Identifier::kFollowsBy: return follows_by_table_->AddKeyValuePair(key, value);
+          case Identifier::kFollowsAfter: return follows_after_table_->AddKeyValuePair(key, value);
+          case Identifier::kFollowsByStar: return follows_by_star_table_->AddKeyValuePair(key, value);
+          case Identifier::kFollowsAfterStar: return follows_after_star_table_->AddKeyValuePair(key, value);
+          case Identifier::kParent: return parent_table_->AddKeyValuePair(key, value);
+          case Identifier::kChild: return child_table_->AddKeyValuePair(key, value);
+          case Identifier::kParentStar: return parent_star_table_->AddKeyValuePair(key, value);
+          case Identifier::kChildStar: return child_star_table_->AddKeyValuePair(key, value);
+          case Identifier::kUsesVarToStmt: return uses_variable_to_stmts_table_->AddKeyValuePair(key, value);
+          case Identifier::kUsesStmtToVar: return uses_stmt_to_variables_table_->AddKeyValuePair(key, value);
+          case Identifier::kModifiesStmtToVar: return modifies_stmt_to_variables_table_->AddKeyValuePair(key, value);
+          case Identifier::kModifiesVarToStmt: return modifies_variable_to_stmts_table_->AddKeyValuePair(key, value);
+          default:
+            throw InvalidIdentifierException();
+        }
+      } catch (exception& e) {
+        return false;
+      }
+    }
+
+    int PopulateNestedRelationship();
 };

@@ -31,3 +31,12 @@ TEST_CASE("Read Table") {
     CHECK_THROWS(read_table->GetValueByKey(2));
   }
 }
+
+TEST_CASE("Add Key-value Pair into Tables") {
+  SECTION("Add item into table") {
+    auto pkb = Pkb();
+    const bool success = pkb.AddInfoToTable(Pkb::Identifier::kAssign, 2, "()");
+    REQUIRE(success == 1);
+    //REQUIRE(pkb.assign_table->GetValueByKey(2) == "()");
+  }
+}

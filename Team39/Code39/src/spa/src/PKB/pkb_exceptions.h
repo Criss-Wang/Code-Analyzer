@@ -18,3 +18,10 @@ class InvalidKeyException : public exception {
       return "Key does not exist in table";
     }
 };
+
+class InvalidIdentifierException : public exception {
+public:
+  const char* what() const throw() {
+    return "Invalid identifier given";
+  }
+};

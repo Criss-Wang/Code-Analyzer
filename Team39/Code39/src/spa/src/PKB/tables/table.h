@@ -15,7 +15,7 @@ class Table {
     unordered_map<T1, T2> table_;
 
   private:
-    bool keyExistsInTable(const T1 key) {
+    virtual bool KeyExistsInTable(const T1 key) {
       return table_.find(key) != table_.end();
     }
 
@@ -26,37 +26,32 @@ class Table {
       return static_cast<int>(table_.size());
     }
 
-    bool AddKeyValuePair(const T1 key, const T2 value) {
+    virtual bool AddKeyValuePair(T1 key, T2 value) {
       try {
-        if (this->keyExistsInTable(key)) {
-          throw new NonEmptyKeyException();
+        if (this->KeyExistsInTable(key)) {
+          throw NonEmptyKeyException();
         }
         table_[key] = value;
-        bool insert_success = table_[key] == value;
-        if (insert_success) {
+        if (table_[key] == value) {
           return true;
-        } else {
-          return false;
         }
+
+        return false;
       }
-      catch (exception e) {
+      catch (exception& e) {
         throw e;
       }
     }
 
-    T2 GetValueByKey(T1 key) {
+    virtual T2 GetValueByKey(T1 key) {
       try {
-        if (this->keyExistsInTable(key)) {
+        if (this->KeyExistsInTable(key)) {
           return table_[key];
-        } else {
-          throw new InvalidKeyException();
         }
+        throw InvalidKeyException();
       }
-      catch (exception e) {
+      catch (exception& e) {
         throw e;
       }
     }
 };
-
-// An
-//class IndexTable : public Table<string, Table*> {};
