@@ -8,7 +8,7 @@ using namespace std;
 #include "PKB/pkb.h"
 #include "Utility/TNode.h"
 
-int Parse () {
+int Parse() {
 
-	return 0;
+  return 0;
 }
