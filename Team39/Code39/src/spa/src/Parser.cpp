@@ -7,6 +7,7 @@ using namespace std;
 #include "Parser.h"
 #include "SP/validator.h"
 
+<<<<<<< HEAD
 void Parse(vector<Token> input) {
 
   /*
@@ -131,3 +132,9 @@ void Parse(vector<Token> input) {
     }
   }
 }
+=======
+int Parse() {
+
+  return 0;
+}
+>>>>>>> 91459c69eecf45cdca5b3c470bb29ccddf960d2e

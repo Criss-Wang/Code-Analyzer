@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "entity_table.h"
+using namespace std;
 
 template<typename T>
 class Results {

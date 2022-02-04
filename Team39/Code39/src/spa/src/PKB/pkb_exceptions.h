@@ -3,16 +3,18 @@
 #include <iostream>
 #include <list>
 
-#include "entity_table.h"
+using namespace std;
 
-/*
- exception class for pkb, not in use right now
- todo: discuss with zheng wei and the team about how to handle exceptions
- */
-class invalidargumentexception : public exception {
-  private:
-    static const string invalidstmtpropmsg = "invalid property index, expected values between " + to_string(StmtTable.assign_idx_) + " to " + to_string(StmtTable.while_idx_) + ".";
-
+class NonEmptyKeyException : public exception {
   public:
-    //invalidargumentexception
+    const char * what() const throw() {
+      return "Key is already in use";
+    }
+};
+
+class InvalidKeyException : public exception {
+  public:
+    const char * what() const throw() {
+      return "Key does not exist in table";
+    }
 };
