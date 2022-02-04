@@ -23,7 +23,7 @@ enum TokenType {
 	WHILE
 };
 
-static const char* tokenTypeStrings[] = {
+static const string tokenTypeStrings[] = {
 	"WHITESPACE",
 	"LETTER",
 	"DIGIT",
@@ -47,7 +47,7 @@ public:
 	string text { 0 };
 	int stmtNum = 1;
 		
-	void print() const;
+	string print();
 
 	void increaseStmtNum() {
 		stmtNum += 1;

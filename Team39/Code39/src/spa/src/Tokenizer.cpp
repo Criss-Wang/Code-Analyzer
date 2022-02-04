@@ -13,10 +13,18 @@ bool isSyntaxError = false;
 
 // Tokenizes a given source program  
 vector<Token> Tokenizer::parse(const string& sourceProgram) {
-	vector <Token> tokensList;
+	int curlyBracketsCount = 0; // 0 for syntactically correct program
+	int parenCount = 0;
+
+	vector<Token> tokensList;
 	Token currentToken;
+	Token prevToken;
 
 	for (char currChar : sourceProgram) {
+		if (isSyntaxError) {
+			return tokensList;
+		}
+
 		switch (currChar) {
 			// Digits
 			case '0':
@@ -39,21 +47,41 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
 
 			// Brackets
 			case '{':
+				if (prevToken.type == INTEGER || prevToken.type == DIGIT
+					|| prevToken.type == OPERATOR || prevToken.type == SEMICOLON) {
+					isSyntaxError = true;
+					continue;
+				}
+
 				if (currentToken.type != WHITESPACE) {
 					endToken(currentToken, tokensList);
 				}
+
 				currentToken.type = LEFT_CURLY;
 				currentToken.text.append(1, currChar);
 				endToken(currentToken, tokensList);
+				curlyBracketsCount++;
 				break;
 
 			case '}':
 				if (currentToken.type != WHITESPACE) {
 					endToken(currentToken, tokensList);
 				}
+
+				if (curlyBracketsCount <= 0) {
+					isSyntaxError = true;
+					continue;
+				}
+
 				currentToken.type = RIGHT_CURLY;
 				currentToken.text.append(1, currChar);
 				endToken(currentToken, tokensList);
+				curlyBracketsCount--;
+
+				if (curlyBracketsCount != 0 || parenCount != 0) {
+					isSyntaxError = true;
+					continue;
+				}
 				break;
 
 			case '(':
@@ -63,20 +91,29 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
 				currentToken.type = LEFT_PAREN;
 				currentToken.text.append(1, currChar);
 				endToken(currentToken, tokensList);
+				parenCount++;
 				break;
 
 			case ')':
 				if (currentToken.type != WHITESPACE) {
 					endToken(currentToken, tokensList);
 				}
+
+				if (parenCount <= 0) {
+					isSyntaxError = true;
+					continue;
+				}
+
 				currentToken.type = RIGHT_PAREN;
 				currentToken.text.append(1, currChar);
 				endToken(currentToken, tokensList);
+				parenCount--;
 				break;
 
 			// Space and tab
 			case ' ':
 			case '	': 
+				prevToken = currentToken;
 				endToken(currentToken, tokensList);
 				break;
 
@@ -89,22 +126,40 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
 			case '=':
 			case '<':
 			case '>':
-				if (currentToken.type != WHITESPACE) {
-					endToken(currentToken, tokensList);
+				if (prevToken.type != LETTER && prevToken.type != NAME
+					&& prevToken.type != DIGIT && prevToken.type != INTEGER
+					&& currentToken.type != RIGHT_PAREN) {
+					isSyntaxError = true;
+					continue;
 				}
+
+				endToken(currentToken, tokensList);
 				currentToken.type = OPERATOR;
 				currentToken.text.append(1, currChar);
-				endToken(currentToken, tokensList);
 				break;
 
 			// Semicolon
 			case ';':
+				if (currentToken.type == OPERATOR || currentToken.type == LEFT_CURLY
+					|| currentToken.type == LEFT_PAREN) {
+					isSyntaxError = true;
+					continue;
+				} 
+
+				if (currentToken.type == WHITESPACE) {
+					if (prevToken.type == OPERATOR || prevToken.type == LEFT_CURLY
+						|| prevToken.type == LEFT_PAREN) {
+						isSyntaxError = true;
+						continue;
+					}
+				}
+
 				if (currentToken.type != WHITESPACE) {
 					endToken(currentToken, tokensList);
 				}
+
 				currentToken.type = SEMICOLON;
 				currentToken.text.append(1, currChar);
-				endToken(currentToken, tokensList);
 				currentToken.increaseStmtNum();
 				break;
 
@@ -120,7 +175,6 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
 					isSyntaxError = true;
 					continue;
 				} 
-					
 				break;
 		}
 	}
@@ -134,9 +188,11 @@ void Tokenizer::endToken(Token &token, vector<Token> &tokensList) {
 	if (token.type == NAME) {
 		checkStmtType(token);
 	}
+
 	if (token.type != WHITESPACE) {	
 		tokensList.push_back(token);
 	}
+
 	token.type = WHITESPACE;
 	token.text.erase();
 }
@@ -153,8 +209,10 @@ void Tokenizer::checkStmtType(Token &token) {
 	}
 }
 
-void Token::print() const {
+string Token::print() {
 	if (!isSyntaxError) {
-		cout << tokenTypeStrings[type] << ", \"" << text << "\", " << stmtNum << endl;
+		string output = tokenTypeStrings[type] + ", \"" + text + "\", " + to_string(stmtNum);
+		cout << output << endl;
+		return output;
 	}
 }
