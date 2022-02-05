@@ -6,7 +6,7 @@
 using namespace std;
 
 
-#include "PKB.h"
+#include "PKB/pkb.h"
 
 int DesignExtractor () {
 	return 0;
