@@ -59,6 +59,11 @@ class Pkb {
     unordered_set<string> procedure_set_;
     unordered_set<set<int>, HashFunction> stmt_list_set_;
 
+    void PopulateNestedFollows();
+    void PopulateNestedParents();
+    void PopulateUses();
+    void PopulateModifies();
+
   public:
     enum class TableIdentifier {
       kAssign, kRead, kPrint, kConstant, kIf, kWhile,
@@ -76,152 +81,21 @@ class Pkb {
      * Generic function which passes generic variable types into a function of a fixed-typed class object is not accepted.
      */
      // TODO(Zhenlin): [Implementation] If we don't want empty value, we should add a checker and throw exception when T2 Value is empty (invalid)
-    bool AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<int>& value) {
-      try {
-        if (value.empty()) throw InvalidValueException();
-        switch (table_identifier) {
-          case TableIdentifier::kConstant: return constant_table_->AddKeyValuePair(key, value);
-          case TableIdentifier::kParent: {
-            bool add_success = parent_table_->AddKeyValuePair(key, value);
-            for (const auto child: value) {
-              add_success = child_table_->AddKeyValuePair(child, { key }) && add_success;
-            } 
-            return add_success;
-          }
-          default:
-            throw InvalidIdentifierException();
-        }
-      } catch (exception& e) {
-        return false;
-      }
-    }
-
-    bool AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<string>& value) {
-      try {
-        if (value.empty()) throw InvalidValueException();
-        switch (table_identifier) {
-          case TableIdentifier::kIf: return if_table_->AddKeyValuePair(key, value);
-          case TableIdentifier::kWhile: return while_table_->AddKeyValuePair(key, value);
-          case TableIdentifier::kModifiesStmtToVar: {
-            bool add_success = modifies_stmt_to_variables_table_->AddKeyValuePair(key, value);
-            add_success = add_success && modifies_variable_to_stmts_table_->UpdateKeyValuePair(key, value);
-            return add_success;
-          }
-          default:
-            throw InvalidIdentifierException();
-        }
-      } catch (exception& e) {
-        return false;
-      }
-    }
-
-    bool AddInfoToTable(const TableIdentifier table_identifier, const int key, const int value) {
-      try {
-        if (value < 1) throw InvalidValueException();
-        switch (table_identifier) {
-          case TableIdentifier::kFollowsBy: return follows_by_table_->AddKeyValuePair(key, value);
-          case TableIdentifier::kFollowsAfter: return follows_after_table_->AddKeyValuePair(key, value);
-        default:
-          throw InvalidIdentifierException();
-        }
-      } catch (exception& e) {
-        return false;
-      }
-    }
-
-    bool AddInfoToTable(const TableIdentifier table_identifier, const int key, const string& value) {
-      try {
-        if (value.empty()) throw InvalidValueException();
-        switch (table_identifier) {
-          case TableIdentifier::kAssign: return assign_table_->AddKeyValuePair(key, value);
-          case TableIdentifier::kRead: return read_table_->AddKeyValuePair(key, value);
-          case TableIdentifier::kPrint: return print_table_->AddKeyValuePair(key, value);
-        default:
-          throw InvalidIdentifierException();
-        }
-      } catch (exception& e) {
-        return false;
-      }
-    }
+    bool AddInfoToTable(TableIdentifier table_identifier, int key, const vector<int>& value);
+    bool AddInfoToTable(TableIdentifier table_identifier, int key, const vector<string>& value);
+    bool AddInfoToTable(TableIdentifier table_identifier, int key, int value);
+    bool AddInfoToTable(TableIdentifier table_identifier, int key, const string& value);
 
     // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
     // Will fill in the test cases after optimization
-    bool AddEntityToSet(const EntityIdentifier table_identifier, int entity_val) {
-      try {
-        switch (table_identifier) {
-          case EntityIdentifier::kStmt: {
-            stmt_set_.insert(entity_val);
-            return true;
-          }
-          case EntityIdentifier::kAssign: {
-            assign_set_.insert(entity_val);
-            return true;
-          }
-          case EntityIdentifier::kRead: {
-            read_set_.insert(entity_val);
-            return true;
-          }
-          case EntityIdentifier::kPrint: {
-            print_set_.insert(entity_val);
-            return true;
-          }
-          case EntityIdentifier::kCall: {
-            call_set_.insert(entity_val);
-            return true;
-          }
-          case EntityIdentifier::kConstant: {
-            constant_set_.insert(entity_val);
-            return true;
-          }
-          default:
-            throw InvalidIdentifierException();
-        }
-      } catch (exception& e) {
-        return false;
-      }
-    }
+    bool AddEntityToSet(const EntityIdentifier table_identifier, int entity_val);
+    bool AddEntityToSet(const EntityIdentifier table_identifier, const string& entity_val);
+    bool AddEntityToSet(const EntityIdentifier table_identifier, const set<int>& entity_val);
 
-    bool AddEntityToSet(const EntityIdentifier table_identifier, const string& entity_val) {
-      try {
-        switch (table_identifier) {
-          case EntityIdentifier::kVariable: {
-            variable_set_.insert(entity_val);
-            return true;
-          }
-          case EntityIdentifier::kProc: {
-            procedure_set_.insert(entity_val);
-            return true;
-          }
-          default:
-            throw InvalidIdentifierException();
-        }
-      } catch (exception& e) {
-        return false;
-      }
-    }
-
-    bool AddEntityToSet(const EntityIdentifier table_identifier, const set<int>& entity_val) {
-      try {
-        switch (table_identifier) {
-          case EntityIdentifier::kStmtLst: {
-            stmt_list_set_.insert(entity_val);
-            return true;
-          }
-          default:
-            throw InvalidIdentifierException();
-        }
-      } catch (exception& e) {
-        return false;
-      }
-    }
-
+    // Populate the nested relationships using the tables storing basic information/relationships about entities
     int PopulateNestedRelationship();
 
-    void PopulateNestedFollows();
-    void PopulateNestedParents();
-    void PopulateUses();
-    void PopulateModifies();
-
+    // Basic Relationship utility APIs
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
     [[nodiscard]] bool IsTransitiveParent(int stmt_1, int stmt_2) const;
     [[nodiscard]] int GetParent(int stmt) const;
@@ -229,35 +103,8 @@ class Pkb {
     [[nodiscard]] vector<int> GetChild(int stmt) const;
     [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
 
-    unordered_set<int> GetAllEntityInt(const EntityIdentifier table_identifier) {
-      switch (table_identifier) {
-        case EntityIdentifier::kStmt: return stmt_set_;
-        case EntityIdentifier::kAssign: return assign_set_;
-        case EntityIdentifier::kRead: return read_set_;
-        case EntityIdentifier::kPrint: return print_set_;
-        case EntityIdentifier::kCall: return call_set_;
-        case EntityIdentifier::kConstant: return constant_set_;
-        default:
-          throw InvalidIdentifierException();
-      }
-    }
-
-    unordered_set<string> GetAllEntityString(const EntityIdentifier table_identifier) {
-      switch (table_identifier) {
-        case EntityIdentifier::kVariable: return variable_set_;
-        case EntityIdentifier::kProc: return procedure_set_;
-        default:
-          throw InvalidIdentifierException();
-      }
-    }
-
-    unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier table_identifier) {
-      switch (table_identifier) {
-        case EntityIdentifier::kStmtLst: return stmt_list_set_;
-        default:
-          throw InvalidIdentifierException();
-      }
-    }
-
-    
+    // Get All the items of a certain entity type
+    unordered_set<int> GetAllEntityInt(const EntityIdentifier table_identifier);
+    unordered_set<string> GetAllEntityString(const EntityIdentifier table_identifier);
+    unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier table_identifier);
 };
