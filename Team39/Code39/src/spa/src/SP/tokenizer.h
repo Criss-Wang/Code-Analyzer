@@ -44,13 +44,17 @@ static const string tokenTypeStrings[] = {
 class Token {
   public:
     enum TokenType type { WHITESPACE }; // Initialised to WHITESPACE
-    string text { 0 };
+    string text = "";
     int stmt_num_ = 1;
     
     string print();
 
     void increaseStmtNum() {
       stmt_num_ += 1;
+    }
+
+    bool operator==(const Token& t) const {
+      return t.type == type && t.text == text;
     }
 };
 

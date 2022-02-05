@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "Tokenizer.h"
+#include "tokenizer.h"
 
 using namespace std; 
 
@@ -103,6 +103,7 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
       // Space and tab
       case ' ':
       case '	': 
+      case '\n':
         prev_token = current_token;
         endToken(current_token, tokens_list);
         break;
@@ -147,6 +148,7 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
 
         current_token.type = SEMICOLON;
         current_token.text.append(1, currChar);
+        endToken(current_token, tokens_list);
         current_token.increaseStmtNum();
         break;
 
