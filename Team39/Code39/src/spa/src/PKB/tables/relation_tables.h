@@ -39,4 +39,7 @@ class UsesVariableToStmtsTable : public Table<string, vector<int>> {};
 class ModifiesStmtToVariablesTable : public Table<int, vector<string>> {};
 
 // Variables will be the key and the corresponding line number will be the value
-class ModifiesVariableToStmtsTable : public Table<string, vector<int>> {};
+class ModifiesVariableToStmtsTable : public Table<string, vector<int>> {
+  public:
+    bool UpdateKeyValuePair(int value_to_update, const vector<string>& keys);
+};

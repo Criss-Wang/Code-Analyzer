@@ -80,4 +80,23 @@ TEST_CASE("Add Key-value Pair into Tables") {
     success = pkb.AddInfoToTable(Pkb::TableIdentifier::kAssign, 2, 2);
     REQUIRE(success == 0);
   }
+
+  SECTION("Add item into table: invalid value") {
+    auto pkb = Pkb();
+    vector<int> value_1 = {};
+    bool success = pkb.AddInfoToTable(Pkb::TableIdentifier::kConstant, 2, value_1);
+    REQUIRE(success == 0);
+
+    vector<string> value_2 = {};
+    success = pkb.AddInfoToTable(Pkb::TableIdentifier::kIf, 2, value_2);
+    REQUIRE(success == 0);
+
+    int value_3 = -1;
+    success = pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsBy, 2, value_3);
+    REQUIRE(success == 0);
+
+    string value_4;
+    success = pkb.AddInfoToTable(Pkb::TableIdentifier::kAssign, 2, value_4);
+    REQUIRE(success == 0);
+  }
 }

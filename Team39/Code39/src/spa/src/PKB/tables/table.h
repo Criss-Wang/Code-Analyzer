@@ -13,14 +13,15 @@ template <typename T1, typename T2>
 class Table {
   protected:
     unordered_map<T1, T2> table_;
-
-  private:
     virtual bool KeyExistsInTable(const T1 key) {
       return table_.find(key) != table_.end();
     }
 
+
+  private:
   public:
     ~Table() = default;
+
 
     int GetTableSize() {
       return static_cast<int>(table_.size());
@@ -69,5 +70,17 @@ class Table {
         val_set.push_back(value);
       }
       return val_set;
+    }
+
+    virtual bool SetKeyValuePair(T1 key, T2 value) {
+      try {
+        if (!this->KeyExistsInTable(key)) {
+          return AddKeyValuePair(key, value);
+        }
+        table_[key] = value;
+        return true;
+      } catch (exception& e) {
+        return false;
+      }
     }
 };

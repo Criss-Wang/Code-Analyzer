@@ -7,6 +7,21 @@
 #include "tables/relation_tables.h"
 #include "pkb_exceptions.h"
 
+// Custom hash function from https://www.geeksforgeeks.org/unordered-set-of-vectors-in-c-with-examples/
+struct HashFunction {
+  size_t operator()(const set<int>
+    & my_vector) const {
+    std::hash<int> hasher;
+    size_t answer = 0;
+
+    for (int i : my_vector) {
+      answer ^= hasher(i) + 0x9e3779b9 +
+        (answer << 6) + (answer >> 2);
+    }
+    return answer;
+  }
+};
+
 class Pkb {
   private:
     // Entity tables
@@ -40,9 +55,9 @@ class Pkb {
     unordered_set<int> if_set_;
     unordered_set<int> while_set_;
     unordered_set<int> constant_set_;
-    unordered_set<set<int>> stmt_list_set_;
     unordered_set<string> variable_set_;
     unordered_set<string> procedure_set_;
+    unordered_set<set<int>, HashFunction> stmt_list_set_;
 
   public:
     enum class TableIdentifier {
@@ -60,12 +75,19 @@ class Pkb {
      * In the following, we implement 5 overloaded APIs to add key value information pairs to pkb tables.
      * Generic function which passes generic variable types into a function of a fixed-typed class object is not accepted.
      */
+     // TODO(Zhenlin): [Implementation] If we don't want empty value, we should add a checker and throw exception when T2 Value is empty (invalid)
     bool AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<int>& value) {
       try {
+        if (value.empty()) throw InvalidValueException();
         switch (table_identifier) {
           case TableIdentifier::kConstant: return constant_table_->AddKeyValuePair(key, value);
-          case TableIdentifier::kParent: return parent_table_->AddKeyValuePair(key, value);
-          case TableIdentifier::kChild: return child_table_->AddKeyValuePair(key, value);
+          case TableIdentifier::kParent: {
+            bool add_success = parent_table_->AddKeyValuePair(key, value);
+            for (const auto child: value) {
+              add_success = child_table_->AddKeyValuePair(child, { key }) && add_success;
+            } 
+            return add_success;
+          }
           default:
             throw InvalidIdentifierException();
         }
@@ -76,9 +98,15 @@ class Pkb {
 
     bool AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<string>& value) {
       try {
+        if (value.empty()) throw InvalidValueException();
         switch (table_identifier) {
           case TableIdentifier::kIf: return if_table_->AddKeyValuePair(key, value);
           case TableIdentifier::kWhile: return while_table_->AddKeyValuePair(key, value);
+          case TableIdentifier::kModifiesStmtToVar: {
+            bool add_success = modifies_stmt_to_variables_table_->AddKeyValuePair(key, value);
+            add_success = add_success && modifies_variable_to_stmts_table_->UpdateKeyValuePair(key, value);
+            return add_success;
+          }
           default:
             throw InvalidIdentifierException();
         }
@@ -89,6 +117,7 @@ class Pkb {
 
     bool AddInfoToTable(const TableIdentifier table_identifier, const int key, const int value) {
       try {
+        if (value < 1) throw InvalidValueException();
         switch (table_identifier) {
           case TableIdentifier::kFollowsBy: return follows_by_table_->AddKeyValuePair(key, value);
           case TableIdentifier::kFollowsAfter: return follows_after_table_->AddKeyValuePair(key, value);
@@ -102,6 +131,7 @@ class Pkb {
 
     bool AddInfoToTable(const TableIdentifier table_identifier, const int key, const string& value) {
       try {
+        if (value.empty()) throw InvalidValueException();
         switch (table_identifier) {
           case TableIdentifier::kAssign: return assign_table_->AddKeyValuePair(key, value);
           case TableIdentifier::kRead: return read_table_->AddKeyValuePair(key, value);
@@ -116,7 +146,7 @@ class Pkb {
 
     // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
     // Will fill in the test cases after optimization
-    bool AddEntityToSet(const EntityIdentifier table_identifier, const int entity_val) {
+    bool AddEntityToSet(const EntityIdentifier table_identifier, int entity_val) {
       try {
         switch (table_identifier) {
           case EntityIdentifier::kStmt: {
@@ -192,12 +222,12 @@ class Pkb {
     void PopulateUses();
     void PopulateModifies();
 
-    bool IsParent(int stmt_1, int stmt_2);
-    bool IsTransitiveParent(int stmt_1, int stmt_2);
-    int GetParent(int stmt);
-    vector<int> GetAllParents(int stmt);
-    vector<int> GetChild(int stmt);
-    vector<int> GetAllChildren(int stmt);
+    [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
+    [[nodiscard]] bool IsTransitiveParent(int stmt_1, int stmt_2) const;
+    [[nodiscard]] int GetParent(int stmt) const;
+    [[nodiscard]] vector<int> GetAllParents(int stmt) const;
+    [[nodiscard]] vector<int> GetChild(int stmt) const;
+    [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
 
     unordered_set<int> GetAllEntityInt(const EntityIdentifier table_identifier) {
       switch (table_identifier) {
@@ -221,7 +251,7 @@ class Pkb {
       }
     }
 
-    unordered_set<set<int>> GetAllEntityStmtLst(const EntityIdentifier table_identifier) {
+    unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier table_identifier) {
       switch (table_identifier) {
         case EntityIdentifier::kStmtLst: return stmt_list_set_;
         default:
