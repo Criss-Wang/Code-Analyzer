@@ -54,4 +54,20 @@ class Table {
         throw e;
       }
     }
+
+    virtual vector<T1> GetKeyLst() {
+      vector<T1> key_set;
+      for (const auto& [key, value]: table_) {
+        key_set.push_back(key);
+      }
+      return key_set;
+    }
+
+    virtual vector<T2> GetValueLst() {
+      vector<T2> val_set;
+      for (const auto& [key, value] : table_) {
+        val_set.push_back(value);
+      }
+      return val_set;
+    }
 };
