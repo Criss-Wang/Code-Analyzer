@@ -131,8 +131,6 @@ namespace pql {
 
         pql::Synonym GetResultSynonym();
 
-        bool IsStatement(const std::string& name);
-
         bool IsProcedure(const std::string& name);
 
         void AddSuchThatClause(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right);

@@ -71,15 +71,6 @@ namespace pql {
         return *Query::result_synonym;
     }
 
-    bool Query::IsStatement(const std::string& name) {
-        for (Synonym sm : Query::statements) {
-            if (sm.GetName() == name) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     bool Query::IsProcedure(const std::string& name) {
         for (Synonym sm : Query::procedures) {
             if (sm.GetName() == name) {
