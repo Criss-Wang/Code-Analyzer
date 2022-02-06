@@ -21,7 +21,7 @@ TEST_CASE("Test populate PKB") {
 	*	print y;
 	* }
 	* */
-	ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/validation_tests/test1.txt");
+	ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test1.txt");
 	if (!input_file.is_open()) {
 		cerr << "Could not open the file " << endl;
 		RequirePopulation(1 == 1);
@@ -44,7 +44,7 @@ TEST_CASE("Test populate PKB 2") {
 	* }
 	* */
 
-	ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/validation_tests/test2.txt");
+	ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test2.txt");
 	if (!input_file.is_open()) {
 		cerr << "Could not open the file " << endl;
 		RequirePopulation(1 == 1);
