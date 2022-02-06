@@ -118,8 +118,7 @@ namespace pql {
     private:
         std::vector<pql::Synonym> declarations;
         std::map<std::string, pql::Synonym> synonyms;
-        std::vector<pql::Synonym> statements;
-        std::vector<pql::Synonym> procedures;
+        std::vector<pql::Synonym> used_synonyms;
         std::optional<pql::Synonym> result_synonym;
         std::vector<RelationshipToken> such_that_clauses;
     public:
@@ -130,6 +129,10 @@ namespace pql {
         void SetResultSynonym(const std::string& name);
 
         pql::Synonym GetResultSynonym();
+
+        void AddUsedSynonym(const std::string& name);
+
+        std::vector<pql::Synonym> GetAllUsedSynonyms();
 
         bool IsProcedure(const std::string& name);
 

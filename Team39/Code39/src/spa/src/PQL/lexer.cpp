@@ -102,6 +102,7 @@ namespace pql {
                     std::cout << "The synonym used in a relationship must be declared" << std::endl;
                 }
             }
+            q.AddUsedSynonym(ref);
         }
         return ref;
     }
