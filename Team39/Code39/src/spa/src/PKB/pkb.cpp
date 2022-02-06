@@ -151,9 +151,9 @@ bool Pkb::IsTransitiveParent(const int stmt_1, const int stmt_2) const {
   return find(parent_stmt_lst.begin(), parent_stmt_lst.end(), stmt_1) != parent_stmt_lst.end();
 }
 
-int Pkb::GetParent(const int stmt) const {
+vector<int> Pkb::GetParent(const int stmt) const {
   const vector<int> parent_stmt_lst = child_table_->GetValueByKey(stmt);
-  return parent_stmt_lst[0];
+  return {parent_stmt_lst[0]};
 }
 
 vector<int> Pkb::GetAllParents(const int stmt) const {
