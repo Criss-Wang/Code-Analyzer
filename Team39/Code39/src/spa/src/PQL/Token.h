@@ -138,6 +138,6 @@ namespace pql {
 
         void AddSuchThatClause(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right);
 
-        std::vector<RelationshipToken> GetSuchThatClauses();
+        std::vector<RelationshipToken> GetSuchThatClause();
     };
 }
