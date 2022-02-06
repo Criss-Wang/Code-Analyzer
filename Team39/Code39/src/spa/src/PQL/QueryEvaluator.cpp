@@ -10,24 +10,30 @@
 using namespace std;
 
 #include "../PKB/pkb.h"
+#include "Token.h"
+
 
 namespace pql {
     list<int> Intersect(const list<int>& lst1, const vector<int>& lst2);
     void UpdateHashmap(unordered_map<string, list<int>>& hmap, string name, const vector<int>& lst);
     bool IsNumber(const string& str);
 
-    list<string> evaluate(Query query) {
+    bool GetRelExist(RelationshipToken& token, Pkb& pkb);
+    vector<int> GetRelDomain(RelationshipToken& token, Pkb& pkb);
+    vector<int> GetInverseRelDomain(RelationshipToken& token, Pkb& pkb);
+
+    list<string> evaluate(Query query, Pkb pkb) {
         vector<RelationshipToken> suchThatClauses = query.GetSuchThatClause();
         unordered_map<string, list<int>> hashmap;
         vector<Synonym> synonyms = query.GetAllUsedSynonyms();
 
         //hashmap stores <synonym.name, domain> pair.
-        for (const Synonym& synonym : synonyms) {
-            hashmap.insert({ synonym.GetName(), pkb::getAllEntity(synonym.GetDeclaration()) });
+        for (Synonym& synonym : synonyms) {
+            hashmap.insert({ synonym.GetName(), pkb.GetAllEntityInt(synonym.GetDeclaration()) });
         }
 
         if (false) {
-            //this is for pattern clauses, havent implemented yet from parser side
+            //this is for pattern clauses, haven't implemented yet from parser side
             /*
             Synonym s = patternClause.getSynonym();
             list<int> matched;
@@ -50,11 +56,11 @@ namespace pql {
             */
         }
 
-        for (const RelationshipToken& token : suchThatClauses) {
+        for (RelationshipToken& token : suchThatClauses) {
             bool isLeftNum = IsNumber(token.GetLeft());
             bool isRightNum = IsNumber(token.GetRight());
             if (isLeftNum && isRightNum) {
-                bool relDoesExist = GetRelExist(token);
+                bool relDoesExist = GetRelExist(token, pkb);
                 if (!relDoesExist) {
                     //the relationship does not exist
                     //return empty list
@@ -62,12 +68,12 @@ namespace pql {
                     return res;
                 }
             } else if (isLeftNum) {
-                vector<int> relDomain = GetRelDomain(token);
+                vector<int> relDomain = GetRelDomain(token, pkb);
                 string name = token.GetRight();
 
                 if (name == "_") {
                     //there's no synonym involved
-                    //just need to check whether the relDomain is emtpty
+                    //just need to check whether the relDomain is empty
                     if (relDomain.empty()) {
                         list<string> res{};
                         return res;
@@ -82,12 +88,12 @@ namespace pql {
                 }
                 
             } else if (isRightNum) {
-                vector<int> relDomain = GetInverseRelDomain(token);
+                vector<int> relDomain = GetInverseRelDomain(token, pkb);
                 string name = token.GetRight();
 
                 if (name == "_") {
                     //there's no synonym involved
-                    //just need to check whether the relDomain is emtpty
+                    //just need to check whether the relDomain is empty
                     if (relDomain.empty()) {
                         list<string> res{};
                         return res;
@@ -149,22 +155,22 @@ namespace pql {
         return true;
     }
 
-    bool GetRelExist(const RelationshipToken& token) {
+    bool GetRelExist(RelationshipToken& token, Pkb& pkb) {
         int left = stoi(token.GetLeft());
         int right = stoi(token.GetRight());
         bool res = false;
         switch (token.GetRelationship()) {
-            case RelationshipTypes::FOLLOWS:
-                res = pkb::IsFollows(left, right);
+            case RelationshipTypes::kFollows:
+                res = pkb.IsFollows(left, right);
                 break;
-            case RelationshipTypes::FOLLOWS_T:
-                res = pkb::IsTransitiveFollows(left, right);
+            case RelationshipTypes::kFollowsT:
+                res = pkb.IsTransitiveFollows(left, right);
                 break;
-            case RelationshipTypes::PARENT:
-                res = pkb::IsParent(left, right);
+            case RelationshipTypes::kParent:
+                res = pkb.IsParent(left, right);
                 break;
-            case RelationshipTypes::PARENT_T:
-                res = pkb::IsTransitiveParent(left, right);
+            case RelationshipTypes::kParentT:
+                res = pkb.IsTransitiveParent(left, right);
                 break;
             default:
                 break;
@@ -173,21 +179,21 @@ namespace pql {
         return res;
     }
 
-    bool GetRelDomain(const RelationshipToken& token) {
+    vector<int> GetRelDomain(RelationshipToken& token, Pkb& pkb) {
         int left = stoi(token.GetLeft());
         vector<int> res;
         switch (token.GetRelationship()) {
-            case RelationshipTypes::FOLLOWS:
-                res.push_back(pkb::GetStmtRightBefore(left));
+            case RelationshipTypes::kFollows:
+                res.push_back(pkb.GetStmtRightBefore(left));
                 break;
-            case RelationshipTypes::FOLLOWS_T:
-                res = pkb::GetStmtBefore(left);
+            case RelationshipTypes::kFollowsT:
+                res = pkb.GetStmtsBefore(left);
                 break;
-            case RelationshipTypes::PARENT:
-                res.push_back(pkb::GetParent(left));
+            case RelationshipTypes::kParent:
+                res.push_back(pkb.GetParent(left));
                 break;
-            case RelationshipTypes::PARENT_T:
-                res = pkb::GetAllParents(left);
+            case RelationshipTypes::kParentT:
+                res = pkb.GetAllParents(left);
                 break;
             default:
                 break;
@@ -196,21 +202,21 @@ namespace pql {
         return res;
     }
 
-    bool GetInverseRelDomain(const RelationshipToken& token) {
+    vector<int> GetInverseRelDomain(RelationshipToken& token, Pkb& pkb) {
         int right = stoi(token.GetRight());
         vector<int> res;
         switch (token.GetRelationship()) {
-        case RelationshipTypes::FOLLOWS:
-            res.push_back(pkb::GetStmtRightAfter(right));
+        case RelationshipTypes::kFollows:
+            res.push_back(pkb.GetStmtRightAfter(right));
             break;
-        case RelationshipTypes::FOLLOWS_T:
-            res = pkb::GetStmtAfter(right);
+        case RelationshipTypes::kFollowsT:
+            res = pkb.GetStmtsAfter(right);
             break;
-        case RelationshipTypes::PARENT:
-            res = pkb::GetChild(right);
+        case RelationshipTypes::kParent:
+            res = pkb.GetChild(right);
             break;
-        case RelationshipTypes::PARENT_T:
-            res = pkb::GetAllChildren(right);
+        case RelationshipTypes::kParentT:
+            res = pkb.GetAllChildren(right);
             break;
         default:
             break;
