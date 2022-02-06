@@ -22,13 +22,21 @@ void Pkb::PopulateNestedParents() {
     queue<int> q;
     q.push(key);
     while (!q.empty()) {
+      if (!parent_table_->KeyExistsInTable(q.front())) {
+        q.pop();
+        continue;
+      }
       for (auto child_key: parent_table_->GetValueByKey(q.front())) {
         current_key_child_lst.push_back(child_key);
         q.push(child_key);
       }
       q.pop();
     }
-    parent_star_table_->AddKeyValuePair(key, current_key_child_lst);
+    if (parent_star_table_->KeyExistsInTable(key)) {
+      parent_star_table_->UpdateKeyWithNewValue(key, current_key_child_lst);
+    } else {
+      parent_star_table_->AddKeyValuePair(key, current_key_child_lst);
+    }
   }
 
   // Populate the reverse nested relationships
@@ -37,28 +45,42 @@ void Pkb::PopulateNestedParents() {
     queue<int> q;
     q.push(key);
     while (!q.empty()) {
+      if (!child_table_->KeyExistsInTable(q.front())) {
+        q.pop();
+        continue;
+      }
       for (auto parent_key : child_table_->GetValueByKey(q.front())) {
         current_key_parent_lst.push_back(parent_key);
         q.push(parent_key);
       }
       q.pop();
     }
-    child_star_table_->AddKeyValuePair(key, current_key_parent_lst);
+    if (child_star_table_->KeyExistsInTable(key)) {
+      child_star_table_->UpdateKeyWithNewValue(key, current_key_parent_lst);
+    } else {
+      child_star_table_->AddKeyValuePair(key, current_key_parent_lst);
+    }
   }
 }
 
 void Pkb::PopulateModifies() {
   for (const auto parent_stmt: parent_star_table_->GetKeyLst()) {
-    const vector<string> current_stmt_modifies_lst = modifies_stmt_to_variables_table_->GetValueByKey(parent_stmt);
+    vector<string> current_stmt_modifies_lst;
+    if (modifies_stmt_to_variables_table_->KeyExistsInTable(parent_stmt)) {
+      current_stmt_modifies_lst = modifies_stmt_to_variables_table_->GetValueByKey(parent_stmt);
+    }
     vector<string> tmp_lst(current_stmt_modifies_lst);
     for (const auto child_stmt: parent_star_table_->GetValueByKey(parent_stmt)) {
-      vector<string> child_stmt_modifies_lst = modifies_stmt_to_variables_table_->GetValueByKey(child_stmt);
+      vector<string> child_stmt_modifies_lst;
+      if (!modifies_stmt_to_variables_table_->KeyExistsInTable(child_stmt)) continue;
+      child_stmt_modifies_lst = modifies_stmt_to_variables_table_->GetValueByKey(child_stmt);
       // Merge two vectors
       tmp_lst.insert(tmp_lst.end(), child_stmt_modifies_lst.begin(), child_stmt_modifies_lst.end());
       // Remove duplicate elements
       sort(tmp_lst.begin(), tmp_lst.end());
       tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
     }
+    if (tmp_lst.empty()) return;
     bool success = modifies_stmt_to_variables_table_->UpdateKeyWithNewValue(parent_stmt, tmp_lst);
   }
 
@@ -73,7 +95,10 @@ void Pkb::PopulateModifies() {
       sort(tmp_lst.begin(), tmp_lst.end());
       tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
     }
+    if (tmp_lst.empty()) return;
+    bool success = modifies_variable_to_stmts_table_->UpdateKeyWithNewValue(var, tmp_lst);
   }
+
 }
 
 void Pkb::PopulateNestedFollows() {

@@ -113,6 +113,24 @@ TEST_CASE("Populate Table") {
 
     REQUIRE(populate_success == 1);
     REQUIRE(pkb.IsTransitiveParent(1, 4) == 1);
+    REQUIRE(pkb.IsParent(2, 5) == 0);
+    REQUIRE(pkb.IsParent(5, 2) == 0);
+    REQUIRE(pkb.GetParent(2) == 1);
+    REQUIRE(pkb.GetParent(4) == 3);
+    REQUIRE(pkb.GetAllParents(4)[1] == 1);
+    REQUIRE(pkb.GetChild(3)[2] == 6);
+    REQUIRE(pkb.GetAllChildren(1)[0] == 2);
+
+    const vector<string> value_3 = { "x" };
+    const vector<string> value_4 = { "y" };
+    const bool success_3 = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 2, value_3);
+    const bool success_4 = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 4, value_4);
+    const int populate_success_2 = pkb.PopulateNestedRelationship();
+
+    REQUIRE(populate_success_2 == 1);
   }
 }
 
+TEST_CASE("Add entity items") {
+  
+}
