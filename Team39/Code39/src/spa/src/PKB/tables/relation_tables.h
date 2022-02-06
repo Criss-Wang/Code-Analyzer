@@ -33,7 +33,10 @@ class ChildStarTable : public Table<int, vector<int>> {};
 class UsesStmtToVariablesTable : public Table<int, vector<string>> {};
 
 // Variables will be the key and the corresponding line number will be the value
-class UsesVariableToStmtsTable : public Table<string, vector<int>> {};
+class UsesVariableToStmtsTable : public Table<string, vector<int>> {
+  public:
+    bool UpdateKeyValuePair(int value_to_update, const vector<string>& keys);
+};
 
 // Line number will be the key and the list of variables modified will be the value
 class ModifiesStmtToVariablesTable : public Table<int, vector<string>> {};
