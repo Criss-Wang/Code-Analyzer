@@ -3,19 +3,20 @@
 //
 
 #include <iostream>
+
 #include "Token.h"
 
-namespace PQL {
+namespace pql {
 
-    variable RelationshipToken::getLeft() {
+    pql::Variable RelationshipToken::GetLeft() {
         return RelationshipToken::left;
     }
 
-    variable RelationshipToken::getRight() {
+    pql::Variable RelationshipToken::GetRight() {
         return RelationshipToken::right;
     }
 
-    void Query::addSynonym(DeclarationTypes d, const PQL::synonym& s) {
+    void Query::AddSynonym(DeclarationTypes d, const pql::Synonym& s) {
         Query::declarations.at(d).push_back(s);
         if (d == DeclarationTypes::PROCEDURE) {
             Query::procedures.push_back(s);
@@ -24,48 +25,48 @@ namespace PQL {
         }
     }
 
-    void Query::setResultSynonym(const PQL::synonym& s) {
-        if (Query::isProcedure(s) or Query::isStatement(s)) {
-            Query::resultSynonym = s;
+    void Query::SetResultSynonym(const pql::Synonym& s) {
+        if (Query::IsProcedure(s) or Query::IsStatement(s)) {
+            Query::result_synonym = s;
         } else {
             try {
                 throw ParseException();
             } catch (ParseException& e) {
-                std::cout << ParseException::getErrorMessage("The select synonym must be declared first!") << std::endl;
+                std::cout << ParseException::GetErrorMessage("The select synonym must be declared first!") << std::endl;
             }
         }
     }
 
-    synonym Query::getResultSynonym() {
-        return Query::resultSynonym;
+    pql::Synonym Query::GetResultSynonym() {
+        return Query::result_synonym;
     }
 
-    bool Query::isStatement(const PQL::synonym& s) {
+    bool Query::IsStatement(const pql::Synonym& s) {
         return (std::find(Query::statements.begin(), Query::statements.end(), s) != Query::statements.end());
     }
 
-    bool Query::isProcedure(const PQL::synonym& s) {
+    bool Query::IsProcedure(const pql::Synonym& s) {
         return (std::find(Query::procedures.begin(), Query::procedures.end(), s) != Query::procedures.end());
     }
 
-    void Query::addRelationship(RelationshipTypes r, const synonym& left, const synonym& right) {
+    void Query::AddRelationship(RelationshipTypes r, const pql::Synonym& left, const pql::Synonym& right) {
         switch (r) {
             case FOLLOWS:
-                Query::suchThatClauses.push_back(PQL::Follows_Token(left, right));
+                Query::such_that_clauses.push_back(pql::Follows_Token(left, right));
             case FOLLOWS_T:
-                Query::suchThatClauses.push_back(PQL::Follows_T_Token(left, right));
+                Query::such_that_clauses.push_back(pql::Follows_T_Token(left, right));
             case PARENT:
-                Query::suchThatClauses.push_back(PQL::Parent_Token(left, right));
+                Query::such_that_clauses.push_back(pql::Parent_Token(left, right));
             case PARENT_T:
-                Query::suchThatClauses.push_back(PQL::Parent_T_Token(left, right));
+                Query::such_that_clauses.push_back(pql::Parent_T_Token(left, right));
             case USES_S:
-                Query::suchThatClauses.push_back(PQL::Uses_S_Token(left, right));
+                Query::such_that_clauses.push_back(pql::Uses_S_Token(left, right));
             case USES_P:
-                Query::suchThatClauses.push_back(PQL::Uses_P_Token(left, right));
+                Query::such_that_clauses.push_back(pql::Uses_P_Token(left, right));
             case MODIFIES_S:
-                Query::suchThatClauses.push_back(PQL::Modifies_S_Token(left, right));
+                Query::such_that_clauses.push_back(pql::Modifies_S_Token(left, right));
             case MODIFIES_P:
-                Query::suchThatClauses.push_back(PQL::Modifies_P_Token(left, right));
+                Query::such_that_clauses.push_back(pql::Modifies_P_Token(left, right));
         }
     }
 }

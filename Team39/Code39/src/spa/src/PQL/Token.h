@@ -3,18 +3,19 @@
 //
 
 #pragma once
+
 #include <utility>
 #include <vector>
 #include <map>
 #include <string>
 #include <exception>
 
-namespace PQL {
-    typedef std::string variable;
-    typedef std::string synonym;
+namespace pql {
+    typedef std::string Variable;
+    typedef std::string Synonym;
 
     struct ParseException : public std::exception {
-        static std::string getErrorMessage (const std::string& msg) {
+        static std::string GetErrorMessage (const std::string& msg) {
             return msg;
         }
     };
@@ -53,7 +54,7 @@ namespace PQL {
             {"assign", ASSIGN},
             {"variable", VARIABLE},
             {"constant", CONSTANT},
-            {"procedure", PROCEDURE},
+            {"procedure", PROCEDURE}
     };
 
     const std::map<std::string, RelationshipTypes> relationshipMap {
@@ -67,7 +68,7 @@ namespace PQL {
             {"ModifiesP", MODIFIES_P}
     };
 
-    std::optional<DeclarationTypes> getDeclarationType(const std::string& keyword) {
+    std::optional<DeclarationTypes> GetDeclarationType(const std::string& keyword) {
         if (declarationMap.find(keyword) != declarationMap.end()) {
             return declarationMap.at(keyword);
         } else {
@@ -75,7 +76,7 @@ namespace PQL {
         }
     }
 
-    std::optional<RelationshipTypes> getRelationshipType(const std::string& relationship) {
+    std::optional<RelationshipTypes> GetRelationshipType(const std::string& relationship) {
         if (relationshipMap.find(relationship) != relationshipMap.end()) {
             return relationshipMap.at(relationship);
         } else {
@@ -90,74 +91,74 @@ namespace PQL {
 
     class RelationshipToken : public Token {
     private:
-        const PQL::variable left;
-        const PQL::variable right;
+        const pql::Variable left;
+        const pql::Variable right;
     public:
-        RelationshipToken(PQL::variable left, PQL::variable right) : left(std::move(left)), right(std::move(right)) {};
+        RelationshipToken(pql::Variable left, pql::Variable right) : left(std::move(left)), right(std::move(right)) {};
 
-        PQL::variable getLeft();
+        pql::Variable GetLeft();
 
-        PQL::variable getRight();
+        pql::Variable GetRight();
     };
 
     class Follows_Token: public RelationshipToken {
     public:
-        Follows_Token(PQL::variable left, PQL::variable right) : RelationshipToken(std::move(left), std::move(right)) {};
+        Follows_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
     };
 
     class Follows_T_Token: public RelationshipToken {
     public:
-        Follows_T_Token(PQL::variable left, PQL::variable right) : RelationshipToken(std::move(left), std::move(right)) {};
+        Follows_T_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
     };
 
     class Parent_Token: public RelationshipToken {
     public:
-        Parent_Token(PQL::variable left, PQL::variable right) : RelationshipToken(std::move(left), std::move(right)) {};
+        Parent_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
     };
 
     class Parent_T_Token: public RelationshipToken {
     public:
-        Parent_T_Token(PQL::variable left, PQL::variable right) : RelationshipToken(std::move(left), std::move(right)) {};
+        Parent_T_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
     };
 
     class Uses_S_Token: public RelationshipToken {
     public:
-        Uses_S_Token(PQL::variable left, PQL::variable right) : RelationshipToken(std::move(left), std::move(right)) {};
+        Uses_S_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
     };
 
     class Uses_P_Token: public RelationshipToken {
     public:
-        Uses_P_Token(PQL::variable left, PQL::variable right) : RelationshipToken(std::move(left), std::move(right)) {};
+        Uses_P_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
     };
 
     class Modifies_S_Token: public RelationshipToken {
     public:
-        Modifies_S_Token(PQL::variable left, PQL::variable right) : RelationshipToken(std::move(left), std::move(right)) {};
+        Modifies_S_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
     };
 
     class Modifies_P_Token: public RelationshipToken {
     public:
-        Modifies_P_Token(PQL::variable left, PQL::variable right) : RelationshipToken(std::move(left), std::move(right)) {};
+        Modifies_P_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
     };
 
     class Query {
     private:
-        std::map<DeclarationTypes, std::vector<synonym>> declarations;
-        std::vector<synonym> statements;
-        std::vector<synonym> procedures;
-        synonym resultSynonym;
-        std::vector<RelationshipToken> suchThatClauses;
+        std::map<DeclarationTypes, std::vector<pql::Synonym>> declarations;
+        std::vector<pql::Synonym> statements;
+        std::vector<pql::Synonym> procedures;
+        pql::Synonym result_synonym;
+        std::vector<RelationshipToken> such_that_clauses;
     public:
-        void addSynonym(DeclarationTypes d, const PQL::synonym& s);
+        void AddSynonym(DeclarationTypes d, const pql::Synonym& s);
 
-        void setResultSynonym(const PQL::synonym& s);
+        void SetResultSynonym(const pql::Synonym& s);
 
-        synonym getResultSynonym();
+        pql::Synonym GetResultSynonym();
 
-        bool isStatement(const PQL::synonym& s);
+        bool IsStatement(const pql::Synonym& s);
 
-        bool isProcedure(const PQL::synonym& s);
+        bool IsProcedure(const pql::Synonym& s);
 
-        void addRelationship(RelationshipTypes r, const synonym& left, const synonym& right);
+        void AddRelationship(RelationshipTypes r, const pql::Synonym& left, const pql::Synonym& right);
     };
 }

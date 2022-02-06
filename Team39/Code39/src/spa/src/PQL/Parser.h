@@ -9,13 +9,13 @@
 
 #include "Token.h"
 
-namespace PQL {
+namespace pql {
 
-    bool isLetter(char c) {
+    bool IsLetter(char c) {
         return c >= 65 and c <= 90;
     }
 
-    bool isDigit(char c) {
+    bool IsDigit(char c) {
         return c >= 48 and c <= 57;
     }
 
@@ -27,23 +27,23 @@ namespace PQL {
             ss << input;
         }
 
-        char peek();
+        char Peek();
 
-        char next();
+        char Next();
 
-        bool isEOF();
+        bool IsEOF();
 
-        void eatWhiteSpaces();
+        void EatWhiteSpaces();
 
-        void consume();
+        void Consume();
 
-        char expectLetter();
+        char ExpectLetter();
 
-        void expect(const std::string& s);
+        void Expect(const std::string& s);
 
-        void expectEOF();
+        void ExpectEOF();
 
-        synonym parseSynonym();
+        pql::Synonym ParseSynonym();
     };
 
     class Parser {
@@ -54,11 +54,11 @@ namespace PQL {
         /*Constructor for Parser*/
         explicit Parser(const std::string& input) : ps(input), token() {};
 
-        void parse();
+        void Parse();
 
-        std::vector<synonym> getSynonyms();
+        std::vector<pql::Synonym> GetSynonyms();
 
-        void parseRelationship(Query& q);
+        void ParseRelationship(Query& q);
     };
 
 }

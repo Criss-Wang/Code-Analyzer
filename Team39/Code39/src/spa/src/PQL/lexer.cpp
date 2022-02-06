@@ -4,39 +4,39 @@
 
 #include "Parser.h"
 
-namespace PQL {
+namespace pql {
 
-    char ParserState::peek() {
+    char ParserState::Peek() {
         return (char) ss.peek();
     }
 
-    char ParserState::next() {
+    char ParserState::Next() {
         return (char) ss.get();
     }
 
-    bool ParserState::isEOF() {
+    bool ParserState::IsEOF() {
         return ss.eof();
     }
 
-    void ParserState::eatWhiteSpaces() {
+    void ParserState::EatWhiteSpaces() {
         while (ss.peek() == ' ') {
             ss.get();
         }
     }
 
-    void ParserState::consume() {
+    void ParserState::Consume() {
         ss.get();
     }
 
-    char ParserState::expectLetter() {
-        if (PQL::isLetter(peek())) {
-            return next();
+    char ParserState::ExpectLetter() {
+        if (pql::IsLetter(ParserState::Peek())) {
+            return ParserState::Next();
         } else {
             throw ParseException();
         }
     }
 
-    void ParserState::expect(const std::string& s) {
+    void ParserState::Expect(const std::string& s) {
         std::stringstream ssm;
         ssm << s;
         while (!ssm.eof()) {
@@ -44,36 +44,36 @@ namespace PQL {
                 try {
                     throw ParseException();
                 } catch (ParseException& e) {
-                    std::cout << PQL::ParseException::getErrorMessage("Expecting '" + s + "' keyword!") << std::endl;
+                    std::cout << pql::ParseException::GetErrorMessage("Expecting '" + s + "' keyword!") << std::endl;
                 }
             }
         }
     }
 
-    void ParserState::expectEOF() {
-        if (!ParserState::isEOF()) {
+    void ParserState::ExpectEOF() {
+        if (!ParserState::IsEOF()) {
             try {
                 throw ParseException();
             } catch (ParseException& e) {
-                std::cout << PQL::ParseException::getErrorMessage("Expecting end of file!") << std::endl;
+                std::cout << pql::ParseException::GetErrorMessage("Expecting end of file!") << std::endl;
             }
         }
     }
 
-    synonym ParserState::parseSynonym() {
-        PQL::synonym sm;
+    pql::Synonym ParserState::ParseSynonym() {
+        pql::Synonym sm;
         std::stringstream ssm;
-        ParserState::eatWhiteSpaces();
+        ParserState::EatWhiteSpaces();
         try {
-            ssm << ParserState::expectLetter();
+            ssm << ParserState::ExpectLetter();
         } catch (ParseException& e) {
-            std::cout << PQL::ParseException::getErrorMessage("A synonym must start with a letter!") << std::endl;
+            std::cout << pql::ParseException::GetErrorMessage("A synonym must start with a letter!") << std::endl;
         }
-        for (char nextChar = ParserState::peek(); PQL::isLetter(nextChar) or PQL::isDigit(nextChar); nextChar = ParserState::peek()) {
-            ssm << ParserState::next();
+        for (char nextChar = ParserState::Peek(); pql::IsLetter(nextChar) or pql::IsDigit(nextChar); nextChar = ParserState::Peek()) {
+            ssm << ParserState::Next();
         }
         ssm >> sm;
-        ParserState::eatWhiteSpaces();
+        ParserState::EatWhiteSpaces();
         return sm;
     }
 

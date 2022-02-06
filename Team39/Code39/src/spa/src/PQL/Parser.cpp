@@ -8,75 +8,75 @@
 
 #include "Parser.h"
 
-namespace PQL {
+namespace pql {
 
-    std::vector<synonym> Parser::getSynonyms() {
-        std::vector<synonym> synonyms;
-        while (ps.peek() != ';') {
-            ps.eatWhiteSpaces();
-            synonyms.push_back(ps.parseSynonym());
-            ps.eatWhiteSpaces();
-            if (ps.peek() == ',') {
-                ps.consume();
+    std::vector<pql::Synonym> Parser::GetSynonyms() {
+        std::vector<pql::Synonym> synonyms;
+        while (ps.Peek() != ';') {
+            ps.EatWhiteSpaces();
+            synonyms.push_back(ps.ParseSynonym());
+            ps.EatWhiteSpaces();
+            if (ps.Peek() == ',') {
+                ps.Consume();
             } else {
                 try {
                     throw ParseException();
                 } catch (ParseException& e) {
-                    std::cout << PQL::ParseException::getErrorMessage("A synonym must contain only letters or digits!") << std::endl;
+                    std::cout << pql::ParseException::GetErrorMessage("A synonym must contain only letters or digits!") << std::endl;
                 }
             }
         }
         return synonyms;
     }
 
-    void Parser::parse() {
+    void Parser::Parse() {
         Query result {};
-        while (!ps.isEOF()) {
-            ps.eatWhiteSpaces();
+        while (!ps.IsEOF()) {
+            ps.EatWhiteSpaces();
             std::stringstream ks;
-            while (isLetter(ps.peek())) {
-                ks << ps.next();
+            while (IsLetter(ps.Peek())) {
+                ks << ps.Next();
             }
             std::string keyword;
             ks >> keyword;
-            if (auto d = PQL::getDeclarationType(keyword)) {
-                for (const synonym& s : Parser::getSynonyms()) {
-                    result.addSynonym(*d, s);
+            if (auto d = pql::GetDeclarationType(keyword)) {
+                for (const pql::Synonym& s : Parser::GetSynonyms()) {
+                    result.AddSynonym(*d, s);
                 }
             } else if (keyword == "Select") {
-                ps.eatWhiteSpaces();
-                result.setResultSynonym(ps.parseSynonym());
-                ps.eatWhiteSpaces();
-                if (!ps.isEOF()) {
-                    ps.expect("such that");
-                    ps.eatWhiteSpaces();
-                    Parser::parseRelationship(result);
-                    ps.expectEOF();
+                ps.EatWhiteSpaces();
+                result.SetResultSynonym(ps.ParseSynonym());
+                ps.EatWhiteSpaces();
+                if (!ps.IsEOF()) {
+                    ps.Expect("such that");
+                    ps.EatWhiteSpaces();
+                    Parser::ParseRelationship(result);
+                    ps.ExpectEOF();
                 }
             }
         }
     }
 
-    void Parser::parseRelationship(Query& q) {
+    void Parser::ParseRelationship(Query& q) {
         std::string relationship;
         std::stringstream ssm;
-        while (isLetter(ps.peek())) {
-            ssm << ps.next();
+        while (IsLetter(ps.Peek())) {
+            ssm << ps.Next();
         }
         ssm >> relationship;
-        ps.eatWhiteSpaces();
-        ps.expect("(");
-        synonym left = ps.parseSynonym();
-        ps.expect(",");
-        synonym right = ps.parseSynonym();
-        ps.expect(")");
+        ps.EatWhiteSpaces();
+        ps.Expect("(");
+        pql::Synonym left = ps.ParseSynonym();
+        ps.Expect(",");
+        pql::Synonym right = ps.ParseSynonym();
+        ps.Expect(")");
         if (relationship == "Uses" or relationship == "Modifies") {
-            if (q.isProcedure(left)) {
+            if (q.IsProcedure(left)) {
                 relationship.push_back('P');
             }
         }
-        if (auto r = PQL::getRelationshipType(relationship)) {
-            q.addRelationship(*r, left, right);
+        if (auto r = pql::GetRelationshipType(relationship)) {
+            q.AddRelationship(*r, left, right);
         }
     }
 }
