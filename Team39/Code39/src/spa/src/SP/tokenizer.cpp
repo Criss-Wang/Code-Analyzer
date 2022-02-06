@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "Tokenizer.h"
+#include "tokenizer.h"
 
 using namespace std; 
 
@@ -17,9 +17,9 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
   Token current_token;
   Token prev_token;
 
-  for (char currChar : sourceProgram) {
+  for (char curr_char : sourceProgram) {
 
-    switch (currChar) {
+    switch (curr_char) {
       // Digits
       case '0':
       case '1':
@@ -36,7 +36,7 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
         } else if (current_token.type == DIGIT || current_token.type == INTEGER) {
           current_token.type = INTEGER;
         }
-        current_token.text.append(1, currChar);
+        current_token.text.append(1, curr_char);
         break;
 
       // Brackets
@@ -47,18 +47,21 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
         }
 
         if (current_token.type != WHITESPACE) {
-          endToken(current_token, tokens_list);
+          prev_token = current_token;
+          EndToken(current_token, tokens_list);
         }
 
         current_token.type = LEFT_CURLY;
-        current_token.text.append(1, currChar);
-        endToken(current_token, tokens_list);
+        current_token.text.append(1, curr_char);
+        prev_token = current_token;
+        EndToken(current_token, tokens_list);
         curlyBracketsCount++;
         break;
 
       case '}':
         if (current_token.type != WHITESPACE) {
-          endToken(current_token, tokens_list);
+          prev_token = current_token;
+          EndToken(current_token, tokens_list);
         }
 
         if (curlyBracketsCount <= 0) {
@@ -66,8 +69,9 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
         }
 
         current_token.type = RIGHT_CURLY;
-        current_token.text.append(1, currChar);
-        endToken(current_token, tokens_list);
+        current_token.text.append(1, curr_char);
+        prev_token = current_token;
+        EndToken(current_token, tokens_list);
         curlyBracketsCount--;
 
         if (curlyBracketsCount != 0 || parenCount != 0) {
@@ -77,17 +81,19 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
 
       case '(':
         if (current_token.type != WHITESPACE) {
-          endToken(current_token, tokens_list);			
+          EndToken(current_token, tokens_list);			
         }
         current_token.type = LEFT_PAREN;
-        current_token.text.append(1, currChar);
-        endToken(current_token, tokens_list);
+        current_token.text.append(1, curr_char);
+        prev_token = current_token;
+        EndToken(current_token, tokens_list);
         parenCount++;
         break;
 
       case ')':
         if (current_token.type != WHITESPACE) {
-          endToken(current_token, tokens_list);
+          prev_token = current_token;
+          EndToken(current_token, tokens_list);
         }
 
         if (parenCount <= 0) {
@@ -95,16 +101,18 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
         }
 
         current_token.type = RIGHT_PAREN;
-        current_token.text.append(1, currChar);
-        endToken(current_token, tokens_list);
+        current_token.text.append(1, curr_char);
+        prev_token = current_token;
+        EndToken(current_token, tokens_list);
         parenCount--;
         break;
 
       // Space and tab
       case ' ':
       case '	': 
+      case '\n':
         prev_token = current_token;
-        endToken(current_token, tokens_list);
+        EndToken(current_token, tokens_list);
         break;
 
       // Operators
@@ -122,9 +130,10 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
           throw invalid_argument("Syntax error");
         }
 
-        endToken(current_token, tokens_list);
+        prev_token = current_token;
+        EndToken(current_token, tokens_list);
         current_token.type = OPERATOR;
-        current_token.text.append(1, currChar);
+        current_token.text.append(1, curr_char);
         break;
 
       // Semicolon
@@ -142,22 +151,25 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
         }
 
         if (current_token.type != WHITESPACE) {
-          endToken(current_token, tokens_list);
+          prev_token = current_token;
+          EndToken(current_token, tokens_list);
         }
 
         current_token.type = SEMICOLON;
-        current_token.text.append(1, currChar);
-        current_token.increaseStmtNum();
+        current_token.text.append(1, curr_char);
+        prev_token = current_token;
+        EndToken(current_token, tokens_list);
+        current_token.IncreaseStmtNum();
         break;
 
       // Letters
       default:
         if (current_token.type == WHITESPACE) {
           current_token.type = LETTER;
-          current_token.text.append(1, currChar);
+          current_token.text.append(1, curr_char);
         } else if (current_token.type == LETTER || current_token.type == NAME) {
           current_token.type = NAME;
-          current_token.text.append(1, currChar);
+          current_token.text.append(1, curr_char);
         } else if (current_token.type == DIGIT || current_token.type == INTEGER) {
           throw invalid_argument("Syntax error");
         } 
@@ -165,14 +177,14 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
     }
   }
 
-  endToken(current_token, tokens_list);
+  EndToken(current_token, tokens_list);
   return tokens_list;
 }
 
 // Resets current token to WHITESPACE
-void Tokenizer::endToken(Token &token, vector<Token> &tokensList) {
+void Tokenizer::EndToken(Token &token, vector<Token> &tokensList) {
   if (token.type == NAME) {
-    checkStmtType(token);
+    CheckStmtType(token);
   }
 
   if (token.type != WHITESPACE) {	
@@ -183,7 +195,7 @@ void Tokenizer::endToken(Token &token, vector<Token> &tokensList) {
   token.text.erase();
 }
 
-void Tokenizer::checkStmtType(Token &token) {
+void Tokenizer::CheckStmtType(Token &token) {
   if (token.text == "if") {
     token.type = IF;
   } else if (token.text == "then") {
