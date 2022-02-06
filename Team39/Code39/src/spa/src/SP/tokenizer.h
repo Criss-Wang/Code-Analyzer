@@ -49,7 +49,7 @@ class Token {
     
     string print();
 
-    void increaseStmtNum() {
+    void IncreaseStmtNum() {
       stmt_num_ += 1;
     }
 
@@ -63,7 +63,7 @@ class Tokenizer {
     vector<Token> parse(const string& sourceProgram);
 
   private:
-    void endToken(Token& token, vector<Token>& tokens);
-    void checkStmtType(Token& token);
+    void EndToken(Token& token, vector<Token>& tokens);
+    void CheckStmtType(Token& token);
 };
 

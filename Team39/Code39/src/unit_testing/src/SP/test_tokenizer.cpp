@@ -176,6 +176,58 @@ TEST_CASE("Valid tokenizer output") {
 
     RequireTokenizer(expected_tokens == actual_tokens);
   }
+
+  SECTION("Stmt with brackets") {
+    source_prog = "procedure procName {x = y + (5 + z);}";
+    actual_tokens = tokenizer.parse(source_prog);
+
+    Token token1{ NAME, "procedure", 1 };
+    Token token2{ NAME, "procName", 1 };
+    Token token3{ LEFT_CURLY, "{", 1 };
+    Token token4{ LETTER, "x", 1 };
+    Token token5{ OPERATOR, "=", 1 };
+    Token token6{ LETTER, "y", 1 };
+    Token token7{ OPERATOR, "+", 1 };
+    Token token8{ LEFT_PAREN, "(", 1 };
+    Token token9{ DIGIT, "5", 1 };
+    Token token10{ OPERATOR, "+", 1 };
+    Token token11{ LETTER, "z", 1 };
+    Token token12{ RIGHT_PAREN, ")", 1 };
+    Token token13{ SEMICOLON, ";", 1 };
+    Token token14{ RIGHT_CURLY, "}", 2 };
+    expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
+                         token11, token12, token13, token14 };
+
+    RequireTokenizer(expected_tokens == actual_tokens);
+  }
+
+  SECTION("Stmt with brackets") {
+    source_prog = "procedure procName {x = y + (5 + (z + 5));}";
+    actual_tokens = tokenizer.parse(source_prog);
+
+    Token token1{ NAME, "procedure", 1 };
+    Token token2{ NAME, "procName", 1 };
+    Token token3{ LEFT_CURLY, "{", 1 };
+    Token token4{ LETTER, "x", 1 };
+    Token token5{ OPERATOR, "=", 1 };
+    Token token6{ LETTER, "y", 1 };
+    Token token7{ OPERATOR, "+", 1 };
+    Token token8{ LEFT_PAREN, "(", 1 };
+    Token token9{ DIGIT, "5", 1 };
+    Token token10{ OPERATOR, "+", 1 };
+    Token token11{ LEFT_PAREN, "(", 1 };
+    Token token12{ LETTER, "z", 1 };
+    Token token13{ OPERATOR, "+", 1 };
+    Token token14{ DIGIT, "5", 1 };
+    Token token15{ RIGHT_PAREN, ")", 1 };
+    Token token16{ RIGHT_PAREN, ")", 1 };
+    Token token17{ SEMICOLON, ";", 1 };
+    Token token18{ RIGHT_CURLY, "}", 2 };
+    expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
+                         token11, token12, token13, token14, token15, token16, token17, token18 };
+
+    RequireTokenizer(expected_tokens == actual_tokens);
+  }
 }
 
 TEST_CASE("Invalid tokenizer output") {
@@ -230,6 +282,30 @@ TEST_CASE("Invalid tokenizer output") {
       actual_tokens = tokenizer.parse(source_prog);
     } catch (const std::invalid_argument& e) {}
   }
+
+  SECTION("Invalid lack of close parenthesis") {
+    source_prog = "procedure procName { y = (x + 2; }";
+
+    try {
+      actual_tokens = tokenizer.parse(source_prog);
+    } catch (const std::invalid_argument& e) {}
+  }
+
+  SECTION("Invalid order of parenthesis") {
+    source_prog = "procedure procName { y = )x + 2(; }";
+
+    try {
+      actual_tokens = tokenizer.parse(source_prog);
+    } catch (const std::invalid_argument& e) {}
+  }
+
+  SECTION("Invalid number of parenthesis") {
+    source_prog = "procedure procName { x = x + (2 + y)); }";
+
+    try {
+      actual_tokens = tokenizer.parse(source_prog);
+    } catch (const std::invalid_argument& e) {}
+  }
 }
 
 /*
@@ -262,7 +338,8 @@ TEST_CASE("Run tokenizer with file input") {
   } else {
     cout << "Unable to open file";
   }
-  requireTokenizer(1 == 1);
+  RequireTokenizer(1 == 1);
 }
 */
+
 
