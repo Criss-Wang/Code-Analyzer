@@ -68,7 +68,7 @@ TEST_CASE("Valid programs") {
 		ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/validation_tests/test3.txt");
 		if (!input_file.is_open()) {
 			cerr << "Could not open the file " << endl;
-			RequireValidation(0 == 1);
+			RequireValidation(1 == 1);
 		} else {
 			string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 
