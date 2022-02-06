@@ -46,13 +46,13 @@ namespace pql {
         } else {
             pql::Synonym sm = Synonym(name, d);
             Query::declarations.push_back(sm);
-            Query::synonyms[name] = sm;
+            Query::synonyms.insert(std::pair<std::string, pql::Synonym>(name, sm));
         }
     }
 
     void Query::SetResultSynonym(const std::string& name) {
         if (Query::SynonymDeclared(name)) {
-            Query::result_synonym = Query::synonyms[name];
+            Query::result_synonym = Query::synonyms.at(name);
             Query::AddUsedSynonym(name);
         } else {
             try {
@@ -68,11 +68,11 @@ namespace pql {
     }
 
     bool Query::IsProcedure(const std::string& name) {
-        return Query::synonyms[name].GetDeclaration() == PROCEDURE;
+        return Query::synonyms.at(name).GetDeclaration() == PROCEDURE;
     }
 
     void Query::AddUsedSynonym(const std::string& name) {
-        Query::used_synonyms.push_back(Query::synonyms[name]);
+        Query::used_synonyms.push_back(Query::synonyms.at(name));
     }
 
     std::vector<pql::Synonym> Query::GetAllUsedSynonyms() {
