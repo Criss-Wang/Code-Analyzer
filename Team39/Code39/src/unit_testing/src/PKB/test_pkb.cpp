@@ -36,67 +36,83 @@ TEST_CASE("Add Key-value Pair into Tables") {
   SECTION("Add item into table: int -> int list") {
     auto pkb = Pkb();
     const vector<int> value = { 1,2,3 };
-    const bool success = pkb.AddInfoToTable(Pkb::TableIdentifier::kConstant, 2, value);
+    const bool success = pkb.AddInfoToTable(TableIdentifier::kParent, 2, value);
     REQUIRE(success == 1);
-    //REQUIRE(pkb.assign_table->GetValueByKey(2) == "()");
+    const bool check_inserted = pkb.IsParent(2, 1) && pkb.IsParent(2,2) && pkb.IsParent(2,3);
+    REQUIRE(check_inserted == 1);
   }
 
   SECTION("Add item into table: int -> string list") {
     auto pkb = Pkb();
     const vector<string> value = { "a", "b", "c" };
-    const bool success = pkb.AddInfoToTable(Pkb::TableIdentifier::kIf, 2, value);
+    const bool success = pkb.AddInfoToTable(TableIdentifier::kIf, 2, value);
     REQUIRE(success == 1);
     //REQUIRE(pkb.assign_table->GetValueByKey(2) == "()");
   }
 
   SECTION("Add item into table: int -> int") {
     auto pkb = Pkb();
-    const bool success = pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsBy, 2, 2);
+    const bool success = pkb.AddInfoToTable(TableIdentifier::kFollows, 2, 2);
     REQUIRE(success == 1);
     //REQUIRE(pkb.assign_table->GetValueByKey(2) == "()");
   }
 
   SECTION("Add item into table: int -> string") {
     auto pkb = Pkb();
-    const bool success = pkb.AddInfoToTable(Pkb::TableIdentifier::kAssign, 2, "x");
+    const bool success = pkb.AddInfoToTable(TableIdentifier::kAssign, 2, "x");
     REQUIRE(success == 1);
     //REQUIRE(pkb.assign_table->GetValueByKey(2) == "()");
   }
 
   SECTION("Add item into table: invalid identifier") {
     auto pkb = Pkb();
-    bool success = pkb.AddInfoToTable(Pkb::TableIdentifier::kConstant, 2, "xvar");
+    bool success = pkb.AddInfoToTable(TableIdentifier::kConstant, 2, "xvar");
     REQUIRE(success == 0);
 
-    success = pkb.AddInfoToTable(Pkb::TableIdentifier::kIf, 2, "xvar");
+    success = pkb.AddInfoToTable(TableIdentifier::kIf, 2, "xvar");
     REQUIRE(success == 0);
 
-    success = pkb.AddInfoToTable(Pkb::TableIdentifier::kUsesVarToStmt, 2, "xvar");
+    success = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 2, "xvar");
     REQUIRE(success == 0);
 
-    success = pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsBy, 2, "x");
+    success = pkb.AddInfoToTable(TableIdentifier::kFollows, 2, "x");
     REQUIRE(success == 0);
 
-    success = pkb.AddInfoToTable(Pkb::TableIdentifier::kAssign, 2, 2);
+    success = pkb.AddInfoToTable(TableIdentifier::kAssign, 2, 2);
     REQUIRE(success == 0);
   }
 
   SECTION("Add item into table: invalid value") {
     auto pkb = Pkb();
     vector<int> value_1 = {};
-    bool success = pkb.AddInfoToTable(Pkb::TableIdentifier::kConstant, 2, value_1);
+    bool success = pkb.AddInfoToTable(TableIdentifier::kConstant, 2, value_1);
     REQUIRE(success == 0);
 
     vector<string> value_2 = {};
-    success = pkb.AddInfoToTable(Pkb::TableIdentifier::kIf, 2, value_2);
+    success = pkb.AddInfoToTable(TableIdentifier::kIf, 2, value_2);
     REQUIRE(success == 0);
 
     int value_3 = -1;
-    success = pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsBy, 2, value_3);
+    success = pkb.AddInfoToTable(TableIdentifier::kFollows, 2, value_3);
     REQUIRE(success == 0);
 
     string value_4;
-    success = pkb.AddInfoToTable(Pkb::TableIdentifier::kAssign, 2, value_4);
+    success = pkb.AddInfoToTable(TableIdentifier::kAssign, 2, value_4);
     REQUIRE(success == 0);
   }
 }
+
+TEST_CASE("Populate Table") {
+  SECTION("Check all nested tables udpated") {
+    auto pkb = Pkb();
+    const vector<int> value = { 4,5,6 };
+    const bool success = pkb.AddInfoToTable(TableIdentifier::kParent, 3, value);
+    const vector<int> value_2 = { 2,3 };
+    const bool success_2 = pkb.AddInfoToTable(TableIdentifier::kParent, 1, value_2);
+    const int populate_success = pkb.PopulateNestedRelationship();
+
+    REQUIRE(populate_success == 1);
+    REQUIRE(pkb.IsTransitiveParent(1, 4) == 1);
+  }
+}
+
