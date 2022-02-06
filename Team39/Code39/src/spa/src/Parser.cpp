@@ -6,6 +6,7 @@ using namespace std;
 
 #include "Parser.h"
 #include "SP/validator.h"
+#include "PKB/tables/table.h"
 
 void Parse(string input) {
 
@@ -33,23 +34,23 @@ void Parse(string input) {
         string read_var = next(token, 1)->text;
 
         // Add stmt num to stmt_set_ and read_set_
-        pkb.AddEntityToSet(Pkb::EntityIdentifier::kStmt, token->stmt_num_);
-        pkb.AddEntityToSet(Pkb::EntityIdentifier::kRead, token->stmt_num_);
+        pkb.AddEntityToSet(EntityIdentifier::kStmt, token->stmt_num_);
+        pkb.AddEntityToSet(EntityIdentifier::kRead, token->stmt_num_);
 
-        pkb.AddInfoToTable(Pkb::TableIdentifier::kRead, token->stmt_num_, read_var);
+        pkb.AddInfoToTable(TableIdentifier::kRead, token->stmt_num_, read_var);
 
         // Add modifies to modify stmt to var
-        pkb.AddInfoToTable(Pkb::TableIdentifier::kModifiesStmtToVar, token->stmt_num_, token->text);
+        pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, token->text);
 
+
+        // TODO (Yuxuan): Add helper function to avoid repeating same code
         if (previous != -1) {
           // Add followsBy and followsAfter
-          pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsBy, previous, token->stmt_num_);
-          pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsAfter, token->stmt_num_, previous);
+          pkb.AddInfoToTable(TableIdentifier::kFollows, previous, token->stmt_num_);
         }
         if (parent != -1) {
           // Add parent and child
-          pkb.AddInfoToTable(Pkb::TableIdentifier::kParent, parent, token->stmt_num_);
-          pkb.AddInfoToTable(Pkb::TableIdentifier::kChild, token->stmt_num_, parent);
+          pkb.AddInfoToTable(TableIdentifier::kParent, parent, token->stmt_num_);
         }
 
       } else if (token->text == "print") {
@@ -57,23 +58,21 @@ void Parse(string input) {
         string print_var = next(token, 1)->text;
 
         // Add stmt num to stmt_set_ and print_set_
-        pkb.AddEntityToSet(Pkb::EntityIdentifier::kStmt, token->stmt_num_);
-        pkb.AddEntityToSet(Pkb::EntityIdentifier::kPrint, token->stmt_num_);
+        pkb.AddEntityToSet(EntityIdentifier::kStmt, token->stmt_num_);
+        pkb.AddEntityToSet(EntityIdentifier::kPrint, token->stmt_num_);
 
-        pkb.AddInfoToTable(Pkb::TableIdentifier::kPrint, token->stmt_num_, print_var);
+        pkb.AddInfoToTable(TableIdentifier::kPrint, token->stmt_num_, print_var);
 
-        // Add uses to uses stmt to var
-        pkb.AddInfoToTable(Pkb::TableIdentifier::kUsesStmtToVar, token->stmt_num_, token->text);
+        // add uses
+        pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, token->stmt_num_, { token->text });
 
         if (previous != -1) {
-          // Add followsBy and followsAfter
-          pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsBy, previous, token->stmt_num_);
-          pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsAfter, token->stmt_num_, previous);
+          // Add follows
+          pkb.AddInfoToTable(TableIdentifier::kFollows, previous, token->stmt_num_);
         }
         if (parent != -1) {
-          // Add parent and child
-          pkb.AddInfoToTable(Pkb::TableIdentifier::kParent, parent, token->stmt_num_);
-          pkb.AddInfoToTable(Pkb::TableIdentifier::kChild, token->stmt_num_, parent);
+          // Add parent
+          pkb.AddInfoToTable(TableIdentifier::kParent, parent, token->stmt_num_);
         }
 
       } else if (token->text == "call") {
@@ -88,18 +87,18 @@ void Parse(string input) {
       } else if (token->type == LETTER || token->type == NAME) {
         if (is_procedure_name) {
           // Add procedure name to procedure_set_
-          pkb.AddEntityToSet(Pkb::EntityIdentifier::kProc, token->text);
+          pkb.AddEntityToSet(EntityIdentifier::kProc, token->text);
           is_procedure_name = false;
         } else {
-          pkb.AddEntityToSet(Pkb::EntityIdentifier::kVariable, token->text);
+          pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text);
         }
 
         bool is_assignment = next(token, 1)->text == "=";
         if (is_assignment) {
 
           // Add stmt num to stmt_set_ and assign_set_
-          pkb.AddEntityToSet(Pkb::EntityIdentifier::kStmt, token->stmt_num_);
-          pkb.AddEntityToSet(Pkb::EntityIdentifier::kAssign, token->stmt_num_);
+          pkb.AddEntityToSet(EntityIdentifier::kStmt, token->stmt_num_);
+          pkb.AddEntityToSet(EntityIdentifier::kAssign, token->stmt_num_);
 
           // Build assignments for pattern matching
           string assignment = "";
@@ -151,20 +150,31 @@ void Parse(string input) {
             }
           }
 
-          pkb.AddInfoToTable(Pkb::TableIdentifier::kAssign, token->stmt_num_, assignment);
+          pkb.AddInfoToTable(TableIdentifier::kAssign, token->stmt_num_, assignment);
 
           // Add modifies to modify stmt to var
-          pkb.AddInfoToTable(Pkb::TableIdentifier::kModifiesStmtToVar, token->stmt_num_, token->text);
-          //pkb.AddInfoToTable(Pkb::TableIdentifier::kModifiesVarToStmt, token->text, token->stmt_num_);
+          pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, { token->text });
 
-        } else if (is_rhs_of_assignment) {
-          // Add uses to uses stmt to var
-          pkb.AddInfoToTable(Pkb::TableIdentifier::kUsesStmtToVar, token->stmt_num_, token->text);
+          // build a vector containing all variables on the RHS and put them into modifiesStmtToVar table
+          // TODO: test if its actually working
+          string uses_var = "";
+          vector<string> all_uses_var;
+          for (int i = 0; i < assignment.length(); i++) {
+            if (isalpha(assignment[i]) || isdigit(assignment[i])) {
+              uses_var += assignment[i];
+            } else {
+              if (uses_var != "") {
+                all_uses_var.push_back(uses_var);
+                uses_var = "";
+              }
+            }
+          }
+          pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, all_uses_var);
         }
 
       } else if (token->type == DIGIT || token->type == INTEGER) {
         // Add constant to constant_set_
-        pkb.AddEntityToSet(Pkb::EntityIdentifier::kConstant, token->text);
+        pkb.AddEntityToSet(EntityIdentifier::kConstant, token->text);
 
       } else if (token->type == LEFT_CURLY) {
         parent = token->stmt_num_;
@@ -181,14 +191,12 @@ void Parse(string input) {
           is_rhs_of_assignment = true;
 
           if (previous != -1) {
-            // Add followsBy and followsAfter
-            pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsBy, previous, token->stmt_num_);
-            pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsAfter, token->stmt_num_, previous);
+            // Add followsBy
+            pkb.AddInfoToTable(TableIdentifier::kFollows, previous, token->stmt_num_);
           }
           if (parent != -1) {
-            // Add parent and child
-            pkb.AddInfoToTable(Pkb::TableIdentifier::kParent, parent, token->stmt_num_);
-            pkb.AddInfoToTable(Pkb::TableIdentifier::kChild, token->stmt_num_, parent);
+            // Add parent
+            pkb.AddInfoToTable(TableIdentifier::kParent, parent, token->stmt_num_);
           }
         }
       } else {
@@ -211,6 +219,8 @@ void Parse(string input) {
     cout << endl;
     */
 
-    pkb.PopulateNestedRelationship();
+    if (pkb.PopulateNestedRelationship() == 0) {
+      throw invalid_argument("PKB Population failed");
+    }    
   }
 }
