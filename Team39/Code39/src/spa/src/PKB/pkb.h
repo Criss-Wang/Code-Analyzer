@@ -86,8 +86,11 @@ class Pkb {
     [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
 
     [[nodiscard]] bool IsFollows(int stmt_1, int stmt_2) const;
+    [[nodiscard]] bool IsTransitiveFollows(int stmt_1, int stmt_2) const;
     [[nodiscard]] int GetStmtRightBefore(int stmt) const;
+    [[nodiscard]] vector<int> GetStmtsBefore(int stmt) const;
     [[nodiscard]] int GetStmtRightAfter(int stmt) const;
+    [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;
 
     // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
     bool AddEntityToSet(const EntityIdentifier entity_identifier, int entity_val);

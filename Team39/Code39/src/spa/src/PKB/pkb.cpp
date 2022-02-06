@@ -133,12 +133,25 @@ bool Pkb::IsFollows(const int stmt_1, const int stmt_2) const {
   return stmt_2 == follows_table_->GetValueByKey(stmt_1);
 }
 
+bool Pkb::IsTransitiveFollows(const int stmt_1, const int stmt_2) const {
+  vector<int> stmts_lst = follows_star_table_->GetValueByKey(stmt_1);
+  return find(stmts_lst.begin(), stmts_lst.end(), stmt_2) != stmts_lst.end();
+}
+
 int Pkb::GetStmtRightBefore(const int stmt) const {
   return follows_before_table_->GetValueByKey(stmt);
 }
 
+vector<int> Pkb::GetStmtsBefore(const int stmt) const {
+  return follows_before_star_table_->GetValueByKey(stmt);
+}
+
 int Pkb::GetStmtRightAfter(const int stmt) const {
   return follows_table_->GetValueByKey(stmt);
+}
+
+vector<int> Pkb::GetStmtsAfter(const int stmt) const {
+  return follows_star_table_->GetValueByKey(stmt);
 }
 
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<int>& value) {
