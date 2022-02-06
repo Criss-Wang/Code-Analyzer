@@ -6,7 +6,7 @@ int Pkb::PopulateNestedRelationship() {
   try {
     PopulateNestedFollows();
     PopulateNestedParents();
-    //PopulateUses();
+    PopulateUses();
     PopulateModifies();
   } catch (exception& e) {
     return 0;
@@ -47,33 +47,49 @@ void Pkb::PopulateNestedParents() {
   }
 }
 
-void Pkb::PopulateModifies() {
-  for (const auto parent_stmt: parent_star_table_->GetKeyLst()) {
-    const vector<string> current_stmt_modifies_lst = modifies_stmt_to_variables_table_->GetValueByKey(parent_stmt);
-    vector<string> tmp_lst(current_stmt_modifies_lst);
-    for (const auto child_stmt: parent_star_table_->GetValueByKey(parent_stmt)) {
-      vector<string> child_stmt_modifies_lst = modifies_stmt_to_variables_table_->GetValueByKey(child_stmt);
+// Helper function for populating nested
+void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarTable& child_star_table, Table<int, vector<string>>& t,
+  Table<string, vector<int>> t2) {
+  for (const int parent_stmt: parent_star_table.GetKeyLst()) {
+    // Get the associated list of variables with the statement number
+    const vector<string> variables_lst = t.GetValueByKey(parent_stmt);
+    // Create a copy of this list of variables
+    vector<string> tmp_lst(variables_lst);
+
+    for (const int child_stmt: parent_star_table.GetValueByKey(parent_stmt)) {
+      // Get the variables associated with the statement number
+      vector<string> variables_lst_of_child_stmt = t.GetValueByKey(child_stmt);
       // Merge two vectors
-      tmp_lst.insert(tmp_lst.end(), child_stmt_modifies_lst.begin(), child_stmt_modifies_lst.end());
+      tmp_lst.insert(tmp_lst.end(), variables_lst_of_child_stmt.begin(), variables_lst_of_child_stmt.end());
       // Remove duplicate elements
       sort(tmp_lst.begin(), tmp_lst.end());
       tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
     }
-    bool success = modifies_stmt_to_variables_table_->UpdateKeyWithNewValue(parent_stmt, tmp_lst);
+    bool success = t.UpdateKeyWithNewValue(parent_stmt, tmp_lst);
   }
 
-  for (const auto var: modifies_variable_to_stmts_table_->GetKeyLst()) {
-    vector<int> current_stmt_modifying_lst = modifies_variable_to_stmts_table_->GetValueByKey(var);
-    vector<int> tmp_lst(current_stmt_modifying_lst);
-    for (const auto stmt_modifying: current_stmt_modifying_lst) {
-      const vector<int> parent_stmt_lst = child_star_table_->GetValueByKey(stmt_modifying);
-      if (parent_stmt_lst.empty()) continue;
-      tmp_lst.insert(tmp_lst.end(), parent_stmt_lst.begin(), parent_stmt_lst.end());
+  // Populate the inverse relation
+  for (const string var: t2.GetKeyLst()) {
+    vector<int> stmts_lst = t2.GetValueByKey(var);
+    vector<int> tmp_lst(stmts_lst);
+    for (const int stmt: stmts_lst) {
+      const vector<int> parent_stmts_lst = child_star_table.GetValueByKey(stmt);
+      if (parent_stmts_lst.empty()) continue;
+      tmp_lst.insert(tmp_lst.end(), parent_stmts_lst.begin(), parent_stmts_lst.end());
       // Remove duplicate elements
       sort(tmp_lst.begin(), tmp_lst.end());
       tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
     }
+    t2.UpdateKeyWithNewValue(var, tmp_lst);
   }
+}
+
+void Pkb::PopulateModifies() {
+  PopulateNestedModifiesOrUses(*parent_star_table_, *child_star_table_,  *modifies_stmt_to_variables_table_, *modifies_variable_to_stmts_table_);
+}
+
+void Pkb::PopulateUses() {
+  PopulateNestedModifiesOrUses(*parent_star_table_, *child_star_table_,  *uses_stmt_to_variables_table_, *uses_variable_to_stmts_table_);
 }
 
 void Pkb::PopulateNestedFollows() {
@@ -185,6 +201,12 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         bool add_success = modifies_stmt_to_variables_table_->AddKeyValuePair(key, value);
         // Populate the reverse relation
         add_success = add_success && modifies_variable_to_stmts_table_->UpdateKeyValuePair(key, value);
+        return add_success;
+      }
+      case TableIdentifier::kUsesStmtToVar: {
+        bool add_success = uses_stmt_to_variables_table_->AddKeyValuePair(key, value);
+        // Populate the reverse relation
+        add_success = add_success && uses_variable_to_stmts_table_->UpdateKeyValuePair(key, value);
         return add_success;
       }
       default:
