@@ -10,8 +10,8 @@
 
 namespace pql {
 
-    std::vector<pql::Synonym> Parser::GetSynonyms() {
-        std::vector<pql::Synonym> synonyms;
+    std::vector<std::string> Parser::GetSynonyms() {
+        std::vector<std::string> synonyms;
         while (ps.Peek() != ';') {
             ps.EatWhiteSpaces();
             synonyms.push_back(ps.ParseSynonym());
@@ -22,7 +22,7 @@ namespace pql {
                 try {
                     throw ParseException();
                 } catch (ParseException& e) {
-                    std::cout << pql::ParseException::GetErrorMessage("A synonym must contain only letters or digits!") << std::endl;
+                    std::cout << "A synonym must contain only letters or digits!" << std::endl;
                 }
             }
         }
@@ -40,7 +40,7 @@ namespace pql {
             std::string keyword;
             ks >> keyword;
             if (auto d = pql::GetDeclarationType(keyword)) {
-                for (const pql::Synonym& s : Parser::GetSynonyms()) {
+                for (const std::string& s : Parser::GetSynonyms()) {
                     result.AddSynonym(*d, s);
                 }
             } else if (keyword == "Select") {
@@ -66,9 +66,9 @@ namespace pql {
         ssm >> relationship;
         ps.EatWhiteSpaces();
         ps.Expect("(");
-        pql::Synonym left = ps.ParseSynonym();
+        pql::Ref left = ps.ParseRef(q);
         ps.Expect(",");
-        pql::Synonym right = ps.ParseSynonym();
+        pql::Ref right = ps.ParseRef(q);
         ps.Expect(")");
         if (relationship == "Uses" or relationship == "Modifies") {
             if (q.IsProcedure(left)) {
@@ -76,7 +76,7 @@ namespace pql {
             }
         }
         if (auto r = pql::GetRelationshipType(relationship)) {
-            q.AddRelationship(*r, left, right);
+            q.AddSuchThatClause(*r, left, right);
         }
     }
 }

@@ -43,7 +43,9 @@ namespace pql {
 
         void ExpectEOF();
 
-        pql::Synonym ParseSynonym();
+        std::string ParseSynonym();
+
+        pql::Ref ParseRef(Query& q);
     };
 
     class Parser {
@@ -56,7 +58,7 @@ namespace pql {
 
         void Parse();
 
-        std::vector<pql::Synonym> GetSynonyms();
+        std::vector<std::string> GetSynonyms();
 
         void ParseRelationship(Query& q);
     };

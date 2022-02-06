@@ -44,7 +44,7 @@ namespace pql {
                 try {
                     throw ParseException();
                 } catch (ParseException& e) {
-                    std::cout << pql::ParseException::GetErrorMessage("Expecting '" + s + "' keyword!") << std::endl;
+                    std::cout << "Expecting '" + s + "' keyword!" << std::endl;
                 }
             }
         }
@@ -55,19 +55,19 @@ namespace pql {
             try {
                 throw ParseException();
             } catch (ParseException& e) {
-                std::cout << pql::ParseException::GetErrorMessage("Expecting end of file!") << std::endl;
+                std::cout << "Expecting end of file!" << std::endl;
             }
         }
     }
 
-    pql::Synonym ParserState::ParseSynonym() {
-        pql::Synonym sm;
+    std::string ParserState::ParseSynonym() {
+        std::string sm;
         std::stringstream ssm;
         ParserState::EatWhiteSpaces();
         try {
             ssm << ParserState::ExpectLetter();
         } catch (ParseException& e) {
-            std::cout << pql::ParseException::GetErrorMessage("A synonym must start with a letter!") << std::endl;
+            std::cout << "A synonym must start with a letter!" << std::endl;
         }
         for (char nextChar = ParserState::Peek(); pql::IsLetter(nextChar) or pql::IsDigit(nextChar); nextChar = ParserState::Peek()) {
             ssm << ParserState::Next();
@@ -75,6 +75,35 @@ namespace pql {
         ssm >> sm;
         ParserState::EatWhiteSpaces();
         return sm;
+    }
+
+    pql::Ref ParserState::ParseRef(Query& q) {
+        pql::Ref ref;
+        std::stringstream ssm;
+        bool is_synonym = false;
+        ParserState::EatWhiteSpaces();
+        if (ParserState::Peek() == '_') {
+            ssm <<ParserState::Next();
+        } else if (IsDigit(ParserState::Peek())) {
+            ssm << ParserState::Next();
+            for (char nextChar = ParserState::Peek(); pql::IsDigit(nextChar); nextChar = ParserState::Peek()) {
+                ssm << ParserState::Next();
+            }
+        } else {
+            ssm << ParserState::ParseSynonym();
+            is_synonym = true;
+        }
+        ssm >> ref;
+        if (is_synonym) {
+            if (!q.SynonymDeclared(ref)) {
+                try {
+                    throw ParseException();
+                } catch (ParseException& e) {
+                    std::cout << "The synonym used in a relationship must be declared" << std::endl;
+                }
+            }
+        }
+        return ref;
     }
 
 }

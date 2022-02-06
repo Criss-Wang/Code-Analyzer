@@ -12,15 +12,8 @@
 
 namespace pql {
     typedef std::string Variable;
-    typedef std::string Synonym;
-
-    struct ParseException : public std::exception {
-        static std::string GetErrorMessage (const std::string& msg) {
-            return msg;
-        }
-    };
-
-    enum DeclarationTypes {
+    typedef std::string Ref;
+    typedef enum {
         STMT,
         READ,
         PRINT,
@@ -31,7 +24,23 @@ namespace pql {
         VARIABLE,
         CONSTANT,
         PROCEDURE
+    } DeclarationType;
+
+    class Synonym {
+    private:
+        std::string name;
+        DeclarationType declaration;
+    public:
+        Synonym(std::string name, DeclarationType declaration) : name(std::move(name)), declaration(declaration) {};
+
+        std::string GetName();
+
+        DeclarationType GetDeclaration();
+
+        bool equal(const Synonym& s);
     };
+
+    struct ParseException : public std::exception {};
 
     enum RelationshipTypes {
         FOLLOWS,
@@ -44,7 +53,7 @@ namespace pql {
         MODIFIES_P
     };
 
-    const std::map<std::string, DeclarationTypes> declarationMap {
+    const std::map<std::string, DeclarationType> declarationMap {
             {"stmt", STMT},
             {"read", READ},
             {"print", PRINT},
@@ -68,7 +77,7 @@ namespace pql {
             {"ModifiesP", MODIFIES_P}
     };
 
-    std::optional<DeclarationTypes> GetDeclarationType(const std::string& keyword) {
+    std::optional<DeclarationType> GetDeclarationType(const std::string& keyword) {
         if (declarationMap.find(keyword) != declarationMap.end()) {
             return declarationMap.at(keyword);
         } else {
@@ -91,74 +100,43 @@ namespace pql {
 
     class RelationshipToken : public Token {
     private:
-        const pql::Variable left;
-        const pql::Variable right;
+        enum RelationshipTypes relationship;
+        const pql::Ref left;
+        const pql::Ref right;
     public:
-        RelationshipToken(pql::Variable left, pql::Variable right) : left(std::move(left)), right(std::move(right)) {};
+        RelationshipToken(pql::RelationshipTypes relationship, pql::Ref left, pql::Ref right) :
+                relationship(relationship), left(std::move(left)), right(std::move(right)) {};
 
-        pql::Variable GetLeft();
+        pql::Ref GetLeft();
 
-        pql::Variable GetRight();
-    };
+        pql::Ref GetRight();
 
-    class Follows_Token: public RelationshipToken {
-    public:
-        Follows_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
-    };
-
-    class Follows_T_Token: public RelationshipToken {
-    public:
-        Follows_T_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
-    };
-
-    class Parent_Token: public RelationshipToken {
-    public:
-        Parent_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
-    };
-
-    class Parent_T_Token: public RelationshipToken {
-    public:
-        Parent_T_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
-    };
-
-    class Uses_S_Token: public RelationshipToken {
-    public:
-        Uses_S_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
-    };
-
-    class Uses_P_Token: public RelationshipToken {
-    public:
-        Uses_P_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
-    };
-
-    class Modifies_S_Token: public RelationshipToken {
-    public:
-        Modifies_S_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
-    };
-
-    class Modifies_P_Token: public RelationshipToken {
-    public:
-        Modifies_P_Token(pql::Variable left, pql::Variable right) : RelationshipToken(std::move(left), std::move(right)) {};
+        pql::RelationshipTypes GetRelationship();
     };
 
     class Query {
     private:
-        std::map<DeclarationTypes, std::vector<pql::Synonym>> declarations;
+        std::vector<pql::Synonym> declarations;
+        std::map<std::string, pql::Synonym> synonyms;
         std::vector<pql::Synonym> statements;
         std::vector<pql::Synonym> procedures;
-        pql::Synonym result_synonym;
+        std::optional<pql::Synonym> result_synonym;
         std::vector<RelationshipToken> such_that_clauses;
     public:
-        void AddSynonym(DeclarationTypes d, const pql::Synonym& s);
+        bool SynonymDeclared(const std::string& name);
 
-        void SetResultSynonym(const pql::Synonym& s);
+        void AddSynonym(DeclarationType d, const std::string& name);
+
+        void SetResultSynonym(const std::string& name);
 
         pql::Synonym GetResultSynonym();
 
-        bool IsStatement(const pql::Synonym& s);
+        bool IsStatement(const std::string& name);
 
-        bool IsProcedure(const pql::Synonym& s);
+        bool IsProcedure(const std::string& name);
 
-        void AddRelationship(RelationshipTypes r, const pql::Synonym& left, const pql::Synonym& right);
+        void AddSuchThatClause(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right);
+
+        std::vector<RelationshipToken> GetSuchThatClauses();
     };
 }

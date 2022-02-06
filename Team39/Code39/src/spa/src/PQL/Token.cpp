@@ -8,6 +8,18 @@
 
 namespace pql {
 
+    std::string Synonym::GetName() {
+        return Synonym::name;
+    }
+
+    DeclarationType Synonym::GetDeclaration() {
+        return Synonym::declaration;
+    }
+
+    bool Synonym::equal(const Synonym& s) {
+        return Synonym::name == s.name and Synonym::declaration == s.declaration;
+    }
+
     pql::Variable RelationshipToken::GetLeft() {
         return RelationshipToken::left;
     }
@@ -16,57 +28,72 @@ namespace pql {
         return RelationshipToken::right;
     }
 
-    void Query::AddSynonym(DeclarationTypes d, const pql::Synonym& s) {
-        Query::declarations.at(d).push_back(s);
-        if (d == DeclarationTypes::PROCEDURE) {
-            Query::procedures.push_back(s);
+    pql::RelationshipTypes RelationshipToken::GetRelationship() {
+        return RelationshipToken::relationship;
+    }
+
+    bool Query::SynonymDeclared(const std::string& name) {
+        return synonyms.find(name) != synonyms.end();
+    }
+
+    void Query::AddSynonym(DeclarationType d, const std::string& name) {
+        if (Query::SynonymDeclared(name)) {
+            try {
+                throw ParseException();
+            } catch (ParseException& e) {
+                std::cout << "The declaring synonym must not be declared before!" << std::endl;
+            }
         } else {
-            Query::statements.push_back(s);
+            pql::Synonym sm = Synonym(name, d);
+            Query::declarations.push_back(sm);
+            Query::synonyms[name] = sm;
+            if (d == DeclarationType::PROCEDURE) {
+                Query::procedures.push_back(sm);
+            } else {
+                Query::statements.push_back(sm);
+            }
         }
     }
 
-    void Query::SetResultSynonym(const pql::Synonym& s) {
-        if (Query::IsProcedure(s) or Query::IsStatement(s)) {
-            Query::result_synonym = s;
+    void Query::SetResultSynonym(const std::string& name) {
+        if (Query::SynonymDeclared(name)) {
+            Query::result_synonym = synonyms[name];
         } else {
             try {
                 throw ParseException();
             } catch (ParseException& e) {
-                std::cout << ParseException::GetErrorMessage("The select synonym must be declared first!") << std::endl;
+                std::cout << "The select synonym must be declared first!" << std::endl;
             }
         }
     }
 
     pql::Synonym Query::GetResultSynonym() {
-        return Query::result_synonym;
+        return *Query::result_synonym;
     }
 
-    bool Query::IsStatement(const pql::Synonym& s) {
-        return (std::find(Query::statements.begin(), Query::statements.end(), s) != Query::statements.end());
-    }
-
-    bool Query::IsProcedure(const pql::Synonym& s) {
-        return (std::find(Query::procedures.begin(), Query::procedures.end(), s) != Query::procedures.end());
-    }
-
-    void Query::AddRelationship(RelationshipTypes r, const pql::Synonym& left, const pql::Synonym& right) {
-        switch (r) {
-            case FOLLOWS:
-                Query::such_that_clauses.push_back(pql::Follows_Token(left, right));
-            case FOLLOWS_T:
-                Query::such_that_clauses.push_back(pql::Follows_T_Token(left, right));
-            case PARENT:
-                Query::such_that_clauses.push_back(pql::Parent_Token(left, right));
-            case PARENT_T:
-                Query::such_that_clauses.push_back(pql::Parent_T_Token(left, right));
-            case USES_S:
-                Query::such_that_clauses.push_back(pql::Uses_S_Token(left, right));
-            case USES_P:
-                Query::such_that_clauses.push_back(pql::Uses_P_Token(left, right));
-            case MODIFIES_S:
-                Query::such_that_clauses.push_back(pql::Modifies_S_Token(left, right));
-            case MODIFIES_P:
-                Query::such_that_clauses.push_back(pql::Modifies_P_Token(left, right));
+    bool Query::IsStatement(const std::string& name) {
+        for (Synonym sm : Query::statements) {
+            if (sm.GetName() == name) {
+                return true;
+            }
         }
+        return false;
+    }
+
+    bool Query::IsProcedure(const std::string& name) {
+        for (Synonym sm : Query::procedures) {
+            if (sm.GetName() == name) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void Query::AddSuchThatClause(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right) {
+        Query::such_that_clauses.emplace_back(r, left, right);
+    }
+
+    std::vector<RelationshipToken> Query::GetSuchThatClauses() {
+        return Query::such_that_clauses;
     }
 }
