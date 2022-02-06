@@ -6,8 +6,8 @@ int Pkb::PopulateNestedRelationship() {
   try {
     PopulateNestedFollows();
     PopulateNestedParents();
-    PopulateUses();
     PopulateModifies();
+    PopulateUses();
   } catch (exception& e) {
     return 0;
   }
@@ -69,15 +69,15 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
   for (const int parent_stmt: parent_star_table.GetKeyLst()) {
     vector<string> variables_lst;
     if (t.KeyExistsInTable(parent_stmt)) {
-      // Get the associated list of variables with the statement number
       variables_lst = t.GetValueByKey(parent_stmt);
     }
-    // Create a copy of this list of variables
     vector<string> tmp_lst(variables_lst);
 
     for (const int child_stmt: parent_star_table.GetValueByKey(parent_stmt)) {
+      if (!t.KeyExistsInTable(child_stmt)) continue;
       // Get the variables associated with the statement number
       vector<string> variables_lst_of_child_stmt = t.GetValueByKey(child_stmt);
+      
       // Merge two vectors
       tmp_lst.insert(tmp_lst.end(), variables_lst_of_child_stmt.begin(), variables_lst_of_child_stmt.end());
       // Remove duplicate elements

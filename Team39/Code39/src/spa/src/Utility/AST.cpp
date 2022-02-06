@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include <iostream>
 #include <typeinfo>
-#include "AST.h"
+#include "ast.h"
 
 TNode* AST::getRoot() {
 	return this->root;

@@ -20,7 +20,8 @@ enum TokenType {
   IF, 
   THEN,
   ELSE,
-  WHILE
+  WHILE,
+  WILDCARD
 };
 
 static const string tokenTypeStrings[] = {
@@ -38,7 +39,8 @@ static const string tokenTypeStrings[] = {
   "IF",
   "THEN",
   "ELSE",
-  "WHILE"
+  "WHILE",
+  "WILDCARD"
 };
 
 class Token {

@@ -1,6 +1,6 @@
 #include "Parser.h"
-#include "Utility/TNode.h"
-#include "Utility/AST.h"
+#include "Utility/t_node.h"
+#include "Utility/ast.h"
 
 #include "catch.hpp"
 using namespace std;
@@ -23,7 +23,7 @@ TEST_CASE("1st Test: Assignment") {
 	actualAST.print("", actualAST.root, false);
 
     require((*actualAST.root).isEqual(expectedAST.root));
-} */
+}
 
 TEST_CASE("Read - Test 1") {
 
@@ -215,5 +215,5 @@ TEST_CASE("Read and Print - Test 1") {
 
 	require((actualAST).isEqual(expectedAST));
 }
-
+ */
 
