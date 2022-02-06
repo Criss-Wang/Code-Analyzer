@@ -1,17 +1,8 @@
 #pragma once
 #include <string>
 #include "PKB/pkb.h"
+#include "SP/Tokenizer.h"
 
 using namespace std;
 
-
-// TODO (Yuxuan): [Integration] Use actual vector<Token> returned by Tokenizer to populate
-// To be deleted after tokenizer is completed.
-struct TokenTemp {
-	string type;
-	string text;
-	int line_num;
-};
-
-// change back to parse(string source_program_input) after tokenizer is done.
-void Parse(vector<TokenTemp> input);
+void Parse(string input);
