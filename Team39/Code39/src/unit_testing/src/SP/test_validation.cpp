@@ -58,13 +58,12 @@ TEST_CASE("Valid programs") {
 		}
 	}
 
-	/* KIV, issue with tokenizer
 	SECTION("Test 3") {
 		/*Input:
 		* procedure procName {
 		*	x = y + (5 + z);
 		* }
-		* 
+		* */
 		
 		ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/validation_tests/test3.txt");
 		if (!input_file.is_open()) {
@@ -78,10 +77,8 @@ TEST_CASE("Valid programs") {
 			cout << endl;
 
 			RequireValidation(Validate(tokens));
-		}
-		
+		}	
 	}
-	*/
 }
 
 TEST_CASE("Invalid Programs") {
