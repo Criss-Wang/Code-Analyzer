@@ -19,7 +19,7 @@ namespace pql {
     list<string> evaluate(Query query) {
         vector<RelationshipToken> suchThatClauses = query.GetSuchThatClause();
         unordered_map<string, list<int>> hashmap;
-        list<Synonym> synonyms = query.GetAllSynonymsUsed();
+        vector<Synonym> synonyms = query.GetAllUsedSynonyms();
 
         //hashmap stores <synonym.name, domain> pair.
         for (const Synonym& synonym : synonyms) {
@@ -105,6 +105,15 @@ namespace pql {
             }
         }
 
+        Synonym selectedSyn = query.GetResultSynonym();
+        list<int> selectedSynDomain = hashmap[selectedSyn.GetName()];
+        list<string> res;
+
+        for (int val : selectedSynDomain) {
+            res.push_back(to_string(val));
+        }
+
+        return res;
     }
 
     void UpdateHashmap(unordered_map<string, list<int>>& hmap, string name, const vector<int>& lst) {
