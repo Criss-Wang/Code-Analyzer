@@ -46,7 +46,7 @@ namespace pql {
         } else {
             pql::Synonym sm = Synonym(name, d);
             Query::declarations.push_back(sm);
-            Query::synonyms[name] = sm;
+            Query::synonyms.insert(std::pair<std::string, pql::Synonym>(name, sm));
         }
     }
 
