@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include <iostream>
 #include <typeinfo>
-#include "TNode.h"
+#include "t_node.h"
 
 void TNode::insertFront(TNode* node) {
 	this->childNodes.insert(childNodes.begin(), node);

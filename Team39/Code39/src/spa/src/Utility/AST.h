@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <list>
-#include "TNode.h"
+#include "t_node.h"
 using namespace std;
 
 class AST {

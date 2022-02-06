@@ -7,127 +7,210 @@ using namespace std;
 #include "Parser.h"
 #include "SP/validator.h"
 
-void Parse(vector<TokenTemp> input) {
+void Parse(string input) {
 
-  /*
-  * Tokenizer tokenizer;
-  *
-  * vector<Token> inputTokens = tokenizer.parse(sourceProgramInput);
-  * if (validator.validate(inputTokens)) {
-  *	populate PKB;
-  * } else {
-  *	cout << "Syntax Error";
-  * }
-  */
+  Pkb pkb; // TODO: Need to integrate with globally declared pkb for autotester
+  Tokenizer tokenizer;
+  vector<Token> inputTokens = tokenizer.parse(input);
 
-
-  // TODO (Yuxuan): [Integration] Use PKB declared globally
-  Pkb pkb;
-
-  if (Validate(input)) {
+  if (Validate(inputTokens)) {
 
     // Stores parent/previous stmt's line number for Parent/Follows relationship
     int parent = -1;
     int previous = -1;
     bool is_rhs_of_assignment = false;
+    bool is_procedure_name = false;
+    bool is_variable_name = false;
 
-    for (auto token = begin(input); token != end(input); ++token) {
-      if (token->type == "procedure") {
-        string proc_name = next(token, 1)->text;
-        //pkb.proc_table_.AddEntityByName(proc_name);
-        parent = token->line_num;
-        cout << "add procedure: " << proc_name << endl;
+    for (auto token = begin(inputTokens); token != end(inputTokens); ++token) {
+      
+      if (token->type == NAME && token->text == "procedure") {
+        parent = token->stmt_num_;
+        is_procedure_name = true;
 
-      } else if (token->type == "variable" || token->type == "name") {
-        //pkb.var_table_.AddEntityByName(token->text);
-        cout << "add variable: " << token->text << endl;
+      } else if (token->text == "read") {
+
+        string read_var = next(token, 1)->text;
+
+        // Add stmt num to stmt_set_ and read_set_
+        pkb.AddEntityToSet(Pkb::EntityIdentifier::kStmt, token->stmt_num_);
+        pkb.AddEntityToSet(Pkb::EntityIdentifier::kRead, token->stmt_num_);
+
+        pkb.AddInfoToTable(Pkb::TableIdentifier::kRead, token->stmt_num_, read_var);
+
+        // Add modifies to modify stmt to var
+        pkb.AddInfoToTable(Pkb::TableIdentifier::kModifiesStmtToVar, token->stmt_num_, token->text);
+
+        if (previous != -1) {
+          // Add followsBy and followsAfter
+          pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsBy, previous, token->stmt_num_);
+          pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsAfter, token->stmt_num_, previous);
+        }
+        if (parent != -1) {
+          // Add parent and child
+          pkb.AddInfoToTable(Pkb::TableIdentifier::kParent, parent, token->stmt_num_);
+          pkb.AddInfoToTable(Pkb::TableIdentifier::kChild, token->stmt_num_, parent);
+        }
+
+      } else if (token->text == "print") {
+
+        string print_var = next(token, 1)->text;
+
+        // Add stmt num to stmt_set_ and print_set_
+        pkb.AddEntityToSet(Pkb::EntityIdentifier::kStmt, token->stmt_num_);
+        pkb.AddEntityToSet(Pkb::EntityIdentifier::kPrint, token->stmt_num_);
+
+        pkb.AddInfoToTable(Pkb::TableIdentifier::kPrint, token->stmt_num_, print_var);
+
+        // Add uses to uses stmt to var
+        pkb.AddInfoToTable(Pkb::TableIdentifier::kUsesStmtToVar, token->stmt_num_, token->text);
+
+        if (previous != -1) {
+          // Add followsBy and followsAfter
+          pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsBy, previous, token->stmt_num_);
+          pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsAfter, token->stmt_num_, previous);
+        }
+        if (parent != -1) {
+          // Add parent and child
+          pkb.AddInfoToTable(Pkb::TableIdentifier::kParent, parent, token->stmt_num_);
+          pkb.AddInfoToTable(Pkb::TableIdentifier::kChild, token->stmt_num_, parent);
+        }
+
+      } else if (token->text == "call") {
+        // TODO (Yuxuan): Add implementation in future iterations
+
+      } else if (token->type == WHILE) {
+        // TODO (Yuxuan): Add implementation in future iterations
+
+      } else if (token->type == IF) {
+        // TODO (Yuxuan): Add implementation in future iterations
+
+      } else if (token->type == LETTER || token->type == NAME) {
+        if (is_procedure_name) {
+          // Add procedure name to procedure_set_
+          pkb.AddEntityToSet(Pkb::EntityIdentifier::kProc, token->text);
+          is_procedure_name = false;
+        } else {
+          pkb.AddEntityToSet(Pkb::EntityIdentifier::kVariable, token->text);
+        }
 
         bool is_assignment = next(token, 1)->text == "=";
         if (is_assignment) {
-          // TODO (Yuxuan): populate modifies relationship using API given by PKB
-          cout << "add modifies: " << token->line_num << ", " << token->text << endl;
+
+          // Add stmt num to stmt_set_ and assign_set_
+          pkb.AddEntityToSet(Pkb::EntityIdentifier::kStmt, token->stmt_num_);
+          pkb.AddEntityToSet(Pkb::EntityIdentifier::kAssign, token->stmt_num_);
+
+          // Build assignments for pattern matching
+          string assignment = "";
+          int i = 2;
+          while (next(token, i)->type != SEMICOLON) {
+            assignment += next(token, i)->text;
+            i++;
+          }
+
+          // add brackets for '*' or '/' first
+          for (int i = 0; i < assignment.length(); i++) {
+            if (assignment[i] == '*' || assignment[i] == '/') {
+              int right_offset = 1;
+              if (assignment.substr(i).find(")") != string::npos) {
+                right_offset = assignment.substr(i).find(")") + 1;
+              }
+              assignment.insert(i + right_offset + 1, ")");
+
+              int pos = i - 1;
+              int start = 0;
+              while (assignment.substr(start, i).find("(") != string::npos) {
+                pos = assignment.substr(start, i).find("(");
+                start++;
+              }
+              assignment.insert(pos, "(");
+
+              i += 2;
+            }
+          }
+          
+          // add brackets for '+' and '-'
+          for (int i = 0; i < assignment.length(); i++) {
+            if (assignment[i] == '+' || assignment[i] == '-') {
+              int right_offset = 1;
+              if (assignment.substr(i).find(")") != string::npos) {
+                right_offset = assignment.substr(i).find(")") + 1;
+              }
+              assignment.insert(i + right_offset + 1, ")");
+
+              int pos = i - 1;
+              int start = 0;
+              while (assignment.substr(start, i).find("(") != string::npos) {
+                pos = assignment.substr(start, i).find("(");
+                start++;
+              }
+              assignment.insert(pos, "(");
+
+              i += 2;
+            }
+          }
+
+          pkb.AddInfoToTable(Pkb::TableIdentifier::kAssign, token->stmt_num_, assignment);
+
+          // Add modifies to modify stmt to var
+          pkb.AddInfoToTable(Pkb::TableIdentifier::kModifiesStmtToVar, token->stmt_num_, token->text);
+          //pkb.AddInfoToTable(Pkb::TableIdentifier::kModifiesVarToStmt, token->text, token->stmt_num_);
 
         } else if (is_rhs_of_assignment) {
-          // TODO (Yuxuan): populate uses relationship using API given by PKB
-          cout << "add uses: " << token->line_num << ", " << token->text << endl;
-        }
-      } else if (token->type == "constant") {
-        //pkb.const_table_.AddEntityByName(token->text);
-        cout << "add constant: " << token->text << endl;
-
-      } else if (token->type == "read") {
-        string read_var = next(token, 1)->text;
-        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::read_idx_);
-        cout << "add read stmt: line " << token->line_num << endl;
-
-        // TODO (Yuxuan): populate modifies relationship using API given by PKB
-        cout << "add modifies: " << token->line_num << ", " << read_var << endl;
-
-        if (previous != -1) {
-          // TODO (Yuxuan): populate follows relationship using API given by PKB
-          cout << "add follows: " << previous << ", " << token->line_num << endl;
-        }
-        if (parent != -1) {
-          // TODO (Yuxuan): populate parent relationship using API given by PKB
-          cout << "add parent: " << parent << ", " << token->line_num << endl;
+          // Add uses to uses stmt to var
+          pkb.AddInfoToTable(Pkb::TableIdentifier::kUsesStmtToVar, token->stmt_num_, token->text);
         }
 
-      } else if (token->type == "print") {
-        string print_var = next(token, 1)->text;
-        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::print_idx_);
-        cout << "add print stmt: line " << token->line_num << endl;
+      } else if (token->type == DIGIT || token->type == INTEGER) {
+        // Add constant to constant_set_
+        pkb.AddEntityToSet(Pkb::EntityIdentifier::kConstant, token->text);
 
-        // TODO (Yuxuan): populate modifies relationship using API given by PKB
-        cout << "add uses: " << token->line_num << ", " << print_var << endl;
+      } else if (token->type == LEFT_CURLY) {
+        parent = token->stmt_num_;
 
-        if (previous != -1) {
-          // TODO (Yuxuan): populate follows relationship using API given by PKB
-          cout << "add follows: " << previous << ", " << token->line_num << endl;
-        }
-        if (parent != -1) {
-          // TODO (Yuxuan): populate parent relationship using API given by PKB
-          cout << "add parent: " << parent << ", " << token->line_num << endl;
-        }
-
-      } else if (token->type == "assign") { // kiv, tokenType no assign var?
-        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::assign_idx_);
-
-      } else if (token->type == "call") {
-        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::call_idx_);
-
-      } else if (token->type == "while") {
-        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::while_idx_);
-
-      } else if (token->type == "if") {
-        //pkb.stmt_table_.AddEntity(token->line_num, StmtTable::if_idx_);
-
-      } else if (token->type == "{") {
-        parent = token->line_num;
-
-      } else if (token->type == "}") {
+      } else if (token->type == RIGHT_CURLY) {
         parent = -1;
 
-      } else if (token->type == ";") {
-        previous = token->line_num;
+      } else if (token->type == SEMICOLON) {
+        previous = token->stmt_num_;
         is_rhs_of_assignment = false;
 
-      } else if (token->type == "operator") {
+      } else if (token->type == OPERATOR) {
         if (token->text == "=") {
           is_rhs_of_assignment = true;
-          cout << "add assign stmt: line " << token->line_num << endl;
 
           if (previous != -1) {
-            // TODO (Yuxuan): populate follows relationship using API given by PKB
-            cout << "add follows: " << previous << ", " << token->line_num << endl;
+            // Add followsBy and followsAfter
+            pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsBy, previous, token->stmt_num_);
+            pkb.AddInfoToTable(Pkb::TableIdentifier::kFollowsAfter, token->stmt_num_, previous);
           }
           if (parent != -1) {
-            // TODO (Yuxuan): populate parent relationship using API given by PKB
-            cout << "add parent: " << parent << ", " << token->line_num << endl;
+            // Add parent and child
+            pkb.AddInfoToTable(Pkb::TableIdentifier::kParent, parent, token->stmt_num_);
+            pkb.AddInfoToTable(Pkb::TableIdentifier::kChild, token->stmt_num_, parent);
           }
         }
       } else {
         cout << "Error: Token type not recognized" << endl;
       }
     }
+
+    /* 
+    // Print tables for testing purposes 
+    cout << "Procedure Names: " << endl;
+    for (auto const& i : pkb.GetAllEntityString(Pkb::EntityIdentifier::kProc)) {
+      std::cout << i << " ";
+    }
+    cout << endl;
+
+    cout << "Variable Names: " << endl;
+    for (auto const& i : pkb.GetAllEntityString(Pkb::EntityIdentifier::kVariable)) {
+      std::cout << i << " ";
+    }
+    cout << endl;
+    */
+
+    pkb.PopulateNestedRelationship();
   }
 }
