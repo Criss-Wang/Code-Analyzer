@@ -52,7 +52,7 @@ namespace pql {
 
     void Query::SetResultSynonym(const std::string& name) {
         if (Query::SynonymDeclared(name)) {
-            Query::result_synonym = Query::synonyms[name];
+            Query::result_synonym = Query::synonyms.at(name);
             Query::AddUsedSynonym(name);
         } else {
             try {
@@ -68,7 +68,7 @@ namespace pql {
     }
 
     bool Query::IsProcedure(const std::string& name) {
-        return Query::synonyms[name].GetDeclaration() == PROCEDURE;
+        return Query::synonyms.at(name).GetDeclaration() == PROCEDURE;
     }
 
     void Query::AddUsedSynonym(const std::string& name) {
