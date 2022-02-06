@@ -13,18 +13,16 @@ template <typename T1, typename T2>
 class Table {
   protected:
     unordered_map<T1, T2> table_;
-    virtual bool KeyExistsInTable(const T1 key) {
-      return table_.find(key) != table_.end();
-    }
 
-
-  private:
   public:
     ~Table() = default;
 
-
     int GetTableSize() {
       return static_cast<int>(table_.size());
+    }
+
+    virtual bool KeyExistsInTable(const T1 key) {
+      return table_.find(key) != table_.end();
     }
 
     virtual bool AddKeyValuePair(T1 key, T2 value) {
@@ -72,7 +70,8 @@ class Table {
       return val_set;
     }
 
-    virtual bool SetKeyValuePair(T1 key, T2 value) {
+    // If key does not exist, add the key into the table. Otherwise, update the key with the new value
+    virtual bool UpdateKeyWithNewValue(T1 key, T2 value) {
       try {
         if (!this->KeyExistsInTable(key)) {
           return AddKeyValuePair(key, value);
@@ -83,4 +82,15 @@ class Table {
         return false;
       }
     }
+};
+
+enum class TableIdentifier {
+  kAssign, kRead, kPrint, kConstant, kIf, kWhile,
+  kFollows, kFollowsStar,
+  kParent, kParentStar,
+  kUsesStmtToVar, kModifiesStmtToVar
+};
+
+enum class EntityIdentifier {
+  kProc, kStmtLst, kStmt, kRead, kPrint, kAssign, kWhile, kCall, kIf, kVariable, kConstant
 };
