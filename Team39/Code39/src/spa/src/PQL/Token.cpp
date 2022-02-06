@@ -72,7 +72,7 @@ namespace pql {
     }
 
     void Query::AddUsedSynonym(const std::string& name) {
-        Query::used_synonyms.push_back(Query::synonyms[name]);
+        Query::used_synonyms.push_back(Query::synonyms.at(name));
     }
 
     std::vector<pql::Synonym> Query::GetAllUsedSynonyms() {
