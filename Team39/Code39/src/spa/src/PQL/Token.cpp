@@ -83,7 +83,7 @@ namespace pql {
         Query::such_that_clauses.emplace_back(r, left, right);
     }
 
-    std::vector<RelationshipToken> Query::GetSuchThatClauses() {
+    std::vector<RelationshipToken> Query::GetSuchThatClause() {
         return Query::such_that_clauses;
     }
 }
