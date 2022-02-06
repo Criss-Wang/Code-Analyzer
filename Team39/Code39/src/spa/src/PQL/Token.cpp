@@ -53,7 +53,7 @@ namespace PQL {
             case FOLLOWS:
                 Query::suchThatClauses.push_back(PQL::Follows_Token(left, right));
             case FOLLOWS_T:
-                Query::suchThatClauses.push_back(PQL::Follows_Token(left, right));
+                Query::suchThatClauses.push_back(PQL::Follows_T_Token(left, right));
             case PARENT:
                 Query::suchThatClauses.push_back(PQL::Parent_T_Token(left, right));
             case PARENT_T:
