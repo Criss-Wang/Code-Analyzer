@@ -10,6 +10,7 @@
 using namespace std;
 
 #include "../PKB/pkb.h"
+#include "QueryEvaluator.h"
 
 namespace pql {
     list<int> Intersect(const list<int>& lst1, const vector<int>& lst2);
