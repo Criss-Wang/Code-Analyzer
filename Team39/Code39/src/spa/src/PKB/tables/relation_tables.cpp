@@ -10,7 +10,7 @@ bool ModifiesVariableToStmtsTable::UpdateKeyValuePair(const int value_to_update,
       }
       vector<int> var_to_stmt_lst = GetValueByKey(var);
       if (find(var_to_stmt_lst.begin(), var_to_stmt_lst.end(), value_to_update) == var_to_stmt_lst.end()) var_to_stmt_lst.push_back(value_to_update);
-      add_success = SetKeyValuePair(var, var_to_stmt_lst) && add_success;
+      add_success = UpdateKeyWithNewValue(var, var_to_stmt_lst) && add_success;
     }
     return add_success;
   } catch (exception& e) {
