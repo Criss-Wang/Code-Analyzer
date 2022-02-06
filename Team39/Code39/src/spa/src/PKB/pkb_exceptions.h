@@ -19,13 +19,14 @@ class InvalidKeyException final : public exception {
     }
 };
 
-class InvalidValueException final : public exception {
+class EmptyValueException final : public exception {
   public:
     const char* what() const throw() {
       return "Value should not be empty";
     }
 };
 
+// Thrown when wrong TableIdentifier or EntityIdentifier is provided
 class InvalidIdentifierException final : public exception {
   public:
     const char* what() const throw() {
