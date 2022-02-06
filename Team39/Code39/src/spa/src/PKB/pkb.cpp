@@ -49,7 +49,7 @@ void Pkb::PopulateNestedParents() {
 
 // Helper function for populating nested
 void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarTable& child_star_table, Table<int, vector<string>>& t,
-  Table<string, vector<int>> t2) {
+  Table<string, vector<int>>& t2) {
   for (const int parent_stmt: parent_star_table.GetKeyLst()) {
     // Get the associated list of variables with the statement number
     const vector<string> variables_lst = t.GetValueByKey(parent_stmt);
