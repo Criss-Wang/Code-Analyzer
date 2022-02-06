@@ -71,6 +71,13 @@ namespace pql {
         pql::Ref right = ps.ParseRef(q);
         ps.Expect(")");
         if (relationship == "Uses" or relationship == "Modifies") {
+            if (left == "_") {
+                try {
+                    throw ParseException();
+                } catch (ParseException& e) {
+                    std::cout << "The first argument of Uses or Modifies Relationship cannot be a wildcard!" << std::endl;
+                }
+            }
             if (q.IsProcedure(left)) {
                 relationship.push_back('P');
             }
