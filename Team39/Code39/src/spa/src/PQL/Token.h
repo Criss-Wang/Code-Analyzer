@@ -15,16 +15,16 @@ namespace pql {
     typedef std::string Variable;
     typedef std::string Ref;
     typedef enum {
-        STMT,
-        READ,
-        PRINT,
-        CALL,
-        WHILE,
-        IF,
-        ASSIGN,
-        VARIABLE,
-        CONSTANT,
-        PROCEDURE
+        kStmt,
+        kRead,
+        kPrint,
+        kCall,
+        kWhile,
+        kIf,
+        kAssign,
+        kVariable,
+        kConstant,
+        kProcedure
     } DeclarationType;
 
     class Synonym {
@@ -44,38 +44,38 @@ namespace pql {
     struct ParseException : public std::exception {};
 
     enum RelationshipTypes {
-        FOLLOWS,
-        FOLLOWS_T,
-        PARENT,
-        PARENT_T,
-        USES_S,
-        USES_P,
-        MODIFIES_S,
-        MODIFIES_P
+        kFollows,
+        kFollowsT,
+        kParent,
+        kParentT,
+        kUsesS,
+        kUsesP,
+        kModifiesS,
+        kModifiesP
     };
 
     const std::map<std::string, DeclarationType> declarationMap {
-            {"stmt", STMT},
-            {"read", READ},
-            {"print", PRINT},
-            {"call", CALL},
-            {"while", WHILE},
-            {"if", IF},
-            {"assign", ASSIGN},
-            {"variable", VARIABLE},
-            {"constant", CONSTANT},
-            {"procedure", PROCEDURE}
+            {"stmt", kStmt},
+            {"read", kRead},
+            {"print", kPrint},
+            {"call", kCall},
+            {"while", kWhile},
+            {"if", kIf},
+            {"assign", kAssign},
+            {"variable", kVariable},
+            {"constant", kConstant},
+            {"procedure", kProcedure}
     };
 
     const std::map<std::string, RelationshipTypes> relationshipMap {
-            {"Follows", FOLLOWS},
-            {"Follows*", FOLLOWS_T},
-            {"Parent", PARENT},
-            {"Parent*", PARENT_T},
-            {"Uses", USES_S},
-            {"UsesP", USES_P},
-            {"Modifies", MODIFIES_S},
-            {"ModifiesP", MODIFIES_P}
+            {"Follows", kFollows},
+            {"Follows*", kFollowsT},
+            {"Parent", kParent},
+            {"Parent*", kParentT},
+            {"Uses", kUsesS},
+            {"UsesP", kUsesP},
+            {"Modifies", kModifiesS},
+            {"ModifiesP", kModifiesP}
     };
 
     std::optional<DeclarationType> GetDeclarationType(const std::string& keyword) {
