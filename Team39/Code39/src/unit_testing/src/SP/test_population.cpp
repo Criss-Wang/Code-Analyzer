@@ -28,7 +28,8 @@ TEST_CASE("Test populate PKB") {
 	} else {
 		string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 
-		//Parse(input);
+		Pkb pkb;
+		Parse(input, pkb);
 
 		RequirePopulation(1==1);
 	}
@@ -51,7 +52,8 @@ TEST_CASE("Test populate PKB 2") {
 	} else {
 		string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 
-		//Parse(input);
+		Pkb pkb;
+		Parse(input, pkb);
 
 		RequirePopulation(1 == 1);
 	}
