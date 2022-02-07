@@ -155,8 +155,7 @@ void Parse(string input) {
           // Add modifies to modify stmt to var
           pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, { token->text });
 
-          // build a vector containing all variables on the RHS and put them into modifiesStmtToVar table
-          // TODO: test if its actually working
+          // build a vector containing all variables on the RHS and put them into UsesStmtToVar table
           string uses_var = "";
           vector<string> all_uses_var;
           for (int i = 0; i < assignment.length(); i++) {
