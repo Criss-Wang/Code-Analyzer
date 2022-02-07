@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <exception>
+#include <optional>
 
 namespace pql {
     typedef std::string Variable;

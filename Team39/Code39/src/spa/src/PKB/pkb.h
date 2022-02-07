@@ -80,7 +80,7 @@ class Pkb {
     // Relationship utility APIs for PQL
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
     [[nodiscard]] bool IsTransitiveParent(int stmt_1, int stmt_2) const;
-    [[nodiscard]] int GetParent(int stmt) const;
+    [[nodiscard]] vector<int> GetParent(int stmt) const;
     [[nodiscard]] vector<int> GetAllParents(int stmt) const;
     [[nodiscard]] vector<int> GetChild(int stmt) const;
     [[nodiscard]] vector<int> GetAllChildren(int stmt) const;

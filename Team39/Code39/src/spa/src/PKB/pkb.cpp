@@ -6,8 +6,8 @@ int Pkb::PopulateNestedRelationship() {
   try {
     PopulateNestedFollows();
     PopulateNestedParents();
-    PopulateUses();
     PopulateModifies();
+    PopulateUses();
   } catch (exception& e) {
     return 0;
   }
@@ -22,13 +22,21 @@ void Pkb::PopulateNestedParents() {
     queue<int> q;
     q.push(key);
     while (!q.empty()) {
+      if (!parent_table_->KeyExistsInTable(q.front())) {
+        q.pop();
+        continue;
+      }
       for (auto child_key: parent_table_->GetValueByKey(q.front())) {
         current_key_child_lst.push_back(child_key);
         q.push(child_key);
       }
       q.pop();
     }
-    parent_star_table_->AddKeyValuePair(key, current_key_child_lst);
+    if (parent_star_table_->KeyExistsInTable(key)) {
+      parent_star_table_->UpdateKeyWithNewValue(key, current_key_child_lst);
+    } else {
+      parent_star_table_->AddKeyValuePair(key, current_key_child_lst);
+    }
   }
 
   // Populate the reverse nested relationships
@@ -37,34 +45,47 @@ void Pkb::PopulateNestedParents() {
     queue<int> q;
     q.push(key);
     while (!q.empty()) {
+      if (!child_table_->KeyExistsInTable(q.front())) {
+        q.pop();
+        continue;
+      }
       for (auto parent_key : child_table_->GetValueByKey(q.front())) {
         current_key_parent_lst.push_back(parent_key);
         q.push(parent_key);
       }
       q.pop();
     }
-    child_star_table_->AddKeyValuePair(key, current_key_parent_lst);
+    if (child_star_table_->KeyExistsInTable(key)) {
+      child_star_table_->UpdateKeyWithNewValue(key, current_key_parent_lst);
+    } else {
+      child_star_table_->AddKeyValuePair(key, current_key_parent_lst);
+    }
   }
 }
 
-// Helper function for populating nested
+
 void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarTable& child_star_table, Table<int, vector<string>>& t,
   Table<string, vector<int>>& t2) {
   for (const int parent_stmt: parent_star_table.GetKeyLst()) {
-    // Get the associated list of variables with the statement number
-    const vector<string> variables_lst = t.GetValueByKey(parent_stmt);
-    // Create a copy of this list of variables
+    vector<string> variables_lst;
+    if (t.KeyExistsInTable(parent_stmt)) {
+      variables_lst = t.GetValueByKey(parent_stmt);
+    }
     vector<string> tmp_lst(variables_lst);
 
     for (const int child_stmt: parent_star_table.GetValueByKey(parent_stmt)) {
+      if (!t.KeyExistsInTable(child_stmt)) continue;
       // Get the variables associated with the statement number
       vector<string> variables_lst_of_child_stmt = t.GetValueByKey(child_stmt);
+      
       // Merge two vectors
       tmp_lst.insert(tmp_lst.end(), variables_lst_of_child_stmt.begin(), variables_lst_of_child_stmt.end());
       // Remove duplicate elements
       sort(tmp_lst.begin(), tmp_lst.end());
       tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
     }
+
+    if (tmp_lst.empty()) return;
     bool success = t.UpdateKeyWithNewValue(parent_stmt, tmp_lst);
   }
 
@@ -73,6 +94,7 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
     vector<int> stmts_lst = t2.GetValueByKey(var);
     vector<int> tmp_lst(stmts_lst);
     for (const int stmt: stmts_lst) {
+      if (!child_star_table.KeyExistsInTable(stmt)) continue;
       const vector<int> parent_stmts_lst = child_star_table.GetValueByKey(stmt);
       if (parent_stmts_lst.empty()) continue;
       tmp_lst.insert(tmp_lst.end(), parent_stmts_lst.begin(), parent_stmts_lst.end());
@@ -80,7 +102,9 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
       sort(tmp_lst.begin(), tmp_lst.end());
       tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
     }
-    t2.UpdateKeyWithNewValue(var, tmp_lst);
+
+    if (tmp_lst.empty()) return;
+    bool success = t2.UpdateKeyWithNewValue(var, tmp_lst);
   }
 }
 
@@ -128,9 +152,9 @@ bool Pkb::IsTransitiveParent(const int stmt_1, const int stmt_2) const {
   return find(parent_stmt_lst.begin(), parent_stmt_lst.end(), stmt_1) != parent_stmt_lst.end();
 }
 
-int Pkb::GetParent(const int stmt) const {
+vector<int> Pkb::GetParent(const int stmt) const {
   const vector<int> parent_stmt_lst = child_table_->GetValueByKey(stmt);
-  return parent_stmt_lst[0];
+  return {parent_stmt_lst[0]};
 }
 
 vector<int> Pkb::GetAllParents(const int stmt) const {
