@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <exception>
+#include <optional>
 
 #include "../Utility/Entity.h"
 

@@ -40,7 +40,7 @@ void Parse(string input, Pkb & pkb) {
         pkb.AddInfoToTable(TableIdentifier::kRead, token->stmt_num_, read_var);
 
         // Add modifies to modify stmt to var
-        pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, token->text);
+        pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, { token->text });
 
 
         // TODO (Yuxuan): Add helper function to avoid repeating same code
@@ -155,8 +155,7 @@ void Parse(string input, Pkb & pkb) {
           // Add modifies to modify stmt to var
           pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, { token->text });
 
-          // build a vector containing all variables on the RHS and put them into modifiesStmtToVar table
-          // TODO: test if its actually working
+          // build a vector containing all variables on the RHS and put them into UsesStmtToVar table
           string uses_var = "";
           vector<string> all_uses_var;
           for (int i = 0; i < assignment.length(); i++) {
@@ -169,7 +168,7 @@ void Parse(string input, Pkb & pkb) {
               }
             }
           }
-          pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, all_uses_var);
+          pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, token->stmt_num_, all_uses_var);
         }
 
       } else if (token->type == DIGIT || token->type == INTEGER) {
