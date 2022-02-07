@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "Token.h"
+#include "../Utility/Entity.h"
 
 namespace pql {
 
@@ -12,12 +13,12 @@ namespace pql {
         return Synonym::name;
     }
 
-    DeclarationType Synonym::GetDeclaration() {
+    EntityIdentifier Synonym::GetDeclaration() {
         return Synonym::declaration;
     }
 
     bool Synonym::equal(const Synonym& s) {
-        return Synonym::name == s.name and Synonym::declaration == s.declaration;
+        return Synonym::name == s.name && Synonym::declaration == s.declaration;
     }
 
     pql::Variable RelationshipToken::GetLeft() {
@@ -36,7 +37,7 @@ namespace pql {
         return synonyms.find(name) != synonyms.end();
     }
 
-    void Query::AddSynonym(DeclarationType d, const std::string& name) {
+    void Query::AddSynonym(EntityIdentifier d, const std::string& name) {
         if (Query::SynonymDeclared(name)) {
             try {
                 throw ParseException();
