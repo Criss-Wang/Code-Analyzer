@@ -5,7 +5,6 @@
 #include <iostream>
 
 #include "Token.h"
-#include "../Utility/Entity.h"
 
 namespace pql {
 
@@ -69,7 +68,7 @@ namespace pql {
     }
 
     bool Query::IsProcedure(const std::string& name) {
-        return Query::synonyms.at(name).GetDeclaration() == kProcedure;
+        return Query::synonyms.at(name).GetDeclaration() == EntityIdentifier::kProcedure;
     }
 
     void Query::AddUsedSynonym(const std::string& name) {

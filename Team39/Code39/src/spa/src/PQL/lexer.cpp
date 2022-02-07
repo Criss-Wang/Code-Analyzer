@@ -2,6 +2,7 @@
 // Created by Tan Xi Zhe on 28/1/22.
 //
 
+#pragma once
 #include "Parser.h"
 
 namespace pql {

@@ -5,4 +5,4 @@
 
 using namespace std;
 
-void Parse(string input, Pkb pkb);
+void Parse(string input, Pkb& pkb);

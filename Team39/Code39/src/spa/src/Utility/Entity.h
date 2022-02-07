@@ -1,4 +1,4 @@
-
+#pragma once
 enum class EntityIdentifier {
 	kProc, 
 	kStmtLst, 
@@ -10,5 +10,6 @@ enum class EntityIdentifier {
 	kCall, 
 	kIf, 
 	kVariable, 
-	kConstant
+	kConstant,
+	kProcedure
 };

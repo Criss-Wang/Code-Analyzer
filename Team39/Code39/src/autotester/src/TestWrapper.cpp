@@ -40,7 +40,8 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
   // each result must be a string.
 
   pql::Parser parser = pql::Parser(query);
-  std::list<std::string> res = evaluateQuery(parser.getQuery());
+  std::list<std::string> res = {};
+  //evaluateQuery(parser.getQuery(), pkb);
 
   for (string s : res) {
 	  results.push_back(s);
