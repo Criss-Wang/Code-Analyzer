@@ -94,6 +94,7 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
     vector<int> stmts_lst = t2.GetValueByKey(var);
     vector<int> tmp_lst(stmts_lst);
     for (const int stmt: stmts_lst) {
+      if (!child_star_table.KeyExistsInTable(stmt)) continue;
       const vector<int> parent_stmts_lst = child_star_table.GetValueByKey(stmt);
       if (parent_stmts_lst.empty()) continue;
       tmp_lst.insert(tmp_lst.end(), parent_stmts_lst.begin(), parent_stmts_lst.end());

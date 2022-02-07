@@ -127,7 +127,14 @@ TEST_CASE("Populate Table") {
     const bool success_4 = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 4, value_4);
     const int populate_success_2 = pkb.PopulateNestedRelationship();
 
+    const vector<string> value_5 = { "x" };
+    const vector<string> value_6 = { "y" };
+    const bool success_5 = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 2, value_5);
+    const bool success_6 = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 4, value_6);
+    const int populate_success_3 = pkb.PopulateNestedRelationship();
+
     REQUIRE(populate_success_2 == 1);
+    REQUIRE(populate_success_3 == 1);
   }
 }
 
