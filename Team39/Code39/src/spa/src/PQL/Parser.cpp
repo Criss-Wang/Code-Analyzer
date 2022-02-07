@@ -30,7 +30,6 @@ namespace pql {
     }
 
     void Parser::Parse() {
-        Query result {};
         while (!ps.IsEOF()) {
             ps.EatWhiteSpaces();
             std::stringstream ks;
@@ -41,20 +40,24 @@ namespace pql {
             ks >> keyword;
             if (auto d = pql::GetDeclarationType(keyword)) {
                 for (const std::string& s : Parser::GetSynonyms()) {
-                    result.AddSynonym(*d, s);
+                    Parser::query.AddSynonym(*d, s);
                 }
             } else if (keyword == "Select") {
                 ps.EatWhiteSpaces();
-                result.SetResultSynonym(ps.ParseSynonym());
+                Parser::query.SetResultSynonym(ps.ParseSynonym());
                 ps.EatWhiteSpaces();
                 if (!ps.IsEOF()) {
                     ps.Expect("such that");
                     ps.EatWhiteSpaces();
-                    Parser::ParseRelationship(result);
+                    Parser::ParseRelationship(Parser::query);
                     ps.ExpectEOF();
                 }
             }
         }
+    }
+
+    pql::Query Parser::getQuery() {
+        return Parser::query;
     }
 
     void Parser::ParseRelationship(Query& q) {

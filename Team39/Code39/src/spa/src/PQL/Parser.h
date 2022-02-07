@@ -51,12 +51,14 @@ namespace pql {
     class Parser {
     private:
         ParserState ps;
-        Token token;
+        Query query;
     public:
         /*Constructor for Parser*/
-        explicit Parser(const std::string& input) : ps(input), token() {};
+        explicit Parser(const std::string& input) : ps(input), query(Query()) {};
 
         void Parse();
+
+        pql::Query getQuery();
 
         std::vector<std::string> GetSynonyms();
 
