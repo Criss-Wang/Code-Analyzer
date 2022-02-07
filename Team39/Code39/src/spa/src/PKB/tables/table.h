@@ -62,10 +62,10 @@ class Table {
       return key_set;
     }
 
-    virtual vector<T2> GetValueLst() {
-      vector<T2> val_set;
+    virtual vector<pair<T1, T2>> GetKeyValueLst() {
+      vector<pair<T1, T2>> val_set;
       for (const auto& [key, value] : table_) {
-        val_set.push_back(value);
+        val_set.push_back(make_pair(key, value));
       }
       return val_set;
     }

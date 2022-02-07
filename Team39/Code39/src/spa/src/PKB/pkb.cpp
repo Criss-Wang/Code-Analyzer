@@ -2,6 +2,47 @@
 
 #include <queue>
 
+// TODO(Zhenlin): [Performance] Not optimized with the help of traversal order
+template<typename T1, typename T2>
+void PopulateForP(T1 table_to_refer, T2 table_to_update) {
+  for (const auto key : table_to_refer->GetKeyLst()) {
+    vector<int> current_key_child_lst;
+    queue<int> q;
+    q.push(key);
+    while (!q.empty()) {
+      if (!table_to_refer->KeyExistsInTable(q.front())) {
+        q.pop();
+        continue;
+      }
+      for (auto child_key : table_to_refer->GetValueByKey(q.front())) {
+        current_key_child_lst.push_back(child_key);
+        q.push(child_key);
+      }
+      q.pop();
+    }
+    if (table_to_update->KeyExistsInTable(key)) {
+      table_to_update->UpdateKeyWithNewValue(key, current_key_child_lst);
+    } else {
+      table_to_update->AddKeyValuePair(key, current_key_child_lst);
+    }
+  }
+}
+
+template<typename T1, typename T2>
+void PopulateForF(T1 table_to_refer, T2 table_to_update) {
+  // While the stmt_1 exists in the table, keep adding stmt_2 such that follows*(stmt_1, stmt_2) holds into the vector
+  for (const int key : table_to_refer->GetKeyLst()) {
+    int stmt_1 = key;
+    vector<int> follows_star_of_stmt;
+    while (table_to_refer->KeyExistsInTable(stmt_1)) {
+      int stmt_2 = table_to_refer->GetValueByKey(stmt_1);
+      follows_star_of_stmt.push_back(stmt_2);
+      stmt_1 = stmt_2;
+    }
+    table_to_update->AddKeyValuePair(key, follows_star_of_stmt);
+  }
+}
+
 int Pkb::PopulateNestedRelationship() {
   try {
     PopulateNestedFollows();
@@ -14,53 +55,14 @@ int Pkb::PopulateNestedRelationship() {
   return 1;
 }
 
-// TODO(Zhenlin): [Performance] Not optimized with the help of traversal order
-// TODO(Zhenlin): [SE Practice] Code duplication exists, but not sure how to resolve
-void Pkb::PopulateNestedParents() {
-  for (const auto key: parent_table_->GetKeyLst()) {
-    vector<int> current_key_child_lst;
-    queue<int> q;
-    q.push(key);
-    while (!q.empty()) {
-      if (!parent_table_->KeyExistsInTable(q.front())) {
-        q.pop();
-        continue;
-      }
-      for (auto child_key: parent_table_->GetValueByKey(q.front())) {
-        current_key_child_lst.push_back(child_key);
-        q.push(child_key);
-      }
-      q.pop();
-    }
-    if (parent_star_table_->KeyExistsInTable(key)) {
-      parent_star_table_->UpdateKeyWithNewValue(key, current_key_child_lst);
-    } else {
-      parent_star_table_->AddKeyValuePair(key, current_key_child_lst);
-    }
-  }
+void Pkb::PopulateNestedFollows() {
+  PopulateForF<FollowsTable*, FollowsStarTable*>(follows_table_, follows_star_table_);
+  PopulateForF<FollowsBeforeTable*, FollowsBeforeStarTable*>(follows_before_table_, follows_before_star_table_);
+}
 
-  // Populate the reverse nested relationships
-  for (const auto key : child_table_->GetKeyLst()) {
-    vector<int> current_key_parent_lst;
-    queue<int> q;
-    q.push(key);
-    while (!q.empty()) {
-      if (!child_table_->KeyExistsInTable(q.front())) {
-        q.pop();
-        continue;
-      }
-      for (auto parent_key : child_table_->GetValueByKey(q.front())) {
-        current_key_parent_lst.push_back(parent_key);
-        q.push(parent_key);
-      }
-      q.pop();
-    }
-    if (child_star_table_->KeyExistsInTable(key)) {
-      child_star_table_->UpdateKeyWithNewValue(key, current_key_parent_lst);
-    } else {
-      child_star_table_->AddKeyValuePair(key, current_key_parent_lst);
-    }
-  }
+void Pkb::PopulateNestedParents() {
+  PopulateForP<ParentTable*, ParentStarTable*>(parent_table_, parent_star_table_);
+  PopulateForP<ChildTable*, ChildStarTable*>(child_table_, child_star_table_);
 }
 
 
@@ -116,32 +118,6 @@ void Pkb::PopulateUses() {
   PopulateNestedModifiesOrUses(*parent_star_table_, *child_star_table_,  *uses_stmt_to_variables_table_, *uses_variable_to_stmts_table_);
 }
 
-void Pkb::PopulateNestedFollows() {
-  // While the stmt_1 exists in the table, keep adding stmt_2 such that follows*(stmt_1, stmt_2) holds into the vector
-  for (const int key: follows_table_->GetKeyLst()) {
-    int stmt_1 = key;
-    vector<int> follows_star_of_stmt1;
-    while (follows_table_->KeyExistsInTable(stmt_1)) {
-      int stmt_2 = follows_table_->GetValueByKey(stmt_1);
-      follows_star_of_stmt1.push_back(stmt_2);
-      stmt_1 = stmt_2;
-    }
-    follows_star_table_->AddKeyValuePair(key, follows_star_of_stmt1);
-  }
-
-  // Populate the reverse nested relationships
-  for (const int key: follows_before_table_->GetKeyLst()) {
-    int stmt_2 = key;
-    vector<int> follows_before_star_of_stmt_2;
-    while (follows_before_table_->KeyExistsInTable(stmt_2)) {
-      int stmt_1 = follows_before_table_->GetValueByKey(stmt_2);
-      follows_before_star_of_stmt_2.push_back(stmt_1);
-      stmt_2 = stmt_1;
-    }
-    follows_before_star_table_->AddKeyValuePair(key, follows_before_star_of_stmt_2);
-  }
-}
-
 bool Pkb::IsParent(const int stmt_1, const int stmt_2) const {
   vector<int> parent_stmt_lst = child_table_->GetValueByKey(stmt_2);
   return find(parent_stmt_lst.begin(), parent_stmt_lst.end(), stmt_1) != parent_stmt_lst.end();
@@ -161,12 +137,35 @@ vector<int> Pkb::GetAllParents(const int stmt) const {
   return child_star_table_->GetValueByKey(stmt);
 }
 
+
+
 vector<int> Pkb::GetChild(const int stmt) const {
   return parent_table_->GetValueByKey(stmt);
 }
 
 vector<int> Pkb::GetAllChildren(const int stmt) const {
   return parent_star_table_->GetValueByKey(stmt);
+}
+
+
+template<typename T1, typename T2, typename T3>
+vector<pair<T2, T3>> UnfoldResults(T1 table_to_unfold) {
+  vector<pair<T2, T3>> result;
+  for (const auto& [key, val_lst] : table_to_unfold->GetKeyValueLst()) {
+    for (auto val_item : val_lst) {
+      result.emplace_back(make_pair(key, val_item));
+    }
+  }
+  return result;
+}
+
+vector<pair<int, int>> Pkb::GetAllParentPair(int stmt) const {
+  return UnfoldResults<ParentTable*, int, int>(parent_table_);
+}
+
+vector<pair<int, int>> Pkb::GetAllTransitiveParentPair(int stmt) const
+{
+  return UnfoldResults<ParentStarTable*, int, int>(parent_star_table_);
 }
 
 bool Pkb::IsFollows(const int stmt_1, const int stmt_2) const {
