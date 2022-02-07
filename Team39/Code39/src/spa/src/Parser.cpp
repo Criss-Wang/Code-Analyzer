@@ -40,7 +40,7 @@ void Parse(string input) {
         pkb.AddInfoToTable(TableIdentifier::kRead, token->stmt_num_, read_var);
 
         // Add modifies to modify stmt to var
-        pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, token->text);
+        pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, { token->text });
 
 
         // TODO (Yuxuan): Add helper function to avoid repeating same code
@@ -169,7 +169,7 @@ void Parse(string input) {
               }
             }
           }
-          pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, all_uses_var);
+          pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, token->stmt_num_, all_uses_var);
         }
 
       } else if (token->type == DIGIT || token->type == INTEGER) {
