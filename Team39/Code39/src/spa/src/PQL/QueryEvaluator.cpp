@@ -22,7 +22,7 @@ namespace pql {
     vector<int> GetRelDomain(RelationshipToken& token, Pkb& pkb);
     vector<int> GetInverseRelDomain(RelationshipToken& token, Pkb& pkb);
 
-    list<string> evaluate(Query query, Pkb pkb) {
+    list<string> evaluateQuery(Query query, Pkb pkb) {
         vector<RelationshipToken> suchThatClauses = query.GetSuchThatClause();
         unordered_map<string, list<int>> hashmap;
         vector<Synonym> synonyms = query.GetAllUsedSynonyms();

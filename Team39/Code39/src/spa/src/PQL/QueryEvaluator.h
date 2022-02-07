@@ -1,7 +1,8 @@
 #include <string>
+#include <list>
 
 #include "../PKB/pkb.h"
 
 namespace pql {
-	list<string> evaluate(Query query, Pkb pkb);
+	std::list<std::string> evaluateQuery(Query query, Pkb pkb);
 }

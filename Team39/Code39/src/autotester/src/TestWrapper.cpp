@@ -4,6 +4,7 @@
 #include <fstream>
 
 #include "../../spa/src/PQL/Parser.h"
+#include "../../spa/src/PQL/QueryEvaluator.h"
 
 // implementation code of WrapperFactory - do NOT modify the next 5 lines
 AbstractWrapper* WrapperFactory::wrapper = 0;
@@ -18,6 +19,7 @@ volatile bool AbstractWrapper::GlobalStop = false;
 TestWrapper::TestWrapper() {
   // create any objects here as instance variables of this class
   // as well as any initialization required for your spa program
+	Pkb pkb;
 }
 
 // method for parsing the SIMPLE source
@@ -25,8 +27,8 @@ void TestWrapper::parse(std::string filename) {
 	// call your parser to do the parsing
   // ...rest of your code...
   ifstream input_file(filename);
-  string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-  Parse(input);
+  std::string input = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+  Parse(input, pkb);
 }
 
 // method to evaluating a query
@@ -38,4 +40,9 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
   // each result must be a string.
 
   pql::Parser parser = pql::Parser(query);
+  std::list<std::string> res = evaluateQuery(parser.getQuery());
+
+  for (string s : res) {
+	  results.push_back(s);
+  }
 }

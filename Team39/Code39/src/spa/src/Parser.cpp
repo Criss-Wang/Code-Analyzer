@@ -8,9 +8,9 @@ using namespace std;
 #include "SP/validator.h"
 #include "PKB/tables/table.h"
 
-void Parse(string input) {
+void Parse(string input, Pkb & pkb) {
 
-  Pkb pkb; // TODO: Need to integrate with globally declared pkb for autotester
+  //Pkb pkb; // TODO: Need to integrate with globally declared pkb for autotester
   Tokenizer tokenizer;
   vector<Token> inputTokens = tokenizer.parse(input);
 
