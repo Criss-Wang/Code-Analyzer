@@ -14,11 +14,6 @@ class Table {
   protected:
     unordered_map<T1, T2> table_;
 
-  private:
-    bool keyExistsInTable(const T1 key) {
-      return table_.find(key) != table_.end();
-    }
-
   public:
     ~Table() = default;
 
@@ -26,34 +21,76 @@ class Table {
       return static_cast<int>(table_.size());
     }
 
-    bool AddKeyValuePair(const T1 key, const T2 value) {
+    virtual bool KeyExistsInTable(const T1 key) {
+      return table_.find(key) != table_.end();
+    }
+
+    virtual bool AddKeyValuePair(T1 key, T2 value) {
       try {
-        if (this->keyExistsInTable(key)) {
-          throw new NonEmptyKeyException();
+        if (this->KeyExistsInTable(key)) {
+          throw NonEmptyKeyException();
         }
         table_[key] = value;
-        bool insert_success = table_[key] == value;
-        if (insert_success) {
+        if (table_[key] == value) {
           return true;
-        } else {
-          return false;
         }
+
+        return false;
       }
-      catch (exception e) {
+      catch (exception& e) {
         throw e;
       }
     }
 
-    T2 GetValueByKey(T1 key) {
+    virtual T2 GetValueByKey(T1 key) {
       try {
-        if (this->keyExistsInTable(key)) {
+        if (this->KeyExistsInTable(key)) {
           return table_[key];
-        } else {
-          throw new InvalidKeyException();
         }
+        throw InvalidKeyException();
       }
-      catch (exception e) {
+      catch (exception& e) {
         throw e;
       }
     }
+
+    virtual vector<T1> GetKeyLst() {
+      vector<T1> key_set;
+      for (const auto& [key, value]: table_) {
+        key_set.push_back(key);
+      }
+      return key_set;
+    }
+
+    virtual vector<T2> GetValueLst() {
+      vector<T2> val_set;
+      for (const auto& [key, value] : table_) {
+        val_set.push_back(value);
+      }
+      return val_set;
+    }
+
+    // If key does not exist, add the key into the table. Otherwise, update the key with the new value
+    virtual bool UpdateKeyWithNewValue(T1 key, T2 value) {
+      try {
+        if (!this->KeyExistsInTable(key)) {
+          return AddKeyValuePair(key, value);
+        }
+        table_[key] = value;
+        return true;
+      } catch (exception& e) {
+        return false;
+      }
+    }
+};
+
+enum class TableIdentifier {
+  kAssign, kRead, kPrint, kConstant, kIf, kWhile,
+  kFollows, kFollowsStar,
+  kParent, kParentStar,
+  kUsesStmtToVar, kModifiesStmtToVar
+};
+
+enum class EntityIdentifier {
+  kProc, kStmtLst, kStmt, kRead, kPrint, kAssign, kWhile, kCall, kIf, kVariable, kConstant
 };

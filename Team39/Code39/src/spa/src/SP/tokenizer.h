@@ -20,7 +20,8 @@ enum TokenType {
   IF, 
   THEN,
   ELSE,
-  WHILE
+  WHILE,
+  WILDCARD
 };
 
 static const string tokenTypeStrings[] = {
@@ -38,19 +39,24 @@ static const string tokenTypeStrings[] = {
   "IF",
   "THEN",
   "ELSE",
-  "WHILE"
+  "WHILE",
+  "WILDCARD"
 };
 
 class Token {
   public:
     enum TokenType type { WHITESPACE }; // Initialised to WHITESPACE
-    string text { 0 };
+    string text = "";
     int stmt_num_ = 1;
     
     string print();
 
-    void increaseStmtNum() {
+    void IncreaseStmtNum() {
       stmt_num_ += 1;
+    }
+
+    bool operator==(const Token& t) const {
+      return t.type == type && t.text == text;
     }
 };
 
@@ -59,7 +65,7 @@ class Tokenizer {
     vector<Token> parse(const string& sourceProgram);
 
   private:
-    void endToken(Token& token, vector<Token>& tokens);
-    void checkStmtType(Token& token);
+    void EndToken(Token& token, vector<Token>& tokens);
+    void CheckStmtType(Token& token);
 };
 

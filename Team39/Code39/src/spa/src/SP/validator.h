@@ -3,4 +3,4 @@
 
 using namespace std;
 
-bool Validate(vector<TokenTemp> input);
+bool Validate(vector<Token> input);
