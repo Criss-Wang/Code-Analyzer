@@ -29,7 +29,9 @@ namespace pql {
 
         //hashmap stores <synonym.name, domain> pair.
         for (Synonym& synonym : synonyms) {
-            hashmap.insert({ synonym.GetName(), pkb.GetAllEntityInt(synonym.GetDeclaration()) });
+            unordered_set<int> domainSet = pkb.GetAllEntityInt(synonym.GetDeclaration());
+            list<int> domainList(std::begin(domainSet), std::end(domainSet));
+            hashmap.insert({ synonym.GetName(), domainList});
         }
 
         if (false) {
