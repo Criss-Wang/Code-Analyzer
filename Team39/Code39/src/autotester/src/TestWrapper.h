@@ -12,7 +12,7 @@
 
 class TestWrapper : public AbstractWrapper
 {
-private:
+public:
 	Pkb pkb;
 
 public:

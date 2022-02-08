@@ -64,7 +64,9 @@ namespace pql {
     }
 
     pql::Synonym Query::GetResultSynonym() {
-        return *Query::result_synonym;
+      if (result_synonym) {
+          return *Query::result_synonym;
+        }
     }
 
     bool Query::IsProcedure(const std::string& name) {

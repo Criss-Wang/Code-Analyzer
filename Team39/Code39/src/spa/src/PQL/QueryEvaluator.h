@@ -7,5 +7,5 @@
 using namespace std;
 
 namespace pql {
-	std::list<std::string> evaluateQuery(Query query, Pkb pkb);
+	std::list<std::string> evaluateQuery(Query query, Pkb& pkb);
 }
