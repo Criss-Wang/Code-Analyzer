@@ -2,6 +2,7 @@
 // Created by Tan Xi Zhe on 28/1/22.
 //
 
+#pragma once
 #include "Parser.h"
 
 namespace pql {
@@ -19,7 +20,7 @@ namespace pql {
     }
 
     void ParserState::EatWhiteSpaces() {
-        while (ss.peek() == ' ') {
+        while (ss.peek() == ' ' or ss.peek() == '\n') {
             ss.get();
         }
     }

@@ -4,12 +4,17 @@
 #include <string>
 #include <iostream>
 #include <list>
+#include <fstream>
 
 // include your other headers here
 #include "AbstractWrapper.h"
+#include "../../spa/src/PKB/pkb.h"
 
 class TestWrapper : public AbstractWrapper
 {
+public:
+	Pkb pkb;
+
 public:
 	// default constructor
 	TestWrapper();

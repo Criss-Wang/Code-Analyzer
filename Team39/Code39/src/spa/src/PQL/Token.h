@@ -11,32 +11,22 @@
 #include <exception>
 #include <optional>
 
+#include "../Utility/Entity.h"
+
 namespace pql {
     typedef std::string Variable;
     typedef std::string Ref;
-    typedef enum {
-        kStmt,
-        kRead,
-        kPrint,
-        kCall,
-        kWhile,
-        kIf,
-        kAssign,
-        kVariable,
-        kConstant,
-        kProcedure
-    } DeclarationType;
 
     class Synonym {
     private:
         std::string name;
-        DeclarationType declaration;
+        EntityIdentifier declaration;
     public:
-        Synonym(std::string name, DeclarationType declaration) : name(std::move(name)), declaration(declaration) {};
+        Synonym(std::string name, EntityIdentifier declaration) : name(std::move(name)), declaration(declaration) {};
 
         std::string GetName();
 
-        DeclarationType GetDeclaration();
+        EntityIdentifier GetDeclaration();
 
         bool equal(const Synonym& s);
     };
@@ -54,17 +44,17 @@ namespace pql {
         kModifiesP
     };
 
-    const std::map<std::string, DeclarationType> declarationMap {
-            {"stmt", kStmt},
-            {"read", kRead},
-            {"print", kPrint},
-            {"call", kCall},
-            {"while", kWhile},
-            {"if", kIf},
-            {"assign", kAssign},
-            {"variable", kVariable},
-            {"constant", kConstant},
-            {"procedure", kProcedure}
+    const std::map<std::string, EntityIdentifier> declarationMap {
+            {"stmt", EntityIdentifier::kStmt},
+            {"read", EntityIdentifier::kRead},
+            {"print", EntityIdentifier::kPrint},
+            {"call", EntityIdentifier::kCall},
+            {"while", EntityIdentifier::kWhile},
+            {"if", EntityIdentifier::kIf},
+            {"assign", EntityIdentifier::kAssign},
+            {"variable", EntityIdentifier::kVariable},
+            {"constant", EntityIdentifier::kConstant},
+            {"procedure", EntityIdentifier::kProcedure}
     };
 
     const std::map<std::string, RelationshipTypes> relationshipMap {
@@ -78,21 +68,9 @@ namespace pql {
             {"ModifiesP", kModifiesP}
     };
 
-    std::optional<DeclarationType> GetDeclarationType(const std::string& keyword) {
-        if (declarationMap.find(keyword) != declarationMap.end()) {
-            return declarationMap.at(keyword);
-        } else {
-            return std::nullopt;
-        }
-    }
+    std::optional<EntityIdentifier> GetDeclarationType(const std::string& keyword);
 
-    std::optional<RelationshipTypes> GetRelationshipType(const std::string& relationship) {
-        if (relationshipMap.find(relationship) != relationshipMap.end()) {
-            return relationshipMap.at(relationship);
-        } else {
-            return std::nullopt;
-        }
-    }
+    std::optional<RelationshipTypes> GetRelationshipType(const std::string& relationship);
 
     class Token {
     public:
@@ -125,7 +103,7 @@ namespace pql {
     public:
         bool SynonymDeclared(const std::string& name);
 
-        void AddSynonym(DeclarationType d, const std::string& name);
+        void AddSynonym(EntityIdentifier d, const std::string& name);
 
         void SetResultSynonym(const std::string& name);
 

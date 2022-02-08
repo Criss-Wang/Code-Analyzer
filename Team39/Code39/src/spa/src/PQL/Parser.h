@@ -11,58 +11,54 @@
 
 namespace pql {
 
-    bool IsLetter(char c) {
-        return c >= 65 and c <= 90;
+  bool IsLetter(char c);
+
+  bool IsDigit(char c);
+
+  class ParserState {
+  private:
+    std::stringstream ss;
+  public:
+    explicit ParserState(const std::string& input) {
+      ss << input;
     }
 
-    bool IsDigit(char c) {
-        return c >= 48 and c <= 57;
-    }
+    char Peek();
 
-    class ParserState {
-    private:
-        std::stringstream ss;
-    public:
-        explicit ParserState(const std::string& input) {
-            ss << input;
-        }
+    char Next();
 
-        char Peek();
+    bool IsEOF();
 
-        char Next();
+    void EatWhiteSpaces();
 
-        bool IsEOF();
+    void Consume();
 
-        void EatWhiteSpaces();
+    char ExpectLetter();
 
-        void Consume();
+    void Expect(const std::string& s);
 
-        char ExpectLetter();
+    void ExpectEOF();
 
-        void Expect(const std::string& s);
+    std::string ParseSynonym();
 
-        void ExpectEOF();
+    pql::Ref ParseRef(Query& q);
+  };
 
-        std::string ParseSynonym();
+  class Parser {
+  private:
+    ParserState ps;
+    Query query;
+  public:
+    /*Constructor for Parser*/
+    explicit Parser(const std::string& input) : ps(input), query(Query()) {};
 
-        pql::Ref ParseRef(Query& q);
-    };
+    void Parse();
 
-    class Parser {
-    private:
-        ParserState ps;
-        Query query;
-    public:
-        /*Constructor for Parser*/
-        explicit Parser(const std::string& input) : ps(input), query(Query()) {};
+    pql::Query getQuery();
 
-        void Parse();
+    std::vector<std::string> GetSynonyms();
 
-        pql::Query getQuery();
-
-        std::vector<std::string> GetSynonyms();
-
-        void ParseRelationship(Query& q);
-    };
+    void ParseRelationship(Query& q);
+  };
 
 }

@@ -12,12 +12,12 @@ namespace pql {
         return Synonym::name;
     }
 
-    DeclarationType Synonym::GetDeclaration() {
+    EntityIdentifier Synonym::GetDeclaration() {
         return Synonym::declaration;
     }
 
     bool Synonym::equal(const Synonym& s) {
-        return Synonym::name == s.name and Synonym::declaration == s.declaration;
+        return Synonym::name == s.name && Synonym::declaration == s.declaration;
     }
 
     pql::Variable RelationshipToken::GetLeft() {
@@ -36,7 +36,7 @@ namespace pql {
         return synonyms.find(name) != synonyms.end();
     }
 
-    void Query::AddSynonym(DeclarationType d, const std::string& name) {
+    void Query::AddSynonym(EntityIdentifier d, const std::string& name) {
         if (Query::SynonymDeclared(name)) {
             try {
                 throw ParseException();
@@ -64,11 +64,13 @@ namespace pql {
     }
 
     pql::Synonym Query::GetResultSynonym() {
-        return *Query::result_synonym;
+      if (result_synonym) {
+          return *Query::result_synonym;
+        }
     }
 
     bool Query::IsProcedure(const std::string& name) {
-        return Query::synonyms.at(name).GetDeclaration() == kProcedure;
+        return Query::synonyms.at(name).GetDeclaration() == EntityIdentifier::kProcedure;
     }
 
     void Query::AddUsedSynonym(const std::string& name) {
@@ -85,5 +87,21 @@ namespace pql {
 
     std::vector<RelationshipToken> Query::GetSuchThatClause() {
         return Query::such_that_clauses;
+    }
+
+    std::optional<EntityIdentifier> GetDeclarationType(const std::string& keyword) {
+      if (declarationMap.find(keyword) != declarationMap.end()) {
+        return declarationMap.at(keyword);
+      } else {
+        return std::nullopt;
+      }
+    }
+
+    std::optional<RelationshipTypes> GetRelationshipType(const std::string& relationship) {
+      if (relationshipMap.find(relationship) != relationshipMap.end()) {
+        return relationshipMap.at(relationship);
+      } else {
+        return std::nullopt;
+      }
     }
 }
