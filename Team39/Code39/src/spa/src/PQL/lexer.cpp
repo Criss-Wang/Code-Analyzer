@@ -19,7 +19,7 @@ namespace pql {
     }
 
     void ParserState::EatWhiteSpaces() {
-        while (ss.peek() == ' ') {
+        while (ss.peek() == ' ' or ss.peek() == '\n') {
             ss.get();
         }
     }
