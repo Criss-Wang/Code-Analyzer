@@ -1,9 +1,8 @@
 #include "TestWrapper.h"
 #include "Parser.h"
 
-#include <fstream>
+using namespace std;
 
-#include "../../spa/src/PQL/Parser.h"
 #include "../../spa/src/PQL/QueryEvaluator.h"
 
 // implementation code of WrapperFactory - do NOT modify the next 5 lines
@@ -40,8 +39,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results){
   // each result must be a string.
 
   pql::Parser parser = pql::Parser(query);
-  std::list<std::string> res = {};
-  //evaluateQuery(parser.getQuery(), pkb);
+  std::list<std::string> res = evaluateQuery(parser.getQuery(), pkb);
 
   for (string s : res) {
 	  results.push_back(s);

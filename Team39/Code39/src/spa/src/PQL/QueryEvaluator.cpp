@@ -7,11 +7,7 @@
 #include <list>
 #include <algorithm>
 
-using namespace std;
-
-#include "../PKB/pkb.h"
 #include "QueryEvaluator.h"
-#include "Token.h"
 
 namespace pql {
     list<int> Intersect(const list<int>& lst1, const vector<int>& lst2);
@@ -22,7 +18,7 @@ namespace pql {
     vector<int> GetRelDomain(RelationshipToken& token, Pkb& pkb);
     vector<int> GetInverseRelDomain(RelationshipToken& token, Pkb& pkb);
 
-    list<string> evaluateQuery(Query query, Pkb pkb) {
+    std::list<std::string> evaluateQuery(Query query, Pkb pkb) {
         vector<RelationshipToken> suchThatClauses = query.GetSuchThatClause();
         unordered_map<string, list<int>> hashmap;
         vector<Synonym> synonyms = query.GetAllUsedSynonyms();
@@ -192,7 +188,7 @@ namespace pql {
                 res = pkb.GetStmtsBefore(left);
                 break;
             case RelationshipTypes::kParent:
-                res.push_back(pkb.GetParent(left));
+                res.push_back(pkb.GetParent(left)[0]);
                 break;
             case RelationshipTypes::kParentT:
                 res = pkb.GetAllParents(left);

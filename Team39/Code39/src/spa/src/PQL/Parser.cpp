@@ -2,6 +2,7 @@
 // Created by Tan Xi Zhe on 27/1/22.
 //
 
+#pragma once
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -9,6 +10,14 @@
 #include "Parser.h"
 
 namespace pql {
+
+    bool IsLetter(char c) {
+      return c >= 65 and c <= 90;
+    }
+
+    bool IsDigit(char c) {
+      return c >= 48 and c <= 57;
+    }
 
     std::vector<std::string> Parser::GetSynonyms() {
         std::vector<std::string> synonyms;

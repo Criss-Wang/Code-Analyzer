@@ -68,21 +68,9 @@ namespace pql {
             {"ModifiesP", kModifiesP}
     };
 
-    std::optional<EntityIdentifier> GetDeclarationType(const std::string& keyword) {
-        if (declarationMap.find(keyword) != declarationMap.end()) {
-            return declarationMap.at(keyword);
-        } else {
-            return std::nullopt;
-        }
-    }
+    std::optional<EntityIdentifier> GetDeclarationType(const std::string& keyword);
 
-    std::optional<RelationshipTypes> GetRelationshipType(const std::string& relationship) {
-        if (relationshipMap.find(relationship) != relationshipMap.end()) {
-            return relationshipMap.at(relationship);
-        } else {
-            return std::nullopt;
-        }
-    }
+    std::optional<RelationshipTypes> GetRelationshipType(const std::string& relationship);
 
     class Token {
     public:
