@@ -139,5 +139,17 @@ TEST_CASE("Populate Table") {
 }
 
 TEST_CASE("Add entity items") {
-  
+  SECTION("Adding statement") {
+    Pkb pkb = Pkb();
+    bool success = pkb.AddEntityToSet(EntityIdentifier::kStmt, 1);
+    success = success && pkb.AddEntityToSet(EntityIdentifier::kStmt, 2);
+    success = success && pkb.AddEntityToSet(EntityIdentifier::kStmt, 3);
+
+    REQUIRE(success == 1);
+    const unordered_set<int> res = pkb.GetAllEntityInt(EntityIdentifier::kStmt);
+    REQUIRE(res.size() == 3);
+    REQUIRE(res.find(1) != res.end());
+    REQUIRE(res.find(2) != res.end());
+    REQUIRE(res.find(3) != res.end());
+  }
 }
