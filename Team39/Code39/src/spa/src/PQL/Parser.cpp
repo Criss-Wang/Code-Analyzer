@@ -12,7 +12,7 @@
 namespace pql {
 
     bool IsLetter(char c) {
-      return c >= 65 and c <= 90;
+      return (c >= 'A' and c <= 'Z') or (c >= 'a' and c <= 'z');
     }
 
     bool IsDigit(char c) {
@@ -27,14 +27,9 @@ namespace pql {
             ps.EatWhiteSpaces();
             if (ps.Peek() == ',') {
                 ps.Consume();
-            } else {
-                try {
-                    throw ParseException();
-                } catch (ParseException& e) {
-                    std::cout << "A synonym must contain only letters or digits!" << std::endl;
-                }
             }
         }
+        ps.Consume();
         return synonyms;
     }
 
@@ -72,7 +67,7 @@ namespace pql {
     void Parser::ParseRelationship(Query& q) {
         std::string relationship;
         std::stringstream ssm;
-        while (IsLetter(ps.Peek())) {
+        while (IsLetter(ps.Peek()) or ps.Peek() == '*') {
             ssm << ps.Next();
         }
         ssm >> relationship;
