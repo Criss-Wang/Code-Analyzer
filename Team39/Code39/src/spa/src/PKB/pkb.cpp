@@ -1,6 +1,8 @@
 #include "pkb.h"
 
 #include <queue>
+#include <stack>
+#include <Utility/Helper.h>
 
 // TODO(Zhenlin): [Performance] Not optimized with the help of traversal order
 template<typename T1, typename T2>
@@ -118,6 +120,8 @@ void Pkb::PopulateUses() {
   PopulateNestedModifiesOrUses(*parent_star_table_, *child_star_table_,  *uses_stmt_to_variables_table_, *uses_variable_to_stmts_table_);
 }
 
+// Following are for Search handlers
+
 bool Pkb::IsParent(const int stmt_1, const int stmt_2) const {
   vector<int> parent_stmt_lst = child_table_->GetValueByKey(stmt_2);
   return find(parent_stmt_lst.begin(), parent_stmt_lst.end(), stmt_1) != parent_stmt_lst.end();
@@ -137,8 +141,6 @@ vector<int> Pkb::GetAllParents(const int stmt) const {
   return child_star_table_->GetValueByKey(stmt);
 }
 
-
-
 vector<int> Pkb::GetChild(const int stmt) const {
   return parent_table_->GetValueByKey(stmt);
 }
@@ -146,7 +148,6 @@ vector<int> Pkb::GetChild(const int stmt) const {
 vector<int> Pkb::GetAllChildren(const int stmt) const {
   return parent_star_table_->GetValueByKey(stmt);
 }
-
 
 template<typename T1, typename T2, typename T3>
 vector<pair<T2, T3>> UnfoldResults(T1 table_to_unfold) {
@@ -193,19 +194,44 @@ vector<int> Pkb::GetStmtsAfter(const int stmt) const {
   return follows_star_table_->GetValueByKey(stmt);
 }
 
+
+bool Pkb::AddParent(const int key, const vector<int>& value) {
+  bool add_success = parent_table_->AddKeyValuePair(key, value);
+  // Populate the reverse relation
+  for (const auto child : value) {
+    add_success = child_table_->AddKeyValuePair(child, { key }) && add_success;
+  }
+  return add_success;
+}
+
+bool Pkb::AddFollows(const int key, const int value) {
+  bool add_success = follows_table_->AddKeyValuePair(key, value);
+  // Populate the reverse relation
+  add_success = follows_before_table_->AddKeyValuePair(value, key) && add_success;
+  return add_success;
+}
+
+
+bool Pkb::AddModifies(const int key, const vector<string>& value) {
+  bool add_success = modifies_stmt_to_variables_table_->AddKeyValuePair(key, value);
+  // Populate the reverse relation
+  add_success = add_success && modifies_variable_to_stmts_table_->UpdateKeyValuePair(key, value);
+  return add_success;
+}
+
+bool Pkb::AddUses(const int key, const vector<string>& value) {
+  bool add_success = uses_stmt_to_variables_table_->AddKeyValuePair(key, value);
+  // Populate the reverse relation
+  add_success = add_success && uses_variable_to_stmts_table_->UpdateKeyValuePair(key, value);
+  return add_success;
+}
+
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<int>& value) {
   try {
     if (value.empty()) throw EmptyValueException();
     switch (table_identifier) {
       case TableIdentifier::kConstant: return constant_table_->AddKeyValuePair(key, value);
-      case TableIdentifier::kParent: {
-        bool add_success = parent_table_->AddKeyValuePair(key, value);
-        // Populate the reverse relation
-        for (const auto child : value) {
-          add_success = child_table_->AddKeyValuePair(child, { key }) && add_success;
-        }
-        return add_success;
-      }
+      case TableIdentifier::kParent: return AddParent(key, value);
       default:
         throw InvalidIdentifierException();
     }
@@ -214,24 +240,52 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
   }
 }
 
+unordered_set<int> Pkb::GetAllStmtWithPattern(const string& pattern) const {
+  const string usable_pattern = PatternHelper::PreprocessPattern(pattern);
+  unordered_set<int> empty_set{};
+  unordered_set<int> res{};
+
+  for (auto s: PatternHelper::GetPattenSet(usable_pattern)) {
+    if (!pattern_to_stmt_table_->KeyExistsInTable(s)) return empty_set;
+    unordered_set<int> stmt_lst = pattern_to_stmt_table_->GetValueByKey(s);
+    if (res.empty()) {
+      res = stmt_lst;
+    } else {
+      for (auto stmt : res) {
+        if (stmt_lst.find(stmt) == stmt_lst.end()) res.erase(stmt);
+      }
+    }
+  }
+  return res;
+}
+
+bool Pkb::AddPattern(const int line_num, const string& input) {
+  // First the SP side should guarantee a valid input is sent
+  // We then proceed to parse the set of valid substring patterns
+  const string clean_input = PatternHelper::PreprocessPattern(input);
+  const unordered_set<string> valid_sub_patterns = PatternHelper::GetPattenSet(clean_input);
+  bool add_success = stmt_to_pattern_table_->AddKeyValuePair(line_num, valid_sub_patterns);
+  for (auto p: valid_sub_patterns) {
+    if (!pattern_to_stmt_table_->KeyExistsInTable(p)) {
+      add_success = add_success && pattern_to_stmt_table_->AddKeyValuePair(p, unordered_set<int>{line_num});
+    }
+    else {
+      unordered_set<int> current_set = pattern_to_stmt_table_->GetValueByKey(p);
+      current_set.insert(line_num);
+      add_success = add_success && pattern_to_stmt_table_->UpdateKeyWithNewValue(p, current_set);
+    }
+  }
+  return add_success;
+}
+
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<string>& value) {
   try {
     if (value.empty()) throw EmptyValueException();
     switch (table_identifier) {
       case TableIdentifier::kIf: return if_table_->AddKeyValuePair(key, value);
       case TableIdentifier::kWhile: return while_table_->AddKeyValuePair(key, value);
-      case TableIdentifier::kModifiesStmtToVar: {
-        bool add_success = modifies_stmt_to_variables_table_->AddKeyValuePair(key, value);
-        // Populate the reverse relation
-        add_success = add_success && modifies_variable_to_stmts_table_->UpdateKeyValuePair(key, value);
-        return add_success;
-      }
-      case TableIdentifier::kUsesStmtToVar: {
-        bool add_success = uses_stmt_to_variables_table_->AddKeyValuePair(key, value);
-        // Populate the reverse relation
-        add_success = add_success && uses_variable_to_stmts_table_->UpdateKeyValuePair(key, value);
-        return add_success;
-      }
+      case TableIdentifier::kModifiesStmtToVar: return AddModifies(key, value);
+      case TableIdentifier::kUsesStmtToVar: return AddUses(key, value);
       default:
         throw InvalidIdentifierException();
     }
@@ -244,12 +298,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
   try {
     if (value < 1) throw EmptyValueException();
     switch (table_identifier) {
-      case TableIdentifier::kFollows: {
-        bool add_success = follows_table_->AddKeyValuePair(key, value);
-        // Populate the reverse relation
-        add_success = follows_before_table_->AddKeyValuePair(value, key) && add_success;
-        return add_success;
-      }
+      case TableIdentifier::kFollows: return AddFollows(key, value);
       default:
         throw InvalidIdentifierException();
     }
@@ -265,6 +314,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
       case TableIdentifier::kAssign: return assign_table_->AddKeyValuePair(key, value);
       case TableIdentifier::kRead: return read_table_->AddKeyValuePair(key, value);
       case TableIdentifier::kPrint: return print_table_->AddKeyValuePair(key, value);
+      case TableIdentifier::kPattern: return AddPattern(key, value);
       default:
         throw InvalidIdentifierException();
     }
@@ -371,3 +421,11 @@ unordered_set<set<int>, HashFunction> Pkb::GetAllEntityStmtLst(const EntityIdent
       throw InvalidIdentifierException();
   }
 }
+
+
+
+
+
+
+
+
