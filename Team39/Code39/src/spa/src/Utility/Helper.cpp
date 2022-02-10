@@ -27,7 +27,7 @@ string PatternHelper::PreprocessPattern(const string& pattern) {
 }
 
 
-unordered_set<string> PatternHelper::GetPattenSet(string input) {
+unordered_set<string> PatternHelper::GetPatternSet(string input) {
   // stack for operators.
   stack<char> operators;
 

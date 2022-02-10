@@ -123,30 +123,55 @@ void Pkb::PopulateUses() {
 // Following are for Search handlers
 
 bool Pkb::IsParent(const int stmt_1, const int stmt_2) const {
-  vector<int> parent_stmt_lst = child_table_->GetValueByKey(stmt_2);
-  return find(parent_stmt_lst.begin(), parent_stmt_lst.end(), stmt_1) != parent_stmt_lst.end();
+  try {
+    vector<int> parent_stmt_lst = child_table_->GetValueByKey(stmt_2);
+    return find(parent_stmt_lst.begin(), parent_stmt_lst.end(), stmt_1) != parent_stmt_lst.end();
+  } catch (exception& e) {
+    return false;
+  }
 }
 
 bool Pkb::IsTransitiveParent(const int stmt_1, const int stmt_2) const {
-  vector<int> parent_stmt_lst = child_star_table_->GetValueByKey(stmt_2);
-  return find(parent_stmt_lst.begin(), parent_stmt_lst.end(), stmt_1) != parent_stmt_lst.end();
+  try {
+    vector<int> parent_stmt_lst = child_star_table_->GetValueByKey(stmt_2);
+    return find(parent_stmt_lst.begin(), parent_stmt_lst.end(), stmt_1) != parent_stmt_lst.end();
+  } catch (exception& e) {
+    return false;
+  }
 }
 
 vector<int> Pkb::GetParent(const int stmt) const {
-  const vector<int> parent_stmt_lst = child_table_->GetValueByKey(stmt);
-  return {parent_stmt_lst[0]};
+  try {
+    const vector<int> parent_stmt_lst = child_table_->GetValueByKey(stmt);
+    return { parent_stmt_lst[0] };
+  } catch (exception& e) {
+    return vector<int>{};
+  }
 }
 
 vector<int> Pkb::GetAllParents(const int stmt) const {
-  return child_star_table_->GetValueByKey(stmt);
+  try {
+    return child_star_table_->GetValueByKey(stmt);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+  
 }
 
 vector<int> Pkb::GetChild(const int stmt) const {
-  return parent_table_->GetValueByKey(stmt);
+  try {
+    return parent_table_->GetValueByKey(stmt);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
 }
 
 vector<int> Pkb::GetAllChildren(const int stmt) const {
-  return parent_star_table_->GetValueByKey(stmt);
+  try {
+    return parent_star_table_->GetValueByKey(stmt);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
 }
 
 template<typename T1, typename T2, typename T3>
@@ -161,37 +186,68 @@ vector<pair<T2, T3>> UnfoldResults(T1 table_to_unfold) {
 }
 
 vector<pair<int, int>> Pkb::GetAllParentPair(int stmt) const {
-  return UnfoldResults<ParentTable*, int, int>(parent_table_);
+  try {
+    return UnfoldResults<ParentTable*, int, int>(parent_table_);
+  } catch (exception& e) {
+    return vector<pair<int, int>>{};
+  }
 }
 
-vector<pair<int, int>> Pkb::GetAllTransitiveParentPair(int stmt) const
-{
-  return UnfoldResults<ParentStarTable*, int, int>(parent_star_table_);
+vector<pair<int, int>> Pkb::GetAllTransitiveParentPair(int stmt) const {
+  try {
+    return UnfoldResults<ParentStarTable*, int, int>(parent_star_table_);
+  } catch (exception& e) {
+    return vector<pair<int, int>>{};
+  }
 }
 
 bool Pkb::IsFollows(const int stmt_1, const int stmt_2) const {
-  return stmt_2 == follows_table_->GetValueByKey(stmt_1);
+  try {
+    return stmt_2 == follows_table_->GetValueByKey(stmt_1);
+  } catch (exception& e) {
+    return false;
+  }
 }
 
 bool Pkb::IsTransitiveFollows(const int stmt_1, const int stmt_2) const {
-  vector<int> stmts_lst = follows_star_table_->GetValueByKey(stmt_1);
-  return find(stmts_lst.begin(), stmts_lst.end(), stmt_2) != stmts_lst.end();
+  try {
+    vector<int> stmts_lst = follows_star_table_->GetValueByKey(stmt_1);
+    return find(stmts_lst.begin(), stmts_lst.end(), stmt_2) != stmts_lst.end();
+  } catch (exception& e) {
+    return false;
+  }
 }
 
-int Pkb::GetStmtRightBefore(const int stmt) const {
-  return follows_before_table_->GetValueByKey(stmt);
+vector<int> Pkb::GetStmtRightBefore(const int stmt) const {
+  try {
+    return { follows_before_table_->GetValueByKey(stmt) };
+  } catch (exception& e) {
+    return vector<int>{};
+  }
 }
 
 vector<int> Pkb::GetStmtsBefore(const int stmt) const {
-  return follows_before_star_table_->GetValueByKey(stmt);
+  try {
+    return follows_before_star_table_->GetValueByKey(stmt);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
 }
 
-int Pkb::GetStmtRightAfter(const int stmt) const {
-  return follows_table_->GetValueByKey(stmt);
+vector<int> Pkb::GetStmtRightAfter(const int stmt) const {
+  try {
+    return { follows_table_->GetValueByKey(stmt) };
+  } catch (exception& e) {
+    return vector<int>{};
+  }
 }
 
 vector<int> Pkb::GetStmtsAfter(const int stmt) const {
-  return follows_star_table_->GetValueByKey(stmt);
+  try {
+    return follows_star_table_->GetValueByKey(stmt);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
 }
 
 
@@ -245,7 +301,7 @@ unordered_set<int> Pkb::GetAllStmtWithPattern(const string& pattern) const {
   unordered_set<int> empty_set{};
   unordered_set<int> res{};
 
-  for (auto s: PatternHelper::GetPattenSet(usable_pattern)) {
+  for (auto s: PatternHelper::GetPatternSet(usable_pattern)) {
     if (!pattern_to_stmt_table_->KeyExistsInTable(s)) return empty_set;
     unordered_set<int> stmt_lst = pattern_to_stmt_table_->GetValueByKey(s);
     if (res.empty()) {
@@ -263,7 +319,7 @@ bool Pkb::AddPattern(const int line_num, const string& input) {
   // First the SP side should guarantee a valid input is sent
   // We then proceed to parse the set of valid substring patterns
   const string clean_input = PatternHelper::PreprocessPattern(input);
-  const unordered_set<string> valid_sub_patterns = PatternHelper::GetPattenSet(clean_input);
+  const unordered_set<string> valid_sub_patterns = PatternHelper::GetPatternSet(clean_input);
   bool add_success = stmt_to_pattern_table_->AddKeyValuePair(line_num, valid_sub_patterns);
   for (auto p: valid_sub_patterns) {
     if (!pattern_to_stmt_table_->KeyExistsInTable(p)) {

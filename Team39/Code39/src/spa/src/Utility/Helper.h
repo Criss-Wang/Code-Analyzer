@@ -17,7 +17,7 @@ class PatternHelper : public Helper {
 
   public:
     static string PreprocessPattern(const string& pattern);
-    static unordered_set<string> GetPattenSet(string input);
+    static unordered_set<string> GetPatternSet(string input);
 };
 
 
