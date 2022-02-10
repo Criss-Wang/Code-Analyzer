@@ -52,7 +52,7 @@ TEST_CASE("Add Key-value Pair into Tables") {
 
   SECTION("Add item into table: int -> int") {
     auto pkb = Pkb();
-    const bool success = pkb.AddInfoToTable(TableIdentifier::kFollows, 2, 2);
+    const bool success = pkb.AddInfoToTable(TableIdentifier::kFollows, 2, 3);
     REQUIRE(success == 1);
     //REQUIRE(pkb.assign_table->GetValueByKey(2) == "()");
   }
@@ -139,5 +139,37 @@ TEST_CASE("Populate Table") {
 }
 
 TEST_CASE("Add entity items") {
-  
+  SECTION("Adding statement") {
+    Pkb pkb = Pkb();
+    bool success = pkb.AddEntityToSet(EntityIdentifier::kStmt, 1);
+    success = success && pkb.AddEntityToSet(EntityIdentifier::kStmt, 2);
+    success = success && pkb.AddEntityToSet(EntityIdentifier::kStmt, 3);
+
+    REQUIRE(success == 1);
+    const unordered_set<int> res = pkb.GetAllEntityInt(EntityIdentifier::kStmt);
+    REQUIRE(res.size() == 3);
+    REQUIRE(res.find(1) != res.end());
+    REQUIRE(res.find(2) != res.end());
+    REQUIRE(res.find(3) != res.end());
+  }
+}
+
+
+TEST_CASE("Add Pattern") {
+  SECTION("Adding patterns") {
+    Pkb pkb = Pkb();
+    bool success = pkb.AddInfoToTable(TableIdentifier::kPattern, 2, "A + (B+C) + 2");
+    success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 3, "X + (B+C) * (B + C)");
+    REQUIRE(success == 1);
+  }
+
+  SECTION("Search pattern") {
+    Pkb pkb = Pkb();
+    bool success = pkb.AddInfoToTable(TableIdentifier::kPattern, 2, "A + (B+C) + 2");
+    success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 3, "X + (B+C) * (B + C)");
+
+    unordered_set<int> res = pkb.GetAllStmtWithPattern("X + B + C");
+    REQUIRE(res.empty());
+
+  }
 }

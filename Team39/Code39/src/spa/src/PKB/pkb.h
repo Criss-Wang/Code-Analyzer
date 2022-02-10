@@ -46,6 +46,8 @@ class Pkb {
     UsesVariableToStmtsTable *uses_variable_to_stmts_table_ = new UsesVariableToStmtsTable();
     ModifiesStmtToVariablesTable *modifies_stmt_to_variables_table_ = new ModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable *modifies_variable_to_stmts_table_ = new ModifiesVariableToStmtsTable();
+    StmtToPatternTable *stmt_to_pattern_table_ = new StmtToPatternTable();
+    PatternToStmtTable* pattern_to_stmt_table_ = new PatternToStmtTable();
 
     // A table to store pointers to all tables
     unordered_set<int> stmt_set_;
@@ -65,6 +67,13 @@ class Pkb {
     void PopulateUses();
     void PopulateModifies();
 
+    // Insert all possible expression patterns for a statement
+    bool AddPattern(int line_num, const string& input);
+    bool AddParent(int key, const vector<int>& value);
+    bool AddFollows(int key, int value);
+    bool AddModifies(int key, const vector<string>& value);
+    bool AddUses(int key, const vector<string>& value);
+
   public:
     /**
      * In the following, we implement 5 overloaded APIs to add key value information pairs to pkb tables.
@@ -75,6 +84,11 @@ class Pkb {
     bool AddInfoToTable(TableIdentifier table_identifier, int key, int value);
     bool AddInfoToTable(TableIdentifier table_identifier, int key, const string& value);
 
+    // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
+    bool AddEntityToSet(EntityIdentifier entity_identifier, int entity_val);
+    bool AddEntityToSet(EntityIdentifier entity_identifier, const string& entity_val);
+    bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
+
     // Populate the nested relationships using the tables storing basic information/relationships about entities
     int PopulateNestedRelationship();
 
@@ -83,20 +97,21 @@ class Pkb {
     [[nodiscard]] bool IsTransitiveParent(int stmt_1, int stmt_2) const;
     [[nodiscard]] vector<int> GetParent(int stmt) const;
     [[nodiscard]] vector<int> GetAllParents(int stmt) const;
+    [[nodiscard]] vector<pair<int,int>> GetAllParentPair(int stmt) const;
     [[nodiscard]] vector<int> GetChild(int stmt) const;
     [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPair(int stmt) const;
 
     [[nodiscard]] bool IsFollows(int stmt_1, int stmt_2) const;
     [[nodiscard]] bool IsTransitiveFollows(int stmt_1, int stmt_2) const;
-    [[nodiscard]] int GetStmtRightBefore(int stmt) const;
+    [[nodiscard]] vector<int> GetStmtRightBefore(int stmt) const;
+    [[nodiscard]] vector<pair<int,int>> GetFollowsPair(int stmt) const; // TODO: implement it by Zheng Wei
     [[nodiscard]] vector<int> GetStmtsBefore(int stmt) const;
-    [[nodiscard]] int GetStmtRightAfter(int stmt) const;
+    [[nodiscard]] vector<int> GetStmtRightAfter(int stmt) const;
     [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPair(int stmt) const; // TODO: implement it by Zheng Wei
 
-    // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
-    bool AddEntityToSet(const EntityIdentifier entity_identifier, int entity_val);
-    bool AddEntityToSet(const EntityIdentifier entity_identifier, const string& entity_val);
-    bool AddEntityToSet(const EntityIdentifier entity_identifier, const set<int>& entity_val);
+    [[nodiscard]] unordered_set<int> GetAllStmtWithPattern(const string& pattern) const;
 
     // Get all the items of a certain entity type
     unordered_set<int> GetAllEntityInt(const EntityIdentifier entity_identifier);
