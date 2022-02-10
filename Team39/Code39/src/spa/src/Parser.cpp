@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <stack>
 
 using namespace std;
 
@@ -16,41 +17,30 @@ void Parse(string input, Pkb& pkb) {
   if (Validate(inputTokens)) {
 
     // Stores parent/previous stmt's line number for Parent/Follows relationship
-    int parent = -1;
-    int previous = -1;
-    bool is_rhs_of_assignment = false;
-    bool is_procedure_name = false;
-    bool is_variable_name = false;
+    stack<int> parent;
+    stack<int> previous;
+    bool is_procedure = false;
+    bool is_new_nesting = false;
 
     for (auto token = begin(inputTokens); token != end(inputTokens); ++token) {
       
       if (token->type == NAME && token->text == "procedure") {
-        parent = token->stmt_num_;
-        is_procedure_name = true;
+
+        is_procedure = true;
 
       } else if (token->text == "read") {
 
         string read_var = next(token, 1)->text;
 
-        // Add stmt num to stmt_set_ and read_set_
+        // Add stmt num to stmt_set_ and read_set
         pkb.AddEntityToSet(EntityIdentifier::kStmt, token->stmt_num_);
         pkb.AddEntityToSet(EntityIdentifier::kRead, token->stmt_num_);
 
+        // Add stmt num and read_var to ReadTable
         pkb.AddInfoToTable(TableIdentifier::kRead, token->stmt_num_, read_var);
 
-        // Add modifies to modify stmt to var
+        // Add stmt num and read_var to Modifies Table
         pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, { token->text });
-
-
-        // TODO (Yuxuan): Add helper function to avoid repeating same code
-        if (previous != -1) {
-          // Add followsBy and followsAfter
-          pkb.AddInfoToTable(TableIdentifier::kFollows, previous, token->stmt_num_);
-        }
-        if (parent != -1) {
-          // Add parent and child
-          pkb.AddInfoToTable(TableIdentifier::kParent, parent, token->stmt_num_);
-        }
 
       } else if (token->text == "print") {
 
@@ -60,19 +50,11 @@ void Parse(string input, Pkb& pkb) {
         pkb.AddEntityToSet(EntityIdentifier::kStmt, token->stmt_num_);
         pkb.AddEntityToSet(EntityIdentifier::kPrint, token->stmt_num_);
 
+        // Add stmt num and print_var to PrintTable
         pkb.AddInfoToTable(TableIdentifier::kPrint, token->stmt_num_, print_var);
 
-        // add uses
+        // Add stmt num and print_var to Uses Table
         pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, token->stmt_num_, { token->text });
-
-        if (previous != -1) {
-          // Add follows
-          pkb.AddInfoToTable(TableIdentifier::kFollows, previous, token->stmt_num_);
-        }
-        if (parent != -1) {
-          // Add parent
-          pkb.AddInfoToTable(TableIdentifier::kParent, parent, token->stmt_num_);
-        }
 
       } else if (token->text == "call") {
         // TODO (Yuxuan): Add implementation in future iterations
@@ -84,22 +66,25 @@ void Parse(string input, Pkb& pkb) {
         // TODO (Yuxuan): Add implementation in future iterations
 
       } else if (token->type == LETTER || token->type == NAME) {
-        if (is_procedure_name) {
+
+        if (is_procedure) {
           // Add procedure name to procedure_set_
           pkb.AddEntityToSet(EntityIdentifier::kProc, token->text);
-          is_procedure_name = false;
+
         } else {
+          // Add variable name to variable_set_
           pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text);
         }
 
         bool is_assignment = next(token, 1)->text == "=";
+
         if (is_assignment) {
 
           // Add stmt num to stmt_set_ and assign_set_
           pkb.AddEntityToSet(EntityIdentifier::kStmt, token->stmt_num_);
           pkb.AddEntityToSet(EntityIdentifier::kAssign, token->stmt_num_);
 
-          // Build assignments for pattern matching
+          // Build assignment pattern
           string assignment = "";
           int i = 2;
           while (next(token, i)->type != SEMICOLON) {
@@ -107,58 +92,17 @@ void Parse(string input, Pkb& pkb) {
             i++;
           }
 
-          // add brackets for '*' or '/' first
-          for (int i = 0; i < assignment.length(); i++) {
-            if (assignment[i] == '*' || assignment[i] == '/') {
-              int right_offset = 1;
-              if (assignment.substr(i).find(")") != string::npos) {
-                right_offset = assignment.substr(i).find(")") + 1;
-              }
-              assignment.insert(i + right_offset + 1, ")");
-
-              int pos = i - 1;
-              int start = 0;
-              while (assignment.substr(start, i).find("(") != string::npos) {
-                pos = assignment.substr(start, i).find("(");
-                start++;
-              }
-              assignment.insert(pos, "(");
-
-              i += 2;
-            }
-          }
-          
-          // add brackets for '+' and '-'
-          for (int i = 0; i < assignment.length(); i++) {
-            if (assignment[i] == '+' || assignment[i] == '-') {
-              int right_offset = 1;
-              if (assignment.substr(i).find(")") != string::npos) {
-                right_offset = assignment.substr(i).find(")") + 1;
-              }
-              assignment.insert(i + right_offset + 1, ")");
-
-              int pos = i - 1;
-              int start = 0;
-              while (assignment.substr(start, i).find("(") != string::npos) {
-                pos = assignment.substr(start, i).find("(");
-                start++;
-              }
-              assignment.insert(pos, "(");
-
-              i += 2;
-            }
-          }
-
+          // Add stmt num and assignment pattern to AssignTable
           pkb.AddInfoToTable(TableIdentifier::kAssign, token->stmt_num_, assignment);
 
-          // Add modifies to modify stmt to var
+          // Add stmt num and LHS variable to Modifies Table
           pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, token->stmt_num_, { token->text });
 
-          // build a vector containing all variables on the RHS and put them into UsesStmtToVar table
+          // Build a vector containing all variables in the assignment pattern
           string uses_var = "";
           vector<string> all_uses_var;
           for (int i = 0; i < assignment.length(); i++) {
-            if (isalpha(assignment[i]) || isdigit(assignment[i])) {
+            if (isalpha(assignment[i]) || (isdigit(assignment[i]) && uses_var != "")) {
               uses_var += assignment[i];
             } else {
               if (uses_var != "") {
@@ -167,55 +111,50 @@ void Parse(string input, Pkb& pkb) {
               }
             }
           }
+
+          // Add stmt num and vector of variables into Uses Table
           pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, token->stmt_num_, all_uses_var);
         }
 
       } else if (token->type == DIGIT || token->type == INTEGER) {
+
         // Add constant to constant_set_
         pkb.AddEntityToSet(EntityIdentifier::kConstant, token->text);
 
       } else if (token->type == LEFT_CURLY) {
-        parent = token->stmt_num_;
+
+        if (!is_procedure) {
+          parent.push(token->stmt_num_);
+          is_new_nesting = true;
+        }
 
       } else if (token->type == RIGHT_CURLY) {
-        parent = -1;
+
+        if (is_procedure) {
+          is_procedure = false;
+        } else {
+          parent.pop();
+          previous.pop();
+          is_new_nesting = false;
+        }
 
       } else if (token->type == SEMICOLON) {
-        previous = token->stmt_num_;
-        is_rhs_of_assignment = false;
 
-      } else if (token->type == OPERATOR) {
-        if (token->text == "=") {
-          is_rhs_of_assignment = true;
-
-          if (previous != -1) {
-            // Add followsBy
-            pkb.AddInfoToTable(TableIdentifier::kFollows, previous, token->stmt_num_);
-          }
-          if (parent != -1) {
-            // Add parent
-            pkb.AddInfoToTable(TableIdentifier::kParent, parent, token->stmt_num_);
-          }
+        if (!previous.empty() && !is_new_nesting) {
+          // Add previous stmt num and current stmt num to FollowsTable
+          pkb.AddInfoToTable(TableIdentifier::kFollows, previous.top(), token->stmt_num_);
+          previous.pop();
         }
-      } else {
-        cout << "Error: Token type not recognized" << endl;
+
+        if (!parent.empty()) {
+          // Add parent stmt num and current stmt num to ParentTable
+          pkb.AddInfoToTable(TableIdentifier::kParent, parent.top(), token->stmt_num_);
+        }
+
+        previous.push(token->stmt_num_);
+
       }
     }
-
-    /* 
-    // Print tables for testing purposes 
-    cout << "Procedure Names: " << endl;
-    for (auto const& i : pkb.GetAllEntityString(Pkb::EntityIdentifier::kProc)) {
-      std::cout << i << " ";
-    }
-    cout << endl;
-
-    cout << "Variable Names: " << endl;
-    for (auto const& i : pkb.GetAllEntityString(Pkb::EntityIdentifier::kVariable)) {
-      std::cout << i << " ";
-    }
-    cout << endl;
-    */
 
     if (pkb.PopulateNestedRelationship() == 0) {
       throw invalid_argument("PKB Population failed");
