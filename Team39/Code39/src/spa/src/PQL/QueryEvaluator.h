@@ -1,11 +1,9 @@
 #include <string>
-#include <list>
+#include <vector>
 
 #include "../PKB/pkb.h"
 #include "Parser.h"
 
-using namespace std;
-
 namespace pql {
-	std::list<std::string> evaluateQuery(Query query, Pkb& pkb);
+	std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb);
 }

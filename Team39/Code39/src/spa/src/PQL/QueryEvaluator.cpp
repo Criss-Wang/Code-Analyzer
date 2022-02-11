@@ -4,37 +4,38 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
-#include <list>
 #include <algorithm>
 
 #include "QueryEvaluator.h"
 
+using namespace std;
+
 namespace pql {
-  list<int> Intersect(const list<int>& lst1, const vector<int>& lst2);
-  void UpdateHashmap(unordered_map<string, list<int>>& hmap, string name, const vector<int>& lst);
+  vector<int> Intersect(const vector<int>& lst1, const vector<int>& lst2);
+  void UpdateHashmap(unordered_map<string, vector<int>>& hmap, string name, const vector<int>& lst);
   bool IsNumber(const string& str);
 
   bool GetRelExist(RelationshipToken& token, Pkb& pkb);
   vector<int> GetRelDomain(RelationshipToken& token, Pkb& pkb);
   vector<int> GetInverseRelDomain(RelationshipToken& token, Pkb& pkb);
 
-  std::list<std::string> evaluateQuery(Query query, Pkb& pkb) {
-    vector<RelationshipToken> suchThatClauses = query.GetSuchThatClause();
-    unordered_map<string, list<int>> hashmap;
+  std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
+    vector<RelationshipToken> such_that_clauses = query.GetSuchThatClause();
+    unordered_map<string, vector<int>> hashmap;
     vector<Synonym> synonyms = query.GetAllUsedSynonyms();
 
     //hashmap stores <synonym.name, domain> pair.
     for (Synonym& synonym : synonyms) {
-      unordered_set<int> domainSet = pkb.GetAllEntityInt(synonym.GetDeclaration());
-      list<int> domainList(std::begin(domainSet), std::end(domainSet));
-      hashmap.insert({ synonym.GetName(), domainList });
+      unordered_set<int> domain_set = pkb.GetAllEntityInt(synonym.GetDeclaration());
+      vector<int> domain_list(std::begin(domain_set), std::end(domain_set));
+      hashmap.insert({ synonym.GetName(), domain_list });
     }
 
     if (false) {
       //this is for pattern clauses, haven't implemented yet from parser side
       /*
       Synonym s = patternClause.getSynonym();
-      list<int> matched;
+      vector<int> matched;
 
       if (patternClause.getExactMatch()) {
           matched = PKB::getExactMatchAssign(patternClause.getVar(), patternClause.getExpr());
@@ -48,60 +49,60 @@ namespace pql {
       if (hashmap[s.name].empty()) {
           //there is no assign statement that satisfy the pattern
           //return empty list
-          list<string> res{};
+          vector<string> res{};
           return res;
       }
       */
 
     }
 
-    for (RelationshipToken& token : suchThatClauses) {
-      bool isLeftNum = IsNumber(token.GetLeft());
-      bool isRightNum = IsNumber(token.GetRight());
-      if (isLeftNum && isRightNum) {
-        bool relDoesExist = GetRelExist(token, pkb);
-        if (!relDoesExist) {
+    for (RelationshipToken& token : such_that_clauses) {
+      bool is_left_num = IsNumber(token.GetLeft());
+      bool is_right_num = IsNumber(token.GetRight());
+      if (is_left_num && is_right_num) {
+        bool rel_does_exist = GetRelExist(token, pkb);
+        if (!rel_does_exist) {
           //the relationship does not exist
           //return empty list
-          list<string> res{};
+          vector<string> res{};
           return res;
         }
-      } else if (isLeftNum) {
-        vector<int> relDomain = GetRelDomain(token, pkb);
+      } else if (is_left_num) {
+        vector<int> rel_domain = GetRelDomain(token, pkb);
         string name = token.GetRight();
 
         if (name == "_") {
           //there's no synonym involved
-          //just need to check whether the relDomain is empty
-          if (relDomain.empty()) {
-            list<string> res{};
+          //just need to check whether the rel_domain is empty
+          if (rel_domain.empty()) {
+            vector<string> res{};
             return res;
           }
         } else {
-          UpdateHashmap(hashmap, name, relDomain);
+          UpdateHashmap(hashmap, name, rel_domain);
 
           if (hashmap[name].empty()) {
-            list<string> res{};
+            vector<string> res{};
             return res;
           }
         }
 
-      } else if (isRightNum) {
-        vector<int> relDomain = GetInverseRelDomain(token, pkb);
-        string name = token.GetRight();
+      } else if (is_right_num) {
+        vector<int> rel_domain = GetInverseRelDomain(token, pkb);
+        string name = token.GetLeft();
 
         if (name == "_") {
           //there's no synonym involved
           //just need to check whether the relDomain is empty
-          if (relDomain.empty()) {
-            list<string> res{};
+          if (rel_domain.empty()) {
+            vector<string> res{};
             return res;
           }
-        } else {
-          UpdateHashmap(hashmap, name, relDomain);
+        } else {    
+          UpdateHashmap(hashmap, name, rel_domain);
 
           if (hashmap[name].empty()) {
-            list<string> res{};
+            vector<string> res{};
             return res;
           }
         }
@@ -110,36 +111,36 @@ namespace pql {
       }
     }
 
-    Synonym selectedSyn = query.GetResultSynonym();
-    list<int> selectedSynDomain = hashmap[selectedSyn.GetName()];
-    list<string> res;
+    Synonym selected_syn = query.GetResultSynonym();
+    vector<int> selected_syn_domain = hashmap[selected_syn.GetName()];
+    vector<string> res;
 
-    for (int val : selectedSynDomain) {
+    for (int val : selected_syn_domain) {
       res.push_back(to_string(val));
     }
 
     return res;
   }
 
-  void UpdateHashmap(unordered_map<string, list<int>>& hmap, string name, const vector<int>& lst) {
-    list<int> oriLst = hmap[name];
-    list<int> inter = Intersect(oriLst, lst);
+  void UpdateHashmap(unordered_map<string, vector<int>>& hmap, string name, const vector<int>& lst) {
+    vector<int> oriLst = hmap[name];
+    vector<int> inter = Intersect(oriLst, lst);
     hmap[name] = inter;
   }
 
-  list<int> Intersect(const list<int>& lst1, const vector<int>& lst2) {
+  vector<int> Intersect(const vector<int>& lst1, const vector<int>& lst2) {
     //refer from stack overflow https://stackoverflow.com/questions/38993415/how-to-apply-the-intersection-between-two-lists-in-c
-    list<int> res;
+    vector<int> res;
     unordered_set<int> st;
     for_each(lst2.begin(), lst2.end(), [&st](const int& k) { st.insert(k); });
     for_each(lst1.begin(), lst1.end(),
       [&st, &res](const int& k) {
-      auto iter = st.find(k);
-      if (iter != st.end()) {
-        res.push_back(k);
-        st.erase(iter);
+        auto iter = st.find(k);
+        if (iter != st.end()) {
+          res.push_back(k);
+          st.erase(iter);
+        }
       }
-    }
     );
 
     return res;
@@ -183,16 +184,16 @@ namespace pql {
     vector<int> res;
     switch (token.GetRelationship()) {
       case RelationshipTypes::kFollows:
-        res.push_back(pkb.GetStmtRightBefore(left));
+        res = pkb.GetStmtRightAfter(left);
         break;
       case RelationshipTypes::kFollowsT:
-        res = pkb.GetStmtsBefore(left);
+        res = pkb.GetStmtsAfter(left);
         break;
       case RelationshipTypes::kParent:
-        res.push_back(pkb.GetParent(left)[0]);
+        res = pkb.GetChild(left);
         break;
       case RelationshipTypes::kParentT:
-        res = pkb.GetAllParents(left);
+        res = pkb.GetAllChildren(left);
         break;
       default:
         break;
@@ -206,16 +207,16 @@ namespace pql {
     vector<int> res;
     switch (token.GetRelationship()) {
       case RelationshipTypes::kFollows:
-        res.push_back(pkb.GetStmtRightAfter(right));
+        res = pkb.GetStmtRightBefore(right);
         break;
       case RelationshipTypes::kFollowsT:
-        res = pkb.GetStmtsAfter(right);
+        res = pkb.GetStmtsBefore(right);
         break;
       case RelationshipTypes::kParent:
-        res = pkb.GetChild(right);
+        res = pkb.GetParent(right);
         break;
       case RelationshipTypes::kParentT:
-        res = pkb.GetAllChildren(right);
+        res = pkb.GetAllParents(right);
         break;
       default:
         break;
