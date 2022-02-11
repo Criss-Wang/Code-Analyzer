@@ -16,14 +16,15 @@ bool Validate(vector<Token> input) {
   string expected_text = "procedure";
   
   bool is_procedure = false;
-  bool expect_close_curly_bracket = false;
-  bool expect_open_bracket = false;
+  bool expect_right_curly_bracket = false;
+  bool expect_left_paren_or_integer = false;
+  bool expect_semicolon = false;
 
   for (auto token = begin(input); token != end(input); ++token) {
 
     string token_text;
     TokenType token_type;
-    token->print();
+
     if (find(begin(symbols), end(symbols), token->text) != end(symbols)) {
       token_text = "symbol";
     } else if (find(begin(statements), end(statements), token->text) != end(statements)) {
@@ -34,40 +35,56 @@ bool Validate(vector<Token> input) {
 
     if (token->type == LETTER) {
       token_type = NAME;
+    } else if (token->type == DIGIT) {
+      token_type = INTEGER;
     } else {
       token_type = token->type;
     }
 
-    // check if current token type and text matches the expected ones
-    if (expect_close_curly_bracket) {
-      if (token_type != RIGHT_CURLY && token_type != NAME) {
+    // check if token type and text matches expected
+    bool is_match = (token_type == expected_type || expected_type == WILDCARD)
+      && (token_text == expected_text || expected_text == wildcard);
+
+    // first check for other possible tokens which are not expected but still valid
+    if (expect_right_curly_bracket) {
+      if (!(token_type == RIGHT_CURLY || token_type == NAME)) {
         return false;
       } else {
-        expect_close_curly_bracket = false;
+        expect_right_curly_bracket = false;
       }
-
-    } else if (expect_open_bracket) {
-      if (token_type != RIGHT_PAREN && token_type != NAME) {
+    } else if (expect_left_paren_or_integer) {
+      if (!(token_type == LEFT_PAREN || token_type == INTEGER || token_type == NAME)) {
         return false;
       } else {
-        expect_close_curly_bracket = false;
+        expect_left_paren_or_integer = false;
       }
-
-    } else if ((token_type != expected_type && expected_type != WILDCARD)
-      || (token_text != expected_text && expected_text != wildcard)) {
+    } else if (expect_semicolon) {
+      if (!(token_type == SEMICOLON || token_type == OPERATOR)) {
+        return false;
+      } else {
+        expect_semicolon = false;
+      }
+    } else if (!is_match) {
       return false;
     }
 
     // find expected type and text of next token
-    if (token_type == OPERATOR) { // expects variable or bracket after operator
+    if (token_type == OPERATOR 
+      || token_type == LEFT_PAREN) { // expects variable, integer or left paren after operator/left paren
       expected_type = NAME;
       expected_text = "**";
-      expect_open_bracket = true;
+      expect_left_paren_or_integer = true;
 
-    } else if (token_type == SEMICOLON) { // expects statement or close curly bracket after semicolon
+    } else if (token_type == RIGHT_PAREN) { // expects operator or semicolon after right paren
+      expected_type = OPERATOR;
+      expected_text = "**";
+      expect_semicolon = true;
+
+    } else if (token_type == SEMICOLON 
+      || token_type == RIGHT_CURLY) { // expects statement or right curly after semicolon/right curly
       expected_type = NAME;
       expected_text = "statement";
-      expect_close_curly_bracket = true;
+      expect_right_curly_bracket = true;
 
     } else if (token_type == NAME && token_text == "procedure") { // expects procedure_name after 'procedure'
       expected_type = NAME;
@@ -87,17 +104,14 @@ bool Validate(vector<Token> input) {
       expected_type = NAME;
       expected_text = "**";
 
-    } else if (token_type == NAME) {
-      if (is_procedure) { // expects "{" after procedure_name
-        expected_type = LEFT_CURLY;
-        expected_text = "{";
-        is_procedure = false;
+    } else if (token_type == NAME && is_procedure) { // expects "{" after procedure_name
+      expected_type = LEFT_CURLY;
+      expected_text = "{";
+      is_procedure = false;
 
-      } else { // expects symbol after variable
-        expected_type = WILDCARD;
-        expected_text = "symbol";
-        cout << "here";
-      }
+    } else if (token_type == NAME || token_type == INTEGER) { // expects symbol after variable or integer
+      expected_type = WILDCARD;
+      expected_text = "symbol";
 
     } else {
       cout << "Token ";

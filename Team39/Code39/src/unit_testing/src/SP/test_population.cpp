@@ -6,57 +6,42 @@
 #include "catch.hpp"
 
 using namespace std;
-void RequirePopulation(bool b) {
-    REQUIRE(b);
-}
-
-
-// Just placeholder test cases to test the logic of parse.
-// To be replaced with actual test cases once PKB API is provided.
-TEST_CASE("Test populate PKB") {
-	
-	/*Input:
-	* procedure procName {
-	*	read x;
-	*	print y;
-	* }
-	* */
-	ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test1.txt");
+void RequirePopulate(string path) {
+	ifstream input_file(path);
 	if (!input_file.is_open()) {
 		cerr << "Could not open the file " << endl;
-		RequirePopulation(1 == 1);
 	} else {
 		string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-
 		Pkb pkb;
 		Parse(input, pkb);
-
-		RequirePopulation(1==1);
+		REQUIRE(1 == 1);
 	}
-
-	RequirePopulation(1 == 1);
 }
 
-TEST_CASE("Test populate PKB 2") {
-	/* Input:
-	* procedure procName {
-	*	x = y * 3;
-	* print x;
-	* }
-	* */
+string populate_dir = "../../../../../../Tests39/sp/valid_programs/";
 
-	ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test2.txt");
-	if (!input_file.is_open()) {
-		cerr << "Could not open the file " << endl;
-		RequirePopulation(1 == 1);
-	} else {
-		string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+TEST_CASE("Read/print statements for Population") {
+	RequirePopulate(populate_dir + "1_test1.txt");
+	RequirePopulate(populate_dir + "1_test2.txt");
+	RequirePopulate(populate_dir + "1_test3.txt");
+	RequirePopulate(populate_dir + "1_test4.txt");
+}
 
-		Pkb pkb;
-		Parse(input, pkb);
+TEST_CASE("Read/print/assign statments for Population") {
+	RequirePopulate(populate_dir + "2_test1.txt");
+	RequirePopulate(populate_dir + "2_test2.txt");
+	//RequireValid(valid_dir + "2_test3.txt"); syntax error
+	//RequireValid(valid_dir + "2_test4.txt"); syntax error
+}
 
-		RequirePopulation(1 == 1);
-	}
+TEST_CASE("Read/print/assign/if statments for Population") {
 
-	RequirePopulation(1 == 1);
+}
+
+TEST_CASE("Read/print/assign/while statments for Population") {
+
+}
+
+TEST_CASE("Read/print/assign/if/while statments for Population") {
+
 }

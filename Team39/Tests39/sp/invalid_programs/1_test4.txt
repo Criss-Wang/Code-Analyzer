@@ -1,0 +1,4 @@
+procedure procName {
+read x;
+print 4;
+}

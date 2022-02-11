@@ -1,4 +1,5 @@
 procedure procName {
-x = y * 3;
+read x;
+read y;
 print x;
 }
