@@ -4,34 +4,6 @@
 
 #include "catch.hpp"
 
-TEST_CASE("Read Table") {
-  SECTION("Populate read table with key value pairs") {
-    ReadTable *read_table = new ReadTable();
-    read_table->AddKeyValuePair(1, "y");
-    bool add_success = read_table->AddKeyValuePair(2, "x");
-    REQUIRE(read_table->GetTableSize() == 2);
-    REQUIRE(add_success == true);
-  }
-
-  SECTION("Throw custom exception if key already exists in the table") {
-    ReadTable *read_table = new ReadTable();
-    read_table->AddKeyValuePair(1, "y");
-    CHECK_THROWS(read_table->AddKeyValuePair(1, "x"));
-  }
-
-  SECTION("Get value from read table") {
-    ReadTable *read_table = new ReadTable();
-    read_table->AddKeyValuePair(1, "y");
-    REQUIRE(read_table->GetValueByKey(1) == "y");
-  }
-
-  SECTION("Throw custom exception if key does not exist in the table when retrieving value") {
-    ReadTable *read_table = new ReadTable();
-    read_table->AddKeyValuePair(1, "y");
-    CHECK_THROWS(read_table->GetValueByKey(2));
-  }
-}
-
 TEST_CASE("Add Key-value Pair into Tables") {
   SECTION("Add item into table: int -> int list") {
     auto pkb = Pkb();
@@ -102,42 +74,6 @@ TEST_CASE("Add Key-value Pair into Tables") {
   }
 }
 
-TEST_CASE("Populate Table") {
-  SECTION("Check all nested tables udpated") {
-    auto pkb = Pkb();
-    const vector<int> value = { 4,5,6 };
-    const bool success = pkb.AddInfoToTable(TableIdentifier::kParent, 3, value);
-    const vector<int> value_2 = { 2,3 };
-    const bool success_2 = pkb.AddInfoToTable(TableIdentifier::kParent, 1, value_2);
-    const int populate_success = pkb.PopulateNestedRelationship();
-
-    REQUIRE(populate_success == 1);
-    REQUIRE(pkb.IsTransitiveParent(1, 4) == 1);
-    REQUIRE(pkb.IsParent(2, 5) == 0);
-    REQUIRE(pkb.IsParent(5, 2) == 0);
-    REQUIRE(pkb.GetParent(2)[0] == 1);
-    REQUIRE(pkb.GetParent(4)[0] == 3);
-    REQUIRE(pkb.GetAllParents(4)[1] == 1);
-    REQUIRE(pkb.GetChild(3)[2] == 6);
-    REQUIRE(pkb.GetAllChildren(1)[0] == 2);
-
-    const vector<string> value_3 = { "x" };
-    const vector<string> value_4 = { "y" };
-    const bool success_3 = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 2, value_3);
-    const bool success_4 = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 4, value_4);
-    const int populate_success_2 = pkb.PopulateNestedRelationship();
-
-    const vector<string> value_5 = { "x" };
-    const vector<string> value_6 = { "y" };
-    const bool success_5 = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 2, value_5);
-    const bool success_6 = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 4, value_6);
-    const int populate_success_3 = pkb.PopulateNestedRelationship();
-
-    REQUIRE(populate_success_2 == 1);
-    REQUIRE(populate_success_3 == 1);
-  }
-}
-
 TEST_CASE("Add entity items") {
   SECTION("Adding statement") {
     Pkb pkb = Pkb();
@@ -154,7 +90,6 @@ TEST_CASE("Add entity items") {
   }
 }
 
-
 TEST_CASE("Add Pattern") {
   SECTION("Adding patterns") {
     Pkb pkb = Pkb();
@@ -170,6 +105,5 @@ TEST_CASE("Add Pattern") {
 
     unordered_set<int> res = pkb.GetAllStmtWithPattern("X + B + C");
     REQUIRE(res.empty());
-
   }
 }
