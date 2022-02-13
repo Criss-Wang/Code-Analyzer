@@ -9,7 +9,7 @@ using namespace std;
 #include "PKB/tables/table.h"
 
 void Parse(string input, Pkb& pkb) {
-
+  
   Tokenizer tokenizer;
   vector<Token> inputTokens = tokenizer.parse(input);
 
@@ -77,10 +77,10 @@ void Parse(string input, Pkb& pkb) {
       } else if (token->text == "call") {
         // TODO (Yuxuan): Add implementation in future iterations
 
-      } else if (token->type == WHILE) {
+      //} else if (token->type == WHILE) {
         // TODO (Yuxuan): Add implementation in future iterations
 
-      } else if (token->type == IF) {
+      //} else if (token->type == IF) {
         // TODO (Yuxuan): Add implementation in future iterations
 
       } else if (token->type == LETTER || token->type == NAME) {
