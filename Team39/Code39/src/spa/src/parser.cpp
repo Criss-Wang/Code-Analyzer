@@ -9,7 +9,7 @@ using namespace std;
 #include "PKB/tables/table.h"
 
 void Parse(string input, Pkb& pkb) {
-
+  
   Tokenizer tokenizer;
   vector<Token> inputTokens = tokenizer.parse(input);
 
