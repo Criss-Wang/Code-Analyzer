@@ -16,7 +16,7 @@ namespace pql {
     }
 
     bool ParserState::IsEOF() {
-        return ss.eof();
+        return (ss.peek() == -1);
     }
 
     void ParserState::EatWhiteSpaces() {
@@ -40,7 +40,7 @@ namespace pql {
     void ParserState::Expect(const std::string& s) {
         std::stringstream ssm;
         ssm << s;
-        while (!ssm.eof()) {
+        while (ssm.peek() != -1) {
             if (ss.get() != ssm.get()) {
                 try {
                     throw ParseException();
