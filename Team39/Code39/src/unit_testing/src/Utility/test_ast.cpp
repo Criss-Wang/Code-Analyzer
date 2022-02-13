@@ -1,28 +1,26 @@
-#include "Parser.h"
+#include "parser.h"
 #include "Utility/t_node.h"
 #include "Utility/ast.h"
 
 #include "catch.hpp"
-using namespace std;
-void require(bool b) {
-    REQUIRE(b);
-}
 
-/* test case for assignment is work in progress 
+using namespace std;
+
+/* test case for assignment is work in progress
 TEST_CASE("1st Test: Assignment") {
-	
+
 	string input = "x = y + 1";
 
 	AST expectedAST(new TNode("assign"));
 	(*expectedAST.root).insertFront(new TNode("x"));
 	(*expectedAST.root).insertBack(new TNode("+", { new TNode("y"), new TNode("1") }));
-	
+
 	AST actualAST;
 	actualAST.buildtree(input);
 
 	actualAST.print("", actualAST.root, false);
 
-    require((*actualAST.root).isEqual(expectedAST.root));
+    REQUIRE((*actualAST.root).isEqual(expectedAST.root));
 }
 
 TEST_CASE("Read - Test 1") {
@@ -38,7 +36,7 @@ TEST_CASE("Read - Test 1") {
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require(actualAST.isEqual(expectedAST));
+	REQUIRE(actualAST.isEqual(expectedAST));
 }
 
 TEST_CASE("Read - Test 2") {
@@ -54,7 +52,7 @@ TEST_CASE("Read - Test 2") {
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require(!actualAST.isEqual(expectedAST));
+	REQUIRE(!actualAST.isEqual(expectedAST));
 }
 
 TEST_CASE("Read - Test 3") {
@@ -72,7 +70,7 @@ TEST_CASE("Read - Test 3") {
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require((actualAST).isEqual(expectedAST));
+	REQUIRE((actualAST).isEqual(expectedAST));
 }
 
 TEST_CASE("Read - Test 4") {
@@ -90,7 +88,7 @@ TEST_CASE("Read - Test 4") {
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require(!(actualAST).isEqual(expectedAST));
+	REQUIRE(!(actualAST).isEqual(expectedAST));
 }
 
 TEST_CASE("Read - Test 5") {
@@ -109,7 +107,7 @@ TEST_CASE("Read - Test 5") {
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require((actualAST).isEqual(expectedAST));
+	REQUIRE((actualAST).isEqual(expectedAST));
 }
 
 TEST_CASE("Print - Test 1") {
@@ -125,7 +123,7 @@ TEST_CASE("Print - Test 1") {
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require((actualAST).isEqual(expectedAST));
+	REQUIRE((actualAST).isEqual(expectedAST));
 }
 
 TEST_CASE("Print - Test 2") {
@@ -141,7 +139,7 @@ TEST_CASE("Print - Test 2") {
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require(!(actualAST).isEqual(expectedAST));
+	REQUIRE(!(actualAST).isEqual(expectedAST));
 }
 
 TEST_CASE("Print - Test 3") {
@@ -158,7 +156,7 @@ TEST_CASE("Print - Test 3") {
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require((actualAST).isEqual(expectedAST));
+	REQUIRE((actualAST).isEqual(expectedAST));
 }
 
 TEST_CASE("Print - Test 4") {
@@ -175,7 +173,7 @@ TEST_CASE("Print - Test 4") {
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require(!(actualAST).isEqual(expectedAST));
+	REQUIRE(!(actualAST).isEqual(expectedAST));
 }
 
 TEST_CASE("Print - Test 5") {
@@ -194,7 +192,7 @@ TEST_CASE("Print - Test 5") {
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require((actualAST).isEqual(expectedAST));
+	REQUIRE((actualAST).isEqual(expectedAST));
 }
 
 TEST_CASE("Read and Print - Test 1") {
@@ -213,7 +211,6 @@ TEST_CASE("Read and Print - Test 1") {
 
 	actualAST.print("", actualAST.getRoot(), false);
 
-	require((actualAST).isEqual(expectedAST));
+	REQUIRE((actualAST).isEqual(expectedAST));
 }
  */
-

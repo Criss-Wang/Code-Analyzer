@@ -1,8 +1,8 @@
 #include "pkb.h"
+#include "Utility/helper.h"
 
 #include <queue>
 #include <stack>
-#include <Utility/Helper.h>
 
 // TODO(Zhenlin): [Performance] Not optimized with the help of traversal order
 template<typename T1, typename T2>
@@ -81,7 +81,7 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
       if (!t.KeyExistsInTable(child_stmt)) continue;
       // Get the variables associated with the statement number
       vector<string> variables_lst_of_child_stmt = t.GetValueByKey(child_stmt);
-      
+
       // Merge two vectors
       tmp_lst.insert(tmp_lst.end(), variables_lst_of_child_stmt.begin(), variables_lst_of_child_stmt.end());
       // Remove duplicate elements
@@ -155,7 +155,7 @@ vector<int> Pkb::GetAllParents(const int stmt) const {
   } catch (exception& e) {
     return vector<int>{};
   }
-  
+
 }
 
 vector<int> Pkb::GetChild(const int stmt) const {
@@ -477,11 +477,3 @@ unordered_set<set<int>, HashFunction> Pkb::GetAllEntityStmtLst(const EntityIdent
       throw InvalidIdentifierException();
   }
 }
-
-
-
-
-
-
-
-

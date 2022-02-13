@@ -1,4 +1,4 @@
-#include "Helper.h"
+#include "helper.h"
 
 bool PatternHelper::IsOperator(const char c) {
   return (!isalpha(c) && !isdigit(c));

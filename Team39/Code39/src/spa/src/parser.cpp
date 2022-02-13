@@ -4,12 +4,13 @@
 
 using namespace std;
 
-#include "Parser.h"
+#include "parser.h"
 #include "SP/validator.h"
+#include "SP/tokenizer.h"
+#include "SP/design_extractor.h"
 #include "PKB/tables/table.h"
 
 void Parse(string input, Pkb& pkb) {
-
   Tokenizer tokenizer;
   vector<Token> inputTokens = tokenizer.parse(input);
 
@@ -23,7 +24,7 @@ void Parse(string input, Pkb& pkb) {
     bool is_variable_name = false;
 
     for (auto token = begin(inputTokens); token != end(inputTokens); ++token) {
-      
+
       if (token->type == NAME && token->text == "procedure") {
         parent = token->stmt_num_;
         is_procedure_name = true;
@@ -127,7 +128,7 @@ void Parse(string input, Pkb& pkb) {
               i += 2;
             }
           }
-          
+
           // add brackets for '+' and '-'
           for (int i = 0; i < assignment.length(); i++) {
             if (assignment[i] == '+' || assignment[i] == '-') {
@@ -202,8 +203,8 @@ void Parse(string input, Pkb& pkb) {
       }
     }
 
-    /* 
-    // Print tables for testing purposes 
+    /*
+    // Print tables for testing purposes
     cout << "Procedure Names: " << endl;
     for (auto const& i : pkb.GetAllEntityString(Pkb::EntityIdentifier::kProc)) {
       std::cout << i << " ";
@@ -217,8 +218,8 @@ void Parse(string input, Pkb& pkb) {
     cout << endl;
     */
 
-    if (pkb.PopulateNestedRelationship() == 0) {
-      throw invalid_argument("PKB Population failed");
-    }    
+    if (PopulateNestedRelationships(pkb) == 0) {
+      throw invalid_argument("Failed to populate nested relationships");
+    }
   }
 }
