@@ -97,7 +97,11 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
       case '<':
       case '>':
       case '!':
-        EndToken(current_token, tokens_list);
+      case '&':
+      case '|':
+        if (current_token.type != OPERATOR) {
+          EndToken(current_token, tokens_list);
+        }
         current_token.type = OPERATOR;
         current_token.text.append(1, curr_char);
         break;
