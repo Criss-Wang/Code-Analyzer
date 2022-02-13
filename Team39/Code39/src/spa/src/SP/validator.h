@@ -1,5 +1,7 @@
 #pragma once
-#include "Parser.h"
+
+#include "parser.h"
+#include "tokenizer.h"
 
 using namespace std;
 
