@@ -10,14 +10,12 @@
 
 // Custom hash function from https://www.geeksforgeeks.org/unordered-set-of-vectors-in-c-with-examples/
 struct HashFunction {
-  size_t operator()(const set<int>
-    & my_vector) const {
+  size_t operator()(const set<int> & my_vector) const {
     std::hash<int> hasher;
     size_t answer = 0;
 
     for (int i : my_vector) {
-      answer ^= hasher(i) + 0x9e3779b9 +
-        (answer << 6) + (answer >> 2);
+      answer ^= hasher(i) + 0x9e3779b9 + (answer << 6) + (answer >> 2);
     }
     return answer;
   }

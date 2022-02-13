@@ -112,3 +112,4 @@ unordered_set<string> PatternHelper::GetPatternSet(string input) {
   // return operands.top();
   return res;
 }
+

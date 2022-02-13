@@ -48,17 +48,3 @@ bool TNode::isEqual(TNode* node) {
 	}
 }
 
-bool varTNode::isStmt()
-{
-	return false;
-}
-
-bool stmtLstTNode::isStmt()
-{
-	return false;
-}
-
-bool stmtLstTNode::isStmtLst()
-{
-	return true;
-}
