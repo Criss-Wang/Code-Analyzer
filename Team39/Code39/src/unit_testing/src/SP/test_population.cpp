@@ -21,27 +21,36 @@ void RequirePopulate(string path) {
 string populate_dir = "../../../../../../Tests39/sp/valid_programs/";
 
 TEST_CASE("Read/print statements for Population") {
+
 	RequirePopulate(populate_dir + "1_test1.txt");
 	RequirePopulate(populate_dir + "1_test2.txt");
 	RequirePopulate(populate_dir + "1_test3.txt");
 	RequirePopulate(populate_dir + "1_test4.txt");
+
 }
 
 TEST_CASE("Read/print/assign statments for Population") {
+
 	RequirePopulate(populate_dir + "2_test1.txt");
 	RequirePopulate(populate_dir + "2_test2.txt");
 	//RequireValid(valid_dir + "2_test3.txt"); syntax error
 	//RequireValid(valid_dir + "2_test4.txt"); syntax error
-}
-
-TEST_CASE("Read/print/assign/if statments for Population") {
 
 }
 
-TEST_CASE("Read/print/assign/while statments for Population") {
+TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation") {
+
+		//RequireValid(valid_dir + "3_test1.txt");
+		//RequireValid(valid_dir + "3_test2.txt");
+		//RequireValid(valid_dir + "3_test3.txt");
+		//RequireValid(valid_dir + "3_test4.txt");
 
 }
 
-TEST_CASE("Read/print/assign/if/while statments for Population") {
+TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Validation") {
+
+	//RequireValid(valid_dir + "4_test1.txt");
+	//RequireValid(valid_dir + "4_test2.txt");
+	//RequireValid(valid_dir + "4_test3.txt");
 
 }
