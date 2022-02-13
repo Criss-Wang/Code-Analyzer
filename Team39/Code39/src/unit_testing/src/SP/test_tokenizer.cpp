@@ -139,7 +139,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token11{ DIGIT, "1", 2 };
     Token token12{ SEMICOLON, ";", 2 };
     Token token13{ RIGHT_CURLY, "}", 0 };
-    expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10, 
+    expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
                             token11, token12, token13 };
 
     RequireTokenizer(expected_tokens == actual_tokens);
@@ -160,7 +160,7 @@ TEST_CASE("Valid tokenizer output") {
 
     RequireTokenizer(expected_tokens == actual_tokens);
   }
-  
+
   SECTION("Procedure with newline") {
     source_prog = "procedure procName \n { read read;\n}";
     actual_tokens = tokenizer.parse(source_prog);
@@ -335,7 +335,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token38{ RIGHT_CURLY, "}", 0 };
     Token token39{ RIGHT_CURLY, "}", 0 };
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
-                         token11, token12, token13, token14, token15, token16, token17, token18, token19, token20, 
+                         token11, token12, token13, token14, token15, token16, token17, token18, token19, token20,
                           token21, token22, token23, token24, token25, token26, token27, token28, token29, token30,
                            token31, token32, token33, token34, token35, token36, token37, token38, token39 };
 
@@ -483,6 +483,75 @@ TEST_CASE("Valid tokenizer output") {
 
     RequireTokenizer(expected_tokens == actual_tokens);
   }
+
+  SECTION("Procedure with two-symbol operator in cond expr and rel expr") {
+    source_prog = "x == 0; x >= 0; x <= 0; x != 0; x && y; x || y; !(x == 0);";
+    actual_tokens = tokenizer.parse(source_prog);
+
+    Token token1{ LETTER, "x", 0 };
+    Token token2{ OPERATOR, "==", 0 };
+    Token token3{ DIGIT, "0", 0 };
+    Token token4{ SEMICOLON, ";", 0 };
+    Token token5{ LETTER, "x", 1 };
+    Token token6{ OPERATOR, ">=", 1 };
+    Token token7{ DIGIT, "0", 1 };
+    Token token8{ SEMICOLON, ";", 1 };
+    Token token9{ LETTER, "x", 2 };
+    Token token10{ OPERATOR, "<=", 2 };
+    Token token11{ DIGIT, "0", 2 };
+    Token token12{ SEMICOLON, ";", 2 };
+    Token token13{ LETTER, "x", 3 };
+    Token token14{ OPERATOR, "!=", 3 };
+    Token token15{ DIGIT, "0", 3 };
+    Token token16{ SEMICOLON, ";", 3 };
+    Token token17{ LETTER, "x", 4 };
+    Token token18{ OPERATOR, "&&", 4 };
+    Token token19{ LETTER, "y", 4 };
+    Token token20{ SEMICOLON, ";", 4 };
+    Token token21{ LETTER, "x", 5 };
+    Token token22{ OPERATOR, "||", 5 };
+    Token token23{ LETTER, "y", 5 };
+    Token token24{ SEMICOLON, ";", 5 };
+    Token token25{ OPERATOR, "!", 6 };
+    Token token26{ LEFT_PAREN, "(", 6 };
+    Token token27{ LETTER, "x", 6 };
+    Token token28{ OPERATOR, "==", 6 };
+    Token token29{ DIGIT, "0", 6 };
+    Token token30{ RIGHT_PAREN, ")", 6 };
+    Token token31{ SEMICOLON, ";", 6 };
+    expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
+                         token11, token12, token13, token14, token15, token16, token17, token18, token19, token20,
+                          token21, token22, token23, token24, token25, token26, token27, token28, token29, token30, token31 };
+
+    RequireTokenizer(expected_tokens == actual_tokens);
+  }
+
+  SECTION("Procedure with two-symbol operator in while stmt") {
+    source_prog = "procedure procedure {while !(x >= 0) {x = y;}}";
+    actual_tokens = tokenizer.parse(source_prog);
+
+    Token token1{ NAME, "procedure", 0 };
+    Token token2{ NAME, "procedure", 0 };
+    Token token3{ LEFT_CURLY, "{", 0 };
+    Token token4{ NAME, "while", 1 };
+    Token token5{ OPERATOR, "!", 1 };
+    Token token6{ LEFT_PAREN, "(", 1 };
+    Token token7{ LETTER, "x", 1 };
+    Token token8{ OPERATOR, ">=", 1 };
+    Token token9{ DIGIT, "0", 1 };
+    Token token10{ RIGHT_PAREN, ")", 1 };
+    Token token11{ LEFT_CURLY, "{", 1 };
+    Token token12{ LETTER, "x", 2 };
+    Token token13{ OPERATOR, "=", 2 };
+    Token token14{ LETTER, "y", 2 };
+    Token token15{ SEMICOLON, ";", 2 };
+    Token token16{ RIGHT_CURLY, "}", 0 };
+    Token token17{ RIGHT_CURLY, "}", 0 };
+    expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
+                         token11, token12, token13, token14, token15, token16, token17 };
+
+    RequireTokenizer(expected_tokens == actual_tokens);
+  }
 }
 
 TEST_CASE("Invalid tokenizer output") {
@@ -599,5 +668,3 @@ TEST_CASE("Run tokenizer with file input") {
   RequireTokenizer(1 == 1);
 }
 */
-
-
