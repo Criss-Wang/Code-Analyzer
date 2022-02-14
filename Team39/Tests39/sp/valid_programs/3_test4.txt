@@ -2,11 +2,14 @@ procedure procName {
 read x;
 x = y * (3 + t) + 4;
 print x;
-if (((!(y == 0)) && (x != 0))) || ((x < 8) && (y > 9))) then {
+if (((!(y == 0)) && (x != 0)) || ((x < 8) && (y > 9))) then {
 y = y + 1;
 z = z * y;
 } else {
 print x;
+while (i > 100) {
+z = 1;
+}
 }
 read y;
 }

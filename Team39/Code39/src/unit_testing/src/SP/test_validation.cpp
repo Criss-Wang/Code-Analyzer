@@ -43,7 +43,7 @@ TEST_CASE("Read/print statements for Validation") {
 		RequireValid(valid_dir + "1_test4.txt");
 
 	}
-
+	
 	SECTION("Invalid Programs") {
 
 		RequireInvalid(invalid_dir + "1_test1.txt");
@@ -57,7 +57,7 @@ TEST_CASE("Read/print statements for Validation") {
 }
 
 TEST_CASE("Read/print/assign statments for Validation") {
-
+	
 	SECTION("Valid Programs") {
 
 		RequireValid(valid_dir + "2_test1.txt");
@@ -68,25 +68,26 @@ TEST_CASE("Read/print/assign statments for Validation") {
 	}
 
 	SECTION("Invalid Programs") {
-
+		
 		RequireInvalid(invalid_dir + "2_test1.txt");
 		RequireInvalid(invalid_dir + "2_test2.txt");
 		RequireInvalid(invalid_dir + "2_test3.txt");
 		RequireInvalid(invalid_dir + "2_test4.txt");
 		RequireInvalid(invalid_dir + "2_test5.txt");
 		RequireInvalid(invalid_dir + "2_test6.txt");
-
+		
 	}
+	
 }
 
 TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation") {
 
 	SECTION("Valid Programs") {
 
-		//RequireValid(valid_dir + "3_test1.txt");
-		//RequireValid(valid_dir + "3_test2.txt");
-		//RequireValid(valid_dir + "3_test3.txt");
-		//RequireValid(valid_dir + "3_test4.txt");
+		RequireValid(valid_dir + "3_test1.txt");
+		RequireValid(valid_dir + "3_test2.txt");
+		RequireValid(valid_dir + "3_test3.txt");
+		RequireValid(valid_dir + "3_test4.txt");
 
 	}
 

@@ -1,6 +1,6 @@
-#include "Parser.h"
+#include "SP/tokenizer.h"
+#include "SP/populator.h"
 #include "PKB/pkb.h"
-#include "PKB/tables/table.h"
 
 #include <fstream>
 #include "catch.hpp"
@@ -12,8 +12,10 @@ void RequirePopulate(string path) {
 		cerr << "Could not open the file " << endl;
 	} else {
 		string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+		Tokenizer tokenizer;
+		vector<Token> input_tokens = tokenizer.parse(input);
 		Pkb pkb;
-		Parse(input, pkb);
+		populate(input_tokens, pkb);
 		REQUIRE(1 == 1);
 	}
 }

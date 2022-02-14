@@ -6,36 +6,35 @@ using namespace std;
 
 #include "validator.h"
 
-bool Validate(vector<Token> input) {
+bool validateProcedure(vector<Token> tokens) {
+  bool check_size = tokens.size() == 3;
+  bool check_variable = tokens.at(1).type == NAME || tokens.at(1).type == LETTER;
+  bool check_left_curly = tokens.at(2).type == LEFT_CURLY;
+  return check_size && check_variable && check_left_curly;
+}
 
-  string symbols[] = { "=", "<", ">", "(", ")", "+", "-", "*", "/", ";" };
-  string statements[] = { "read", "print", "if", "while", "call" };
-  string wildcard = "**";
+bool validateReadPrintStmt(vector<Token> tokens) {
+  bool check_size = tokens.size() == 3;
+  bool check_variable = tokens.at(1).type == NAME || tokens.at(1).type == LETTER;
+  bool check_semicolon = tokens.at(2).type == SEMICOLON;
+  return check_size && check_variable && check_semicolon;
+}
 
-  TokenType expected_type = NAME;
-  string expected_text = "procedure";
-  
-  bool is_procedure = false;
-  bool expect_right_curly_bracket = false;
-  bool expect_left_paren_or_integer = false;
-  bool expect_semicolon = false;
+bool validateAssignStmt(vector<Token> tokens) {
+  bool check_size = tokens.size() > 3;
+  bool check_LHS = tokens.at(0).type == NAME || tokens.at(0).type == LETTER;
+  bool check_RHS = true;
+  bool check_semicolon = tokens.at(tokens.size() - 1).type == SEMICOLON;
+
+  vector<TokenType> expected_types = { NAME, INTEGER };
+  vector<string> expected_operators = { "*", "/", "+", "-", "%" };
 
   // keep track of number of brackets
-  int curly_bracket_count = 0;
   int paren_count = 0;
 
-  for (auto token = begin(input); token != end(input); ++token) {
+  for (auto token = begin(tokens) + 2; token != end(tokens) - 1; ++token) {
 
-    string token_text;
     TokenType token_type;
-
-    if (find(begin(symbols), end(symbols), token->text) != end(symbols)) {
-      token_text = "symbol";
-    } else if (find(begin(statements), end(statements), token->text) != end(statements)) {
-      token_text = "statement";
-    } else {
-      token_text = token->text;
-    }
 
     if (token->type == LETTER) {
       token_type = NAME;
@@ -45,100 +44,227 @@ bool Validate(vector<Token> input) {
       token_type = token->type;
     }
 
-    // check if token type and text matches expected
-    bool is_match = (token_type == expected_type || expected_type == WILDCARD)
-      && (token_text == expected_text || expected_text == wildcard);
+    bool check_type = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);
+    bool check_operator = true;
 
-    // first check for other possible tokens which are not expected but still valid
-    if (expect_right_curly_bracket) {
-      if (!(token_type == RIGHT_CURLY || token_type == NAME)) {
-        return false;
-      } else {
-        expect_right_curly_bracket = false;
-      }
-    } else if (expect_left_paren_or_integer) {
-      if (!(token_type == LEFT_PAREN || token_type == INTEGER || token_type == NAME)) {
-        return false;
-      } else {
-        expect_left_paren_or_integer = false;
-      }
-    } else if (expect_semicolon) {
-      if (!(token_type == SEMICOLON || token_type == OPERATOR)) {
-        return false;
-      } else {
-        expect_semicolon = false;
-      }
-    } else if (!is_match) {
-      return false;
+    if (token_type == OPERATOR) {
+      check_operator = find(begin(expected_operators), end(expected_operators), token->text) != end(expected_operators);
     }
+    check_RHS = check_RHS && check_type && check_operator;
 
-    // find expected type and text of next token
-    if (token_type == OPERATOR 
+    if (token_type == OPERATOR
       || token_type == LEFT_PAREN) { // expects variable, integer or left paren after operator/left paren
-      expected_type = NAME;
-      expected_text = "**";
-      expect_left_paren_or_integer = true;
+      expected_types.push_back(NAME);
+      expected_types.push_back(INTEGER);
+      expected_types.push_back(LEFT_PAREN);
 
       if (token_type == LEFT_PAREN) {
         paren_count += 1;
       }
 
-    } else if (token_type == RIGHT_PAREN) { // expects operator or semicolon after right paren
-      expected_type = OPERATOR;
-      expected_text = "**";
-      expect_semicolon = true;
+    } else if (token_type == RIGHT_PAREN) { // expects operator after right paren
+      expected_types.push_back(OPERATOR);
+
       paren_count -= 1;
 
-    } else if (token_type == SEMICOLON 
-      || token_type == RIGHT_CURLY) { // expects statement or right curly after semicolon/right curly
-      expected_type = NAME;
-      expected_text = "statement";
-      expect_right_curly_bracket = true;
+    } else if (token_type == NAME || token_type == INTEGER) { // expects operator or right paren after variable or integer
+      expected_types.push_back(OPERATOR);
+      expected_types.push_back(RIGHT_PAREN);
+    }
+  }
 
-      if (token_type == RIGHT_CURLY) {
-        curly_bracket_count -= 1;
+  bool check_brackets = paren_count == 0;
+  cout << check_RHS;
+  return check_size && check_LHS && check_RHS && check_semicolon && check_brackets;
+}
+
+bool validateCondExpr(vector<Token> tokens) {
+  bool check_cond_expr = true;
+
+  vector<TokenType> expected_types = { NAME, INTEGER, LEFT_PAREN, NOT_OPERATOR };
+  vector<string> rel_operators = { ">", "<", "==", "!=", ">=", "<=" };
+
+  // keep track of number of brackets
+  int paren_count = 0;
+
+  for (auto token = begin(tokens); token != end(tokens); ++token) {
+
+    TokenType token_type;
+
+    if (token->type == LETTER) {
+      token_type = NAME;
+    } else if (token->type == DIGIT) {
+      token_type = INTEGER;
+    } else if (token->text == "!") {
+      token_type = NOT_OPERATOR;
+    } else if (token->text == "||" || token->text == "&&") {
+      token_type = COND_OPERATOR;
+    } else if (find(begin(rel_operators), end(rel_operators), token->text) != end(rel_operators)) {
+      token_type = REL_OPERATOR;
+    } else {
+      token_type = token->type;
+    }
+
+    bool check_type = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);
+
+    check_cond_expr = check_cond_expr && check_type;
+
+    if (token_type == LEFT_PAREN) { // expects variable, integer or left paren after left paren
+      expected_types.push_back(NAME);
+      expected_types.push_back(INTEGER);
+      expected_types.push_back(LEFT_PAREN);
+
+      paren_count += 1;
+
+    } else if (token_type == RIGHT_PAREN) { // expects cond operator after right paren
+      expected_types.push_back(COND_OPERATOR);
+
+      paren_count -= 1;
+
+    } else if (token_type == NOT_OPERATOR) { // expects left paren after not operator
+      expected_types.push_back(LEFT_PAREN);
+
+    } else if (token_type == NAME || token_type == INTEGER) { // expects rel operator or right paren after variable or integer
+      expected_types.push_back(REL_OPERATOR);
+      expected_types.push_back(RIGHT_PAREN);
+    }
+  }
+
+  bool check_brackets = paren_count == 0;
+  return check_cond_expr && check_brackets;
+}
+
+bool validateWhileStmt(vector<Token> tokens) {
+  bool check_size = tokens.size() > 6;
+  bool check_left_paren = tokens.at(1).type == LEFT_PAREN;
+  bool check_right_paren = tokens.at(tokens.size() - 2).type == RIGHT_PAREN;
+  bool check_left_curly = tokens.at(tokens.size() - 1).type == LEFT_CURLY;
+
+  vector<Token>::const_iterator first = tokens.begin() + 2;
+  vector<Token>::const_iterator last = tokens.end() - 2;
+  vector<Token> cond_expr(first, last);
+  bool check_cond_expr = validateCondExpr(cond_expr);
+
+  return check_size && check_left_paren && check_right_paren && check_left_curly && check_cond_expr;
+}
+
+bool validateIfStmt(vector<Token> tokens) {
+  bool check_size = tokens.size() > 7;
+  bool check_left_paren = tokens.at(1).type == LEFT_PAREN;
+  bool check_right_paren = tokens.at(tokens.size() - 3).type == RIGHT_PAREN;
+  bool check_then_keyword = tokens.at(tokens.size() - 2).type == NAME && tokens.at(tokens.size() - 2).text == "then";
+  bool check_left_curly = tokens.at(tokens.size() - 1).type == LEFT_CURLY;
+
+  vector<Token>::const_iterator first = tokens.begin() + 2;
+  vector<Token>::const_iterator last = tokens.end() - 3;
+  vector<Token> cond_expr(first, last);
+  bool check_cond_expr = validateCondExpr(cond_expr);
+
+  return check_size && check_left_paren && check_right_paren && check_left_curly
+    && check_cond_expr;
+}
+
+bool Validate(vector<Token> input) {
+
+  // keep track of number of brackets and number of if/else
+  int curly_bracket_count = 0;
+  int if_stmts = 0;
+
+  for (auto token = begin(input); token != end(input); ++token) {
+    cout << "actual token ";
+    token->print();
+    cout << endl;
+
+    TokenType token_type;
+    string token_text;
+
+    if (token->text == "procedure") {
+      vector<Token> tokens;
+      while (token->text != "{" && token != end(input) - 1) {
+        tokens.push_back(*token);
+        token++;
       }
+      tokens.push_back(*token);
 
-    } else if (token_type == NAME && token_text == "procedure") { // expects procedure_name after 'procedure'
-      expected_type = NAME;
-      expected_text = "**";
-      is_procedure = true;
-
-    } else if (token_type == LEFT_CURLY) { // expects variable or stmt after "{"
-      if (next(token, 2)->text == "=") {
-        expected_type = NAME;
-        expected_text = "**";
-      } else {
-        expected_type = NAME;
-        expected_text = "statement";
+      if (!validateProcedure(tokens)) {
+        return false;
       }
 
       curly_bracket_count += 1;
 
-    } else if (token_text == "statement") { // expects variable after stmt
-      expected_type = NAME;
-      expected_text = "**";
+    } else if (token->type == RIGHT_CURLY) {
+      bool has_two_more_tokens = token != end(input) - 1 && token != end(input) - 2;
+      if (has_two_more_tokens && next(token, 1)->text == "else" && next(token, 2)->type == LEFT_CURLY) {
+        if_stmts -= 1;
+        token++;
+        token++;
+      } else {
+        curly_bracket_count -= 1;
+      }
 
-    } else if (token_type == NAME && is_procedure) { // expects "{" after procedure_name
-      expected_type = LEFT_CURLY;
-      expected_text = "{";
-      is_procedure = false;
+    } else if (next(token, 1)->text == "=") {
+      vector<Token> tokens;
+      while (token->text != ";" && token != end(input) - 1) {
+        tokens.push_back(*token);
+        token++;
+      }
+      tokens.push_back(*token);
 
-    } else if (token_type == NAME || token_type == INTEGER) { // expects symbol after variable or integer
-      expected_type = WILDCARD;
-      expected_text = "symbol";
+      if (!validateAssignStmt(tokens)) {
+        return false;
+      }
+
+    } else if (token->text == "while") {
+      vector<Token> tokens;
+      while (token->text != "{" && token != end(input) - 1) {
+        tokens.push_back(*token);
+        token++;
+      }
+      tokens.push_back(*token);
+
+      if (!validateWhileStmt(tokens)) {
+        return false;
+      } else {
+        curly_bracket_count += 1;
+      }
+
+    } else if (token->text == "if") {
+      vector<Token> tokens;
+      while (token->text != "{" && token != end(input) - 1) {
+        tokens.push_back(*token);
+        token++;
+      }
+      tokens.push_back(*token);
+
+      if (!validateIfStmt(tokens)) {
+        return false;
+      } else {
+        curly_bracket_count += 1;
+        if_stmts += 1;
+      }
+
+    } else if (token->text == "read" || token->text == "print") {
+      vector<Token> tokens;
+      while (token->text != ";" && token != end(input) - 1) {
+        tokens.push_back(*token);
+        token++;
+      }
+      tokens.push_back(*token);
+
+      if (!validateReadPrintStmt(tokens)) {
+        return false;
+      }
 
     } else {
-      cout << "Token ";
-      token->print();
-      cout <<" not recognized" << endl;
+      return false;
     }
   }
 
-  if (curly_bracket_count != 0 || paren_count != 0) {
-    return false;
-  } else {
+  if (curly_bracket_count == 0 && if_stmts == 0) {
     return true;
+  } else {
+    cout << curly_bracket_count;
+    return false;
   }
 
 }
