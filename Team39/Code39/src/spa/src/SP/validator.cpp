@@ -22,8 +22,8 @@ bool validateReadPrintStmt(vector<Token> tokens) {
 
 bool validateAssignStmt(vector<Token> tokens) {
   bool check_size = tokens.size() > 3;
-  bool check_LHS = tokens.at(0).type == NAME || tokens.at(0).type == LETTER;
-  bool check_RHS = true;
+  bool check_lhs = tokens.at(0).type == NAME || tokens.at(0).type == LETTER;
+  bool check_rhs = true;
   bool check_semicolon = tokens.at(tokens.size() - 1).type == SEMICOLON;
 
   vector<TokenType> expected_types = { NAME, INTEGER };
@@ -50,7 +50,7 @@ bool validateAssignStmt(vector<Token> tokens) {
     if (token_type == OPERATOR) {
       check_operator = find(begin(expected_operators), end(expected_operators), token->text) != end(expected_operators);
     }
-    check_RHS = check_RHS && check_type && check_operator;
+    check_rhs = check_rhs && check_type && check_operator;
 
     if (token_type == OPERATOR
       || token_type == LEFT_PAREN) { // expects variable, integer or left paren after operator/left paren
@@ -74,8 +74,7 @@ bool validateAssignStmt(vector<Token> tokens) {
   }
 
   bool check_brackets = paren_count == 0;
-  cout << check_RHS;
-  return check_size && check_LHS && check_RHS && check_semicolon && check_brackets;
+  return check_size && check_lhs && check_rhs && check_semicolon && check_brackets;
 }
 
 bool validateCondExpr(vector<Token> tokens) {
@@ -171,16 +170,13 @@ bool Validate(vector<Token> input) {
   int if_stmts = 0;
 
   for (auto token = begin(input); token != end(input); ++token) {
-    cout << "actual token ";
-    token->print();
-    cout << endl;
 
     TokenType token_type;
     string token_text;
 
     if (token->text == "procedure") {
       vector<Token> tokens;
-      while (token->text != "{" && token != end(input) - 1) {
+      while (token->type !=LEFT_CURLY && token != end(input) - 1) {
         tokens.push_back(*token);
         token++;
       }
@@ -204,7 +200,7 @@ bool Validate(vector<Token> input) {
 
     } else if (next(token, 1)->text == "=") {
       vector<Token> tokens;
-      while (token->text != ";" && token != end(input) - 1) {
+      while (token->type != SEMICOLON && token != end(input) - 1) {
         tokens.push_back(*token);
         token++;
       }
@@ -216,7 +212,7 @@ bool Validate(vector<Token> input) {
 
     } else if (token->text == "while") {
       vector<Token> tokens;
-      while (token->text != "{" && token != end(input) - 1) {
+      while (token->type != LEFT_CURLY && token != end(input) - 1) {
         tokens.push_back(*token);
         token++;
       }
@@ -230,7 +226,7 @@ bool Validate(vector<Token> input) {
 
     } else if (token->text == "if") {
       vector<Token> tokens;
-      while (token->text != "{" && token != end(input) - 1) {
+      while (token->type != LEFT_CURLY && token != end(input) - 1) {
         tokens.push_back(*token);
         token++;
       }
@@ -245,7 +241,7 @@ bool Validate(vector<Token> input) {
 
     } else if (token->text == "read" || token->text == "print") {
       vector<Token> tokens;
-      while (token->text != ";" && token != end(input) - 1) {
+      while (token->type != SEMICOLON && token != end(input) - 1) {
         tokens.push_back(*token);
         token++;
       }
@@ -263,7 +259,6 @@ bool Validate(vector<Token> input) {
   if (curly_bracket_count == 0 && if_stmts == 0) {
     return true;
   } else {
-    cout << curly_bracket_count;
     return false;
   }
 

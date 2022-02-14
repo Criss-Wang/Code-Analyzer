@@ -42,17 +42,17 @@ TEST_CASE("Read/print/assign statments for Population") {
 
 TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population") {
 
-		//RequireValid(valid_dir + "3_test1.txt");
-		//RequireValid(valid_dir + "3_test2.txt");
-		//RequireValid(valid_dir + "3_test3.txt");
-		//RequireValid(valid_dir + "3_test4.txt");
+	RequirePopulate(populate_dir + "3_test1.txt");
+	RequirePopulate(populate_dir + "3_test2.txt");
+	RequirePopulate(populate_dir + "3_test3.txt");
+	RequirePopulate(populate_dir + "3_test4.txt");
 
 }
 
 TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population") {
 
-	//RequireValid(valid_dir + "4_test1.txt");
-	//RequireValid(valid_dir + "4_test2.txt");
-	//RequireValid(valid_dir + "4_test3.txt");
+	RequirePopulate(populate_dir + "4_test1.txt");
+	RequirePopulate(populate_dir + "4_test2.txt");
+	RequirePopulate(populate_dir + "4_test3.txt");
 
 }
