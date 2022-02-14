@@ -3,52 +3,52 @@
 
 #include <stack>
 
-FollowsTable Pkb::GetFollowsTable() {
-  return *follows_table_;
+FollowsTable* Pkb::GetFollowsTable() {
+  return follows_table_;
 }
 
-FollowsStarTable Pkb::GetFollowsStarTable() {
-  return *follows_star_table_;
+FollowsStarTable* Pkb::GetFollowsStarTable() {
+  return follows_star_table_;
 }
 
-FollowsBeforeTable Pkb::GetFollowsBeforeTable() {
-  return *follows_before_table_;
+FollowsBeforeTable* Pkb::GetFollowsBeforeTable() {
+  return follows_before_table_;
 }
 
-FollowsBeforeStarTable Pkb::GetFollowsBeforeStarTable() {
-  return *follows_before_star_table_;
+FollowsBeforeStarTable* Pkb::GetFollowsBeforeStarTable() {
+  return follows_before_star_table_;
 }
 
-ParentTable Pkb::GetParentTable() {
-  return *parent_table_;
+ParentTable* Pkb::GetParentTable() {
+  return parent_table_;
 }
 
-ChildTable Pkb::GetChildTable() {
-  return *child_table_;
+ChildTable* Pkb::GetChildTable() {
+  return child_table_;
 }
 
-ParentStarTable Pkb::GetParentStarTable() {
-  return *parent_star_table_;
+ParentStarTable* Pkb::GetParentStarTable() {
+  return parent_star_table_;
 }
 
-ChildStarTable Pkb::GetChildStarTable() {
-  return *child_star_table_;
+ChildStarTable* Pkb::GetChildStarTable() {
+  return child_star_table_;
 }
 
-ModifiesStmtToVariablesTable Pkb::GetModifiesStmtToVariablesTable() {
-  return *modifies_stmt_to_variables_table_;
+ModifiesStmtToVariablesTable* Pkb::GetModifiesStmtToVariablesTable() {
+  return modifies_stmt_to_variables_table_;
 }
 
-ModifiesVariableToStmtsTable Pkb::GetModifiesVariableToStmtsTable() {
-  return *modifies_variable_to_stmts_table_;
+ModifiesVariableToStmtsTable* Pkb::GetModifiesVariableToStmtsTable() {
+  return modifies_variable_to_stmts_table_;
 }
 
-UsesStmtToVariablesTable Pkb::GetUsesStmtToVariablesTable() {
-  return *uses_stmt_to_variables_table_;
+UsesStmtToVariablesTable* Pkb::GetUsesStmtToVariablesTable() {
+  return uses_stmt_to_variables_table_;
 }
 
-UsesVariableToStmtsTable Pkb::GetUsesVariableToStmtsTable() {
-  return *uses_variable_to_stmts_table_;
+UsesVariableToStmtsTable* Pkb::GetUsesVariableToStmtsTable() {
+  return uses_variable_to_stmts_table_;
 }
 
 // Following are for search handlers

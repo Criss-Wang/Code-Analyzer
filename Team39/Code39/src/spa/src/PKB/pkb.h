@@ -91,18 +91,18 @@ class Pkb {
     bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
 
     // Get tables
-    FollowsTable GetFollowsTable();
-    FollowsStarTable GetFollowsStarTable();
-    FollowsBeforeTable GetFollowsBeforeTable();
-    FollowsBeforeStarTable GetFollowsBeforeStarTable();
-    ParentTable GetParentTable();
-    ChildTable GetChildTable();
-    ParentStarTable GetParentStarTable();
-    ChildStarTable GetChildStarTable();
-    ModifiesStmtToVariablesTable GetModifiesStmtToVariablesTable();
-    ModifiesVariableToStmtsTable GetModifiesVariableToStmtsTable();
-    UsesStmtToVariablesTable GetUsesStmtToVariablesTable();
-    UsesVariableToStmtsTable GetUsesVariableToStmtsTable();
+    FollowsTable* GetFollowsTable();
+    FollowsStarTable* GetFollowsStarTable();
+    FollowsBeforeTable* GetFollowsBeforeTable();
+    FollowsBeforeStarTable* GetFollowsBeforeStarTable();
+    ParentTable* GetParentTable();
+    ChildTable* GetChildTable();
+    ParentStarTable* GetParentStarTable();
+    ChildStarTable* GetChildStarTable();
+    ModifiesStmtToVariablesTable* GetModifiesStmtToVariablesTable();
+    ModifiesVariableToStmtsTable* GetModifiesVariableToStmtsTable();
+    UsesStmtToVariablesTable* GetUsesStmtToVariablesTable();
+    UsesVariableToStmtsTable* GetUsesVariableToStmtsTable();
 
     // Relationship utility APIs for PQL
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
