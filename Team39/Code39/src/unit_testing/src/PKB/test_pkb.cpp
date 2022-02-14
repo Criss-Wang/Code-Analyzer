@@ -1,5 +1,4 @@
 #include "PKB/pkb.h"
-#include "PKB/tables/table.h"
 #include "PKB/pkb_exceptions.h"
 
 #include "catch.hpp"
