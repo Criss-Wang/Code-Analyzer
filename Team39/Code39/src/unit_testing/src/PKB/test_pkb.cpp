@@ -103,7 +103,7 @@ TEST_CASE("Add Pattern") {
     bool success = pkb.AddInfoToTable(TableIdentifier::kPattern, 2, "A + (B+C) + 2");
     success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 3, "X + (B+C) * (B + C)");
 
-    unordered_set<int> res = pkb.GetAllStmtWithPattern("X + B + C");
+    unordered_set<int> res = pkb.GetAllStmtsWithPattern("X + B + C");
     REQUIRE(res.empty());
   }
 }

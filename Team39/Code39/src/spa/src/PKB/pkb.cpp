@@ -104,6 +104,7 @@ vector<int> Pkb::GetAllChildren(const int stmt) const {
   }
 }
 
+// Does not work if the table's value is not a vector
 template<typename T1, typename T2, typename T3>
 vector<pair<T2, T3>> UnfoldResults(T1 table_to_unfold) {
   vector<pair<T2, T3>> result;
@@ -182,7 +183,11 @@ vector<int> Pkb::GetStmtsAfter(const int stmt) const {
 
 vector<pair<int, int>> Pkb::GetAllFollowsPairs(int stmt) const {
   try {
-    return UnfoldResults<FollowsTable*, int, int>(follows_table_);
+    vector<pair<int, int>> result;
+    for (const auto& [key, val] : follows_table_->GetKeyValueLst()) {
+      result.emplace_back(make_pair(key, val));
+    }
+    return result;
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
