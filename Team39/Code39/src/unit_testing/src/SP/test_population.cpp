@@ -33,8 +33,8 @@ TEST_CASE("Read/print/assign statments for Population") {
 
 	RequirePopulate(populate_dir + "2_test1.txt");
 	RequirePopulate(populate_dir + "2_test2.txt");
-	//RequireValid(valid_dir + "2_test3.txt"); syntax error
-	//RequireValid(valid_dir + "2_test4.txt"); syntax error
+	RequirePopulate(populate_dir + "2_test3.txt");
+	RequirePopulate(populate_dir + "2_test4.txt");
 
 }
 

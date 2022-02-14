@@ -20,6 +20,10 @@ bool Validate(vector<Token> input) {
   bool expect_left_paren_or_integer = false;
   bool expect_semicolon = false;
 
+  // keep track of number of brackets
+  int curly_bracket_count = 0;
+  int paren_count = 0;
+
   for (auto token = begin(input); token != end(input); ++token) {
 
     string token_text;
@@ -75,16 +79,25 @@ bool Validate(vector<Token> input) {
       expected_text = "**";
       expect_left_paren_or_integer = true;
 
+      if (token_type == LEFT_PAREN) {
+        paren_count += 1;
+      }
+
     } else if (token_type == RIGHT_PAREN) { // expects operator or semicolon after right paren
       expected_type = OPERATOR;
       expected_text = "**";
       expect_semicolon = true;
+      paren_count -= 1;
 
     } else if (token_type == SEMICOLON 
       || token_type == RIGHT_CURLY) { // expects statement or right curly after semicolon/right curly
       expected_type = NAME;
       expected_text = "statement";
       expect_right_curly_bracket = true;
+
+      if (token_type == RIGHT_CURLY) {
+        curly_bracket_count -= 1;
+      }
 
     } else if (token_type == NAME && token_text == "procedure") { // expects procedure_name after 'procedure'
       expected_type = NAME;
@@ -99,6 +112,8 @@ bool Validate(vector<Token> input) {
         expected_type = NAME;
         expected_text = "statement";
       }
+
+      curly_bracket_count += 1;
 
     } else if (token_text == "statement") { // expects variable after stmt
       expected_type = NAME;
@@ -119,5 +134,11 @@ bool Validate(vector<Token> input) {
       cout <<" not recognized" << endl;
     }
   }
-  return true;
+
+  if (curly_bracket_count != 0 || paren_count != 0) {
+    return false;
+  } else {
+    return true;
+  }
+
 }
