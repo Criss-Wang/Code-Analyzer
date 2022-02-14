@@ -1,5 +1,5 @@
 procedure procName {
 read x;
 print x;
-x = ) * f * (c + 4);
+x = 7) * f * (c + 4);
 }

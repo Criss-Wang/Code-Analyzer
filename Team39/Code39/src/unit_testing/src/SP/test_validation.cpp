@@ -51,6 +51,7 @@ TEST_CASE("Read/print statements for Validation") {
 		RequireInvalid(invalid_dir + "1_test3.txt");
 		RequireInvalid(invalid_dir + "1_test4.txt");
 		//RequireInvalid(invalid_dir + "1_test5.txt"); throws syntax error instead
+		//RequireInvalid(invalid_dir + "1_test6.txt"); throws syntax error instead
 
 	}
 }
@@ -73,6 +74,7 @@ TEST_CASE("Read/print/assign statments for Validation") {
 		//RequireInvalid(invalid_dir + "2_test3.txt"); throws syntax error instead
 		RequireInvalid(invalid_dir + "2_test4.txt");
 		//RequireInvalid(invalid_dir + "2_test5.txt"); throws syntax error instead
+		//RequireInvalid(invalid_dir + "2_test6.txt"); throws syntax error instead
 
 	}
 }

@@ -9,7 +9,7 @@ using namespace std;
 bool Validate(vector<Token> input) {
 
   string symbols[] = { "=", "<", ">", "(", ")", "+", "-", "*", "/", ";" };
-  string statements[] = { "read", "print", "call" };
+  string statements[] = { "read", "print", "if", "while", "call" };
   string wildcard = "**";
 
   TokenType expected_type = NAME;
