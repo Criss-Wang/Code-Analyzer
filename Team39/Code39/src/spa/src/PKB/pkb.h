@@ -109,10 +109,10 @@ class Pkb {
     [[nodiscard]] bool IsTransitiveParent(int stmt_1, int stmt_2) const;
     [[nodiscard]] vector<int> GetParent(int stmt) const;
     [[nodiscard]] vector<int> GetAllParents(int stmt) const;
-    [[nodiscard]] vector<pair<int,int>> GetAllParentPair(int stmt) const;
+    [[nodiscard]] vector<pair<int,int>> GetAllParentPairs(int stmt) const;
     [[nodiscard]] vector<int> GetChild(int stmt) const;
     [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
-    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPair(int stmt) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs(int stmt) const;
 
     [[nodiscard]] bool IsFollows(int stmt_1, int stmt_2) const;
     [[nodiscard]] bool IsTransitiveFollows(int stmt_1, int stmt_2) const;
@@ -123,7 +123,7 @@ class Pkb {
     [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs(int stmt) const;
 
-    [[nodiscard]] unordered_set<int> GetAllStmtWithPattern(const string& pattern) const;
+    [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
 
     // Get all the items of a certain entity type
     unordered_set<int> GetAllEntityInt(const EntityIdentifier entity_identifier);

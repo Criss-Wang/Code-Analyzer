@@ -115,7 +115,7 @@ vector<pair<T2, T3>> UnfoldResults(T1 table_to_unfold) {
   return result;
 }
 
-vector<pair<int, int>> Pkb::GetAllParentPair(int stmt) const {
+vector<pair<int, int>> Pkb::GetAllParentPairs(int stmt) const {
   try {
     return UnfoldResults<ParentTable*, int, int>(parent_table_);
   } catch (exception& e) {
@@ -123,7 +123,7 @@ vector<pair<int, int>> Pkb::GetAllParentPair(int stmt) const {
   }
 }
 
-vector<pair<int, int>> Pkb::GetAllTransitiveParentPair(int stmt) const {
+vector<pair<int, int>> Pkb::GetAllTransitiveParentPairs(int stmt) const {
   try {
     return UnfoldResults<ParentStarTable*, int, int>(parent_star_table_);
   } catch (exception& e) {
@@ -240,7 +240,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
   }
 }
 
-unordered_set<int> Pkb::GetAllStmtWithPattern(const string& pattern) const {
+unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern) const {
   const string usable_pattern = PatternHelper::PreprocessPattern(pattern);
   unordered_set<int> empty_set{};
   unordered_set<int> res{};
