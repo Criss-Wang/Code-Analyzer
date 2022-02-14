@@ -1,127 +1,57 @@
 #include "pkb.h"
 #include "Utility/helper.h"
 
-#include <queue>
 #include <stack>
 
-// TODO(Zhenlin): [Performance] Not optimized with the help of traversal order
-template<typename T1, typename T2>
-void PopulateForP(T1 table_to_refer, T2 table_to_update) {
-  for (const auto key : table_to_refer->GetKeyLst()) {
-    vector<int> current_key_child_lst;
-    queue<int> q;
-    q.push(key);
-    while (!q.empty()) {
-      if (!table_to_refer->KeyExistsInTable(q.front())) {
-        q.pop();
-        continue;
-      }
-      for (auto child_key : table_to_refer->GetValueByKey(q.front())) {
-        current_key_child_lst.push_back(child_key);
-        q.push(child_key);
-      }
-      q.pop();
-    }
-    if (table_to_update->KeyExistsInTable(key)) {
-      table_to_update->UpdateKeyWithNewValue(key, current_key_child_lst);
-    } else {
-      table_to_update->AddKeyValuePair(key, current_key_child_lst);
-    }
-  }
+FollowsTable Pkb::GetFollowsTable() {
+  return *follows_table_;
 }
 
-template<typename T1, typename T2>
-void PopulateForF(T1 table_to_refer, T2 table_to_update) {
-  // While the stmt_1 exists in the table, keep adding stmt_2 such that follows*(stmt_1, stmt_2) holds into the vector
-  for (const int key : table_to_refer->GetKeyLst()) {
-    int stmt_1 = key;
-    vector<int> follows_star_of_stmt;
-    while (table_to_refer->KeyExistsInTable(stmt_1)) {
-      int stmt_2 = table_to_refer->GetValueByKey(stmt_1);
-      follows_star_of_stmt.push_back(stmt_2);
-      stmt_1 = stmt_2;
-    }
-    table_to_update->AddKeyValuePair(key, follows_star_of_stmt);
-  }
+FollowsStarTable Pkb::GetFollowsStarTable() {
+  return *follows_star_table_;
 }
 
-int Pkb::PopulateNestedRelationship() {
-  try {
-    PopulateNestedFollows();
-    PopulateNestedParents();
-    PopulateModifies();
-    PopulateUses();
-  } catch (exception& e) {
-    return 0;
-  }
-  return 1;
+FollowsBeforeTable Pkb::GetFollowsBeforeTable() {
+  return *follows_before_table_;
 }
 
-void Pkb::PopulateNestedFollows() {
-  PopulateForF<FollowsTable*, FollowsStarTable*>(follows_table_, follows_star_table_);
-  PopulateForF<FollowsBeforeTable*, FollowsBeforeStarTable*>(follows_before_table_, follows_before_star_table_);
+FollowsBeforeStarTable Pkb::GetFollowsBeforeStarTable() {
+  return *follows_before_star_table_;
 }
 
-void Pkb::PopulateNestedParents() {
-  PopulateForP<ParentTable*, ParentStarTable*>(parent_table_, parent_star_table_);
-  PopulateForP<ChildTable*, ChildStarTable*>(child_table_, child_star_table_);
+ParentTable Pkb::GetParentTable() {
+  return *parent_table_;
 }
 
-
-void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarTable& child_star_table, Table<int, vector<string>>& t,
-  Table<string, vector<int>>& t2) {
-  for (const int parent_stmt: parent_star_table.GetKeyLst()) {
-    vector<string> variables_lst;
-    if (t.KeyExistsInTable(parent_stmt)) {
-      variables_lst = t.GetValueByKey(parent_stmt);
-    }
-    vector<string> tmp_lst(variables_lst);
-
-    for (const int child_stmt: parent_star_table.GetValueByKey(parent_stmt)) {
-      if (!t.KeyExistsInTable(child_stmt)) continue;
-      // Get the variables associated with the statement number
-      vector<string> variables_lst_of_child_stmt = t.GetValueByKey(child_stmt);
-
-      // Merge two vectors
-      tmp_lst.insert(tmp_lst.end(), variables_lst_of_child_stmt.begin(), variables_lst_of_child_stmt.end());
-      // Remove duplicate elements
-      sort(tmp_lst.begin(), tmp_lst.end());
-      tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
-    }
-
-    if (tmp_lst.empty()) return;
-    bool success = t.UpdateKeyWithNewValue(parent_stmt, tmp_lst);
-  }
-
-  // Populate the inverse relation
-  for (const string var: t2.GetKeyLst()) {
-    vector<int> stmts_lst = t2.GetValueByKey(var);
-    vector<int> tmp_lst(stmts_lst);
-    for (const int stmt: stmts_lst) {
-      if (!child_star_table.KeyExistsInTable(stmt)) continue;
-      const vector<int> parent_stmts_lst = child_star_table.GetValueByKey(stmt);
-      if (parent_stmts_lst.empty()) continue;
-      tmp_lst.insert(tmp_lst.end(), parent_stmts_lst.begin(), parent_stmts_lst.end());
-      // Remove duplicate elements
-      sort(tmp_lst.begin(), tmp_lst.end());
-      tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
-    }
-
-    if (tmp_lst.empty()) return;
-    bool success = t2.UpdateKeyWithNewValue(var, tmp_lst);
-  }
+ChildTable Pkb::GetChildTable() {
+  return *child_table_;
 }
 
-void Pkb::PopulateModifies() {
-  PopulateNestedModifiesOrUses(*parent_star_table_, *child_star_table_,  *modifies_stmt_to_variables_table_, *modifies_variable_to_stmts_table_);
+ParentStarTable Pkb::GetParentStarTable() {
+  return *parent_star_table_;
 }
 
-void Pkb::PopulateUses() {
-  PopulateNestedModifiesOrUses(*parent_star_table_, *child_star_table_,  *uses_stmt_to_variables_table_, *uses_variable_to_stmts_table_);
+ChildStarTable Pkb::GetChildStarTable() {
+  return *child_star_table_;
 }
 
-// Following are for Search handlers
+ModifiesStmtToVariablesTable Pkb::GetModifiesStmtToVariablesTable() {
+  return *modifies_stmt_to_variables_table_;
+}
 
+ModifiesVariableToStmtsTable Pkb::GetModifiesVariableToStmtsTable() {
+  return *modifies_variable_to_stmts_table_;
+}
+
+UsesStmtToVariablesTable Pkb::GetUsesStmtToVariablesTable() {
+  return *uses_stmt_to_variables_table_;
+}
+
+UsesVariableToStmtsTable Pkb::GetUsesVariableToStmtsTable() {
+  return *uses_variable_to_stmts_table_;
+}
+
+// Following are for search handlers
 bool Pkb::IsParent(const int stmt_1, const int stmt_2) const {
   try {
     vector<int> parent_stmt_lst = child_table_->GetValueByKey(stmt_2);
@@ -250,7 +180,6 @@ vector<int> Pkb::GetStmtsAfter(const int stmt) const {
   }
 }
 
-
 bool Pkb::AddParent(const int key, const vector<int>& value) {
   bool add_success = parent_table_->AddKeyValuePair(key, value);
   // Populate the reverse relation
@@ -266,7 +195,6 @@ bool Pkb::AddFollows(const int key, const int value) {
   add_success = follows_before_table_->AddKeyValuePair(value, key) && add_success;
   return add_success;
 }
-
 
 bool Pkb::AddModifies(const int key, const vector<string>& value) {
   bool add_success = modifies_stmt_to_variables_table_->AddKeyValuePair(key, value);

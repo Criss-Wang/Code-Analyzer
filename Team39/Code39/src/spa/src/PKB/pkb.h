@@ -49,7 +49,7 @@ class Pkb {
     StmtToPatternTable *stmt_to_pattern_table_ = new StmtToPatternTable();
     PatternToStmtTable* pattern_to_stmt_table_ = new PatternToStmtTable();
 
-    // A table to store pointers to all tables
+    // Stores the line numbers into a set
     unordered_set<int> stmt_set_;
     unordered_set<int> assign_set_;
     unordered_set<int> read_set_;
@@ -58,6 +58,7 @@ class Pkb {
     unordered_set<int> if_set_;
     unordered_set<int> while_set_;
     unordered_set<int> constant_set_;
+    // Stores the variable or procedure name into the set
     unordered_set<string> variable_set_;
     unordered_set<string> procedure_set_;
     unordered_set<set<int>, HashFunction> stmt_list_set_;
@@ -89,8 +90,19 @@ class Pkb {
     bool AddEntityToSet(EntityIdentifier entity_identifier, const string& entity_val);
     bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
 
-    // Populate the nested relationships using the tables storing basic information/relationships about entities
-    int PopulateNestedRelationship();
+    // Get tables
+    FollowsTable GetFollowsTable();
+    FollowsStarTable GetFollowsStarTable();
+    FollowsBeforeTable GetFollowsBeforeTable();
+    FollowsBeforeStarTable GetFollowsBeforeStarTable();
+    ParentTable GetParentTable();
+    ChildTable GetChildTable();
+    ParentStarTable GetParentStarTable();
+    ChildStarTable GetChildStarTable();
+    ModifiesStmtToVariablesTable GetModifiesStmtToVariablesTable();
+    ModifiesVariableToStmtsTable GetModifiesVariableToStmtsTable();
+    UsesStmtToVariablesTable GetUsesStmtToVariablesTable();
+    UsesVariableToStmtsTable GetUsesVariableToStmtsTable();
 
     // Relationship utility APIs for PQL
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
