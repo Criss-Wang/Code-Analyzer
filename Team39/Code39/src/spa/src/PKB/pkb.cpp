@@ -180,6 +180,22 @@ vector<int> Pkb::GetStmtsAfter(const int stmt) const {
   }
 }
 
+vector<pair<int, int>> Pkb::GetAllFollowsPairs(int stmt) const {
+  try {
+    return UnfoldResults<FollowsTable*, int, int>(follows_table_);
+  } catch (exception& e) {
+    return vector<pair<int, int>>{};
+  }
+}
+
+vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs(int stmt) const {
+  try {
+    return UnfoldResults<FollowsStarTable*, int, int>(follows_star_table_);
+  } catch (exception& e) {
+    return vector<pair<int, int>>{};
+  }
+}
+
 bool Pkb::AddParent(const int key, const vector<int>& value) {
   bool add_success = parent_table_->AddKeyValuePair(key, value);
   // Populate the reverse relation
