@@ -8,7 +8,7 @@ using namespace std;
 #include "SP/populator.h"
 
 void Parse(string input, Pkb& pkb) {
-
+  
   Tokenizer tokenizer;
   vector<Token> input_tokens = tokenizer.parse(input);
 

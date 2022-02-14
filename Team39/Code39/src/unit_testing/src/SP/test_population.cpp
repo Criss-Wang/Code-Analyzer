@@ -38,7 +38,7 @@ TEST_CASE("Read/print/assign statments for Population") {
 
 }
 
-TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation") {
+TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population") {
 
 		//RequireValid(valid_dir + "3_test1.txt");
 		//RequireValid(valid_dir + "3_test2.txt");
@@ -47,7 +47,7 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation
 
 }
 
-TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Validation") {
+TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population") {
 
 	//RequireValid(valid_dir + "4_test1.txt");
 	//RequireValid(valid_dir + "4_test2.txt");

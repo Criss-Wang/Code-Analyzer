@@ -67,10 +67,10 @@ void populate(vector<Token> inputTokens, Pkb& pkb) {
     } else if (token->text == "call") {
       // TODO (Yuxuan): Add implementation in future iterations
 
-    } else if (token->type == WHILE) {
+    //} else if (token->type == WHILE) {
       // TODO (Yuxuan): Add implementation in future iterations
 
-    } else if (token->type == IF) {
+    //} else if (token->type == IF) {
       // TODO (Yuxuan): Add implementation in future iterations
 
     } else if (token->type == LETTER || token->type == NAME) {
