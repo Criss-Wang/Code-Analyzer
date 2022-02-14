@@ -46,8 +46,8 @@ class Pkb {
     UsesVariableToStmtsTable *uses_variable_to_stmts_table_ = new UsesVariableToStmtsTable();
     ModifiesStmtToVariablesTable *modifies_stmt_to_variables_table_ = new ModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable *modifies_variable_to_stmts_table_ = new ModifiesVariableToStmtsTable();
-    StmtToPatternTable *stmt_to_pattern_table_ = new StmtToPatternTable();
-    PatternToStmtTable* pattern_to_stmt_table_ = new PatternToStmtTable();
+    StmtToPatternsTable *stmt_to_patterns_table_ = new StmtToPatternsTable();
+    PatternToStmtsTable* pattern_to_stmts_table_ = new PatternToStmtsTable();
 
     // Stores the line numbers into a set
     unordered_set<int> stmt_set_;

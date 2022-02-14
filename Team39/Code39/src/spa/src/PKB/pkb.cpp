@@ -246,8 +246,8 @@ unordered_set<int> Pkb::GetAllStmtWithPattern(const string& pattern) const {
   unordered_set<int> res{};
 
   for (auto s: PatternHelper::GetPatternSet(usable_pattern)) {
-    if (!pattern_to_stmt_table_->KeyExistsInTable(s)) return empty_set;
-    unordered_set<int> stmt_lst = pattern_to_stmt_table_->GetValueByKey(s);
+    if (!pattern_to_stmts_table_->KeyExistsInTable(s)) return empty_set;
+    unordered_set<int> stmt_lst = pattern_to_stmts_table_->GetValueByKey(s);
     if (res.empty()) {
       res = stmt_lst;
     } else {
@@ -264,15 +264,15 @@ bool Pkb::AddPattern(const int line_num, const string& input) {
   // We then proceed to parse the set of valid substring patterns
   const string clean_input = PatternHelper::PreprocessPattern(input);
   const unordered_set<string> valid_sub_patterns = PatternHelper::GetPatternSet(clean_input);
-  bool add_success = stmt_to_pattern_table_->AddKeyValuePair(line_num, valid_sub_patterns);
+  bool add_success = stmt_to_patterns_table_->AddKeyValuePair(line_num, valid_sub_patterns);
   for (auto p: valid_sub_patterns) {
-    if (!pattern_to_stmt_table_->KeyExistsInTable(p)) {
-      add_success = add_success && pattern_to_stmt_table_->AddKeyValuePair(p, unordered_set<int>{line_num});
+    if (!pattern_to_stmts_table_->KeyExistsInTable(p)) {
+      add_success = add_success && pattern_to_stmts_table_->AddKeyValuePair(p, unordered_set<int>{line_num});
     }
     else {
-      unordered_set<int> current_set = pattern_to_stmt_table_->GetValueByKey(p);
+      unordered_set<int> current_set = pattern_to_stmts_table_->GetValueByKey(p);
       current_set.insert(line_num);
-      add_success = add_success && pattern_to_stmt_table_->UpdateKeyWithNewValue(p, current_set);
+      add_success = add_success && pattern_to_stmts_table_->UpdateKeyWithNewValue(p, current_set);
     }
   }
   return add_success;
