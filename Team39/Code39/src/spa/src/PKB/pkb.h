@@ -62,11 +62,6 @@ class Pkb {
     unordered_set<string> procedure_set_;
     unordered_set<set<int>, HashFunction> stmt_list_set_;
 
-    void PopulateNestedFollows();
-    void PopulateNestedParents();
-    void PopulateUses();
-    void PopulateModifies();
-
     // Insert all possible expression patterns for a statement
     bool AddPattern(int line_num, const string& input);
     bool AddParent(int key, const vector<int>& value);
