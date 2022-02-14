@@ -5,7 +5,6 @@
 
 #include "tables/entity_tables.h"
 #include "tables/relation_tables.h"
-#include "pkb_exceptions.h"
 #include "../Utility/entity.h"
 
 // Custom hash function from https://www.geeksforgeeks.org/unordered-set-of-vectors-in-c-with-examples/
