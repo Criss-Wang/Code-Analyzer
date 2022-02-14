@@ -102,9 +102,9 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Validation
 
 	SECTION("Valid Programs") {
 
-		//RequireValid(valid_dir + "4_test1.txt");
-		//RequireValid(valid_dir + "4_test2.txt");
-		//RequireValid(valid_dir + "4_test3.txt");
+		RequireValid(valid_dir + "4_test1.txt");
+		RequireValid(valid_dir + "4_test2.txt");
+		RequireValid(valid_dir + "4_test3.txt");
 
 	}
 
