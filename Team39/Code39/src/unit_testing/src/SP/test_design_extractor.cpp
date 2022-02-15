@@ -186,3 +186,37 @@ TEST_CASE("Test Nested Population for Modifies") {
     REQUIRE(success);
   }
 }
+
+TEST_CASE("Test Nested Population for Uses") {
+  Pkb pkb = Pkb();
+  // Nested uses will be populated behind the scenes
+  /*
+   * 1. while (c1 != 0) {
+   * 2.   x = first * 2
+   * 3.   y = second * 2
+   * 4.   if (c2 == 1000) then {
+   * 5.     z = third * 2
+   *      } else {
+   * 6.     a = fourth * 2
+   *      }
+   * 7.   b = fifth * sixth
+   *    }
+   */
+
+  bool success = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 1, vector<string>{"c1"});
+  success = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 4, vector<string>{"c2"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 2, vector<string>{"first"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 3, vector<string>{"second"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 5, vector<string>{"third"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 6, vector<string>{"fourth"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 7, vector<string>{"fifth", "sixth"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kParent, 1, vector<int>{2, 3, 4, 7}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kParent, 4, vector<int>{5, 6}) && success;
+
+  // Populate nested
+  success = success && PopulateNestedRelationships(pkb);
+
+  SECTION("Check population success") {
+    REQUIRE(success);
+  }
+}
