@@ -199,7 +199,7 @@ vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs() const {
   }
 }
 
-bool Pkb::IsUsesStmt(const int stmt, const string var) const {
+bool Pkb::IsUsesStmt(const int stmt, const string& var) const {
   try {
     vector<string> value = uses_stmt_to_variables_table_->GetValueByKey(stmt);
     return find(value.begin(), value.end(), var) != value.end();
@@ -208,7 +208,7 @@ bool Pkb::IsUsesStmt(const int stmt, const string var) const {
   }
 }
 
-vector<int> Pkb::GetUsesStmtsByVar(const string var) const {
+vector<int> Pkb::GetUsesStmtsByVar(const string& var) const {
   try {
     return uses_variable_to_stmts_table_->GetValueByKey(var);
   } catch (exception& e) {
@@ -227,6 +227,39 @@ vector<string> Pkb::GetUsesVarByStmt(const int stmt) const {
 vector<pair<int, string>> Pkb::GetAllUsesStmtVarPairs() const {
   try {
     return UnfoldResults<UsesStmtToVariablesTable*, int, string>(uses_stmt_to_variables_table_);
+  } catch (exception& e) {
+    return vector<pair<int, string>>{};
+  }
+}
+
+bool Pkb::IsModifiesStmt(const int stmt, const string& var) const {
+  try {
+    vector<string> value = modifies_stmt_to_variables_table_->GetValueByKey(stmt);
+    return find(value.begin(), value.end(), var) != value.end();
+  } catch (exception& e) {
+    return false;
+  }
+}
+
+vector<int> Pkb::GetModifiesStmtsByVar(const string& var) const {
+  try {
+    return modifies_variable_to_stmts_table_->GetValueByKey(var);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+}
+
+vector<string> Pkb::GetModifiesVarByStmt(const int stmt) const {
+  try {
+    return modifies_stmt_to_variables_table_->GetValueByKey(stmt);
+  } catch (exception& e) {
+    return vector<string>{};
+  }
+}
+
+vector<pair<int, string>> Pkb::GetAllModifiesStmtVarPairs() const {
+  try {
+    return UnfoldResults<ModifiesStmtToVariablesTable*, int, string>(modifies_stmt_to_variables_table_);
   } catch (exception& e) {
     return vector<pair<int, string>>{};
   }
