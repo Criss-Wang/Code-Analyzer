@@ -154,3 +154,35 @@ TEST_CASE("Test Nested Population for Parent") {
     REQUIRE(transitive_parent_pairs != invalid_pairs);
   }
 }
+
+TEST_CASE("Test Nested Population for Modifies") {
+  Pkb pkb = Pkb();
+  // Nested modifies will be populated behind the scenes
+  /*
+   * 1. while (condition) {
+   * 2.   x = modify * 2
+   * 3.   y = modify * 2
+   * 4.   if (condition) then {
+   * 5.     z = modify * 2
+   *      } else {
+   * 6.     a = modifies * 2
+   *      }
+   * 7.   b = modifies * 2
+   *    }
+   */
+
+  bool success = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 2, vector<string>{"x"});
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 3, vector<string>{"y"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 5, vector<string>{"z"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 6, vector<string>{"a"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 7, vector<string>{"b"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kParent, 1, vector<int>{2, 3, 4, 7}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kParent, 4, vector<int>{5, 6}) && success;
+
+  // Populate nested
+  success = success && PopulateNestedRelationships(pkb);
+
+  SECTION("Check population success") {
+    REQUIRE(success);
+  }
+}
