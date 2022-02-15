@@ -1,4 +1,4 @@
-#include "Helper.h"
+#include "helper.h"
 
 bool PatternHelper::IsOperator(const char c) {
   return (!isalpha(c) && !isdigit(c));
@@ -112,4 +112,3 @@ unordered_set<string> PatternHelper::GetPatternSet(string input) {
   // return operands.top();
   return res;
 }
-
