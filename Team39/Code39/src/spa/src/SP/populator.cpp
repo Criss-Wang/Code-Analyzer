@@ -179,11 +179,15 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       populateProcedure(tokens, pkb);
 
     } else if (token->type == RIGHT_CURLY) {
-      if (!parent.empty()) {
-        parent.pop();
-      }
-      if (!previous.empty()) {
-        previous.pop();
+      bool has_two_more_tokens = token != end(input_tokens) - 1 && token != end(input_tokens) - 2;
+      bool is_else_stmt = has_two_more_tokens && next(token, 1)->text == "else" && next(token, 2)->type == LEFT_CURLY;
+      if (!is_else_stmt) {
+        if (!parent.empty()) {
+          parent.pop();
+        }
+        if (!previous.empty()) {
+          previous.pop();
+        }
       }
 
     } else if (next(token, 1)->text == "=") {
