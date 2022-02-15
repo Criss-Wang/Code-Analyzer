@@ -143,10 +143,14 @@ void populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 stack<int> populateFollowsRelationship(stack<int> previous, Pkb& pkb, int stmt_num) {
-  if (!previous.empty() && stmt_num != previous.top()) {
-    // Add previous stmt num and current stmt num to FollowsTable
-    pkb.AddInfoToTable(TableIdentifier::kFollows, previous.top(), stmt_num);
-    previous.pop();
+  if (!previous.empty()) {
+    if (stmt_num == previous.top()) {
+      return previous;
+    } else {
+      // Add previous stmt num and current stmt num to FollowsTable
+      pkb.AddInfoToTable(TableIdentifier::kFollows, previous.top(), stmt_num);
+      previous.pop();
+    }
   }
 
   previous.push(stmt_num);
@@ -154,10 +158,11 @@ stack<int> populateFollowsRelationship(stack<int> previous, Pkb& pkb, int stmt_n
 }
 
 stack<int> populateParentRelationship(stack<int> parent, Pkb& pkb, int stmt_num) {
-  if (!parent.empty()) {
+  if (!parent.empty() && stmt_num != parent.top()) {
     // Add parent stmt num and current stmt num to ParentTable
     pkb.AddInfoToTable(TableIdentifier::kParent, parent.top(), stmt_num);
   }
+
   return parent;
 }
 
@@ -180,14 +185,21 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       populateProcedure(tokens, pkb);
 
     } else if (token->type == RIGHT_CURLY) {
+      
+      int previous_stmt_num = 0;
+      if (!previous.empty()) {
+        previous_stmt_num = previous.top();
+        previous.pop();
+      }
+
       bool has_two_more_tokens = token != end(input_tokens) - 1 && token != end(input_tokens) - 2;
       bool is_else_stmt = has_two_more_tokens && next(token, 1)->text == "else" && next(token, 2)->type == LEFT_CURLY;
-      if (!is_else_stmt) {
+
+      if (is_else_stmt) {
+        previous.push(previous_stmt_num + 1);
+      } else {
         if (!parent.empty()) {
           parent.pop();
-        }
-        if (!previous.empty()) {
-          previous.pop();
         }
       }
 
