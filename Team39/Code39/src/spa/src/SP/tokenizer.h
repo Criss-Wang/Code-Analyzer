@@ -17,7 +17,9 @@ enum TokenType {
   RIGHT_CURLY,
   OPERATOR,
   SEMICOLON,
-  WILDCARD
+  NOT_OPERATOR,
+  REL_OPERATOR,
+  COND_OPERATOR
 };
 
 static const string tokenTypeStrings[] = {
@@ -32,7 +34,9 @@ static const string tokenTypeStrings[] = {
   "RIGHT_CURLY",
   "OPERATOR",
   "SEMICOLON",
-  "WILDCARD"
+  "NOT_OPERATOR",
+  "REL_OPERATOR",
+  "COND_OPERATOR"
 };
 
 class Token {

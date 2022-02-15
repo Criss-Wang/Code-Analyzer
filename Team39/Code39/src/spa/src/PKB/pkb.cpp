@@ -116,7 +116,7 @@ vector<pair<T2, T3>> UnfoldResults(T1 table_to_unfold) {
   return result;
 }
 
-vector<pair<int, int>> Pkb::GetAllParentPairs(int stmt) const {
+vector<pair<int, int>> Pkb::GetAllParentPairs() const {
   try {
     return UnfoldResults<ParentTable*, int, int>(parent_table_);
   } catch (exception& e) {
@@ -124,7 +124,7 @@ vector<pair<int, int>> Pkb::GetAllParentPairs(int stmt) const {
   }
 }
 
-vector<pair<int, int>> Pkb::GetAllTransitiveParentPairs(int stmt) const {
+vector<pair<int, int>> Pkb::GetAllTransitiveParentPairs() const {
   try {
     return UnfoldResults<ParentStarTable*, int, int>(parent_star_table_);
   } catch (exception& e) {
@@ -191,7 +191,7 @@ vector<pair<int, int>> Pkb::GetFollowsPair(int stmt) const {
   }
 }
 
-vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs(int stmt) const {
+vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs() const {
   try {
     return UnfoldResults<FollowsStarTable*, int, int>(follows_star_table_);
   } catch (exception& e) {

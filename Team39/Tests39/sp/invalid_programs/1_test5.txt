@@ -1,0 +1,4 @@
+procedure 1 {
+read x;
+print y;
+}
