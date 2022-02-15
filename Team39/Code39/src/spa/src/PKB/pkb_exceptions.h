@@ -5,7 +5,7 @@
 
 using namespace std;
 
-class NonEmptyKeyException final : public exception {
+class KeyInUseException final : public exception {
   public:
     const char * what() const throw() {
       return "Key is already in use";

@@ -48,10 +48,10 @@ class ChildStarTable : public Table<int, vector<int>> {};
  */
 
 // Line number will be the key and the list of valid substring patterns will be the value
-class StmtToPatternTable : public Table<int, unordered_set<string>> {};
+class StmtToPatternsTable : public Table<int, unordered_set<string>> {};
 
 // Valid substring patterns will be the key and the list of statement having these patterns will be the value
-class PatternToStmtTable : public Table<string, unordered_set<int>> {};
+class PatternToStmtsTable : public Table<string, unordered_set<int>> {};
 
 // Line number will be the key and the list of variables used will be the value
 class UsesStmtToVariablesTable : public Table<int, vector<string>> {};

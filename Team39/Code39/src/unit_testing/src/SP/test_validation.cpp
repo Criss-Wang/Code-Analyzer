@@ -1,14 +1,10 @@
-#include "Parser.h"
+#include "parser.h"
 #include "SP/validator.h"
 
 #include <fstream>
 #include "catch.hpp"
 
 using namespace std;
-void RequireValidation(bool b) {
-    REQUIRE(b);
-}
-
 
 TEST_CASE("Valid programs") {
 
@@ -23,7 +19,7 @@ TEST_CASE("Valid programs") {
 		ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test1.txt");
 		if (!input_file.is_open()) {
 			cerr << "Could not open the file " << endl;
-			RequireValidation(1 == 1);
+			REQUIRE(1 == 1);
 		} else {
 			string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 
@@ -31,7 +27,7 @@ TEST_CASE("Valid programs") {
 			vector<Token> tokens = tokenize.parse(input);
 			cout << endl;
 
-			RequireValidation(Validate(tokens));
+			REQUIRE(Validate(tokens));
 		}
 	}
 
@@ -42,11 +38,11 @@ TEST_CASE("Valid programs") {
 		* print x;
 		* }
 		* */
-		
+
 		ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test2.txt");
 		if (!input_file.is_open()) {
 			cerr << "Could not open the file " << endl;
-			RequireValidation(1 == 1);
+			REQUIRE(1 == 1);
 		} else {
 			string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 
@@ -54,7 +50,7 @@ TEST_CASE("Valid programs") {
 			vector<Token> tokens = tokenize.parse(input);
 			cout << endl;
 
-			RequireValidation(Validate(tokens));
+			REQUIRE(Validate(tokens));
 		}
 	}
 
@@ -64,11 +60,11 @@ TEST_CASE("Valid programs") {
 		*	x = y + (5 + z);
 		* }
 		* */
-		
+
 		ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test3.txt");
 		if (!input_file.is_open()) {
 			cerr << "Could not open the file " << endl;
-			RequireValidation(1 == 1);
+			REQUIRE(1 == 1);
 		} else {
 			string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 
@@ -76,8 +72,8 @@ TEST_CASE("Valid programs") {
 			vector<Token> tokens = tokenize.parse(input);
 			cout << endl;
 
-			RequireValidation(Validate(tokens));
-		}	
+			REQUIRE(Validate(tokens));
+		}
 	}
 }
 
@@ -93,7 +89,7 @@ TEST_CASE("Invalid Programs") {
 	ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test4.txt");
 	if (!input_file.is_open()) {
 		cerr << "Could not open the file " << endl;
-		RequireValidation(1 == 1);
+		REQUIRE(1 == 1);
 	} else {
 		string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 
@@ -101,7 +97,7 @@ TEST_CASE("Invalid Programs") {
 		vector<Token> tokens = tokenize.parse(input);
 		cout << endl;
 
-		RequireValidation(!Validate(tokens));
+		REQUIRE(!Validate(tokens));
 	}
 
 }

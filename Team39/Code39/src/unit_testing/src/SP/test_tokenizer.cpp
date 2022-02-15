@@ -9,10 +9,6 @@
 
 using namespace std;
 
-void RequireTokenizer(bool b) {
-    REQUIRE(b);
-}
-
 TEST_CASE("Valid tokenizer output") {
   Tokenizer tokenizer;
   string source_prog;
@@ -28,7 +24,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token3{ INTEGER, "045", 0 };
     expected_tokens = { token1, token2, token3 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Letters and names") {
@@ -40,7 +36,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token3{ NAME, "myInt123", 0 };
     expected_tokens = { token1, token2, token3 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Brackets") {
@@ -53,7 +49,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token4{ RIGHT_CURLY, "}", 0 };
     expected_tokens = { token1, token2, token3, token4 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Operators and semicolon") {
@@ -81,7 +77,7 @@ TEST_CASE("Valid tokenizer output") {
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9,
                             token10, token11, token12, token13, token14, token15, token16, token17, token18 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with read and print statements") {
@@ -100,7 +96,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token10{ RIGHT_CURLY, "}", 0 };
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with assign statement") {
@@ -119,7 +115,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token10{ RIGHT_CURLY, "}", 0 };
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Same procedure name, variable name and terminal") {
@@ -142,7 +138,7 @@ TEST_CASE("Valid tokenizer output") {
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
                             token11, token12, token13 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with whitespaces") {
@@ -158,7 +154,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token7{ RIGHT_CURLY, "}", 0 };
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with newline") {
@@ -174,7 +170,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token7{ RIGHT_CURLY, "}", 0 };
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Stmt with brackets") {
@@ -198,7 +194,7 @@ TEST_CASE("Valid tokenizer output") {
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
                          token11, token12, token13, token14 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Stmt with brackets") {
@@ -226,7 +222,7 @@ TEST_CASE("Valid tokenizer output") {
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
                          token11, token12, token13, token14, token15, token16, token17, token18 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with ifs") {
@@ -257,7 +253,7 @@ TEST_CASE("Valid tokenizer output") {
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
                          token11, token12, token13, token14, token15, token16, token17, token18, token19, token20, token21 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with while") {
@@ -288,7 +284,7 @@ TEST_CASE("Valid tokenizer output") {
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
                          token11, token12, token13, token14, token15, token16, token17, token18, token19, token20, token21 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with ifs followed by while") {
@@ -339,7 +335,7 @@ TEST_CASE("Valid tokenizer output") {
                           token21, token22, token23, token24, token25, token26, token27, token28, token29, token30,
                            token31, token32, token33, token34, token35, token36, token37, token38, token39 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with while followed by ifs") {
@@ -390,7 +386,7 @@ TEST_CASE("Valid tokenizer output") {
                           token21, token22, token23, token24, token25, token26, token27, token28, token29, token30,
                            token31, token32, token33, token34, token35, token36, token37, token38, token39 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with ifs nested in while") {
@@ -431,7 +427,7 @@ TEST_CASE("Valid tokenizer output") {
                          token11, token12, token13, token14, token15, token16, token17, token18, token19, token20,
                           token21, token22, token23, token24, token25, token26, token27, token28, token29, token30 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with while nested in ifs") {
@@ -481,7 +477,7 @@ TEST_CASE("Valid tokenizer output") {
                           token21, token22, token23, token24, token25, token26, token27, token28, token29, token30,
                            token31, token32, token33, token34, token35, token36, token37, token38 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with two-symbol operator in cond expr and rel expr") {
@@ -523,7 +519,7 @@ TEST_CASE("Valid tokenizer output") {
                          token11, token12, token13, token14, token15, token16, token17, token18, token19, token20,
                           token21, token22, token23, token24, token25, token26, token27, token28, token29, token30, token31 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Procedure with two-symbol operator in while stmt") {
@@ -550,7 +546,7 @@ TEST_CASE("Valid tokenizer output") {
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
                          token11, token12, token13, token14, token15, token16, token17 };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 }
 
@@ -565,7 +561,7 @@ TEST_CASE("Invalid tokenizer output") {
     actual_tokens = tokenizer.parse(source_prog);
     expected_tokens = { };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
 }
 
@@ -576,9 +572,9 @@ TEST_CASE("Invalid tokenizer output") {
     actual_tokens = tokenizer.parse(source_prog);
     expected_tokens = { };
 
-    RequireTokenizer(expected_tokens == actual_tokens);
+    REQUIRE(expected_tokens == actual_tokens);
   }
-  
+
   SECTION("Invalid assign") {
     source_prog = "procedure procName { = x + 2; }";
 
@@ -665,6 +661,6 @@ TEST_CASE("Run tokenizer with file input") {
   } else {
     cout << "Unable to open file";
   }
-  RequireTokenizer(1 == 1);
+  REQUIRE(1 == 1);
 }
 */
