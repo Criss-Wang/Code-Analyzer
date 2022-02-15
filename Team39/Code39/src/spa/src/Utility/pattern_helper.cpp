@@ -18,7 +18,7 @@ int PatternHelper::GetPriority(const char c) {
 
 string PatternHelper::PreprocessPattern(const string& pattern) {
   string res;
-  for (auto c : pattern) {
+  for (const auto c : pattern) {
     if (IsExprSpec(c)) {
       res += c;
     }
@@ -26,14 +26,27 @@ string PatternHelper::PreprocessPattern(const string& pattern) {
   return res;
 }
 
+string PatternHelper::GenerateSubPattern(stack<char>& operators, stack<string>& operands) {
+  char op = operators.top();
+  operators.pop();
 
-unordered_set<string> PatternHelper::GetPatternSet(string input) {
+  string op1 = operands.top();
+  operands.pop();
+  string op2 = operands.top();
+  operands.pop();
+  string curr_pattern = op2 + op1 + op;
+  operands.push(curr_pattern);
+  return curr_pattern;
+}
+
+unordered_set<string> PatternHelper::GetPatternSetPostfix(const string& input, const bool is_full) {
   // stack for operators.
   stack<char> operators;
 
   // stack for operands.
   stack<string> operands;
-  stack<string> operands2;
+
+  // result set
   unordered_set<string> res;
 
   for (int i = 0; i < input.length(); i++) {
@@ -48,18 +61,8 @@ unordered_set<string> PatternHelper::GetPatternSet(string input) {
     // matching opening bracket is found in operator stack.
     else if (input[i] == ')') {
       while (!operators.empty() && operators.top() != '(') {
-
-        // operator
-        char op = operators.top();
-        operators.pop();
-
-        string op3 = operands2.top();
-        operands2.pop();
-        string op4 = operands2.top();
-        operands2.pop();
-        string tmp2 = op4 + op + op3;
-        operands2.push(tmp2);
-        res.insert(tmp2);
+        string curr_pattern = GenerateSubPattern(operators, operands);
+        if (is_full) res.insert(curr_pattern);
       }
 
       // Pop opening bracket from stack.
@@ -69,44 +72,29 @@ unordered_set<string> PatternHelper::GetPatternSet(string input) {
     // If current character is an operand then push it into operands stack.
     else if (!IsOperator(input[i])) {
       // operands.push(string(1, input[i]));
-      operands2.push(string(1, input[i]));
-      res.insert(string(1, input[i]));
+      operands.push(string(1, input[i]));
+      if (is_full) res.insert(string(1, input[i]));
     }
 
     // If current character is an operator, then push it into operators stack after popping high priority operators from
     // operators stack and pushing result in operands stack.
     else {
       while (!operators.empty() && GetPriority(input[i]) <= GetPriority(operators.top())) {
-        char op = operators.top();
-        operators.pop();
-
-        string op3 = operands2.top();
-        operands2.pop();
-        string op4 = operands2.top();
-        operands2.pop();
-
-        string tmp2 = op4 + op + op3;
-        operands2.push(tmp2);
-        res.insert(tmp2);
+        string curr_pattern = GenerateSubPattern(operators, operands);
+        if (is_full) res.insert(curr_pattern);
       }
       operators.push(input[i]);
     }
   }
 
   // Pop operators from operators stack until it is empty and add result of each pop operation in operands stack.
+  string curr_pattern;
   while (!operators.empty()) {
-    char op = operators.top();
-    operators.pop();
-
-    string op3 = operands2.top();
-    operands2.pop();
-    string op4 = operands2.top();
-    operands2.pop();
-
-    string tmp2 = op4 + op + op3;
-    operands2.push(tmp2);
-    res.insert(tmp2);
+    curr_pattern = GenerateSubPattern(operators, operands);
+    if (is_full) res.insert(curr_pattern);
   }
+
+  if (!is_full) res.insert(curr_pattern);
 
   // Final prefix expression is present in operands stack.
   // return operands.top();

@@ -14,10 +14,11 @@ class PatternHelper : public Helper {
     static bool IsExprSpec(char c);
     // Function to find priority of given operator.
     static int GetPriority(char c);
+    static string GenerateSubPattern(stack<char>& operators, stack<string>& operands);
 
   public:
     static string PreprocessPattern(const string& pattern);
-    static unordered_set<string> GetPatternSet(string input);
+    static unordered_set<string> GetPatternSetPostfix(const string& input, const bool is_full);
 };
 
 
