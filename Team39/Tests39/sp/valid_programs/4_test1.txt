@@ -1,0 +1,10 @@
+procedure procName {
+  x = y + (5 + z);
+  while (x != 4) {
+    if (y == 0) then {
+      print x;
+    } else {
+      read y;
+    }
+  }
+}

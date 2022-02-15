@@ -1,0 +1,12 @@
+procedure procName {
+if ((x <= 9) && (x >= 10)) then {
+read x;
+} else {
+read y;
+} 
+while (!(y < 0)) {
+print y;
+}
+x = y * (3 + t) + 4;
+print x;
+}

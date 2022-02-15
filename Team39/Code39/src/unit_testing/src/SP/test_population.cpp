@@ -1,58 +1,59 @@
-#include "parser.h"
+#include "SP/tokenizer.h"
+#include "SP/populator.h"
 #include "PKB/pkb.h"
-#include "PKB/tables/table.h"
 
 #include <fstream>
 #include "catch.hpp"
 
 using namespace std;
 
-// Just placeholder test cases to test the logic of parse.
-// To be replaced with actual test cases once PKB API is provided.
-TEST_CASE("Test populate PKB") {
-
-	/*Input:
-	* procedure procName {
-	*	read x;
-	*	print y;
-	* }
-	* */
-	ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test1.txt");
+void RequirePopulate(string path) {
+	ifstream input_file(path);
 	if (!input_file.is_open()) {
 		cerr << "Could not open the file " << endl;
-		REQUIRE(1 == 1);
 	} else {
 		string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-
+		Tokenizer tokenizer;
+		vector<Token> input_tokens = tokenizer.parse(input);
 		Pkb pkb;
-		Parse(input, pkb);
-
-		REQUIRE(1==1);
+		populate(input_tokens, pkb);
+		REQUIRE(1 == 1);
 	}
-
-	REQUIRE(1 == 1);
 }
 
-TEST_CASE("Test populate PKB 2") {
-	/* Input:
-	* procedure procName {
-	*	x = y * 3;
-	* print x;
-	* }
-	* */
+string populate_dir = "../../../../../../Tests39/sp/valid_programs/";
 
-	ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test2.txt");
-	if (!input_file.is_open()) {
-		cerr << "Could not open the file " << endl;
-		REQUIRE(1 == 1);
-	} else {
-		string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+TEST_CASE("Read/print statements for Population") {
 
-		Pkb pkb;
-		Parse(input, pkb);
+	RequirePopulate(populate_dir + "1_test1.txt");
+	RequirePopulate(populate_dir + "1_test2.txt");
+	RequirePopulate(populate_dir + "1_test3.txt");
+	RequirePopulate(populate_dir + "1_test4.txt");
+  
+}
 
-		REQUIRE(1 == 1);
-	}
+TEST_CASE("Read/print/assign statments for Population") {
 
-	REQUIRE(1 == 1);
+	RequirePopulate(populate_dir + "2_test1.txt");
+	RequirePopulate(populate_dir + "2_test2.txt");
+	RequirePopulate(populate_dir + "2_test3.txt");
+	RequirePopulate(populate_dir + "2_test4.txt");
+
+}
+
+TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population") {
+
+	RequirePopulate(populate_dir + "3_test1.txt");
+	RequirePopulate(populate_dir + "3_test2.txt");
+	RequirePopulate(populate_dir + "3_test3.txt");
+	RequirePopulate(populate_dir + "3_test4.txt");
+  
+}
+
+TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population") {
+
+	RequirePopulate(populate_dir + "4_test1.txt");
+	RequirePopulate(populate_dir + "4_test2.txt");
+	RequirePopulate(populate_dir + "4_test3.txt");
+
 }
