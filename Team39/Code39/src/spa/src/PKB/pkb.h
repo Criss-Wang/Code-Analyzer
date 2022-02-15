@@ -115,6 +115,11 @@ class Pkb {
     [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs() const;
 
+    [[nodiscard]] bool IsUsesStmt(int stmt, string var) const;
+    [[nodiscard]] vector<int> GetUsesStmtsByVar(string var) const;
+    [[nodiscard]] vector<string> GetUsesVarByStmt(int stmt) const;
+    [[nodiscard]] vector<pair<int, string>> GetAllUsesStmtVarPairs() const;
+
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
 
     // Get all the items of a certain entity type

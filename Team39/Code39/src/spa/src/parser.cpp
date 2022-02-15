@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#include "Parser.h"
+#include "parser.h"
 #include "SP/tokenizer.h"
 #include "SP/validator.h"
 #include "SP/populator.h"
