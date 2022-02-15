@@ -219,4 +219,105 @@ TEST_CASE("Test Nested Population for Uses") {
   SECTION("Check population success") {
     REQUIRE(success);
   }
+
+  SECTION("Check PQL queries for nested uses") {
+    REQUIRE(pkb.IsUsesStmt(1, "c1"));
+    REQUIRE(pkb.IsUsesStmt(4, "c2"));
+    REQUIRE(pkb.IsUsesStmt(2, "first"));
+    REQUIRE(pkb.IsUsesStmt(3, "second"));
+    REQUIRE(pkb.IsUsesStmt(7, "fifth"));
+    REQUIRE(pkb.IsUsesStmt(7, "sixth"));
+
+    REQUIRE(pkb.IsUsesStmt(1, "first"));
+    REQUIRE(pkb.IsUsesStmt(1, "fifth"));
+    REQUIRE(pkb.IsUsesStmt(1, "c2"));
+    REQUIRE(pkb.IsUsesStmt(1, "third"));
+    REQUIRE(pkb.IsUsesStmt(1, "fourth"));
+    REQUIRE(pkb.IsUsesStmt(4, "third"));
+    REQUIRE(pkb.IsUsesStmt(4, "fourth"));
+
+    REQUIRE(!pkb.IsUsesStmt(4, "c1"));
+    REQUIRE(!pkb.IsUsesStmt(4, "fifth"));
+    REQUIRE(!pkb.IsUsesStmt(4, "sixth"));
+    REQUIRE(!pkb.IsUsesStmt(1000, "first"));
+    REQUIRE(!pkb.IsUsesStmt(1000, "invalid"));
+
+    vector<int> stmts = pkb.GetUsesStmtsByVar("c2");
+    vector<int> expected_stmts = {1, 4};
+    REQUIRE(stmts == expected_stmts);
+
+    stmts = pkb.GetUsesStmtsByVar("third");
+    expected_stmts = {1, 4, 5};
+    REQUIRE(stmts == expected_stmts);
+
+    stmts = pkb.GetUsesStmtsByVar("c1");
+    expected_stmts = {1};
+    REQUIRE(stmts == expected_stmts);
+
+    stmts = pkb.GetUsesStmtsByVar("second");
+    expected_stmts = {1, 3};
+    REQUIRE(stmts == expected_stmts);
+
+    stmts = pkb.GetUsesStmtsByVar("fourth");
+    expected_stmts = {1, 4, 6};
+    REQUIRE(stmts == expected_stmts);
+
+    stmts = pkb.GetUsesStmtsByVar("fifth");
+    expected_stmts = {1, 7};
+    REQUIRE(stmts == expected_stmts);
+
+    stmts = pkb.GetUsesStmtsByVar("invalid");
+    expected_stmts = {};
+    REQUIRE(stmts == expected_stmts);
+
+    vector<string> variables = pkb.GetUsesVarByStmt(1);
+    vector<string> expected_variables = {"c1", "c2", "first", "second", "third", "fourth", "fifth", "sixth"};
+    vector<string> invalid_vector = {};
+    std::sort(variables.begin(), variables.end());
+    std::sort(expected_variables.begin(), expected_variables.end());
+    REQUIRE(variables == expected_variables);
+    REQUIRE(variables != invalid_vector);
+
+    variables = pkb.GetUsesVarByStmt(2);
+    expected_variables = {"first"};
+    invalid_vector = {};
+    REQUIRE(variables == expected_variables);
+    REQUIRE(variables != invalid_vector);
+
+    variables = pkb.GetUsesVarByStmt(4);
+    expected_variables = {"c2", "third", "fourth"};
+    invalid_vector = {};
+    std::sort(variables.begin(), variables.end());
+    std::sort(expected_variables.begin(), expected_variables.end());
+    REQUIRE(variables == expected_variables);
+    REQUIRE(variables != invalid_vector);
+
+    variables = pkb.GetUsesVarByStmt(7);
+    expected_variables = {"fifth", "sixth"};
+    invalid_vector = {};
+    std::sort(variables.begin(), variables.end());
+    std::sort(expected_variables.begin(), expected_variables.end());
+    REQUIRE(variables == expected_variables);
+    REQUIRE(variables != invalid_vector);
+
+    variables = pkb.GetUsesVarByStmt(1000);
+    expected_variables = {};
+    invalid_vector = {""};
+    std::sort(variables.begin(), variables.end());
+    std::sort(expected_variables.begin(), expected_variables.end());
+    REQUIRE(variables == expected_variables);
+    REQUIRE(variables != invalid_vector);
+
+    vector<pair<int, string>> stmt_var_pairs = pkb.GetAllUsesStmtVarPairs();
+    vector<pair<int, string>> expected_stmt_var_pairs = vector<pair<int, string>>{make_pair(1, "c1"), make_pair(1, "first"), make_pair(1, "second"),
+      make_pair(1, "third"), make_pair(1, "fourth"), make_pair(1, "fifth"), make_pair(1, "sixth"), make_pair(1, "c2"), make_pair(2, "first"),
+      make_pair(3, "second"), make_pair(4, "c2"), make_pair(4, "third"), make_pair(4, "fourth"), make_pair(5, "third"), make_pair(6, "fourth"),
+      make_pair(7, "fifth"), make_pair(7, "sixth")};
+    vector<pair<int, string>> invalid_pairs = vector<pair<int, string>>{make_pair(1, "invalid")};
+    // Sort to ensure that ordering of pairs in vector does not matter
+    std::sort(stmt_var_pairs.begin(), stmt_var_pairs.end());
+    std::sort(expected_stmt_var_pairs.begin(), expected_stmt_var_pairs.end());
+    REQUIRE(stmt_var_pairs == expected_stmt_var_pairs);
+    REQUIRE(stmt_var_pairs != invalid_pairs);
+  }
 }
