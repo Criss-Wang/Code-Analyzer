@@ -184,7 +184,7 @@ namespace pql {
     vector<int> res;
     switch (token.GetRelationship()) {
       case RelationshipTypes::kFollows:
-        res = pkb.GetStmtRightBefore(left);
+        res = pkb.GetStmtRightAfter(left);
         break;
       case RelationshipTypes::kFollowsT:
         res = pkb.GetStmtsAfter(left);
@@ -207,7 +207,7 @@ namespace pql {
     vector<int> res;
     switch (token.GetRelationship()) {
       case RelationshipTypes::kFollows:
-        res = pkb.GetStmtRightAfter(right);
+        res = pkb.GetStmtRightBefore(right);
         break;
       case RelationshipTypes::kFollowsT:
         res = pkb.GetStmtsBefore(right);

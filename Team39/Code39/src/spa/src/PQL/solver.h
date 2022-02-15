@@ -11,7 +11,7 @@ namespace pql_solver {
     private:
       std::vector<pql_table::InterTable> tables_;
       std::vector<pql_table::Predicate> predicates_;
-      std::vector<pql::Synonym> all_syn_
+      std::vector<pql::Synonym> all_syn_used_;
       pql::Synonym return_syn_;
       
     public:

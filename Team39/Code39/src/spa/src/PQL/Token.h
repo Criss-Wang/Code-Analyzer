@@ -22,6 +22,8 @@ namespace pql {
         std::string name;
         EntityIdentifier declaration;
     public:
+        Synonym() {};
+
         Synonym(std::string name, EntityIdentifier declaration) : name(std::move(name)), declaration(declaration) {};
 
         std::string GetName();

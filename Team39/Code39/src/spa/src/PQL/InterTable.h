@@ -7,46 +7,6 @@
 #include "Token.h"
 
 namespace pql_table {
-  
-  typedef struct element {
-    int val;
-    std::string name;
-
-    bool operator< (const element& e1, const element& e2) const {
-      if (e1.val == e2.val) {
-        return e1.name < e2.name;
-      }
-      else {
-        return e1.val < e2.val;
-      }
-    }
-
-    bool operator==(const element& e) const {
-      return val == e.val && name == e.name;
-    }
-  } element;
-
-  //specialized hash function for struct element
-  struct hash_fn { 
-    std::size_t operator() (const elemenet& e) const {
-      std::size_t h1 = std::hash<int>()(e.val);
-      std::size_t h2 = std::hash<std::string>()(e.name);
-
-      return h1 ^ h2;
-    }
-  };
-
-  //specialized hash function for pair of struct element
-  struct hash_pair_fn {
-    std::size_t operator() (const std::pair<element, element>& p) const {
-      std::size_t h1 = std::hash<int>()(p.first.val);
-      std::size_t h2 = std::hash<std::string>()(p.first.name);
-      std::size_t h3 = std::hash<int>()(p.second.val);
-      std::size_t h4 = std::hash<std::string>()(p.second.name);
-
-      return h1 ^ h2 ^ h3 ^ h4;
-    }
-  };
 
   class InterTable {
     public:
@@ -77,7 +37,7 @@ namespace pql_table {
 
       void MergeAndFilter(InterTable& t1, Predicate& pred);
 
-      bool equal(const InterTable& t);
+      bool equal(InterTable& t);
   };
 
   /*
