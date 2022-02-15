@@ -5,6 +5,7 @@
 using namespace std;
 
 #include "populator.h"
+#include "SP/design_extractor.h"
 
 void populateProcedure(vector<Token> tokens, Pkb& pkb) {
   string proc_name = tokens.at(1).text;
@@ -262,7 +263,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
     }
   }
 
-  if (pkb.PopulateNestedRelationship() == 0) {
+  if (PopulateNestedRelationships(pkb) == 0) {
     throw invalid_argument("PKB Population failed");
   }
 }

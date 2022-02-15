@@ -7,7 +7,6 @@ using namespace std;
 #include "SP/validator.h"
 #include "SP/populator.h"
 
-
 void Parse(string input, Pkb& pkb) {
 
   Tokenizer tokenizer;
