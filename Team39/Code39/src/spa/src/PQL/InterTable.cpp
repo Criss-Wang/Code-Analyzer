@@ -3,8 +3,9 @@
 #include <algorithm>
 #include <unordered_set>
 #include <unordered_map>
+#include <set>
 
-#include "InterTable.h"
+#include "intertable.h"
 
 namespace pql_table {
 
@@ -28,6 +29,10 @@ namespace pql_table {
 
 	int InterTable::GetColNum() {
 		return header_.size();
+	}
+
+	int InterTable::GetRowNum() {
+			return rows_.size();
 	}
 
 	int InterTable::FindSynCol(pql::Synonym& syn) {
@@ -74,7 +79,7 @@ namespace pql_table {
 						std::vector<element> row_to_be_insert;
 
 						for (element& ele : front_row) {
-								row_to_be_insert.push_back(ele)
+							row_to_be_insert.push_back(ele)
 						}
 
 						for (element& ele : back_row) {
@@ -91,80 +96,125 @@ namespace pql_table {
 
 	void InterTable::Filter(Predicate& pred) {
 		std::vector<std::vector<element>> new_rows;
-		int first_syn_col_index = FindSynCol(pred.first_syn);
-		int second_syn_col_index = FindSynCol(pred.second_syn);
-		std::unordered_map<element, int, hash_fn> first_syn_domain;
-		std::unordered_map<element, int, hash_fn> second_syn_domain;
+		int first_syn_col_index = FindSynCol(pred.first_syn_);
+		int second_syn_col_index = FindSynCol(pred.second_syn_);
+		std::unordered_map<std::pair<element, element>, int, hash_pair_fn> pair_domain;
 
 		for (int index = 0; index < rows_.size(); index++) {
-			first_syn_domain.insert({ rows_[index][first_syn_col_index], index });
-			second_syn_domain.insert({ rows_[index][second_syn_col_index], index });
+			std::pair<element, element> cur_pair(rows_[index][first_syn_col_index], rows_[index][second_syn_col_index]);
+			auto iter;
+			iter = pair_domain.find(cur_pair);
+
+			if (iter == pair_domain.end()) {
+				//the element does not exist in the map
+				std::vector<int> v({ index });
+				pair_domain.insert({ cur_pair, v });
+			}
+			else {
+				iter->second.push_back(index);
+			}
 		}
 
-		for (auto& ele_pair : pred.allowed_pairs) {
-				std::unordered_map<element, int>::iterator it1;
-				it1 = first_syn_domain.find(ele_pair.first);
-				if (it1 == first_syn_domain.end()) {
-						continue;
-				}
+		for (auto& ele_pair : pred.allowed_pairs_) {
+			auto iter = pair_domain.find(ele_pair);
 
-				std::unordered_map<element, int>::iterator it2;
-				it2 = second_syn_domain.find(ele_pair.second);
-				if (it2 == second_syn_domain.end()) {
-						continue;
-				}
+			if (iter == pair_domain.end()) {
+				continue;
+			}
 
-				std::vector<element> row_to_be_insert;
-				for (element& ele : rows_[it1->second]) {
-						row_to_be_insert.push_back(ele);
-				}
-				new_rows.push_back(row_to_be_insert);
+			for (int index : iter->second) {
+				new_rows.push_back(rows_[index]);
+			}
 		}
 
 		rows_ = new_rows;
 	}
 
-	void MergeAndFilter(InterTable& t1, Predicate& pred) {
-			std::vector<std::vector<element>> new_rows;
-			int first_syn_col_index = FindSynCol(pred.first_syn);
-			int second_syn_col_index = t1.FindSynCol(pred.second_syn);
-			std::unordered_map<element, int, hash_fn> first_syn_domain;
-			std::unordered_map<element, int, hash_fn> second_syn_domain;
+	void InterTable::MergeAndFilter(InterTable& t1, Predicate& pred) {
+		std::vector<std::vector<element>> new_rows;
+		int first_syn_col_index = FindSynCol(pred.first_syn_);
+		int second_syn_col_index = t1.FindSynCol(pred.second_syn_);
 
-			for (int index = 0; index < rows_.size(); index++) {
-				first_syn_domain.insert({ rows_[index][first_syn_col_index], index });
+		//The maps store element to a list of row indices that contain the element
+		std::unordered_map<element, std::vector<int>, hash_fn> first_syn_domain;
+		std::unordered_map<element, std::vector<int>, hash_fn> second_syn_domain;
+
+		for (int index = 0; index < rows_.size(); index++) {
+		  std::unordered_map<element, std::vector<int>>::iterator iter;
+		  iter = first_syn_domain.find(rows_[index][first_syn_col_index]);
+
+		  if (iter == first_syn_domain.end()) {
+				//the element does not exist in the map
+				std::vector<int> v({ index });
+				first_syn_domain.insert({ rows_[index][first_syn_col_index], v });
+		  } else {
+				iter->second.push_back(index);
+		  }
+		}
+
+		for (int index = 0; index < t1.rows_.size(); index++) {
+		  std::unordered_map<element, std::vector<int>>::iterator iter;
+		  iter = second_syn_domain.find(t1.rows_[index][second_syn_col_index]);
+
+		  if (iter == second_syn_domain.end()) {
+				//the element does not exist in the map
+				std::vector<int> v({ index });
+				second_syn_domain.insert({ rows_[index][second_syn_col_index], v });
+		  }
+		  else {
+				iter->second.push_back(index);
+		  }
+		}
+
+
+		for (auto& ele_pair : pred.allowed_pairs_) {
+		  std::unordered_map<element, int>::iterator it1;
+		  it1 = first_syn_domain.find(ele_pair.first);
+		  if (it1 == first_syn_domain.end()) {
+				continue;
+		  }
+
+		  std::unordered_map<element, int>::iterator it2;
+		  it2 = second_syn_domain.find(ele_pair.second);
+		  if (it2 == second_syn_domain.end()) {
+				continue;
+		  }
+
+		  for (int first_index : it1->second) {
+				for (int second_index : it2->second) {
+				  std::vector<element> row_to_be_insert;
+						
+				  for (auto& ele : rows_[first_index]) {
+						row_to_be_insert.push_back(ele);
+				  }
+
+				  for (auto& ele : t1.rows_[second_index]) {
+						row_to_be_insert.push_back(ele);
+				  }
+						
+				  new_rows.push_back(row_to_be_insert);
+				}
+		  }
+		}
+
+		rows_ = new_rows;
+	}
+
+	bool InterTable::equal(const InterTable& t) {
+		if (GetColNum() != t.GetColNum() || GetRowNum() != t.GetRowNum()) {
+			return false;
+		}
+
+		//check header equality
+		for (int index = 0; index < GetColNum(); index++) {
+			if (!header_[index].equal(t.header_[index])) {
+				return false;
 			}
+		}
 
-			for (int index = 0; index < t1.rows_.size(); index++) {
-				second_syn_domain.insert({ t1.rows_[index][second_syn_col_index], index });
-			}
+		std::multiset<std::vector<element>> s1(rows_.begin(), rows_.end());
+		std::multiset<std::vector<element>> s2(t.rows_.begin(), t.rows_.end());
 
-
-			for (auto& ele_pair : pred.allowed_pairs) {
-					std::unordered_map<element, int>::iterator it1;
-					it1 = first_syn_domain.find(ele_pair.first);
-					if (it1 == first_syn_domain.end()) {
-							continue;
-					}
-
-					std::unordered_map<element, int>::iterator it2;
-					it2 = second_syn_domain.find(ele_pair.second);
-					if (it2 == second_syn_domain.end()) {
-							continue;
-					}
-
-					std::vector<element> row_to_be_insert;
-					for (element& ele : rows_[it1->second]) {
-							row_to_be_insert.push_back(ele);
-					}
-
-					for (element& ele : rows_[it2->second]) {
-							row_to_be_insert.push_back(ele);
-					}
-
-					new_rows.push_back(row_to_be_insert);
-			}
-
-			rows_ = new_rows;
+		return s1 == s2;
 	}
 }
