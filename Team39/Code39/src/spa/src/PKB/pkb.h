@@ -115,7 +115,7 @@ class Pkb {
     [[nodiscard]] vector<int> GetStmtsBefore(int stmt) const;
     [[nodiscard]] vector<int> GetStmtRightAfter(int stmt) const;
     [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;
-    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs(int stmt) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs() const;
 
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
 

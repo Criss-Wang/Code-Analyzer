@@ -191,7 +191,7 @@ vector<pair<int, int>> Pkb::GetFollowsPair(int stmt) const {
   }
 }
 
-vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs(int stmt) const {
+vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs() const {
   try {
     return UnfoldResults<FollowsStarTable*, int, int>(follows_star_table_);
   } catch (exception& e) {
