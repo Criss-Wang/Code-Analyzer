@@ -28,7 +28,7 @@ class Table {
     virtual bool AddKeyValuePair(T1 key, T2 value) {
       try {
         if (this->KeyExistsInTable(key)) {
-          throw NonEmptyKeyException();
+          throw KeyInUseException();
         }
         table_[key] = value;
         if (table_[key] == value) {
@@ -37,7 +37,7 @@ class Table {
 
         return false;
       }
-      catch (exception& e) {
+      catch (KeyInUseException& e) {
         throw e;
       }
     }
@@ -49,7 +49,7 @@ class Table {
         }
         throw InvalidKeyException();
       }
-      catch (exception& e) {
+      catch (InvalidKeyException& e) {
         throw e;
       }
     }
@@ -62,10 +62,10 @@ class Table {
       return key_set;
     }
 
-    virtual vector<T2> GetValueLst() {
-      vector<T2> val_set;
+    virtual vector<pair<T1, T2>> GetKeyValueLst() {
+      vector<pair<T1, T2>> val_set;
       for (const auto& [key, value] : table_) {
-        val_set.push_back(value);
+        val_set.push_back(make_pair(key, value));
       }
       return val_set;
     }
@@ -85,10 +85,8 @@ class Table {
 };
 
 enum class TableIdentifier {
-  kAssign, kRead, kPrint, kConstant, kIf, kWhile,
+  kAssign, kRead, kPrint, kConstant, kIf, kWhile, kPattern,
   kFollows, kFollowsStar,
   kParent, kParentStar,
   kUsesStmtToVar, kModifiesStmtToVar
 };
-
-

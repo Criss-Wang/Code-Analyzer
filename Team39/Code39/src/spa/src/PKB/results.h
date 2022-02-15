@@ -1,5 +1,6 @@
 #pragma once
 
+#include <any>
 #include<stdio.h>
 #include <iostream>
 #include <string>
@@ -25,4 +26,7 @@ class StmtResults final : public Results<int> {
 };
 
 class VarResults final : public Results<string> {
+};
+
+class TupleResult final : public Results<vector<any>> {
 };

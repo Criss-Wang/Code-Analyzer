@@ -5,8 +5,7 @@
 
 #include "tables/entity_tables.h"
 #include "tables/relation_tables.h"
-#include "pkb_exceptions.h"
-#include "../Utility/Entity.h"
+#include "../Utility/entity.h"
 
 // Custom hash function from https://www.geeksforgeeks.org/unordered-set-of-vectors-in-c-with-examples/
 struct HashFunction {
@@ -46,8 +45,10 @@ class Pkb {
     UsesVariableToStmtsTable *uses_variable_to_stmts_table_ = new UsesVariableToStmtsTable();
     ModifiesStmtToVariablesTable *modifies_stmt_to_variables_table_ = new ModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable *modifies_variable_to_stmts_table_ = new ModifiesVariableToStmtsTable();
+    StmtToPatternsTable *stmt_to_patterns_table_ = new StmtToPatternsTable();
+    PatternToStmtsTable* pattern_to_stmts_table_ = new PatternToStmtsTable();
 
-    // A table to store pointers to all tables
+    // Stores the line numbers into a set
     unordered_set<int> stmt_set_;
     unordered_set<int> assign_set_;
     unordered_set<int> read_set_;
@@ -56,14 +57,17 @@ class Pkb {
     unordered_set<int> if_set_;
     unordered_set<int> while_set_;
     unordered_set<int> constant_set_;
+    // Stores the variable or procedure name into the set
     unordered_set<string> variable_set_;
     unordered_set<string> procedure_set_;
     unordered_set<set<int>, HashFunction> stmt_list_set_;
 
-    void PopulateNestedFollows();
-    void PopulateNestedParents();
-    void PopulateUses();
-    void PopulateModifies();
+    // Insert all possible expression patterns for a statement
+    bool AddPattern(int line_num, const string& input);
+    bool AddParent(int key, const vector<int>& value);
+    bool AddFollows(int key, int value);
+    bool AddModifies(int key, const vector<string>& value);
+    bool AddUses(int key, const vector<string>& value);
 
   public:
     /**
@@ -75,28 +79,45 @@ class Pkb {
     bool AddInfoToTable(TableIdentifier table_identifier, int key, int value);
     bool AddInfoToTable(TableIdentifier table_identifier, int key, const string& value);
 
-    // Populate the nested relationships using the tables storing basic information/relationships about entities
-    int PopulateNestedRelationship();
+    // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
+    bool AddEntityToSet(EntityIdentifier entity_identifier, int entity_val);
+    bool AddEntityToSet(EntityIdentifier entity_identifier, const string& entity_val);
+    bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
+
+    // Get tables
+    FollowsTable* GetFollowsTable();
+    FollowsStarTable* GetFollowsStarTable();
+    FollowsBeforeTable* GetFollowsBeforeTable();
+    FollowsBeforeStarTable* GetFollowsBeforeStarTable();
+    ParentTable* GetParentTable();
+    ChildTable* GetChildTable();
+    ParentStarTable* GetParentStarTable();
+    ChildStarTable* GetChildStarTable();
+    ModifiesStmtToVariablesTable* GetModifiesStmtToVariablesTable();
+    ModifiesVariableToStmtsTable* GetModifiesVariableToStmtsTable();
+    UsesStmtToVariablesTable* GetUsesStmtToVariablesTable();
+    UsesVariableToStmtsTable* GetUsesVariableToStmtsTable();
 
     // Relationship utility APIs for PQL
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
     [[nodiscard]] bool IsTransitiveParent(int stmt_1, int stmt_2) const;
     [[nodiscard]] vector<int> GetParent(int stmt) const;
     [[nodiscard]] vector<int> GetAllParents(int stmt) const;
+    [[nodiscard]] vector<pair<int,int>> GetAllParentPairs(int stmt) const;
     [[nodiscard]] vector<int> GetChild(int stmt) const;
     [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs(int stmt) const;
 
     [[nodiscard]] bool IsFollows(int stmt_1, int stmt_2) const;
     [[nodiscard]] bool IsTransitiveFollows(int stmt_1, int stmt_2) const;
-    [[nodiscard]] int GetStmtRightBefore(int stmt) const;
+    [[nodiscard]] vector<int> GetStmtRightBefore(int stmt) const;
+    [[nodiscard]] vector<pair<int,int>> GetFollowsPair(int stmt) const;
     [[nodiscard]] vector<int> GetStmtsBefore(int stmt) const;
-    [[nodiscard]] int GetStmtRightAfter(int stmt) const;
+    [[nodiscard]] vector<int> GetStmtRightAfter(int stmt) const;
     [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs(int stmt) const;
 
-    // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
-    bool AddEntityToSet(const EntityIdentifier entity_identifier, int entity_val);
-    bool AddEntityToSet(const EntityIdentifier entity_identifier, const string& entity_val);
-    bool AddEntityToSet(const EntityIdentifier entity_identifier, const set<int>& entity_val);
+    [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
 
     // Get all the items of a certain entity type
     unordered_set<int> GetAllEntityInt(const EntityIdentifier entity_identifier);

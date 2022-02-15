@@ -1,9 +1,18 @@
 #pragma once
 
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "table.h"
+
+/**
+ * Relationship tables between same type of entities
+ * - Follows
+ * - Parent
+ * - Call
+ * - Next
+ */
 
 // Line number will be the key and the line number that follows after will be the value i.e. follows(key, value)
 class FollowsTable : public Table<int, int> {};
@@ -28,6 +37,21 @@ class ParentStarTable : public Table<int, vector<int>> {};
 
 // Nested line number will be the key and the parent line number such that parent*([value], key) holds will be the value
 class ChildStarTable : public Table<int, vector<int>> {};
+
+
+/**
+ * Relationship tables between different types of entities
+ * - Modifies
+ * - Uses
+ * - Affects (unique)
+ * - Pattern
+ */
+
+// Line number will be the key and the list of valid substring patterns will be the value
+class StmtToPatternsTable : public Table<int, unordered_set<string>> {};
+
+// Valid substring patterns will be the key and the list of statement having these patterns will be the value
+class PatternToStmtsTable : public Table<string, unordered_set<int>> {};
 
 // Line number will be the key and the list of variables used will be the value
 class UsesStmtToVariablesTable : public Table<int, vector<string>> {};

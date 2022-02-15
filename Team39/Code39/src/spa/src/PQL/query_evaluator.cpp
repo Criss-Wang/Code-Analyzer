@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include <algorithm>
 
-#include "QueryEvaluator.h"
+#include "query_evaluator.h"
 
 using namespace std;
 
@@ -184,7 +184,7 @@ namespace pql {
     vector<int> res;
     switch (token.GetRelationship()) {
       case RelationshipTypes::kFollows:
-        res.push_back(pkb.GetStmtRightAfter(left));
+        res = pkb.GetStmtRightBefore(left);
         break;
       case RelationshipTypes::kFollowsT:
         res = pkb.GetStmtsAfter(left);
@@ -207,7 +207,7 @@ namespace pql {
     vector<int> res;
     switch (token.GetRelationship()) {
       case RelationshipTypes::kFollows:
-        res.push_back(pkb.GetStmtRightBefore(right));
+        res = pkb.GetStmtRightAfter(right);
         break;
       case RelationshipTypes::kFollowsT:
         res = pkb.GetStmtsBefore(right);
@@ -225,4 +225,3 @@ namespace pql {
     return res;
   }
 }
-

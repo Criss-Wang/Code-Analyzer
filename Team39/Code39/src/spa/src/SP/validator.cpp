@@ -5,6 +5,7 @@
 using namespace std;
 
 #include "validator.h"
+#include "tokenizer.h"
 
 bool Validate(vector<Token> input) {
 
