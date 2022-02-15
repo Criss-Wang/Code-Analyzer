@@ -199,6 +199,58 @@ vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs() const {
   }
 }
 
+bool Pkb::IsUsesStmt(const int stmt, const string var) const {
+  try {
+    vector<string> value = uses_stmt_to_variables_table_->GetValueByKey(stmt);
+    return find(value.begin(), value.end(), var) != value.end();
+  } catch (exception& e) {
+    return false;
+  }
+}
+
+vector<int> Pkb::GetUsesStmtsByVar(const string var) const {
+  try {
+    return uses_variable_to_stmts_table_->GetValueByKey(var);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+}
+
+vector<string> Pkb::GetUsesVarByStmt(const int stmt) const {
+  try {
+    return uses_stmt_to_variables_table_->GetValueByKey(stmt);
+  } catch (exception& e) {
+    return vector<string>{};
+  }
+}
+
+vector<pair<int, string>> Pkb::GetAllUsesStmtVarPairs() const {
+  try {
+    return UnfoldResults<UsesStmtToVariablesTable*, int, string>(uses_stmt_to_variables_table_);
+  } catch (exception& e) {
+    return vector<pair<int, string>>{};
+  }
+}
+
+unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern) const {
+  const string usable_pattern = PatternHelper::PreprocessPattern(pattern);
+  unordered_set<int> empty_set{};
+  unordered_set<int> res{};
+
+  for (auto s: PatternHelper::GetPatternSet(usable_pattern)) {
+    if (!pattern_to_stmts_table_->KeyExistsInTable(s)) return empty_set;
+    unordered_set<int> stmt_lst = pattern_to_stmts_table_->GetValueByKey(s);
+    if (res.empty()) {
+      res = stmt_lst;
+    } else {
+      for (auto stmt : res) {
+        if (stmt_lst.find(stmt) == stmt_lst.end()) res.erase(stmt);
+      }
+    }
+  }
+  return res;
+}
+
 bool Pkb::AddParent(const int key, const vector<int>& value) {
   bool add_success = parent_table_->AddKeyValuePair(key, value);
   // Populate the reverse relation
@@ -229,39 +281,6 @@ bool Pkb::AddUses(const int key, const vector<string>& value) {
   return add_success;
 }
 
-bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<int>& value) {
-  try {
-    if (value.empty()) throw EmptyValueException();
-    switch (table_identifier) {
-      case TableIdentifier::kConstant: return constant_table_->AddKeyValuePair(key, value);
-      case TableIdentifier::kParent: return AddParent(key, value);
-      default:
-        throw InvalidIdentifierException();
-    }
-  } catch (exception& e) {
-    return false;
-  }
-}
-
-unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern) const {
-  const string usable_pattern = PatternHelper::PreprocessPattern(pattern);
-  unordered_set<int> empty_set{};
-  unordered_set<int> res{};
-
-  for (auto s: PatternHelper::GetPatternSet(usable_pattern)) {
-    if (!pattern_to_stmts_table_->KeyExistsInTable(s)) return empty_set;
-    unordered_set<int> stmt_lst = pattern_to_stmts_table_->GetValueByKey(s);
-    if (res.empty()) {
-      res = stmt_lst;
-    } else {
-      for (auto stmt : res) {
-        if (stmt_lst.find(stmt) == stmt_lst.end()) res.erase(stmt);
-      }
-    }
-  }
-  return res;
-}
-
 bool Pkb::AddPattern(const int line_num, const string& input) {
   // First the SP side should guarantee a valid input is sent
   // We then proceed to parse the set of valid substring patterns
@@ -279,6 +298,20 @@ bool Pkb::AddPattern(const int line_num, const string& input) {
     }
   }
   return add_success;
+}
+
+bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<int>& value) {
+  try {
+    if (value.empty()) throw EmptyValueException();
+    switch (table_identifier) {
+      case TableIdentifier::kConstant: return constant_table_->AddKeyValuePair(key, value);
+      case TableIdentifier::kParent: return AddParent(key, value);
+      default:
+        throw InvalidIdentifierException();
+    }
+  } catch (exception& e) {
+    return false;
+  }
 }
 
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<string>& value) {
