@@ -1,4 +1,4 @@
-#include "Parser.h"
+#include "parser.h"
 #include "SP/validator.h"
 
 #include <fstream>
@@ -41,7 +41,7 @@ TEST_CASE("Read/print statements for Validation") {
 		RequireValid(valid_dir + "1_test2.txt");
 		RequireValid(valid_dir + "1_test3.txt");
 		RequireValid(valid_dir + "1_test4.txt");
-
+    
 	}
 	
 	SECTION("Invalid Programs") {

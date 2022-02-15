@@ -5,6 +5,7 @@
 using namespace std;
 
 #include "validator.h"
+#include "tokenizer.h"
 
 bool validateProcedure(vector<Token> tokens) {
   bool check_size = tokens.size() == 3;
