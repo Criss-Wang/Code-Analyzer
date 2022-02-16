@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "intertable.h"
 #include "predicate.h"
@@ -15,7 +16,9 @@ namespace pql_solver {
       pql::Synonym return_syn_;
       
     public:
-      Solver()
+        Solver(std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
+            std::unordered_map<std::string, std::vector<string>>& var_hashmap,
+            std::vector<pql::Synonym>& syn_list, pql::Synonym& selected_syn);
 
     public:
       
