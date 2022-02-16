@@ -28,6 +28,10 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
       case '7':
       case '8':
       case '9':
+        if (current_token.type == OPERATOR) {
+          EndToken(current_token, tokens_list);
+        }
+
         if (current_token.type == WHITESPACE) {
           current_token.type = DIGIT;
         } else if (current_token.type == DIGIT || current_token.type == INTEGER) {
@@ -38,7 +42,6 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
 
       // Brackets
       case '{':
-
         if (current_token.type != WHITESPACE) {
           EndToken(current_token, tokens_list);
         }
@@ -65,6 +68,7 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
         if (current_token.type != WHITESPACE) {
           EndToken(current_token, tokens_list);			
         }
+
         current_token.type = LEFT_PAREN;
         current_token.text.append(1, curr_char);
         EndToken(current_token, tokens_list);
@@ -120,6 +124,10 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
 
       // Letters
       default:
+        if (current_token.type == OPERATOR) {
+          EndToken(current_token, tokens_list);
+        }
+
         if (current_token.type == WHITESPACE) {
           current_token.type = LETTER;
           current_token.text.append(1, curr_char);
@@ -144,7 +152,7 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
 // Resets current token to WHITESPACE
 void Tokenizer::EndToken(Token &token, vector<Token> &tokens_list) {
   if (token.type == NAME) {
-      CheckStmtNum(token);
+    CheckStmtNum(token);
   }
 
   if (token.type != WHITESPACE) {	
@@ -162,7 +170,7 @@ void Tokenizer::CheckStmtNum(Token &token) {
 }
 
 string Token::print() {
-    string output = tokenTypeStrings[type] + ", \"" + text + "\", " + to_string(stmt_num_);
-    cout << output << endl;
-    return output;
+  string output = tokenTypeStrings[type] + ", \"" + text + "\", " + to_string(stmt_num_);
+  cout << output << endl;
+  return output;
 }
