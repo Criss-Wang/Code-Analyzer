@@ -1,0 +1,15 @@
+procedure procName {
+  read x;
+  if ((x < 4) || (x > 1)) then {
+    x = y + (5 + z);
+    while (!(x < 4)) {
+      x = x + 1;
+      print x;
+    }
+  } else {
+    print y;
+    y = x / 188;
+  }
+  print x;
+  x = 0;
+}

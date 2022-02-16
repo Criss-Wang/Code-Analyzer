@@ -1,0 +1,8 @@
+procedure procName {
+read x;
+x = y * (3 + t) + 4;
+print x;
+read y;
+y = y + 1;
+z = z * y;
+}
