@@ -165,6 +165,7 @@ TEST_CASE("Populating StmtToPatterns Table") {
   // PatternToStmtsTable is populated behind the scenes
   Pkb pkb = Pkb();
   bool success = pkb.AddInfoToTable(TableIdentifier::kPattern, 2, "A + (B + C) + 2");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 4, "A + B + C + 2");
   success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 3, "X + (B + C) * (B + C)");
   SECTION("Adding patterns") {
     REQUIRE(success);

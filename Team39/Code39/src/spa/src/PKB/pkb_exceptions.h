@@ -33,3 +33,11 @@ class InvalidIdentifierException final : public exception {
       return "Invalid identifier given";
     }
 };
+
+// Thrown when wrong TableIdentifier or EntityIdentifier is provided
+class BadResultException final : public exception {
+public:
+  const char* what() const throw() {
+    return "The result given is not meeting the requirement";
+  }
+};
