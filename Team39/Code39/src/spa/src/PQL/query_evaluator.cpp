@@ -15,41 +15,6 @@
 using namespace std;
 
 namespace pql {
-  template <typename T>
-  void UpdateHashmap(unordered_map<string, vector<T>>& hmap, string name, const vector<T>& lst) {
-      vector<T> oriLst = hmap[name];
-      vector<T> inter = Intersect<T>(oriLst, lst);
-      hmap[name] = inter;
-  }
-
-  template <typename T>
-  vector<T> Intersect(const vector<T>& lst1, const vector<T>& lst2) {
-      //refer from stack overflow https://stackoverflow.com/questions/38993415/how-to-apply-the-intersection-between-two-lists-in-c
-      vector<T> res;
-      unordered_set<T> st;
-      for_each(lst2.begin(), lst2.end(), [&st](const T& k) { st.insert(k); });
-      for_each(lst1.begin(), lst1.end(),
-          [&st, &res](const T& k) {
-              auto iter = st.find(k);
-              if (iter != st.end()) {
-                  res.push_back(k);
-                  st.erase(iter);
-              }
-          }
-      );
-
-      return res;
-  }
-
-  bool IsNumber(const string& str) {
-    for (char const& c : str) {
-      if (isdigit(c) == 0) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& stmt_hashmap, 
                     std::unordered_map<std::string, std::vector<std::string>>& var_hashmap, Pkb& pkb) {
     //hashmap stores <synonym.name, domain> pair.
@@ -87,8 +52,30 @@ namespace pql {
       default: 
         return;
     }
+  }
 
+  void ConsumePattern() {
+    //this is for pattern clauses, haven't implemented yet from parser side
+    /*
+    Synonym s = patternClause.getSynonym();
+    vector<int> matched;
 
+    if (patternClause.getExactMatch()) {
+        matched = PKB::getExactMatchAssign(patternClause.getVar(), patternClause.getExpr());
+    }
+    else {
+        matched = PKB::getSubMatchAssign(patternClause.getVar(), patternClause.getExpr());
+    }
+
+    UpdateHashmap(hashmap, s.name, matched);
+
+    if (hashmap[s.name].empty()) {
+        //there is no assign statement that satisfy the pattern
+        //return empty list
+        vector<string> res{};
+        return res;
+    }
+    */
   }
 
   std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
@@ -104,31 +91,10 @@ namespace pql {
 
     GetAllDomain(synonyms, stmt_hashmap, var_hashmap, pkb);
 
-    if (false) {
-      //this is for pattern clauses, haven't implemented yet from parser side
-      /*
-      Synonym s = patternClause.getSynonym();
-      vector<int> matched;
-
-      if (patternClause.getExactMatch()) {
-          matched = PKB::getExactMatchAssign(patternClause.getVar(), patternClause.getExpr());
-      }
-      else {
-          matched = PKB::getSubMatchAssign(patternClause.getVar(), patternClause.getExpr());
-      }
-
-      UpdateHashmap(hashmap, s.name, matched);
-
-      if (hashmap[s.name].empty()) {
-          //there is no assign statement that satisfy the pattern
-          //return empty list
-          vector<string> res{};
-          return res;
-      }
-      */
-
+    if (pattern_token) {
+      ConsumePattern();
     }
-
+    
     for (RelationshipToken& token : such_that_clauses) {
       pql::Clause clause = GenerateClause(token, pkb, stmt_hashmap, var_hashmap, predicates);
       clause.Evaluate();

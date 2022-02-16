@@ -149,6 +149,15 @@ namespace pql {
     UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
   }
 
+  void FollowsClause::ExtractRelPair() {
+    std::string left = token_->GetLeft();
+    std::string right = token_->GetRight();
+    std::vector<std::pair<int, int>> domain_pair = pkb_.GetFollowsPair();
+    pql_table::Predicate pred(left, right, domain_pair);
+
+    predicates_.push_back(pred);
+  }
+
   void FollowsClause::Evaluate() {
     bool is_left_syn = token_->IsLeftSynonym();
     bool is_right_syn = token_->IsRightSynonym();
@@ -160,7 +169,7 @@ namespace pql {
     } else if (is_left_syn) {
       FollowsClause::ExtractInverseRelDomain();
     } else {
-
+      FollowsClause::ExtractRelPair();
     }
   }
 
@@ -220,6 +229,15 @@ namespace pql {
     UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
   }
 
+  void FollowsTClause::ExtractRelPair() {
+    std::string left = token_->GetLeft();
+    std::string right = token_->GetRight();
+    std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllTransitiveFollowsPairs();
+    pql_table::Predicate pred(left, right, domain_pair);
+
+    predicates_.push_back(pred);
+  }
+
   void FollowsTClause::Evaluate() {
     bool is_left_syn = token_->IsLeftSynonym();
     bool is_right_syn = token_->IsRightSynonym();
@@ -231,7 +249,7 @@ namespace pql {
     } else if (is_left_syn) {
       FollowsTClause::ExtractInverseRelDomain();
     } else {
-
+      FollowsTClause::ExtractRelPair();
     }
   }
 
@@ -290,6 +308,15 @@ namespace pql {
     UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
   }
 
+  void ParentClause::ExtractRelPair() {
+    std::string left = token_->GetLeft();
+    std::string right = token_->GetRight();
+    std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllParentPairs();
+    pql_table::Predicate pred(left, right, domain_pair);
+
+    predicates_.push_back(pred);
+  }
+
   void ParentClause::Evaluate() {
     bool is_left_syn = token_->IsLeftSynonym();
     bool is_right_syn = token_->IsRightSynonym();
@@ -301,7 +328,7 @@ namespace pql {
     } else if (is_left_syn) {
       ParentClause::ExtractInverseRelDomain();
     } else {
-
+      ParentClause::ExtractRelPair();
     }
   }
 
@@ -362,6 +389,15 @@ namespace pql {
     UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
   }
 
+  void ParentTClause::ExtractRelPair() {
+    std::string left = token_->GetLeft();
+    std::string right = token_->GetRight();
+    std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllTransitiveParentPairs();
+    pql_table::Predicate pred(left, right, domain_pair);
+
+    predicates_.push_back(pred);
+  }
+
   void ParentTClause::Evaluate() {
     bool is_left_syn = token_->IsLeftSynonym();
     bool is_right_syn = token_->IsRightSynonym();
@@ -373,7 +409,7 @@ namespace pql {
     } else if (is_left_syn) {
       ParentTClause::ExtractInverseRelDomain();
     } else {
-
+      ParentTClause::ExtractRelPair();
     }
   }
 
@@ -441,6 +477,15 @@ namespace pql {
     UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
   }
 
+  void UsesSClause::ExtractRelPair() {
+      std::string left = token_->GetLeft();
+      std::string right = token_->GetRight();
+      std::vector<std::pair<int, std::string>> domain_pair = pkb_.GetAllUsesStmtVarPairs();
+      pql_table::Predicate pred(left, right, domain_pair);
+
+      predicates_.push_back(pred);
+  }
+
   void UsesSClause::Evaluate() {
     bool is_left_syn = token_->IsLeftSynonym();
     bool is_right_syn = token_->IsRightSynonym();
@@ -450,9 +495,9 @@ namespace pql {
     } else if (is_right_syn) {
       UsesSClause::ExtractRelDomain();
     } else if (is_left_syn) {
-        UsesSClause::ExtractInverseRelDomain();
+      UsesSClause::ExtractInverseRelDomain();
     } else {
-
+      UsesSClause::ExtractRelPair();
     }
   }
 
@@ -520,6 +565,15 @@ namespace pql {
     UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
   }
 
+  void ModifiesSClause::ExtractRelPair() {
+    std::string left = token_->GetLeft();
+    std::string right = token_->GetRight();
+    std::vector<std::pair<int, std::string>> domain_pair = pkb_.GetAllModifiesStmtVarPairs();
+    pql_table::Predicate pred(left, right, domain_pair);
+
+    predicates_.push_back(pred);
+  }
+
   void ModifiesSClause::Evaluate() {
     bool is_left_syn = token_->IsLeftSynonym();
     bool is_right_syn = token_->IsRightSynonym();
@@ -531,7 +585,7 @@ namespace pql {
     } else if (is_left_syn) {
       ModifiesSClause::ExtractInverseRelDomain();
     } else {
-
+      ModifiesSClause::ExtractRelPair();
     }
   }
 }

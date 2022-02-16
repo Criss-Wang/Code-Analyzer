@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <algorithm>
 
 #include "Token.h"
 #include "predicate.h"
@@ -29,6 +30,8 @@ namespace pql {
 
       void ExtractInverseRelDomain() { return; };
 
+      void ExtractRelPair() { return; };
+
       void Evaluate() { return; };
   };
 
@@ -46,6 +49,8 @@ namespace pql {
       void ExtractRelDomain();
 
       void ExtractInverseRelDomain();
+
+      void ExtractRelPair();
 
       void Evaluate();
   };
@@ -65,6 +70,8 @@ namespace pql {
 
       void ExtractInverseRelDomain();
 
+      void ExtractRelPair();
+
       void Evaluate();
   };
 
@@ -82,6 +89,8 @@ namespace pql {
       void ExtractRelDomain();
 
       void ExtractInverseRelDomain();
+
+      void ExtractRelPair();
 
       void Evaluate();
   };
@@ -101,6 +110,8 @@ namespace pql {
 
       void ExtractInverseRelDomain();
 
+      void ExtractRelPair();
+
       void Evaluate();
   };
 
@@ -119,6 +130,8 @@ namespace pql {
 
       void ExtractInverseRelDomain();
 
+      void ExtractRelPair();
+
       void Evaluate();
   };
 
@@ -136,6 +149,8 @@ namespace pql {
       void ExtractRelDomain();
 
       void ExtractInverseRelDomain();
+
+      void ExtractRelPair();
 
       void Evaluate();
   };
