@@ -1,107 +1,63 @@
-//
-// Created by Tan Xi Zhe on 3/2/22.
-//
-
-#include <iostream>
+#include <utility>
 
 #include "Token.h"
 
 namespace pql {
 
-    std::string Synonym::GetName() {
-        return Synonym::name;
-    }
+  std::string Synonym::GetName() {
+    return Synonym::name;
+  }
 
-    EntityIdentifier Synonym::GetDeclaration() {
-        return Synonym::declaration;
-    }
+  EntityIdentifier Synonym::GetDeclaration() {
+    return Synonym::declaration;
+  }
 
-    bool Synonym::equal(const Synonym& s) {
-        return Synonym::name == s.name && Synonym::declaration == s.declaration;
-    }
+  bool Synonym::equal(const Synonym &s) {
+    return Synonym::name == s.name && Synonym::declaration == s.declaration;
+  }
 
-    pql::Variable RelationshipToken::GetLeft() {
-        return RelationshipToken::left;
-    }
+  pql::Ref RelationshipToken::GetLeft() {
+    return RelationshipToken::left;
+  }
 
-    pql::Variable RelationshipToken::GetRight() {
-        return RelationshipToken::right;
-    }
+  pql::Ref RelationshipToken::GetRight() {
+    return RelationshipToken::right;
+  }
 
-    pql::RelationshipTypes RelationshipToken::GetRelationship() {
-        return RelationshipToken::relationship;
-    }
+  pql::RelationshipTypes RelationshipToken::GetRelationship() {
+    return RelationshipToken::relationship;
+  }
 
-    bool Query::SynonymDeclared(const std::string& name) {
-        return synonyms.find(name) != synonyms.end();
-    }
+  std::string PatternToken::GetAssignSynonym() {
+    return PatternToken::assign_synonym;
+  }
 
-    void Query::AddSynonym(EntityIdentifier d, const std::string& name) {
-        if (Query::SynonymDeclared(name)) {
-            try {
-                throw ParseException();
-            } catch (ParseException& e) {
-                std::cout << "The declaring synonym must not be declared before!" << std::endl;
-            }
-        } else {
-            pql::Synonym sm = Synonym(name, d);
-            Query::declarations.push_back(sm);
-            Query::synonyms.insert(std::pair<std::string, pql::Synonym>(name, sm));
-        }
-    }
+  pql::Ref PatternToken::GetLeft() {
+    return PatternToken::left;
+  }
 
-    void Query::SetResultSynonym(const std::string& name) {
-        if (Query::SynonymDeclared(name)) {
-            Query::result_synonym = Query::synonyms.at(name);
-            Query::AddUsedSynonym(name);
-        } else {
-            try {
-                throw ParseException();
-            } catch (ParseException& e) {
-                std::cout << "The select synonym must be declared first!" << std::endl;
-            }
-        }
-    }
+  std::string PatternToken::GetExpression() {
+    return PatternToken::expression;
+  }
 
-    pql::Synonym Query::GetResultSynonym() {
-      if (result_synonym) {
-          return *Query::result_synonym;
-        }
-    }
+  bool PatternToken::IsExact() {
+    return PatternToken::exact;
+  }
 
-    bool Query::IsProcedure(const std::string& name) {
-        return Query::synonyms.at(name).GetDeclaration() == EntityIdentifier::kProcedure;
+  std::optional<EntityIdentifier> GetDeclarationType(const std::string &keyword) {
+    if (declarationMap.find(keyword) != declarationMap.end()) {
+      return declarationMap.at(keyword);
+    } else {
+      return std::nullopt;
     }
+  }
 
-    void Query::AddUsedSynonym(const std::string& name) {
-        Query::used_synonyms.push_back(Query::synonyms.at(name));
+  std::optional<RelationshipTypes> GetRelationshipType(const std::string &relationship) {
+    if (relationshipMap.find(relationship) != relationshipMap.end()) {
+      return relationshipMap.at(relationship);
+    } else {
+      return std::nullopt;
     }
+  }
 
-    std::vector<pql::Synonym> Query::GetAllUsedSynonyms() {
-        return Query::used_synonyms;
-    }
-
-    void Query::AddSuchThatClause(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right) {
-        Query::such_that_clauses.emplace_back(r, left, right);
-    }
-
-    std::vector<RelationshipToken> Query::GetSuchThatClause() {
-        return Query::such_that_clauses;
-    }
-
-    std::optional<EntityIdentifier> GetDeclarationType(const std::string& keyword) {
-      if (declarationMap.find(keyword) != declarationMap.end()) {
-        return declarationMap.at(keyword);
-      } else {
-        return std::nullopt;
-      }
-    }
-
-    std::optional<RelationshipTypes> GetRelationshipType(const std::string& relationship) {
-      if (relationshipMap.find(relationship) != relationshipMap.end()) {
-        return relationshipMap.at(relationship);
-      } else {
-        return std::nullopt;
-      }
-    }
 }

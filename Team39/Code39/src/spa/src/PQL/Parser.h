@@ -1,13 +1,11 @@
-//
-// Created by Tan Xi Zhe on 28/1/22.
-//
-
 #pragma once
+
 #include <iostream>
 #include <sstream>
 #include <utility>
 
 #include "Token.h"
+#include "query.h"
 
 namespace pql {
 
@@ -42,6 +40,8 @@ namespace pql {
     std::string ParseSynonym();
 
     pql::Ref ParseRef(Query& q);
+
+    std::string ParseExpression();
   };
 
   class Parser {
@@ -59,6 +59,8 @@ namespace pql {
     std::vector<std::string> GetSynonyms();
 
     void ParseRelationship(Query& q);
+
+    void ParsePattern(Query& q);
   };
 
 }
