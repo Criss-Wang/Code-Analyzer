@@ -157,8 +157,8 @@ TEST_CASE("Statement to Patterns Table") {
 
   SECTION("Get key-value list from table") {
     vector<pair<int, unordered_set<string>>> key_value_lst = stmt_to_patterns_table.GetKeyValueLst();
-    vector<pair<int, unordered_set<string>>> expected_key_value_lst = {make_pair(2, unordered_set<string>{"z * 2"}),
-      make_pair(1, unordered_set<string>{"x + y"})};
+    vector<pair<int, unordered_set<string>>> expected_key_value_lst = { make_pair(1, unordered_set<string>{"x + y"}),
+      make_pair(2, unordered_set<string>{"z * 2"})};
 
     REQUIRE(key_value_lst == expected_key_value_lst);
   }

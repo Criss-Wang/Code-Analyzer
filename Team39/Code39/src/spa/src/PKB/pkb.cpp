@@ -199,7 +199,7 @@ vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs() const {
   }
 }
 
-bool Pkb::IsUsesStmt(const int stmt, const string var) const {
+bool Pkb::IsUsesStmt(const int stmt, const string& var) const {
   try {
     vector<string> value = uses_stmt_to_variables_table_->GetValueByKey(stmt);
     return find(value.begin(), value.end(), var) != value.end();
@@ -208,7 +208,7 @@ bool Pkb::IsUsesStmt(const int stmt, const string var) const {
   }
 }
 
-vector<int> Pkb::GetUsesStmtsByVar(const string var) const {
+vector<int> Pkb::GetUsesStmtsByVar(const string& var) const {
   try {
     return uses_variable_to_stmts_table_->GetValueByKey(var);
   } catch (exception& e) {
@@ -232,23 +232,49 @@ vector<pair<int, string>> Pkb::GetAllUsesStmtVarPairs() const {
   }
 }
 
+bool Pkb::IsModifiesStmt(const int stmt, const string& var) const {
+  try {
+    vector<string> value = modifies_stmt_to_variables_table_->GetValueByKey(stmt);
+    return find(value.begin(), value.end(), var) != value.end();
+  } catch (exception& e) {
+    return false;
+  }
+}
+
+vector<int> Pkb::GetModifiesStmtsByVar(const string& var) const {
+  try {
+    return modifies_variable_to_stmts_table_->GetValueByKey(var);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+}
+
+vector<string> Pkb::GetModifiesVarByStmt(const int stmt) const {
+  try {
+    return modifies_stmt_to_variables_table_->GetValueByKey(stmt);
+  } catch (exception& e) {
+    return vector<string>{};
+  }
+}
+
+vector<pair<int, string>> Pkb::GetAllModifiesStmtVarPairs() const {
+  try {
+    return UnfoldResults<ModifiesStmtToVariablesTable*, int, string>(modifies_stmt_to_variables_table_);
+  } catch (exception& e) {
+    return vector<pair<int, string>>{};
+  }
+}
+
 unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern) const {
   const string usable_pattern = PatternHelper::PreprocessPattern(pattern);
+  constexpr bool is_full = false;
   unordered_set<int> empty_set{};
-  unordered_set<int> res{};
+  const unordered_set<string> res = PatternHelper::GetPatternSetPostfix(usable_pattern, is_full);
+  if (res.size() != 1) throw BadResultException();
+  const string s = *(res.begin());
 
-  for (auto s: PatternHelper::GetPatternSet(usable_pattern)) {
-    if (!pattern_to_stmts_table_->KeyExistsInTable(s)) return empty_set;
-    unordered_set<int> stmt_lst = pattern_to_stmts_table_->GetValueByKey(s);
-    if (res.empty()) {
-      res = stmt_lst;
-    } else {
-      for (auto stmt : res) {
-        if (stmt_lst.find(stmt) == stmt_lst.end()) res.erase(stmt);
-      }
-    }
-  }
-  return res;
+  if (!pattern_to_stmts_table_->KeyExistsInTable(s)) return empty_set;
+  return pattern_to_stmts_table_->GetValueByKey(s);
 }
 
 bool Pkb::AddParent(const int key, const vector<int>& value) {
@@ -285,7 +311,8 @@ bool Pkb::AddPattern(const int line_num, const string& input) {
   // First the SP side should guarantee a valid input is sent
   // We then proceed to parse the set of valid substring patterns
   const string clean_input = PatternHelper::PreprocessPattern(input);
-  const unordered_set<string> valid_sub_patterns = PatternHelper::GetPatternSet(clean_input);
+  const bool is_full = true;
+  const unordered_set<string> valid_sub_patterns = PatternHelper::GetPatternSetPostfix(clean_input, is_full);
   bool add_success = stmt_to_patterns_table_->AddKeyValuePair(line_num, valid_sub_patterns);
   for (auto p: valid_sub_patterns) {
     if (!pattern_to_stmts_table_->KeyExistsInTable(p)) {
