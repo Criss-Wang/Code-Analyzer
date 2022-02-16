@@ -11,13 +11,37 @@
 using namespace std;
 
 namespace pql {
-  vector<int> Intersect(const vector<int>& lst1, const vector<int>& lst2);
-  void UpdateHashmap(unordered_map<string, vector<int>>& hmap, string name, const vector<int>& lst);
   bool IsNumber(const string& str);
 
   bool GetRelExist(RelationshipToken& token, Pkb& pkb);
   vector<int> GetRelDomain(RelationshipToken& token, Pkb& pkb);
   vector<int> GetInverseRelDomain(RelationshipToken& token, Pkb& pkb);
+
+  template <typename T>
+  void UpdateHashmap(unordered_map<string, vector<T>>& hmap, string name, const vector<T>& lst) {
+      vector<T> oriLst = hmap[name];
+      vector<T> inter = Intersect<T>(oriLst, lst);
+      hmap[name] = inter;
+  }
+
+  template <typename T>
+  vector<T> Intersect(const vector<T>& lst1, const vector<T>& lst2) {
+      //refer from stack overflow https://stackoverflow.com/questions/38993415/how-to-apply-the-intersection-between-two-lists-in-c
+      vector<T> res;
+      unordered_set<T> st;
+      for_each(lst2.begin(), lst2.end(), [&st](const T& k) { st.insert(k); });
+      for_each(lst1.begin(), lst1.end(),
+          [&st, &res](const T& k) {
+              auto iter = st.find(k);
+              if (iter != st.end()) {
+                  res.push_back(k);
+                  st.erase(iter);
+              }
+          }
+      );
+
+      return res;
+  }
 
   std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
     vector<RelationshipToken> such_that_clauses = query.GetSuchThatClause();
@@ -79,7 +103,7 @@ namespace pql {
             return res;
           }
         } else {
-          UpdateHashmap(hashmap, name, rel_domain);
+          UpdateHashmap<int>(hashmap, name, rel_domain);
 
           if (hashmap[name].empty()) {
             vector<string> res{};
@@ -99,7 +123,7 @@ namespace pql {
             return res;
           }
         } else {    
-          UpdateHashmap(hashmap, name, rel_domain);
+          UpdateHashmap<int>(hashmap, name, rel_domain);
 
           if (hashmap[name].empty()) {
             vector<string> res{};
@@ -118,30 +142,6 @@ namespace pql {
     for (int val : selected_syn_domain) {
       res.push_back(to_string(val));
     }
-
-    return res;
-  }
-
-  void UpdateHashmap(unordered_map<string, vector<int>>& hmap, string name, const vector<int>& lst) {
-    vector<int> oriLst = hmap[name];
-    vector<int> inter = Intersect(oriLst, lst);
-    hmap[name] = inter;
-  }
-
-  vector<int> Intersect(const vector<int>& lst1, const vector<int>& lst2) {
-    //refer from stack overflow https://stackoverflow.com/questions/38993415/how-to-apply-the-intersection-between-two-lists-in-c
-    vector<int> res;
-    unordered_set<int> st;
-    for_each(lst2.begin(), lst2.end(), [&st](const int& k) { st.insert(k); });
-    for_each(lst1.begin(), lst1.end(),
-      [&st, &res](const int& k) {
-        auto iter = st.find(k);
-        if (iter != st.end()) {
-          res.push_back(k);
-          st.erase(iter);
-        }
-      }
-    );
 
     return res;
   }

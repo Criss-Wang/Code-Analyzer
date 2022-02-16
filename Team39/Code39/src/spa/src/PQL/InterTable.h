@@ -10,7 +10,7 @@ namespace pql_table {
 
   class InterTable {
     public:
-      std::vector<pql::Synonym> header_;
+      std::vector<std::string> header_;
       std::vector<std::vector<element>> rows_;
     
     public:
@@ -18,12 +18,16 @@ namespace pql_table {
 
       InterTable(pql::Synonym& synonym, std::vector<std::string>& str_list);
 
+      InterTable(std::vector<std::string>& header, std::vector<std::vector<element>>& rows);
+
     public:
       int GetColNum();
 
       int GetRowNum();
 
-      int FindSynCol(pql::Synonym& syn);
+      int FindSynCol(std::string& syn_name);
+
+      std::vector<element> GetColByName(std::string& name);
 
       void DeleteRow(int row_index);
 

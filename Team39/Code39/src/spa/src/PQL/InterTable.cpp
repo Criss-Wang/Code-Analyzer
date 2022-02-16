@@ -10,7 +10,7 @@
 namespace pql_table {
 
 	InterTable::InterTable(pql::Synonym& synonym, std::vector<int>& int_list) {
-	  header_ = std::vector<pql::Synonym>({ synonym });
+	  header_ = std::vector<std::string>({ synonym.GetName() });
 		for (int val : int_list) {
 			element to_be_insert;
 			to_be_insert.val = val;
@@ -19,12 +19,17 @@ namespace pql_table {
 	}
 
 	InterTable::InterTable(pql::Synonym& synonym, std::vector<std::string>& str_list) {
-    header_ = std::vector<pql::Synonym>({ synonym });
+    header_ = std::vector<std::string>({ synonym.GetName() });
 		for (std::string str : str_list) {
 			element to_be_insert;
 			to_be_insert.name = str;
 			rows_.push_back(std::vector<element>({ to_be_insert }));
 		}
+	}
+
+	InterTable::InterTable(std::vector<std::string>& header, std::vector<std::vector<element>>& rows) {
+	  header_ = header;
+		rows_ = rows;
 	}
 
 	int InterTable::GetColNum() {
@@ -35,15 +40,36 @@ namespace pql_table {
 			return rows_.size();
 	}
 
-	int InterTable::FindSynCol(pql::Synonym& syn) {
-		//Here we assume that the syn will always be in the header
+	int InterTable::FindSynCol(std::string& syn_name) {
 		for (int index = 0; index < header_.size(); index++) {
-			if (header_[index].GetName() == syn.GetName()) {
+			if (header_[index] == syn_name) {
 				return index;
 			}
 		}
 
-		return 0;
+		return -1;
+	}
+
+	std::vector<element> InterTable::GetColByName(std::string& name) {
+	  std::vector<std::string> header({ name });
+		int index = FindSynCol(name);
+		std::vector<std::vector<element>> rows;
+
+		for (auto& row : rows_) {
+		  std::vector<element> row_to_be_insert({ row[index] });
+			rows.push_back(row_to_be_insert);
+		}
+
+		InterTable table(header, rows);
+		table.Deduplicate();
+
+		std::vector<element> res;
+
+		for (auto& row : table.rows_) {
+				res.push_back(row[0]);
+		}
+
+		return res;
 	}
 
 	void InterTable::DeleteRow(int row_index) {
@@ -192,7 +218,7 @@ namespace pql_table {
 
 		//check header equality
 		for (int index = 0; index < GetColNum(); index++) {
-			if (!header_[index].equal(t.header_[index])) {
+			if (header_[index] != t.header_[index]) {
 				return false;
 			}
 		}

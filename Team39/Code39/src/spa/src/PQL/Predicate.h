@@ -61,13 +61,13 @@ namespace pql_table {
 
   class Predicate {
     public:
-      pql::Synonym first_syn_;
-      pql::Synonym second_syn_;
+      std::string first_syn_;
+      std::string second_syn_;
       std::vector<std::pair<element, element>> allowed_pairs_;
 
     public:
-      Predicate(pql::Synonym& first, pql::Synonym& second, std::vector<std::pair<int, int>> pairs);
+      Predicate(std::string& first, std::string& second, std::vector<std::pair<int, int>> pairs);
 
-      Predicate(pql::Synonym& first, pql::Synonym& second, std::vector<std::pair<int, std::string>> pairs);
+      Predicate(std::string& first, std::string& second, std::vector<std::pair<int, std::string>> pairs);
   };
 }

@@ -5,7 +5,7 @@
 
 namespace pql_table {
 
-  Predicate::Predicate(pql::Synonym& first, pql::Synonym& second, std::vector<std::pair<int, int>> pairs) {
+  Predicate::Predicate(std::string& first, std::string& second, std::vector<std::pair<int, int>> pairs) {
     first_syn_ = first;
     second_syn_ = second;
     std::vector<std::pair<element, element>> lst;
@@ -21,7 +21,7 @@ namespace pql_table {
     allowed_pairs_ = lst;
   }
 
-  Predicate::Predicate(pql::Synonym& first, pql::Synonym& second, std::vector<std::pair<int, std::string>> pairs) {
+  Predicate::Predicate(std::string& first, std::string& second, std::vector<std::pair<int, std::string>> pairs) {
     first_syn_ = first;
     second_syn_ = second;
     std::vector<std::pair<element, element>> lst;
