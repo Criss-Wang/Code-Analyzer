@@ -157,20 +157,22 @@ stack<int> populateFollowsRelationship(stack<int> previous, Pkb& pkb, int stmt_n
   return previous;
 }
 
-stack<int> populateParentRelationship(stack<int> parent, Pkb& pkb, int stmt_num) {
-  if (!parent.empty() && stmt_num != parent.top()) {
-    // Add parent stmt num and current stmt num to ParentTable
-    pkb.AddInfoToTable(TableIdentifier::kParent, parent.top(), stmt_num);
+vector<int> populateParentRelationship(stack<int> parent, vector<int> children, int stmt_num) {
+  if (!parent.empty()) {
+    children.push_back(stmt_num);
   }
 
-  return parent;
+  return children;
 }
 
 void populate(vector<Token> input_tokens, Pkb& pkb) {
 
   // Stores parent/previous stmt's line number for Parent/Follows relationship
   stack<int> parent;
+  vector<int> children;
   stack<int> previous;
+  
+  set<int> stmt_lst;
 
   for (auto token = begin(input_tokens); token != end(input_tokens); ++token) {
 
@@ -199,6 +201,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
         previous.push(previous_stmt_num + 1);
       } else {
         if (!parent.empty()) {
+          // Add parent stmt num and current stmt num to ParentTable
+          pkb.AddInfoToTable(TableIdentifier::kParent, parent.top(), children);
           parent.pop();
         }
       }
@@ -212,8 +216,10 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       tokens.push_back(*token);
 
       populateAssignStmt(tokens, pkb);
-      parent = populateParentRelationship(parent, pkb, token->stmt_num_);
+      children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
+
+      stmt_lst.insert(token->stmt_num_);
 
     } else if (token->text == "read") {
       vector<Token> tokens;
@@ -224,8 +230,10 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       tokens.push_back(*token);
 
       populateReadStmt(tokens, pkb);
-      parent = populateParentRelationship(parent, pkb, token->stmt_num_);
+      children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
+
+      stmt_lst.insert(token->stmt_num_);
 
     } else if (token->text == "print") {
       vector<Token> tokens;
@@ -236,8 +244,10 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       tokens.push_back(*token);
 
       populatePrintStmt(tokens, pkb);
-      parent = populateParentRelationship(parent, pkb, token->stmt_num_);
+      children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
+
+      stmt_lst.insert(token->stmt_num_);
 
     } else if (token->text == "if") {
       vector<Token> tokens;
@@ -249,10 +259,12 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       populateIfStmt(tokens, pkb);
 
-      parent = populateParentRelationship(parent, pkb, token->stmt_num_);
+      children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
       parent.push(token->stmt_num_);
       previous.push(token->stmt_num_ + 1);
+
+      stmt_lst.insert(token->stmt_num_);
 
     } else if (token->text == "while") {
       vector<Token> tokens;
@@ -264,16 +276,21 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       populateWhileStmt(tokens, pkb);
 
-      parent = populateParentRelationship(parent, pkb, token->stmt_num_);
+      children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
       parent.push(token->stmt_num_);
       previous.push(token->stmt_num_ + 1);
+
+      stmt_lst.insert(token->stmt_num_);
 
     } else if (token->text == "call") {
       // TODO (Yuxuan): Add implementation in future iterations
 
     }
   }
+
+  // Add stmt_lst to stmt_list_set_
+  pkb.AddEntityToSet(EntityIdentifier::kStmtLst, stmt_lst);
 
   if (PopulateNestedRelationships(pkb) == 0) {
     throw invalid_argument("PKB Population failed");
