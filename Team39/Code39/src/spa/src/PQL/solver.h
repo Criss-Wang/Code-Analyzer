@@ -17,7 +17,7 @@ namespace pql_solver {
     public:
       Solver(std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
              std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
-             std::vector<pql_table::Predicate> preds,
+             std::vector<pql_table::Predicate>& preds,
              std::vector<pql::Synonym>& syn_list, pql::Synonym& selected_syn);
 
     public:

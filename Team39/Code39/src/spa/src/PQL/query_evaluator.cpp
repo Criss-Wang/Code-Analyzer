@@ -6,17 +6,15 @@
 #include <unordered_set>
 #include <algorithm>
 
+#include "clause.h"
+#include "solver.h"
+#include "predicate.h"
 #include "query_evaluator.h"
+#include "query_evaluator_exceptions.h"
 
 using namespace std;
 
 namespace pql {
-  bool IsNumber(const string& str);
-
-  bool GetRelExist(RelationshipToken& token, Pkb& pkb);
-  vector<int> GetRelDomain(RelationshipToken& token, Pkb& pkb);
-  vector<int> GetInverseRelDomain(RelationshipToken& token, Pkb& pkb);
-
   template <typename T>
   void UpdateHashmap(unordered_map<string, vector<T>>& hmap, string name, const vector<T>& lst) {
       vector<T> oriLst = hmap[name];
@@ -43,17 +41,68 @@ namespace pql {
       return res;
   }
 
-  std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
-    vector<RelationshipToken> such_that_clauses = query.GetSuchThatClause();
-    unordered_map<string, vector<int>> hashmap;
-    vector<Synonym> synonyms = query.GetAllUsedSynonyms();
-
-    //hashmap stores <synonym.name, domain> pair.
-    for (Synonym& synonym : synonyms) {
-      unordered_set<int> domain_set = pkb.GetAllEntityInt(synonym.GetDeclaration());
-      vector<int> domain_list(std::begin(domain_set), std::end(domain_set));
-      hashmap.insert({ synonym.GetName(), domain_list });
+  bool IsNumber(const string& str) {
+    for (char const& c : str) {
+      if (isdigit(c) == 0) {
+        return false;
+      }
     }
+    return true;
+  }
+
+  void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& stmt_hashmap, 
+                    std::unordered_map<std::string, std::vector<std::string>>& var_hashmap, Pkb& pkb) {
+    //hashmap stores <synonym.name, domain> pair.
+    for (pql::Synonym& synonym : synonyms) {
+      if (synonym.GetDeclaration() == EntityIdentifier::kVariable) {
+        std::unordered_set<std::string> domain_set = pkb.GetAllEntityString(synonym.GetDeclaration());
+        std::vector<std::string> domain_list(std::begin(domain_set), std::end(domain_set));
+        var_hashmap.insert({ synonym.GetName(), domain_list });
+      } else {
+        std::unordered_set<int> domain_set = pkb.GetAllEntityInt(synonym.GetDeclaration());
+        std::vector<int> domain_list(std::begin(domain_set), std::end(domain_set));
+        stmt_hashmap.insert({ synonym.GetName(), domain_list });
+      }
+          
+    }
+  }
+
+  Clause GenerateClause(pql::RelationshipToken& token, Pkb& pkb,
+                        std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
+                        std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
+                        std::vector<pql_table::Predicate>& predicates) {
+    switch (token.GetRelationship()) {
+      case RelationshipTypes::kFollows:
+        return FollowsClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+      case RelationshipTypes::kFollowsT:
+        return FollowsTClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+      case RelationshipTypes::kParent:
+        return ParentClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+      case RelationshipTypes::kParentT:
+        return ParentTClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+      case RelationshipTypes::kUsesS:
+        return UsesSClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+      case RelationshipTypes::kModifiesS:
+        return ModifiesSClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+      default: 
+        return;
+    }
+
+
+  }
+
+  std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
+    std::vector<pql::RelationshipToken> such_that_clauses = query.GetSuchThatClause();
+    pql::PatternToken pattern_token = query.GetPattern();
+    std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
+    pql::Synonym selected_syn = query.GetResultSynonym();
+
+    std::vector<pql_table::Predicate> predicates;
+    std::unordered_map<std::string, std::vector<int>> stmt_hashmap;
+    std::unordered_map<std::string, std::vector<std::string>> var_hashmap;
+    
+
+    GetAllDomain(synonyms, stmt_hashmap, var_hashmap, pkb);
 
     if (false) {
       //this is for pattern clauses, haven't implemented yet from parser side
@@ -81,146 +130,12 @@ namespace pql {
     }
 
     for (RelationshipToken& token : such_that_clauses) {
-      bool is_left_num = IsNumber(token.GetLeft());
-      bool is_right_num = IsNumber(token.GetRight());
-      if (is_left_num && is_right_num) {
-        bool rel_does_exist = GetRelExist(token, pkb);
-        if (!rel_does_exist) {
-          //the relationship does not exist
-          //return empty list
-          vector<string> res{};
-          return res;
-        }
-      } else if (is_left_num) {
-        vector<int> rel_domain = GetRelDomain(token, pkb);
-        string name = token.GetRight();
-
-        if (name == "_") {
-          //there's no synonym involved
-          //just need to check whether the rel_domain is empty
-          if (rel_domain.empty()) {
-            vector<string> res{};
-            return res;
-          }
-        } else {
-          UpdateHashmap<int>(hashmap, name, rel_domain);
-
-          if (hashmap[name].empty()) {
-            vector<string> res{};
-            return res;
-          }
-        }
-
-      } else if (is_right_num) {
-        vector<int> rel_domain = GetInverseRelDomain(token, pkb);
-        string name = token.GetLeft();
-
-        if (name == "_") {
-          //there's no synonym involved
-          //just need to check whether the relDomain is empty
-          if (rel_domain.empty()) {
-            vector<string> res{};
-            return res;
-          }
-        } else {    
-          UpdateHashmap<int>(hashmap, name, rel_domain);
-
-          if (hashmap[name].empty()) {
-            vector<string> res{};
-            return res;
-          }
-        }
-      } else {
-
-      }
+      pql::Clause clause = GenerateClause(token, pkb, stmt_hashmap, var_hashmap, predicates);
+      clause.Evaluate();
     }
 
-    Synonym selected_syn = query.GetResultSynonym();
-    vector<int> selected_syn_domain = hashmap[selected_syn.GetName()];
-    vector<string> res;
-
-    for (int val : selected_syn_domain) {
-      res.push_back(to_string(val));
-    }
-
-    return res;
-  }
-
-  bool IsNumber(const string& str) {
-    for (char const& c : str) {
-      if (isdigit(c) == 0) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool GetRelExist(RelationshipToken& token, Pkb& pkb) {
-    int left = stoi(token.GetLeft());
-    int right = stoi(token.GetRight());
-    bool res = false;
-    switch (token.GetRelationship()) {
-      case RelationshipTypes::kFollows:
-        res = pkb.IsFollows(left, right);
-        break;
-      case RelationshipTypes::kFollowsT:
-        res = pkb.IsTransitiveFollows(left, right);
-        break;
-      case RelationshipTypes::kParent:
-        res = pkb.IsParent(left, right);
-        break;
-      case RelationshipTypes::kParentT:
-        res = pkb.IsTransitiveParent(left, right);
-        break;
-      default:
-        break;
-    }
-
-    return res;
-  }
-
-  vector<int> GetRelDomain(RelationshipToken& token, Pkb& pkb) {
-    int left = stoi(token.GetLeft());
-    vector<int> res;
-    switch (token.GetRelationship()) {
-      case RelationshipTypes::kFollows:
-        res = pkb.GetStmtRightAfter(left);
-        break;
-      case RelationshipTypes::kFollowsT:
-        res = pkb.GetStmtsAfter(left);
-        break;
-      case RelationshipTypes::kParent:
-        res = pkb.GetChild(left);
-        break;
-      case RelationshipTypes::kParentT:
-        res = pkb.GetAllChildren(left);
-        break;
-      default:
-        break;
-    }
-
-    return res;
-  }
-
-  vector<int> GetInverseRelDomain(RelationshipToken& token, Pkb& pkb) {
-    int right = stoi(token.GetRight());
-    vector<int> res;
-    switch (token.GetRelationship()) {
-      case RelationshipTypes::kFollows:
-        res = pkb.GetStmtRightBefore(right);
-        break;
-      case RelationshipTypes::kFollowsT:
-        res = pkb.GetStmtsBefore(right);
-        break;
-      case RelationshipTypes::kParent:
-        res = pkb.GetParent(right);
-        break;
-      case RelationshipTypes::kParentT:
-        res = pkb.GetAllParents(right);
-        break;
-      default:
-        break;
-    }
+    pql_solver::Solver solver(stmt_hashmap, var_hashmap, predicates, synonyms, selected_syn);
+    std::vector<std::string> res = solver.ExtractResult();
 
     return res;
   }
