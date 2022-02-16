@@ -7,7 +7,7 @@
 #include <list>
 #include <algorithm>
 
-#include "QueryEvaluator.h"
+#include "query_evaluator.h"
 
 namespace pql {
   list<int> Intersect(const list<int>& lst1, const vector<int>& lst2);
@@ -224,4 +224,3 @@ namespace pql {
     return res;
   }
 }
-

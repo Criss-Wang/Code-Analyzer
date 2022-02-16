@@ -1,0 +1,3 @@
+procedure procName {
+x = g - 1
+}

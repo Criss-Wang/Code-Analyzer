@@ -28,7 +28,7 @@ class Table {
     virtual bool AddKeyValuePair(T1 key, T2 value) {
       try {
         if (this->KeyExistsInTable(key)) {
-          throw NonEmptyKeyException();
+          throw KeyInUseException();
         }
         table_[key] = value;
         if (table_[key] == value) {
@@ -37,7 +37,7 @@ class Table {
 
         return false;
       }
-      catch (exception& e) {
+      catch (KeyInUseException& e) {
         throw e;
       }
     }
@@ -49,7 +49,7 @@ class Table {
         }
         throw InvalidKeyException();
       }
-      catch (exception& e) {
+      catch (InvalidKeyException& e) {
         throw e;
       }
     }
@@ -90,5 +90,3 @@ enum class TableIdentifier {
   kParent, kParentStar,
   kUsesStmtToVar, kModifiesStmtToVar
 };
-
-
