@@ -27,14 +27,14 @@ string PatternHelper::PreprocessPattern(const string& pattern) {
 }
 
 string PatternHelper::GenerateSubPattern(stack<char>& operators, stack<string>& operands) {
-  char op = operators.top();
+  const char op = operators.top();
   operators.pop();
 
-  string op1 = operands.top();
+  const string op1 = operands.top();
   operands.pop();
-  string op2 = operands.top();
+  const string op2 = operands.top();
   operands.pop();
-  string curr_pattern = op2 + op1 + op;
+  const string curr_pattern = op2 + op1 + op;
   operands.push(curr_pattern);
   return curr_pattern;
 }
