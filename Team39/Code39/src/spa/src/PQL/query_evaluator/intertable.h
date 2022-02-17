@@ -42,24 +42,5 @@ namespace pql_table {
       void MergeAndFilter(InterTable& t1, Predicate& pred);
 
       bool equal(InterTable& t);
-  };
-
-  /*
-  template <class T>
-  class Row {
-    private:
-      std::vector<T> elements_;
-
-    public:
-      Row(T val) {
-        elements_.push_back(val);
-      }
-
-    public:
-      int size() {
-        return elements_.size();
-      }
   }; 
-  */
- 
 }
