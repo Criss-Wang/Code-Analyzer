@@ -1,107 +1,116 @@
-#include "Parser.h"
+#include "parser.h"
 #include "SP/validator.h"
 
 #include <fstream>
 #include "catch.hpp"
 
 using namespace std;
-void RequireValidation(bool b) {
-    REQUIRE(b);
-}
 
-
-TEST_CASE("Valid programs") {
-
-	SECTION("Test 1") {
-		/*Input:
-		* procedure procName {
-		*	read x;
-		*	print y;
-		* }
-		* */
-
-		ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test1.txt");
-		if (!input_file.is_open()) {
-			cerr << "Could not open the file " << endl;
-			RequireValidation(1 == 1);
-		} else {
-			string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-
-			Tokenizer tokenize;
-			vector<Token> tokens = tokenize.parse(input);
-			cout << endl;
-
-			RequireValidation(Validate(tokens));
-		}
-	}
-
-	SECTION("Test 2") {
-		/* Input:
-		* procedure procName {
-		*	x = y * 3;
-		* print x;
-		* }
-		* */
-		
-		ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test2.txt");
-		if (!input_file.is_open()) {
-			cerr << "Could not open the file " << endl;
-			RequireValidation(1 == 1);
-		} else {
-			string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-
-			Tokenizer tokenize;
-			vector<Token> tokens = tokenize.parse(input);
-			cout << endl;
-
-			RequireValidation(Validate(tokens));
-		}
-	}
-
-	SECTION("Test 3") {
-		/*Input:
-		* procedure procName {
-		*	x = y + (5 + z);
-		* }
-		* */
-		
-		ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test3.txt");
-		if (!input_file.is_open()) {
-			cerr << "Could not open the file " << endl;
-			RequireValidation(1 == 1);
-		} else {
-			string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-
-			Tokenizer tokenize;
-			vector<Token> tokens = tokenize.parse(input);
-			cout << endl;
-
-			RequireValidation(Validate(tokens));
-		}	
-	}
-}
-
-TEST_CASE("Invalid Programs") {
-
-	/*Input:
-	* procedre procName {
-	*	x = y * 3;
-	*	print x;
-	* }
-	* */
-
-	ifstream input_file("C:/Users/yuxua/OneDrive/Documents/NUS/Y3S2/CS3203/21s2-cp-spa-team-39/Team39/Tests39/sp/test4.txt");
+void RequireValid(string path) {
+	ifstream input_file(path);
 	if (!input_file.is_open()) {
 		cerr << "Could not open the file " << endl;
-		RequireValidation(1 == 1);
 	} else {
 		string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-
 		Tokenizer tokenize;
 		vector<Token> tokens = tokenize.parse(input);
-		cout << endl;
+		REQUIRE(Validate(tokens));
+	}
+}
 
-		RequireValidation(!Validate(tokens));
+void RequireInvalid(string path) {
+	ifstream input_file(path);
+	if (!input_file.is_open()) {
+		cerr << "Could not open the file " << endl;
+	} else {
+		string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+		Tokenizer tokenize;
+		vector<Token> tokens = tokenize.parse(input);
+		REQUIRE(!Validate(tokens));
+	}
+}
+
+string valid_dir = "../../../../../../Tests39/sp/valid_programs/";
+string invalid_dir = "../../../../../../Tests39/sp/invalid_programs/";
+
+TEST_CASE("Read/print statements for Validation") {
+
+	SECTION("Valid Programs") {
+
+		RequireValid(valid_dir + "1_test1.txt");
+		RequireValid(valid_dir + "1_test2.txt");
+		RequireValid(valid_dir + "1_test3.txt");
+		RequireValid(valid_dir + "1_test4.txt");
+    
+	}
+	
+	SECTION("Invalid Programs") {
+
+		RequireInvalid(invalid_dir + "1_test1.txt");
+		RequireInvalid(invalid_dir + "1_test2.txt");
+		RequireInvalid(invalid_dir + "1_test3.txt");
+		RequireInvalid(invalid_dir + "1_test4.txt");
+		RequireInvalid(invalid_dir + "1_test5.txt");
+		RequireInvalid(invalid_dir + "1_test6.txt");
+
+	}
+}
+
+TEST_CASE("Read/print/assign statments for Validation") {
+	
+	SECTION("Valid Programs") {
+
+		RequireValid(valid_dir + "2_test1.txt");
+		RequireValid(valid_dir + "2_test2.txt");
+		RequireValid(valid_dir + "2_test3.txt");
+		RequireValid(valid_dir + "2_test4.txt");
+
 	}
 
+	SECTION("Invalid Programs") {
+		
+		RequireInvalid(invalid_dir + "2_test1.txt");
+		RequireInvalid(invalid_dir + "2_test2.txt");
+		RequireInvalid(invalid_dir + "2_test3.txt");
+		RequireInvalid(invalid_dir + "2_test4.txt");
+		RequireInvalid(invalid_dir + "2_test5.txt");
+		RequireInvalid(invalid_dir + "2_test6.txt");
+		
+	}
+	
+}
+
+TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation") {
+
+	SECTION("Valid Programs") {
+
+		RequireValid(valid_dir + "3_test1.txt");
+		RequireValid(valid_dir + "3_test2.txt");
+		RequireValid(valid_dir + "3_test3.txt");
+		RequireValid(valid_dir + "3_test4.txt");
+
+	}
+
+	SECTION("Invalid Programs") {
+
+		//RequireInvalid(invalid_dir + "2_test1.txt");
+
+	}
+}
+
+TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Validation") {
+
+	SECTION("Valid Programs") {
+
+		RequireValid(valid_dir + "4_test1.txt");
+		RequireValid(valid_dir + "4_test2.txt");
+		RequireValid(valid_dir + "4_test3.txt");
+
+	}
+
+	SECTION("Invalid Programs") {
+
+		//RequireInvalid(invalid_dir + "2_test1.txt");
+
+	}
 }

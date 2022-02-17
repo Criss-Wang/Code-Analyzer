@@ -1,4 +1,5 @@
 procedure procName {
+5 = 666 * t;
 read x;
-print y;
+print x;
 }

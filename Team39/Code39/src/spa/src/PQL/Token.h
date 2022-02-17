@@ -7,7 +7,7 @@
 #include <exception>
 #include <optional>
 
-#include "../Utility/Entity.h"
+#include "../Utility/entity.h"
 
 namespace pql {
   typedef std::string Ref;

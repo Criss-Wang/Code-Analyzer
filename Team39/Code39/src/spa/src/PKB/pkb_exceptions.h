@@ -5,7 +5,7 @@
 
 using namespace std;
 
-class NonEmptyKeyException final : public exception {
+class KeyInUseException final : public exception {
   public:
     const char * what() const throw() {
       return "Key is already in use";
@@ -32,4 +32,12 @@ class InvalidIdentifierException final : public exception {
     const char* what() const throw() {
       return "Invalid identifier given";
     }
+};
+
+// Thrown when wrong TableIdentifier or EntityIdentifier is provided
+class BadResultException final : public exception {
+public:
+  const char* what() const throw() {
+    return "The result given is not meeting the requirement";
+  }
 };
