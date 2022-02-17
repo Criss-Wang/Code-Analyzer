@@ -44,40 +44,42 @@ namespace pql {
   }
 
   void Parser::Parse() {
-    try {
-      while (!ps.IsEOF()) {
-        ps.EatWhiteSpaces();
-        std::stringstream ks;
-        while (IsLetter(ps.Peek())) {
-          ks << ps.Next();
+    while (!ps.IsEOF()) {
+      ps.EatWhiteSpaces();
+      std::stringstream ks;
+      while (IsLetter(ps.Peek())) {
+        ks << ps.Next();
+      }
+      std::string keyword;
+      ks >> keyword;
+      if (auto d = pql::GetDeclarationType(keyword)) {
+        for (const std::string &s: Parser::GetSynonyms()) {
+          Parser::query.AddSynonym(*d, s);
         }
-        std::string keyword;
-        ks >> keyword;
-        if (auto d = pql::GetDeclarationType(keyword)) {
-          for (const std::string &s: Parser::GetSynonyms()) {
-            Parser::query.AddSynonym(*d, s);
-          }
-        } else if (keyword == "Select") {
-          ps.EatWhiteSpaces();
-          Parser::query.SetResultSynonym(ps.ParseSynonym());
-          ps.EatWhiteSpaces();
-          if (!ps.IsEOF()) {
+      } else if (keyword == "Select") {
+        ps.EatWhiteSpaces();
+        Parser::query.SetResultSynonym(ps.ParseSynonym());
+        ps.EatWhiteSpaces();
+        if (!ps.IsEOF()) {
+          if (ps.Peek() == 's') {
             ps.Expect("such that");
             ps.EatWhiteSpaces();
             Parser::ParseRelationship(Parser::query);
-          }
-          ps.EatWhiteSpaces();
-          if (!ps.IsEOF()) {
+            ps.EatWhiteSpaces();
+            if (!ps.IsEOF()) {
+              ps.Expect("pattern");
+              ps.EatWhiteSpaces();
+              Parser::ParsePattern(Parser::query);
+            }
+          } else {
             ps.Expect("pattern");
             ps.EatWhiteSpaces();
             Parser::ParsePattern(Parser::query);
           }
-          ps.EatWhiteSpaces();
-          ps.ExpectEOF();
         }
+        ps.EatWhiteSpaces();
+        ps.ExpectEOF();
       }
-    } catch (ParseException& e) {
-      std::cout << "The PQL query is invalid!" << std::endl;
     }
   }
 
@@ -95,6 +97,7 @@ namespace pql {
     ps.EatWhiteSpaces();
     ps.Expect("(");
     pql::Ref left = ps.ParseRef(q);
+    ps.EatWhiteSpaces();
     ps.Expect(",");
     pql::Ref right = ps.ParseRef(q);
     ps.Expect(")");
@@ -139,6 +142,7 @@ namespace pql {
       ps.EatWhiteSpaces();
       if (ps.Peek() == '_') {
         exact = false;
+        ps.Next();
       }
       expression = ps.ParseExpression();
       if (!exact) {
