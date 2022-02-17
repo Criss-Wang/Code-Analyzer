@@ -54,55 +54,99 @@ namespace pql {
     }
   }
 
-  void ConsumePattern() {
-    //this is for pattern clauses, haven't implemented yet from parser side
-    /*
-    Synonym s = patternClause.getSynonym();
-    vector<int> matched;
+  void ConsumePatternWithoutSyn(pql::PatternToken& pattern_token, Pkb& pkb, 
+                                std::unordered_map<std::string, std::vector<int>>& stmt_hashmap) {
+    //pattern a(_, _"x"_) or pattern a("x", _"x"_)
+    //pattern a(_, _) or pattern a("x", _)
+    // We split the pattern a("x", _"x"_) query into: Modifies(a, "x") and GetAllStmtsWithPattern(expr)
+    bool is_left_wildcard = pattern_token.GetLeft() == "_";
+    bool is_expr_wildcard = pattern_token.GetExpression() == "_";
 
-    if (patternClause.getExactMatch()) {
-        matched = PKB::getExactMatchAssign(patternClause.getVar(), patternClause.getExpr());
-    }
-    else {
-        matched = PKB::getSubMatchAssign(patternClause.getVar(), patternClause.getExpr());
+    if (!is_left_wildcard) {
+      std::vector<int> assign_domain = pkb.GetModifiesStmtsByVar(pattern_token.GetLeft());
+      UpdateHashmap(stmt_hashmap, pattern_token.GetAssignSynonym(), assign_domain);
     }
 
-    UpdateHashmap(hashmap, s.name, matched);
-
-    if (hashmap[s.name].empty()) {
-        //there is no assign statement that satisfy the pattern
-        //return empty list
-        vector<string> res{};
-        return res;
+    if (!is_expr_wildcard) {
+      std::unordered_set<int> domain_set = pkb_.GetAllStmtsWithPattern(pattern_token.GetExpression());
+      std::vector<int> domain(domain_set.begin(), domain_set.end());
+      UpdateHashmap<int>(stmt_hashmap, pattern_token.GetAssignSynonym(), domain);
     }
-    */
+  }
+
+  void ConsumePatternWithSyn(pql::PatternToken& pattern_token, Pkb& pkb,
+                             std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
+                             std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
+                             std::vector<pql_table::Predicate>& predicates) {
+    //pattern a(v, _"x"_) or pattern a(v, _)
+    bool is_expr_wildcard = pattern_token.GetExpression() == "_";
+
+    if (!is_expr_wildcard) {
+      std::unordered_set<int> domain_set = pkb_.GetAllStmtsWithPattern(pattern_token.GetExpression());
+      std::vector<int> domain(domain_set.begin(), domain_set.end());
+      UpdateHashmap<int>(stmt_hashmap, pattern_token.GetAssignSynonym(), domain);
+    }
+
+    std::vector<std::string> var_domain = var_hashmap[pattern_token.GetLeft()];
+    std::vector<std::pair<int, std::string>> pred_lst;
+
+    for (std::string& str : var_domain) {
+      std::vector<int> assign_domain = pkb.GetModifiesStmtsByVar(pattern_token.GetLeft());
+
+      for (int& val : assign_domain) {
+        pred_lst.push_back(std::make_pair(val, str));
+      }
+    }
+
+    pql_table::Predicate pred(pattern_token.GetAssignSynonym(), pattern_token.GetLeft(), pred_lst);
+    predicates.push_back(pred);
+  }
+
+  void ConsumePattern(pql::PatternToken& pattern_token, Pkb& pkb,
+                      std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
+                      std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
+                      std::vector<pql_table::Predicate>& predicates) {
+
+    bool is_left_syn = pattern_token.IsLeftSynonym();
+
+    if (!is_left_syn) {
+      ConsumePatternWithoutSyn(pattern_token, pkb, stmt_hashmap);
+    } else {
+      ConsumePatternWithSyn()
+    }
   }
 
   std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
-    std::vector<pql::RelationshipToken> such_that_clauses = query.GetSuchThatClause();
-    pql::PatternToken pattern_token = query.GetPattern();
-    std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
-    pql::Synonym selected_syn = query.GetResultSynonym();
+    try {
+      std::vector<pql::RelationshipToken> such_that_clauses = query.GetSuchThatClause();
+      pql::PatternToken pattern_token = query.GetPattern();
+      std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
+      pql::Synonym selected_syn = query.GetResultSynonym();
 
-    std::vector<pql_table::Predicate> predicates;
-    std::unordered_map<std::string, std::vector<int>> stmt_hashmap;
-    std::unordered_map<std::string, std::vector<std::string>> var_hashmap;
-    
+      std::vector<pql_table::Predicate> predicates;
+      std::unordered_map<std::string, std::vector<int>> stmt_hashmap;
+      std::unordered_map<std::string, std::vector<std::string>> var_hashmap;
 
-    GetAllDomain(synonyms, stmt_hashmap, var_hashmap, pkb);
 
-    if (pattern_token) {
-      ConsumePattern();
+      GetAllDomain(synonyms, stmt_hashmap, var_hashmap, pkb);
+
+      if (pattern_token != std::nullopt) {
+        ConsumePattern(pattern_token, pkb, stmt_hashmap, var_hashmap, predicates);
+      }
+
+      for (pql::RelationshipToken& token : such_that_clauses) {
+        pql::Clause clause = GenerateClause(token, pkb, stmt_hashmap, var_hashmap, predicates);
+        clause.Evaluate();
+      }
+
+      pql_solver::Solver solver(stmt_hashmap, var_hashmap, predicates, synonyms, selected_syn);
+      std::vector<std::string> res = solver.ExtractResult();
+
+      return res;
+
+    } catch (EmptyDomainException e) {
+      std::vector<std::string> empty_res({});
+      return empty_res;
     }
-    
-    for (RelationshipToken& token : such_that_clauses) {
-      pql::Clause clause = GenerateClause(token, pkb, stmt_hashmap, var_hashmap, predicates);
-      clause.Evaluate();
-    }
-
-    pql_solver::Solver solver(stmt_hashmap, var_hashmap, predicates, synonyms, selected_syn);
-    std::vector<std::string> res = solver.ExtractResult();
-
-    return res;
   }
 }
