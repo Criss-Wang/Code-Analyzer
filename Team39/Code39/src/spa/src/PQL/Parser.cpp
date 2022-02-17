@@ -20,7 +20,7 @@ namespace pql {
     return ident[0] == '\"' && ident[ident.length() - 1] == '\"';
   }
 
-  bool IsNumber(const std::string& s) {
+  bool IsInteger(const std::string& s) {
     std::stringstream ssm;
     ssm << s;
     if (!IsDigit(ssm.get())) {
@@ -108,13 +108,13 @@ namespace pql {
     }
     if (auto r = pql::GetRelationshipType(relationship)) {
       if (*r != pql::RelationshipTypes::kUsesP && *r != pql::RelationshipTypes::kModifiesP) {
-        if (!q.IsStatement(left) && left != "_" && !IsNumber(left)) {
+        if (!q.IsStatement(left) && left != "_" && !IsInteger(left)) {
           throw ParseException();
         }
       }
       if (*r == pql::RelationshipTypes::kFollows || *r == pql::RelationshipTypes::kFollowsT
         || *r == pql::RelationshipTypes::kParent || *r == pql::RelationshipTypes::kParentT) {
-        if (!q.IsStatement(right) && right != "_" && !IsNumber(right)) {
+        if (!q.IsStatement(right) && right != "_" && !IsInteger(right)) {
           throw ParseException();
         }
       } else {
