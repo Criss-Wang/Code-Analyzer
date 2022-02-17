@@ -75,7 +75,7 @@ namespace pql {
     Query::pattern.emplace(PatternToken(std::move(assign_synonym), std::move(left), std::move(expression), exact, is_synonym_left));
   }
 
-  pql::PatternToken Query::GetPattern() {
-    return *Query::pattern;
+  std::optional<pql::PatternToken> Query::GetPattern() {
+    return Query::pattern;
   }
 }
