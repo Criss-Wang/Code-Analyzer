@@ -49,9 +49,9 @@ namespace pql {
   }
  
   Clause::Clause(pql::RelationshipToken* token, Pkb& pkb,
-                 std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
-                 std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
-                 std::vector<pql_table::Predicate>& predicates) {
+                 std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+                 std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+                 std::vector<pql_table::Predicate>* predicates) {
     token_ = token;
     pkb_ = pkb;
     stmt_hashmap_ = stmt_hashmap;
@@ -99,7 +99,7 @@ namespace pql {
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(stmt_hashmap_, token_->GetRight(), domain);
+    UpdateHashmap<int>(*stmt_hashmap_, token_->GetRight(), domain);
   }
 
   void FollowsClause::ExtractInverseRelDomain() {
@@ -115,7 +115,7 @@ namespace pql {
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
+    UpdateHashmap<int>(*stmt_hashmap_, token_->GetLeft(), domain);
   }
 
   void FollowsClause::ExtractRelPair() {
@@ -124,7 +124,7 @@ namespace pql {
     std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllFollowsPairs();
     pql_table::Predicate pred(left, right, domain_pair);
 
-    predicates_.push_back(pred);
+    (*predicates_).push_back(pred);
   }
 
   void FollowsClause::Evaluate() {
@@ -180,7 +180,7 @@ namespace pql {
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(stmt_hashmap_, token_->GetRight(), domain);
+    UpdateHashmap<int>(*stmt_hashmap_, token_->GetRight(), domain);
   }
 
   void FollowsTClause::ExtractInverseRelDomain() {
@@ -195,7 +195,7 @@ namespace pql {
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
+    UpdateHashmap<int>(*stmt_hashmap_, token_->GetLeft(), domain);
   }
 
   void FollowsTClause::ExtractRelPair() {
@@ -204,7 +204,7 @@ namespace pql {
     std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllTransitiveFollowsPairs();
     pql_table::Predicate pred(left, right, domain_pair);
 
-    predicates_.push_back(pred);
+    (*predicates_).push_back(pred);
   }
 
   void FollowsTClause::Evaluate() {
@@ -259,7 +259,7 @@ namespace pql {
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(stmt_hashmap_, token_->GetRight(), domain);
+    UpdateHashmap<int>(*stmt_hashmap_, token_->GetRight(), domain);
   }
 
   void ParentClause::ExtractInverseRelDomain() {
@@ -274,7 +274,7 @@ namespace pql {
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
+    UpdateHashmap<int>(*stmt_hashmap_, token_->GetLeft(), domain);
   }
 
   void ParentClause::ExtractRelPair() {
@@ -283,7 +283,7 @@ namespace pql {
     std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllParentPairs();
     pql_table::Predicate pred(left, right, domain_pair);
 
-    predicates_.push_back(pred);
+    (*predicates_).push_back(pred);
   }
 
   void ParentClause::Evaluate() {
@@ -339,7 +339,7 @@ namespace pql {
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(stmt_hashmap_, token_->GetRight(), domain);
+    UpdateHashmap<int>(*stmt_hashmap_, token_->GetRight(), domain);
   }
 
   void ParentTClause::ExtractInverseRelDomain() {
@@ -355,7 +355,7 @@ namespace pql {
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
+    UpdateHashmap<int>(*stmt_hashmap_, token_->GetLeft(), domain);
   }
 
   void ParentTClause::ExtractRelPair() {
@@ -364,7 +364,7 @@ namespace pql {
     std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllTransitiveParentPairs();
     pql_table::Predicate pred(left, right, domain_pair);
 
-    predicates_.push_back(pred);
+    (*predicates_).push_back(pred);
   }
 
   void ParentTClause::Evaluate() {
@@ -405,7 +405,7 @@ namespace pql {
   void UsesSClause::ExtractRelDomain() {
     //Uses(1, v) only since the first parameter cannot be "_"
     std::vector<std::string> domain = pkb_.GetUsesVarByStmt(stoi(token_->GetLeft()));
-    UpdateHashmap<std::string>(var_hashmap_, token_->GetRight(), domain);
+    UpdateHashmap<std::string>(*var_hashmap_, token_->GetRight(), domain);
   }
 
   void UsesSClause::ExtractInverseRelDomain() {
@@ -421,7 +421,7 @@ namespace pql {
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
+    UpdateHashmap<int>(*stmt_hashmap_, token_->GetLeft(), domain);
   }
 
   void UsesSClause::ExtractRelPair() {
@@ -430,7 +430,7 @@ namespace pql {
     std::vector<std::pair<int, std::string>> domain_pair = pkb_.GetAllUsesStmtVarPairs();
     pql_table::Predicate pred(left, right, domain_pair);
 
-    predicates_.push_back(pred);
+    (*predicates_).push_back(pred);
   }
 
   void UsesSClause::Evaluate() {
@@ -470,7 +470,7 @@ namespace pql {
   void ModifiesSClause::ExtractRelDomain() {
     // can only be Modifies(1, v)
     std::vector<std::string> domain = pkb_.GetModifiesVarByStmt(stoi(token_->GetLeft()));
-    UpdateHashmap<std::string>(var_hashmap_, token_->GetRight(), domain);
+    UpdateHashmap<std::string>(*var_hashmap_, token_->GetRight(), domain);
   }
 
   void ModifiesSClause::ExtractInverseRelDomain() {
@@ -486,7 +486,7 @@ namespace pql {
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(stmt_hashmap_, token_->GetLeft(), domain);
+    UpdateHashmap<int>(*stmt_hashmap_, token_->GetLeft(), domain);
   }
 
   void ModifiesSClause::ExtractRelPair() {
@@ -495,7 +495,7 @@ namespace pql {
     std::vector<std::pair<int, std::string>> domain_pair = pkb_.GetAllModifiesStmtVarPairs();
     pql_table::Predicate pred(left, right, domain_pair);
 
-    predicates_.push_back(pred);
+    (*predicates_).push_back(pred);
   }
 
   void ModifiesSClause::Evaluate() {

@@ -20,8 +20,9 @@ namespace pql {
   void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& stmt_hashmap, 
                     std::unordered_map<std::string, std::vector<std::string>>& var_hashmap, Pkb& pkb) {
     //hashmap stores <synonym.name, domain> pair.
-    for (pql::Synonym& synonym : synonyms) {
-      if (synonym.GetDeclaration() == EntityIdentifier::kVariable) {
+      for (pql::Synonym& synonym : synonyms) {
+      if (synonym.GetDeclaration() == EntityIdentifier::kVariable
+          || synonym.GetDeclaration() == EntityIdentifier::kProc) {
         std::unordered_set<std::string> domain_set = pkb.GetAllEntityString(synonym.GetDeclaration());
         std::vector<std::string> domain_list(std::begin(domain_set), std::end(domain_set));
         var_hashmap.insert({ synonym.GetName(), domain_list });
@@ -34,25 +35,25 @@ namespace pql {
     }
   }
 
-  Clause GenerateClause(pql::RelationshipToken& token, Pkb& pkb,
-                        std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
-                        std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
-                        std::vector<pql_table::Predicate>& predicates) {
+  std::unique_ptr<Clause> GenerateClause(pql::RelationshipToken& token, Pkb& pkb,
+                        std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+                        std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+                        std::vector<pql_table::Predicate>* predicates) {
     switch (token.GetRelationship()) {
       case RelationshipTypes::kFollows:
-        return FollowsClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+        return std::make_unique<FollowsClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
       case RelationshipTypes::kFollowsT:
-        return FollowsTClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+        return std::make_unique<FollowsTClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
       case RelationshipTypes::kParent:
-        return ParentClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+        return std::make_unique<ParentClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
       case RelationshipTypes::kParentT:
-        return ParentTClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+        return std::make_unique<ParentTClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
       case RelationshipTypes::kUsesS:
-        return UsesSClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+        return std::make_unique<UsesSClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
       case RelationshipTypes::kModifiesS:
-        return ModifiesSClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+        return std::make_unique<ModifiesSClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
       default: 
-        return Clause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+        throw pql_exceptions::EmptyDomainException();
     }
   }
 
@@ -141,12 +142,12 @@ namespace pql {
       }
 
       for (pql::RelationshipToken& token : such_that_clauses) {
-        pql::Clause clause = GenerateClause(token, pkb, stmt_hashmap, var_hashmap, predicates);
-        clause.Evaluate();
+        std::unique_ptr<pql::Clause> clause = GenerateClause(token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
+        clause->Evaluate();
       }
 
-      pql_solver::Solver solver(stmt_hashmap, var_hashmap, predicates, synonyms, &selected_syn);
-      std::vector<std::string> res = solver.ExtractResult();
+      pql_solver::Solver solver(&stmt_hashmap, &var_hashmap, &predicates, synonyms, &selected_syn);
+      std::vector<std::string> res = solver.Solve();
 
       return res;
 

@@ -8,19 +8,20 @@
 
 namespace pql_solver {
 
-  Solver::Solver(std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
-    std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
-    std::vector<pql_table::Predicate>& preds,
+  Solver::Solver(std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+    std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+    std::vector<pql_table::Predicate>* preds,
     std::vector<pql::Synonym>& syn_list, pql::Synonym* selected_syn) {
       predicates_ = preds;
       return_syn_ = selected_syn;
 
       for (pql::Synonym& syn : syn_list) {
-        if (syn.GetDeclaration() == EntityIdentifier::kVariable) {
-          pql_table::InterTable table(syn, var_hashmap[syn.GetName()]);
+        if (syn.GetDeclaration() == EntityIdentifier::kVariable
+            || syn.GetDeclaration() == EntityIdentifier::kProc) {
+          pql_table::InterTable table(syn, (*var_hashmap)[syn.GetName()]);
           tables_.push_back(table);
         } else {
-          pql_table::InterTable table(syn, stmt_hashmap[syn.GetName()]);
+          pql_table::InterTable table(syn, (*stmt_hashmap)[syn.GetName()]);
           tables_.push_back(table);
         }
       }
@@ -71,12 +72,12 @@ namespace pql_solver {
   }
 
   std::vector<std::string> Solver::Solve() {
-      for (pql_table::Predicate& pred : predicates_) {
-          Consume(pred);
-      }
+    for (pql_table::Predicate& pred : *predicates_) {
+      Consume(pred);
+    }
 
-      std::vector<std::string> res = ExtractResult();
+    std::vector<std::string> res = ExtractResult();
 
-      return res;
+    return res;
   }
 }

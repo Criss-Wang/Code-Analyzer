@@ -44,145 +44,145 @@ namespace pql {
     public:
       pql::RelationshipToken* token_;
       Pkb pkb_;
-      std::unordered_map<std::string, std::vector<int>> stmt_hashmap_;
-      std::unordered_map<std::string, std::vector<std::string>> var_hashmap_; 
-      std::vector<pql_table::Predicate> predicates_;
+      std::unordered_map<std::string, std::vector<int>>* stmt_hashmap_;
+      std::unordered_map<std::string, std::vector<std::string>>* var_hashmap_; 
+      std::vector<pql_table::Predicate>* predicates_;
 
     public:
       Clause(pql::RelationshipToken* token, Pkb& pkb,
-             std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
-             std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
-             std::vector<pql_table::Predicate>& predicates);
+             std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+             std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+             std::vector<pql_table::Predicate>* predicates);
 
     public:
-      void ExtractRelExist() { return; };
+      virtual void ExtractRelExist() = 0;
       
-      void ExtractRelDomain() { return; };
+      virtual void ExtractRelDomain() = 0;
 
-      void ExtractInverseRelDomain() { return; };
+      virtual void ExtractInverseRelDomain() = 0;
 
-      void ExtractRelPair() { return; };
+      virtual void ExtractRelPair() = 0;
 
-      void Evaluate() { return; };
+      virtual void Evaluate() = 0;
   };
 
   class FollowsClause : public Clause {
     public:
       FollowsClause(pql::RelationshipToken* token, Pkb& pkb,
-                    std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
-                    std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
-                    std::vector<pql_table::Predicate>& predicates) :
+                    std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+                    std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+                    std::vector<pql_table::Predicate>* predicates) :
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist();
+      void ExtractRelExist() override;
 
-      void ExtractRelDomain();
+      void ExtractRelDomain() override;
 
-      void ExtractInverseRelDomain();
+      void ExtractInverseRelDomain() override;
 
-      void ExtractRelPair();
+      void ExtractRelPair() override;
 
-      void Evaluate();
+      void Evaluate() override;
   };
 
   class FollowsTClause : public Clause {
     public:
       FollowsTClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
-          std::vector<pql_table::Predicate>& predicates) :
+          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::vector<pql_table::Predicate>* predicates) :
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist();
+      void ExtractRelExist() override;
 
-      void ExtractRelDomain();
+      void ExtractRelDomain() override;
 
-      void ExtractInverseRelDomain();
+      void ExtractInverseRelDomain() override;
 
-      void ExtractRelPair();
+      void ExtractRelPair() override;
 
-      void Evaluate();
+      void Evaluate() override;
   };
 
   class ParentClause : public Clause {
     public:
       ParentClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
-          std::vector<pql_table::Predicate>& predicates) :
+          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::vector<pql_table::Predicate>* predicates) :
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist();
+      void ExtractRelExist() override;
 
-      void ExtractRelDomain();
+      void ExtractRelDomain() override;
 
-      void ExtractInverseRelDomain();
+      void ExtractInverseRelDomain() override;
 
-      void ExtractRelPair();
+      void ExtractRelPair() override;
 
-      void Evaluate();
+      void Evaluate() override;
   };
 
   class ParentTClause : public Clause {
     public:
       ParentTClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
-          std::vector<pql_table::Predicate>& predicates) :
+          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::vector<pql_table::Predicate>* predicates) :
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist();
+      void ExtractRelExist() override;
 
-      void ExtractRelDomain();
+      void ExtractRelDomain() override;
 
-      void ExtractInverseRelDomain();
+      void ExtractInverseRelDomain() override;
 
-      void ExtractRelPair();
+      void ExtractRelPair() override;
 
-      void Evaluate();
+      void Evaluate() override;
   };
 
   class UsesSClause : public Clause {
     public:
       UsesSClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
-          std::vector<pql_table::Predicate>& predicates) :
+          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::vector<pql_table::Predicate>* predicates) :
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist();
+      void ExtractRelExist() override;
 
-      void ExtractRelDomain();
+      void ExtractRelDomain() override;
 
-      void ExtractInverseRelDomain();
+      void ExtractInverseRelDomain() override;
 
-      void ExtractRelPair();
+      void ExtractRelPair() override;
 
-      void Evaluate();
+      void Evaluate() override;
   };
 
   class ModifiesSClause : public Clause {
     public:
       ModifiesSClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
-          std::vector<pql_table::Predicate>& predicates) :
+          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::vector<pql_table::Predicate>* predicates) :
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist();
+      void ExtractRelExist() override;
 
-      void ExtractRelDomain();
+      void ExtractRelDomain() override;
 
-      void ExtractInverseRelDomain();
+      void ExtractInverseRelDomain() override;
 
-      void ExtractRelPair();
+      void ExtractRelPair() override;
 
-      void Evaluate();
+      void Evaluate() override;
   };
 }

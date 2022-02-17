@@ -44,40 +44,36 @@ namespace pql {
   }
 
   void Parser::Parse() {
-    try {
-      while (!ps.IsEOF()) {
-        ps.EatWhiteSpaces();
-        std::stringstream ks;
-        while (IsLetter(ps.Peek())) {
-          ks << ps.Next();
-        }
-        std::string keyword;
-        ks >> keyword;
-        if (auto d = pql::GetDeclarationType(keyword)) {
-          for (const std::string &s: Parser::GetSynonyms()) {
-            Parser::query.AddSynonym(*d, s);
-          }
-        } else if (keyword == "Select") {
-          ps.EatWhiteSpaces();
-          Parser::query.SetResultSynonym(ps.ParseSynonym());
-          ps.EatWhiteSpaces();
-          if (!ps.IsEOF()) {
-            ps.Expect("such that");
-            ps.EatWhiteSpaces();
-            Parser::ParseRelationship(Parser::query);
-          }
-          ps.EatWhiteSpaces();
-          if (!ps.IsEOF()) {
-            ps.Expect("pattern");
-            ps.EatWhiteSpaces();
-            Parser::ParsePattern(Parser::query);
-          }
-          ps.EatWhiteSpaces();
-          ps.ExpectEOF();
-        }
+    while (!ps.IsEOF()) {
+      ps.EatWhiteSpaces();
+      std::stringstream ks;
+      while (IsLetter(ps.Peek())) {
+        ks << ps.Next();
       }
-    } catch (ParseException& e) {
-      std::cout << "The PQL query is invalid!" << std::endl;
+      std::string keyword;
+      ks >> keyword;
+      if (auto d = pql::GetDeclarationType(keyword)) {
+        for (const std::string &s: Parser::GetSynonyms()) {
+        Parser::query.AddSynonym(*d, s);
+        }
+      } else if (keyword == "Select") {
+        ps.EatWhiteSpaces();
+        Parser::query.SetResultSynonym(ps.ParseSynonym());
+        ps.EatWhiteSpaces();
+        if (!ps.IsEOF()) {
+          ps.Expect("such that");
+          ps.EatWhiteSpaces();
+          Parser::ParseRelationship(Parser::query);
+        }
+        ps.EatWhiteSpaces();
+        if (!ps.IsEOF()) {
+          ps.Expect("pattern");
+          ps.EatWhiteSpaces();
+          Parser::ParsePattern(Parser::query);
+        }
+        ps.EatWhiteSpaces();
+        ps.ExpectEOF();
+      }
     }
   }
 
