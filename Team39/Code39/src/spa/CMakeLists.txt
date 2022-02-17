@@ -11,7 +11,7 @@ file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h" "${CMAKE_CURRENT_SOURCE_
   "${CMAKE_CURRENT_SOURCE_DIR}/src/SP/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/SP/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/*.hpp")
 
-add_library(spa ${srcs} ${headers} src/PQL/query.cpp src/PQL/query.h)
+add_library(spa ${srcs} ${headers})
 
 # this makes the headers accessible for other projects which uses spa lib
 target_include_directories(spa PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
