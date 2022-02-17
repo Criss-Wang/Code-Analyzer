@@ -181,10 +181,12 @@ vector<int> Pkb::GetStmtsAfter(const int stmt) const {
   }
 }
 
-vector<pair<int, int>> Pkb::GetFollowsPair(int stmt) const {
+vector<pair<int, int>> Pkb::GetAllFollowsPairs() const {
   try {
     vector<pair<int, int>> result;
-    result.emplace_back(make_pair(stmt, follows_table_->GetValueByKey(stmt)));
+    for (const auto& [key, val] : follows_table_->GetKeyValueLst()) {
+      result.emplace_back(make_pair(key, val));
+    }
     return result;
   } catch (exception& e) {
     return vector<pair<int, int>>{};
