@@ -11,7 +11,7 @@ namespace pql_solver {
   Solver::Solver(std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
     std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
     std::vector<pql_table::Predicate>& preds,
-    std::vector<pql::Synonym>& syn_list, pql::Synonym& selected_syn) {
+    std::vector<pql::Synonym>& syn_list, pql::Synonym* selected_syn) {
       predicates_ = preds;
       return_syn_ = selected_syn;
 
@@ -52,7 +52,7 @@ namespace pql_solver {
   }
 
   std::vector<std::string> Solver::ExtractResult() {
-    std::string name = return_syn_.GetName();
+    std::string name = return_syn_->GetName();
     int index = GetTableIndex(name);
     pql_table::InterTable curr_table = tables_[index];
     std::vector<std::string> lst;
@@ -60,7 +60,7 @@ namespace pql_solver {
     std::vector<pql_table::element> col = curr_table.GetColByName(name);
 
     for (auto& ele : col) {
-      if (return_syn_.GetDeclaration() == EntityIdentifier::kVariable) {
+      if (return_syn_->GetDeclaration() == EntityIdentifier::kVariable) {
         lst.push_back(ele.name);
       } else {
         lst.push_back(std::to_string(ele.val));

@@ -9,37 +9,6 @@
 namespace pql {
 
   template <typename T>
-  std::vector<T> Intersect(const std::vector<T>& lst1, const std::vector<T>& lst2) {
-    //refer from stack overflow https://stackoverflow.com/questions/38993415/how-to-apply-the-intersection-between-two-lists-in-c
-    std::vector<T> res;
-    std::unordered_set<T> st;
-    std::for_each(lst2.begin(), lst2.end(), [&st](const T& k) { st.insert(k); });
-    std::for_each(lst1.begin(), lst1.end(),
-        [&st, &res](const T& k) {
-          auto iter = st.find(k);
-          if (iter != st.end()) {
-            res.push_back(k);
-            st.erase(iter);
-          }
-        }
-      );
-    return res;
-  }
-
-  template <typename T>
-  void UpdateHashmap(std::unordered_map<std::string, std::vector<T>>& hmap, std::string name, const std::vector<T>& lst) {
-    std::vector<T> oriLst = hmap[name];
-    std::vector<T> inter = Intersect<T>(oriLst, lst);
-
-    //the domain is empty after intersection
-    if (inter.size() == 0) {
-        throw EmptyDomainException();
-    }
-
-    hmap[name] = inter;
-  }
-
-  template <typename T>
   std::vector<int> ExtractFirst(std::vector<std::pair<int, T>>& lst) {
     std::vector<int> res;
 
@@ -99,19 +68,19 @@ namespace pql {
       bool rel_exist = pkb_.IsFollows(stoi(token_->GetLeft()), stoi(token_->GetRight()));
 
       if (!rel_exist) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } else if (is_left_num || is_right_num) {
       std::vector<int> domain = is_left_num ? pkb_.GetStmtRightAfter(stoi(token_->GetLeft()))
                                             : pkb_.GetStmtRightBefore(stoi(token_->GetRight()));
       if (domain.size() == 0) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } else {
       std::vector<std::pair<int, int>> domain = pkb_.GetAllFollowsPairs();
 
       if (domain.size() == 0) {
-          throw EmptyDomainException();
+          throw pql_exceptions::EmptyDomainException();
       }
     }
 
@@ -181,19 +150,19 @@ namespace pql {
       bool rel_exist = pkb_.IsTransitiveFollows(stoi(token_->GetLeft()), stoi(token_->GetRight()));
 
       if (!rel_exist) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } else if (is_left_num || is_right_num) {
       std::vector<int> domain = is_left_num ? pkb_.GetStmtsAfter(stoi(token_->GetLeft()))
                                             : pkb_.GetStmtsBefore(stoi(token_->GetRight()));
       if (domain.size() == 0) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } else {
       std::vector<std::pair<int, int>> domain = pkb_.GetAllTransitiveFollowsPairs();
 
       if (domain.size() == 0) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     }
 
@@ -261,19 +230,19 @@ namespace pql {
       bool rel_exist = pkb_.IsParent(stoi(token_->GetLeft()), stoi(token_->GetRight()));
 
       if (!rel_exist) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } else if (is_left_num || is_right_num) {
       std::vector<int> domain = is_left_num ? pkb_.GetChild(stoi(token_->GetLeft()))
                                             : pkb_.GetParent(stoi(token_->GetRight()));
       if (domain.size() == 0) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } else {
       std::vector<std::pair<int, int>> domain = pkb_.GetAllParentPairs();
 
       if (domain.size() == 0) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     }
   }
@@ -340,19 +309,19 @@ namespace pql {
       bool rel_exist = pkb_.IsTransitiveParent(stoi(token_->GetLeft()), stoi(token_->GetRight()));
 
       if (!rel_exist) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } else if (is_left_num || is_right_num) {
       std::vector<int> domain = is_left_num ? pkb_.GetAllChildren(stoi(token_->GetLeft()))
                                             : pkb_.GetAllParents(stoi(token_->GetRight()));
       if (domain.size() == 0) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } else {
       std::vector<std::pair<int, int>> domain = pkb_.GetAllTransitiveParentPairs();
 
       if (domain.size() == 0) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     }
   }
@@ -422,13 +391,13 @@ namespace pql {
       bool rel_exist = pkb_.IsUsesStmt(stoi(token_->GetLeft()), token_->GetRight());
 
       if (!rel_exist) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } else {
       std::vector<std::string> domain = pkb_.GetUsesVarByStmt(stoi(token_->GetLeft()));
                                               
       if (domain.size() == 0) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } 
   }
@@ -487,13 +456,13 @@ namespace pql {
       bool rel_exist = pkb_.IsModifiesStmt(stoi(token_->GetLeft()), token_->GetRight());
 
       if (!rel_exist) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } else {
       std::vector<std::string> domain = pkb_.GetModifiesVarByStmt(stoi(token_->GetLeft()));
 
       if (domain.size() == 0) {
-        throw EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     } 
   }

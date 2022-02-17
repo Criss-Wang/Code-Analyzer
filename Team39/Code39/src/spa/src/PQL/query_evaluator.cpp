@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include <iostream>
 #include <string>
+#include <optional>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -15,6 +16,7 @@
 using namespace std;
 
 namespace pql {
+
   void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& stmt_hashmap, 
                     std::unordered_map<std::string, std::vector<std::string>>& var_hashmap, Pkb& pkb) {
     //hashmap stores <synonym.name, domain> pair.
@@ -50,7 +52,7 @@ namespace pql {
       case RelationshipTypes::kModifiesS:
         return ModifiesSClause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
       default: 
-        return;
+        return Clause(&token, pkb, stmt_hashmap, var_hashmap, predicates);
     }
   }
 
@@ -64,11 +66,11 @@ namespace pql {
 
     if (!is_left_wildcard) {
       std::vector<int> assign_domain = pkb.GetModifiesStmtsByVar(pattern_token.GetLeft());
-      UpdateHashmap(stmt_hashmap, pattern_token.GetAssignSynonym(), assign_domain);
+      UpdateHashmap<int>(stmt_hashmap, pattern_token.GetAssignSynonym(), assign_domain);
     }
 
     if (!is_expr_wildcard) {
-      std::unordered_set<int> domain_set = pkb_.GetAllStmtsWithPattern(pattern_token.GetExpression());
+      std::unordered_set<int> domain_set = pkb.GetAllStmtsWithPattern(pattern_token.GetExpression());
       std::vector<int> domain(domain_set.begin(), domain_set.end());
       UpdateHashmap<int>(stmt_hashmap, pattern_token.GetAssignSynonym(), domain);
     }
@@ -82,7 +84,7 @@ namespace pql {
     bool is_expr_wildcard = pattern_token.GetExpression() == "_";
 
     if (!is_expr_wildcard) {
-      std::unordered_set<int> domain_set = pkb_.GetAllStmtsWithPattern(pattern_token.GetExpression());
+      std::unordered_set<int> domain_set = pkb.GetAllStmtsWithPattern(pattern_token.GetExpression());
       std::vector<int> domain(domain_set.begin(), domain_set.end());
       UpdateHashmap<int>(stmt_hashmap, pattern_token.GetAssignSynonym(), domain);
     }
@@ -98,7 +100,10 @@ namespace pql {
       }
     }
 
-    pql_table::Predicate pred(pattern_token.GetAssignSynonym(), pattern_token.GetLeft(), pred_lst);
+    std::string assign_syn = pattern_token.GetAssignSynonym();
+    std::string var_syn = pattern_token.GetLeft();
+
+    pql_table::Predicate pred(assign_syn, var_syn, pred_lst);
     predicates.push_back(pred);
   }
 
@@ -107,19 +112,19 @@ namespace pql {
                       std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
                       std::vector<pql_table::Predicate>& predicates) {
 
-    bool is_left_syn = pattern_token.IsLeftSynonym();
+    bool is_left_syn = pattern_token.IsSynonymLeft();
 
     if (!is_left_syn) {
       ConsumePatternWithoutSyn(pattern_token, pkb, stmt_hashmap);
     } else {
-      ConsumePatternWithSyn()
+      ConsumePatternWithSyn(pattern_token, pkb, stmt_hashmap, var_hashmap, predicates);
     }
   }
 
   std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
     try {
       std::vector<pql::RelationshipToken> such_that_clauses = query.GetSuchThatClause();
-      pql::PatternToken pattern_token = query.GetPattern();
+      std::optional<pql::PatternToken> pattern_token_opt = query.GetPattern();
       std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
       pql::Synonym selected_syn = query.GetResultSynonym();
 
@@ -130,7 +135,8 @@ namespace pql {
 
       GetAllDomain(synonyms, stmt_hashmap, var_hashmap, pkb);
 
-      if (pattern_token != std::nullopt) {
+      if (pattern_token_opt != std::nullopt) {
+        pql::PatternToken pattern_token = pattern_token_opt.value();
         ConsumePattern(pattern_token, pkb, stmt_hashmap, var_hashmap, predicates);
       }
 
@@ -139,12 +145,12 @@ namespace pql {
         clause.Evaluate();
       }
 
-      pql_solver::Solver solver(stmt_hashmap, var_hashmap, predicates, synonyms, selected_syn);
+      pql_solver::Solver solver(stmt_hashmap, var_hashmap, predicates, synonyms, &selected_syn);
       std::vector<std::string> res = solver.ExtractResult();
 
       return res;
 
-    } catch (EmptyDomainException e) {
+    } catch (pql_exceptions::EmptyDomainException e) {
       std::vector<std::string> empty_res({});
       return empty_res;
     }

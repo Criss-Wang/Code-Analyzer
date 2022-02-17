@@ -5,9 +5,11 @@
 
 using namespace std;
 
-class EmptyDomainException final : public exception {
-  public:
-    const char* what() const throw() {
+namespace pql_exceptions {
+  class EmptyDomainException final : public exception {
+    public:
+      const char* what() const throw() {
         return "The domain is empty";
-    }
-};
+      }
+  };
+}
