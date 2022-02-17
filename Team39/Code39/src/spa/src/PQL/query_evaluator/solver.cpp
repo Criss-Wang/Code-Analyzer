@@ -4,7 +4,7 @@
 
 
 #include "solver.h"
-#include "../Utility/entity.h"
+#include "../../Utility/entity.h"
 
 namespace pql_solver {
 

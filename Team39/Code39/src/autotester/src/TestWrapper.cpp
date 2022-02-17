@@ -1,7 +1,7 @@
 #include "TestWrapper.h"
 #include "parser.h"
 #include "../../spa/src/PQL/Parser.h"
-#include "../../spa/src/PQL/query_evaluator.h"
+#include "../../spa/src/PQL/query_evaluator/query_evaluator.h"
 
 using namespace std;
 

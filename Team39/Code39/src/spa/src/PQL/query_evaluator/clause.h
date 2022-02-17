@@ -3,9 +3,9 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "Token.h"
+#include "../Token.h"
 #include "predicate.h"
-#include "../PKB/pkb.h"
+#include "../../PKB/pkb.h"
 #include "query_evaluator_exceptions.h"
 
 namespace pql {

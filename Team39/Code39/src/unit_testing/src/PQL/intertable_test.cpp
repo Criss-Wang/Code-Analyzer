@@ -1,8 +1,8 @@
 #include <vector>
 #include <string>
 
-#include "../../../spa/src/PQL/intertable.h"
-#include "../../../spa/src/PQL/predicate.h"
+#include "../../../spa/src/PQL/query_evaluator/intertable.h"
+#include "../../../spa/src/PQL/query_evaluator/predicate.h"
 #include "../../../spa/src/PQL/Token.h"
 #include "../../../spa/src/Utility/Entity.h"
 #include "catch.hpp"
