@@ -10,7 +10,7 @@ namespace pql {
     std::vector <pql::Synonym> used_synonyms;
     std::optional <pql::Synonym> result_synonym;
     std::vector <RelationshipToken> such_that_clauses;
-    std::optional <pql::PatternToken> pattern;
+    std::optional <pql::PatternToken> pattern = std::nullopt;
   public:
     bool SynonymDeclared(const std::string &name);
 
@@ -38,6 +38,6 @@ namespace pql {
 
     void AddPattern(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left);
 
-    pql::PatternToken GetPattern();
+    std::optional<pql::PatternToken> GetPattern();
   };
 }
