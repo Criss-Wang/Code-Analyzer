@@ -14,7 +14,7 @@ void RequireValid(string path) {
 		string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 		Tokenizer tokenize;
 		vector<Token> tokens = tokenize.parse(input);
-		REQUIRE(Validate(tokens));
+		REQUIRE((!tokens.empty() && Validate(tokens)));
 	}
 }
 
@@ -93,8 +93,6 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation
 
 	SECTION("Invalid Programs") {
 
-		//RequireInvalid(invalid_dir + "2_test1.txt");
-
 	}
 }
 
@@ -104,13 +102,23 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Validation
 
 		RequireValid(valid_dir + "4_test1.txt");
 		RequireValid(valid_dir + "4_test2.txt");
-		RequireValid(valid_dir + "4_test3.txt");
 
 	}
 
 	SECTION("Invalid Programs") {
 
-		//RequireInvalid(invalid_dir + "2_test1.txt");
+	}
+}
+
+TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Validation") {
+
+	SECTION("Valid Programs") {
+
+		RequireValid(valid_dir + "5_test1.txt");
+
+	}
+
+	SECTION("Invalid Programs") {
 
 	}
 }
