@@ -10,7 +10,6 @@
 #include "../Utility/Entity.h"
 
 namespace pql {
-  typedef std::string Variable;
   typedef std::string Ref;
 
   class Synonym {
@@ -27,8 +26,7 @@ namespace pql {
     bool equal(const Synonym &s);
   };
 
-  struct ParseException : public std::exception {
-  };
+  struct ParseException : public std::exception {};
 
   enum RelationshipTypes {
     kFollows,
@@ -74,13 +72,19 @@ namespace pql {
     enum RelationshipTypes relationship;
     const pql::Ref left;
     const pql::Ref right;
+    bool is_synonym_left;
+    bool is_synonym_right;
   public:
-    RelationshipToken(pql::RelationshipTypes relationship, pql::Ref left, pql::Ref right) :
-      relationship(relationship), left(std::move(left)), right(std::move(right)) {};
+    RelationshipToken(pql::RelationshipTypes relationship, pql::Ref left, pql::Ref right, bool is_synonym_left, bool is_synonym_right) :
+      relationship(relationship), left(std::move(left)), right(std::move(right)), is_synonym_left(is_synonym_left), is_synonym_right(is_synonym_right) {};
 
     pql::Ref GetLeft();
 
     pql::Ref GetRight();
+
+    [[nodiscard]] bool IsSynonymLeft() const;
+
+    [[nodiscard]] bool IsSynonymRight() const;
 
     pql::RelationshipTypes GetRelationship();
   };
@@ -90,10 +94,11 @@ namespace pql {
     const std::string assign_synonym;
     const pql::Ref left;
     const std::string expression;
+    bool is_synonym_left;
     bool exact;
   public:
-    PatternToken(std::string assign_synonym, pql::Ref left, std::string expression, bool exact) :
-        assign_synonym(std::move(assign_synonym)), left(std::move(left)), expression(std::move(expression)), exact(exact) {};
+    PatternToken(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left) :
+        assign_synonym(std::move(assign_synonym)), left(std::move(left)), expression(std::move(expression)), exact(exact), is_synonym_left(is_synonym_left) {};
 
     std::string GetAssignSynonym();
 
@@ -101,6 +106,8 @@ namespace pql {
 
     std::string GetExpression();
 
-    bool IsExact();
+    [[nodiscard]] bool IsSynonymLeft() const;
+
+    [[nodiscard]] bool IsExact() const;
   };
 }

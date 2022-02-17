@@ -28,11 +28,15 @@ namespace pql {
 
     bool IsProcedure(const std::string &name);
 
-    void AddSuchThatClause(RelationshipTypes r, const pql::Ref &left, const pql::Ref &right);
+    bool IsStatement(const std::string &name);
+
+    bool IsVariable(const std::string &name);
+
+    void AddSuchThatClause(RelationshipTypes r, const pql::Ref &left, const pql::Ref &right, bool is_synonym_left, bool is_synonym_right);
 
     std::vector <RelationshipToken> GetSuchThatClause();
 
-    void AddPattern(std::string assign_synonym, pql::Ref left, std::string expression, bool exact);
+    void AddPattern(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left);
 
     pql::PatternToken GetPattern();
   };

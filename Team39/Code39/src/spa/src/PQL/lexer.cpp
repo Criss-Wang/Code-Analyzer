@@ -3,7 +3,6 @@
 #include "Parser.h"
 
 namespace pql {
-
   char ParserState::Peek() {
     return (char) ss.peek();
   }
@@ -39,22 +38,14 @@ namespace pql {
     ssm << s;
     while (ssm.peek() != -1) {
       if (ss.get() != ssm.get()) {
-        try {
-          throw ParseException();
-        } catch (ParseException &e) {
-          std::cout << "Expecting '" + s + "' keyword!" << std::endl;
-        }
+        throw ParseException();
       }
     }
   }
 
   void ParserState::ExpectEOF() {
     if (!ParserState::IsEOF()) {
-      try {
-        throw ParseException();
-      } catch (ParseException &e) {
-        std::cout << "Expecting end of file!" << std::endl;
-      }
+      throw ParseException();
     }
   }
 
@@ -62,11 +53,7 @@ namespace pql {
     std::string sm;
     std::stringstream ssm;
     ParserState::EatWhiteSpaces();
-    try {
-      ssm << ParserState::ExpectLetter();
-    } catch (ParseException &e) {
-      std::cout << "A synonym must start with a letter!" << std::endl;
-    }
+    ssm << ParserState::ExpectLetter();
     for (char next_char = ParserState::Peek();
          pql::IsLetter(next_char) || pql::IsDigit(next_char);
          next_char = ParserState::Peek()) {
@@ -110,11 +97,7 @@ namespace pql {
     ssm >> ref;
     if (is_synonym) {
       if (!q.SynonymDeclared(ref)) {
-        try {
-          throw ParseException();
-        } catch (ParseException &e) {
-          std::cout << "The synonym used in a relationship must be declared" << std::endl;
-        }
+        throw ParseException();
       }
       q.AddUsedSynonym(ref);
     }
@@ -122,23 +105,23 @@ namespace pql {
   }
 
   std::string ParserState::ParseExpression() {
-    std::stringstream ss;
+    std::stringstream s;
     std::string expression;
     ParserState::Expect("\"");
     ParserState::EatWhiteSpaces();
     if (IsDigit(ParserState::Peek())) {
       for (char next_char = ParserState::Peek(); IsDigit(next_char); next_char = ParserState::Peek()) {
-        ss << ParserState::Next();
+        s << ParserState::Next();
       }
     } else if (IsLetter(ParserState::Peek())) {
       for (char next_char = ParserState::Peek(); IsDigit(next_char) || IsLetter(next_char); next_char = ParserState::Peek()) {
-        ss << ParserState::Next();
+        s << ParserState::Next();
       }
     } else {
-      throw ParseExpression();
+      throw ParseException();
     }
     ParserState::Expect("\"");
-    ss >> expression;
+    s >> expression;
     return expression;
   }
 

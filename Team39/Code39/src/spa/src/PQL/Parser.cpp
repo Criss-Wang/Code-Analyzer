@@ -16,6 +16,19 @@ namespace pql {
     return c >= '0' && c <= '9';
   }
 
+  bool IsIdent(const std::string& ident) {
+    return ident[0] == '\"' && ident[ident.length() - 1] == '\"';
+  }
+
+  bool IsNumber(const std::string& s) {
+    std::stringstream ssm;
+    ssm << s;
+    if (!IsDigit(ssm.get())) {
+      return false;
+    }
+    return true;
+  }
+
   std::vector<std::string> Parser::GetSynonyms() {
     std::vector<std::string> synonyms;
     while (ps.Peek() != ';') {
@@ -31,36 +44,40 @@ namespace pql {
   }
 
   void Parser::Parse() {
-    while (!ps.IsEOF()) {
-      ps.EatWhiteSpaces();
-      std::stringstream ks;
-      while (IsLetter(ps.Peek())) {
-        ks << ps.Next();
-      }
-      std::string keyword;
-      ks >> keyword;
-      if (auto d = pql::GetDeclarationType(keyword)) {
-        for (const std::string &s: Parser::GetSynonyms()) {
-          Parser::query.AddSynonym(*d, s);
+    try {
+      while (!ps.IsEOF()) {
+        ps.EatWhiteSpaces();
+        std::stringstream ks;
+        while (IsLetter(ps.Peek())) {
+          ks << ps.Next();
         }
-      } else if (keyword == "Select") {
-        ps.EatWhiteSpaces();
-        Parser::query.SetResultSynonym(ps.ParseSynonym());
-        ps.EatWhiteSpaces();
-        if (!ps.IsEOF()) {
-          ps.Expect("such that");
+        std::string keyword;
+        ks >> keyword;
+        if (auto d = pql::GetDeclarationType(keyword)) {
+          for (const std::string &s: Parser::GetSynonyms()) {
+            Parser::query.AddSynonym(*d, s);
+          }
+        } else if (keyword == "Select") {
           ps.EatWhiteSpaces();
-          Parser::ParseRelationship(Parser::query);
-        }
-        ps.EatWhiteSpaces();
-        if (!ps.IsEOF()) {
-          ps.Expect("pattern");
+          Parser::query.SetResultSynonym(ps.ParseSynonym());
           ps.EatWhiteSpaces();
-          Parser::ParsePattern(Parser::query);
+          if (!ps.IsEOF()) {
+            ps.Expect("such that");
+            ps.EatWhiteSpaces();
+            Parser::ParseRelationship(Parser::query);
+          }
+          ps.EatWhiteSpaces();
+          if (!ps.IsEOF()) {
+            ps.Expect("pattern");
+            ps.EatWhiteSpaces();
+            Parser::ParsePattern(Parser::query);
+          }
+          ps.EatWhiteSpaces();
+          ps.ExpectEOF();
         }
-        ps.EatWhiteSpaces();
-        ps.ExpectEOF();
       }
+    } catch (ParseException& e) {
+      std::cout << "The PQL query is invalid!" << std::endl;
     }
   }
 
@@ -83,18 +100,29 @@ namespace pql {
     ps.Expect(")");
     if (relationship == "Uses" || relationship == "Modifies") {
       if (left == "_") {
-        try {
-          throw ParseException();
-        } catch (ParseException &e) {
-          std::cout << "The first argument of Uses or Modifies Relationship cannot be a wildcard!" << std::endl;
-        }
+        throw ParseException();
       }
-      if (q.IsProcedure(left)) {
+      if (q.IsProcedure(left) || IsIdent(left)) {
         relationship.push_back('P');
       }
     }
     if (auto r = pql::GetRelationshipType(relationship)) {
-      q.AddSuchThatClause(*r, left, right);
+      if (*r != pql::RelationshipTypes::kUsesP && *r != pql::RelationshipTypes::kModifiesP) {
+        if (!q.IsStatement(left) && left != "_" && !IsNumber(left)) {
+          throw ParseException();
+        }
+      }
+      if (*r == pql::RelationshipTypes::kFollows || *r == pql::RelationshipTypes::kFollowsT
+        || *r == pql::RelationshipTypes::kParent || *r == pql::RelationshipTypes::kParentT) {
+        if (!q.IsStatement(right) && right != "_" && !IsNumber(right)) {
+          throw ParseException();
+        }
+      } else {
+        if (!q.IsVariable(right) && right != "_" && !IsIdent(right)) {
+          throw ParseException();
+        }
+      }
+      q.AddSuchThatClause(*r, left, right, q.SynonymDeclared(left), q.SynonymDeclared(right));
     }
   }
 
@@ -118,7 +146,7 @@ namespace pql {
       }
       ps.EatWhiteSpaces();
       ps.Expect(")");
-      q.AddPattern(assign_synonym, left, expression, exact);
+      q.AddPattern(assign_synonym, left, expression, exact, q.SynonymDeclared(left));
     }
   }
 

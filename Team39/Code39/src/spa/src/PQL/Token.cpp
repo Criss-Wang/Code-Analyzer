@@ -24,6 +24,14 @@ namespace pql {
     return RelationshipToken::right;
   }
 
+  bool RelationshipToken::IsSynonymLeft() const {
+    return RelationshipToken::is_synonym_left;
+  }
+
+  bool RelationshipToken::IsSynonymRight() const {
+    return RelationshipToken::is_synonym_right;
+  }
+
   pql::RelationshipTypes RelationshipToken::GetRelationship() {
     return RelationshipToken::relationship;
   }
@@ -40,7 +48,11 @@ namespace pql {
     return PatternToken::expression;
   }
 
-  bool PatternToken::IsExact() {
+  bool PatternToken::IsSynonymLeft() const {
+    return PatternToken::is_synonym_left;
+  }
+
+  bool PatternToken::IsExact() const {
     return PatternToken::exact;
   }
 

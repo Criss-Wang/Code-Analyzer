@@ -1,5 +1,4 @@
 #include "query.h"
-#include <iostream>
 
 namespace pql {
   bool Query::SynonymDeclared(const std::string &name) {
@@ -12,11 +11,7 @@ namespace pql {
 
   void Query::AddSynonym(EntityIdentifier d, const std::string &name) {
     if (Query::SynonymDeclared(name)) {
-      try {
-        throw ParseException();
-      } catch (ParseException &e) {
-        std::cout << "The declaring synonym must not be declared before!" << std::endl;
-      }
+      throw ParseException();
     } else {
       pql::Synonym sm = Synonym(name, d);
       Query::declarations.push_back(sm);
@@ -29,11 +24,7 @@ namespace pql {
       Query::result_synonym = Query::synonyms.at(name);
       Query::AddUsedSynonym(name);
     } else {
-      try {
-        throw ParseException();
-      } catch (ParseException &e) {
-        std::cout << "The select synonym must be declared first!" << std::endl;
-      }
+      throw ParseException();
     }
   }
 
@@ -42,7 +33,26 @@ namespace pql {
   }
 
   bool Query::IsProcedure(const std::string &name) {
-    return Query::synonyms.at(name).GetDeclaration() == EntityIdentifier::kProcedure;
+    if (Query::SynonymDeclared(name)) {
+      return Query::synonyms.at(name).GetDeclaration() == EntityIdentifier::kProcedure;
+    }
+    return false;
+  }
+
+  bool Query::IsStatement(const std::string &name) {
+    if (Query::SynonymDeclared(name)) {
+      return !Query::IsProcedure(name) &&
+        Query::synonyms.at(name).GetDeclaration() != EntityIdentifier::kConstant &&
+        Query::synonyms.at(name).GetDeclaration() != EntityIdentifier::kVariable;
+    }
+    return false;
+  }
+
+  bool Query::IsVariable(const std::string &name) {
+    if (Query::SynonymDeclared(name)) {
+      return Query::synonyms.at(name).GetDeclaration() == EntityIdentifier::kVariable;
+    }
+    return false;
   }
 
   void Query::AddUsedSynonym(const std::string &name) {
@@ -53,16 +63,16 @@ namespace pql {
     return Query::used_synonyms;
   }
 
-  void Query::AddSuchThatClause(RelationshipTypes r, const pql::Ref &left, const pql::Ref &right) {
-    Query::such_that_clauses.emplace_back(r, left, right);
+  void Query::AddSuchThatClause(RelationshipTypes r, const pql::Ref &left, const pql::Ref &right, bool is_synonym_left, bool is_synonym_right) {
+    Query::such_that_clauses.emplace_back(r, left, right, is_synonym_left, is_synonym_right);
   }
 
   std::vector<RelationshipToken> Query::GetSuchThatClause() {
     return Query::such_that_clauses;
   }
 
-  void Query::AddPattern(std::string assign_synonym, pql::Ref left, std::string expression, bool exact) {
-    Query::pattern.emplace(PatternToken(std::move(assign_synonym), std::move(left), std::move(expression), exact));
+  void Query::AddPattern(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left) {
+    Query::pattern.emplace(PatternToken(std::move(assign_synonym), std::move(left), std::move(expression), exact, is_synonym_left));
   }
 
   pql::PatternToken Query::GetPattern() {
