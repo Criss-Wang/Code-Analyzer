@@ -38,11 +38,16 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
   // store the answers to the query in the results list (it is initially empty)
   // each result must be a string.
 
-  pql::Parser parser = pql::Parser(query);
-  parser.Parse();
-  std::list<std::string> res = evaluateQuery(parser.getQuery(), this->pkb);
+  try {
+    pql::Parser parser = pql::Parser(query);
+    parser.Parse();
+    std::list<std::string> res = evaluateQuery(parser.getQuery(), this->pkb);
 
-  for (string s : res) {
-    results.push_back(s);
+    for (string s : res) {
+      results.push_back(s);
+    }
+  } catch (pql::ParseException& e) {
+    std::cout << "The PQL Query is invalid!" << std::endl;
   }
+
 }
