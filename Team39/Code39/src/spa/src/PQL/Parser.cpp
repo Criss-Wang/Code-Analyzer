@@ -147,6 +147,7 @@ namespace pql {
     std::string expression;
     bool exact = true;
     if (q.IsAssignSynonym(assign_synonym)) {
+      q.AddUsedSynonym(assign_synonym);
       ps.EatWhiteSpaces();
       ps.Expect("(");
       pql::Ref left = ps.ParseRef(q);
@@ -173,6 +174,8 @@ namespace pql {
         left = left.substr(1, left.length() - 2);
       }
       q.AddPattern(assign_synonym, left, expression, exact, is_synonym_left);
+    } else {
+      throw ParseException();
     }
   }
 
