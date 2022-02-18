@@ -12,5 +12,4 @@ file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h" "${CMAKE_CURRENT_SOURCE_
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/*.hpp")
 add_executable(unit_testing ${srcs} )
 
-
 target_link_libraries(unit_testing spa)
