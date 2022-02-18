@@ -86,6 +86,7 @@ void populateAssignStmt(vector<Token> tokens, Pkb& pkb) {
 
   // Add stmt num and assignment pattern to Assign Table
   pkb.AddInfoToTable(TableIdentifier::kAssign, stmt_num, assignment_pattern);
+  pkb.AddInfoToTable(TableIdentifier::kPattern, stmt_num, assignment_pattern);
 
   // Add stmt num and rhs constants to Constant Table
   pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, rhs_constants);
