@@ -1,13 +1,11 @@
-//
-// Created by Tan Xi Zhe on 28/1/22.
-//
-
 #pragma once
+
 #include <iostream>
 #include <sstream>
 #include <utility>
 
 #include "Token.h"
+#include "query.h"
 
 namespace pql {
 
@@ -16,49 +14,53 @@ namespace pql {
   bool IsDigit(char c);
 
   class ParserState {
-  private:
-    std::stringstream ss;
-  public:
-    explicit ParserState(const std::string& input) {
-      ss << input;
-    }
+    private:
+      std::stringstream ss;
+    public:
+      explicit ParserState(const std::string& input) {
+        ss << input;
+      }
 
-    char Peek();
+      char Peek();
 
-    char Next();
+      char Next();
 
-    bool IsEOF();
+      bool IsEOF();
 
-    void EatWhiteSpaces();
+      void EatWhiteSpaces();
 
-    void Consume();
+      void Consume();
 
-    char ExpectLetter();
+      char ExpectLetter();
 
-    void Expect(const std::string& s);
+      void Expect(const std::string& s);
 
-    void ExpectEOF();
+      void ExpectEOF();
 
-    std::string ParseSynonym();
+      std::string ParseSynonym();
 
-    pql::Ref ParseRef(Query& q);
+      pql::Ref ParseRef(Query& q);
+
+      std::string ParseExpression();
   };
 
   class Parser {
-  private:
-    ParserState ps;
-    Query query;
-  public:
-    /*Constructor for Parser*/
-    explicit Parser(const std::string& input) : ps(input), query(Query()) {};
+    private:
+      ParserState ps;
+      Query query;
+    public:
+      /*Constructor for Parser*/
+      explicit Parser(const std::string& input) : ps(input), query(Query()) {};
 
-    void Parse();
+      void Parse();
 
-    pql::Query getQuery();
+      pql::Query getQuery();
 
-    std::vector<std::string> GetSynonyms();
+      std::vector<std::string> GetSynonyms();
 
-    void ParseRelationship(Query& q);
+      void ParseRelationship(Query& q);
+
+      void ParsePattern(Query& q);
   };
 
 }

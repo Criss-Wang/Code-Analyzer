@@ -181,10 +181,12 @@ vector<int> Pkb::GetStmtsAfter(const int stmt) const {
   }
 }
 
-vector<pair<int, int>> Pkb::GetFollowsPair(int stmt) const {
+vector<pair<int, int>> Pkb::GetAllFollowsPairs() const {
   try {
     vector<pair<int, int>> result;
-    result.emplace_back(make_pair(stmt, follows_table_->GetValueByKey(stmt)));
+    for (const auto& [key, val] : follows_table_->GetKeyValueLst()) {
+      result.emplace_back(make_pair(key, val));
+    }
     return result;
   } catch (exception& e) {
     return vector<pair<int, int>>{};
@@ -413,6 +415,14 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const int ent
         constant_set_.insert(entity_val);
         return true;
       }
+      case EntityIdentifier::kIf: {
+        if_set_.insert(entity_val);
+        return true;
+      }
+      case EntityIdentifier::kWhile: {
+        while_set_.insert(entity_val);
+        return true;
+      }
       default:
         throw InvalidIdentifierException();
     }
@@ -463,6 +473,8 @@ unordered_set<int> Pkb::GetAllEntityInt(const EntityIdentifier entity_identifier
     case EntityIdentifier::kPrint: return print_set_;
     case EntityIdentifier::kCall: return call_set_;
     case EntityIdentifier::kConstant: return constant_set_;
+    case EntityIdentifier::kIf: return if_set_;
+    case EntityIdentifier::kWhile: return while_set_;
     default:
       throw InvalidIdentifierException();
   }

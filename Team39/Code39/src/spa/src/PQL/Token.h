@@ -1,7 +1,3 @@
-//
-// Created by Tan Xi Zhe on 3/2/22.
-//
-
 #pragma once
 
 #include <utility>
@@ -14,109 +10,105 @@
 #include "../Utility/entity.h"
 
 namespace pql {
-    typedef std::string Variable;
-    typedef std::string Ref;
+  typedef std::string Ref;
 
-    class Synonym {
+  class Synonym {
     private:
-        std::string name;
-        EntityIdentifier declaration;
+      std::string name;
+      EntityIdentifier declaration;
     public:
-        Synonym(std::string name, EntityIdentifier declaration) : name(std::move(name)), declaration(declaration) {};
+      Synonym(std::string name, EntityIdentifier declaration) : name(std::move(name)), declaration(declaration) {};
 
-        std::string GetName();
+      std::string GetName();
 
-        EntityIdentifier GetDeclaration();
+      EntityIdentifier GetDeclaration();
 
-        bool equal(const Synonym& s);
-    };
+      bool equal(const Synonym &s);
+  };
 
-    struct ParseException : public std::exception {};
+  struct ParseException : public std::exception {};
 
-    enum RelationshipTypes {
-        kFollows,
-        kFollowsT,
-        kParent,
-        kParentT,
-        kUsesS,
-        kUsesP,
-        kModifiesS,
-        kModifiesP
-    };
+  enum RelationshipTypes {
+    kFollows,
+    kFollowsT,
+    kParent,
+    kParentT,
+    kUsesS,
+    kUsesP,
+    kModifiesS,
+    kModifiesP
+  };
 
-    const std::map<std::string, EntityIdentifier> declarationMap {
-            {"stmt", EntityIdentifier::kStmt},
-            {"read", EntityIdentifier::kRead},
-            {"print", EntityIdentifier::kPrint},
-            {"call", EntityIdentifier::kCall},
-            {"while", EntityIdentifier::kWhile},
-            {"if", EntityIdentifier::kIf},
-            {"assign", EntityIdentifier::kAssign},
-            {"variable", EntityIdentifier::kVariable},
-            {"constant", EntityIdentifier::kConstant},
-            {"procedure", EntityIdentifier::kProcedure}
-    };
+  const std::map<std::string, EntityIdentifier> declarationMap {
+    {"stmt",      EntityIdentifier::kStmt},
+    {"read",      EntityIdentifier::kRead},
+    {"print",     EntityIdentifier::kPrint},
+    {"call",      EntityIdentifier::kCall},
+    {"while",     EntityIdentifier::kWhile},
+    {"if",        EntityIdentifier::kIf},
+    {"assign",    EntityIdentifier::kAssign},
+    {"variable",  EntityIdentifier::kVariable},
+    {"constant",  EntityIdentifier::kConstant},
+    {"procedure", EntityIdentifier::kProcedure}
+  };
 
-    const std::map<std::string, RelationshipTypes> relationshipMap {
-            {"Follows", kFollows},
-            {"Follows*", kFollowsT},
-            {"Parent", kParent},
-            {"Parent*", kParentT},
-            {"Uses", kUsesS},
-            {"UsesP", kUsesP},
-            {"Modifies", kModifiesS},
-            {"ModifiesP", kModifiesP}
-    };
+  const std::map<std::string, RelationshipTypes> relationshipMap {
+      {"Follows",   kFollows},
+      {"Follows*",  kFollowsT},
+      {"Parent",    kParent},
+      {"Parent*",   kParentT},
+      {"Uses",      kUsesS},
+      {"UsesP",     kUsesP},
+      {"Modifies",  kModifiesS},
+      {"ModifiesP", kModifiesP}
+  };
 
-    std::optional<EntityIdentifier> GetDeclarationType(const std::string& keyword);
+  std::optional<EntityIdentifier> GetDeclarationType(const std::string &keyword);
 
-    std::optional<RelationshipTypes> GetRelationshipType(const std::string& relationship);
+  std::optional<RelationshipTypes> GetRelationshipType(const std::string &relationship);
 
-    class Token {
-    public:
-        Token() = default;
-    };
-
-    class RelationshipToken : public Token {
+  class RelationshipToken {
     private:
-        enum RelationshipTypes relationship;
-        const pql::Ref left;
-        const pql::Ref right;
+      enum RelationshipTypes relationship;
+      const pql::Ref left;
+      const pql::Ref right;
+      bool is_synonym_left;
+      bool is_synonym_right;
     public:
-        RelationshipToken(pql::RelationshipTypes relationship, pql::Ref left, pql::Ref right) :
-                relationship(relationship), left(std::move(left)), right(std::move(right)) {};
+      RelationshipToken(pql::RelationshipTypes relationship, pql::Ref left, pql::Ref right, bool is_synonym_left, bool is_synonym_right) :
+        relationship(relationship), left(std::move(left)), right(std::move(right)), is_synonym_left(is_synonym_left), is_synonym_right(is_synonym_right) {};
 
-        pql::Ref GetLeft();
+      pql::Ref GetLeft();
 
-        pql::Ref GetRight();
+      pql::Ref GetRight();
 
-        pql::RelationshipTypes GetRelationship();
-    };
+      [[nodiscard]] bool IsSynonymLeft() const;
 
-    class Query {
+      [[nodiscard]] bool IsSynonymRight() const;
+
+      pql::RelationshipTypes GetRelationship();
+  };
+
+  class PatternToken {
     private:
-        std::vector<pql::Synonym> declarations;
-        std::map<std::string, pql::Synonym> synonyms;
-        std::vector<pql::Synonym> used_synonyms;
-        std::optional<pql::Synonym> result_synonym;
-        std::vector<RelationshipToken> such_that_clauses;
+      const std::string assign_synonym;
+      const pql::Ref left;
+      const std::string expression;
+      bool is_synonym_left;
+      bool exact;
     public:
-        bool SynonymDeclared(const std::string& name);
+      PatternToken(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left) :
+        assign_synonym(std::move(assign_synonym)), left(std::move(left)), expression(std::move(expression)),
+        exact(exact), is_synonym_left(is_synonym_left) {};
 
-        void AddSynonym(EntityIdentifier d, const std::string& name);
+      std::string GetAssignSynonym();
 
-        void SetResultSynonym(const std::string& name);
+      pql::Ref GetLeft();
 
-        pql::Synonym GetResultSynonym();
+      std::string GetExpression();
 
-        void AddUsedSynonym(const std::string& name);
+      [[nodiscard]] bool IsSynonymLeft() const;
 
-        std::vector<pql::Synonym> GetAllUsedSynonyms();
-
-        bool IsProcedure(const std::string& name);
-
-        void AddSuchThatClause(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right);
-
-        std::vector<RelationshipToken> GetSuchThatClause();
-    };
+      [[nodiscard]] bool IsExact() const;
+  };
 }

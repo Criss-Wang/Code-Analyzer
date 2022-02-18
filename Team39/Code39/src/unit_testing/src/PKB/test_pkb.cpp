@@ -93,21 +93,11 @@ TEST_CASE("Populating Follows and FollowsBefore Table") {
     // Key does not exist so the result should be empty
     REQUIRE(pkb.GetStmtRightAfter(3000) == vector<int>{});
 
-    vector<pair<int, int>> first_pair = pkb.GetFollowsPair(1);
-    vector<pair<int, int>> expected_first_pair = vector<pair<int, int>>{make_pair(1, 2)};
+    vector<pair<int, int>> follows_pairs = pkb.GetAllFollowsPairs();
+    vector<pair<int, int>> expected_follows_pairs = vector<pair<int, int>>{make_pair(2, 3), make_pair(1, 2)};
     vector<pair<int, int>> invalid_first_pair = vector<pair<int, int>>{make_pair(1, 3)};
-    REQUIRE(first_pair == expected_first_pair);
-    REQUIRE(first_pair != invalid_first_pair);
-
-    vector<pair<int, int>> second_pair = pkb.GetFollowsPair(2);
-    vector<pair<int, int>> expected_second_pair = vector<pair<int, int>>{make_pair(2, 3)};
-    vector<pair<int, int>> invalid_second_pair = vector<pair<int, int>>{make_pair(2, 4)};
-    REQUIRE(second_pair == expected_second_pair);
-    REQUIRE(second_pair != invalid_second_pair);
-
-    vector<pair<int, int>> empty_pair = pkb.GetFollowsPair(1000);
-    vector<pair<int, int>> expected_empty_pair = vector<pair<int, int>>{};
-    REQUIRE(empty_pair == expected_empty_pair);
+    REQUIRE(follows_pairs == expected_follows_pairs);
+    REQUIRE(follows_pairs != invalid_first_pair);
   }
 
   SECTION("Test API for PQL side for FollowsBeforeTable") {

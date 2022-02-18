@@ -109,7 +109,7 @@ class Pkb {
     [[nodiscard]] bool IsFollows(int stmt_1, int stmt_2) const;
     [[nodiscard]] bool IsTransitiveFollows(int stmt_1, int stmt_2) const;
     [[nodiscard]] vector<int> GetStmtRightBefore(int stmt) const;
-    [[nodiscard]] vector<pair<int,int>> GetFollowsPair(int stmt) const;
+    [[nodiscard]] vector<pair<int,int>> GetAllFollowsPairs() const;
     [[nodiscard]] vector<int> GetStmtsBefore(int stmt) const;
     [[nodiscard]] vector<int> GetStmtRightAfter(int stmt) const;
     [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;

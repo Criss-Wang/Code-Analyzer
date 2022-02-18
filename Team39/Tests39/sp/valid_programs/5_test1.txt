@@ -5,7 +5,9 @@ procedure procName {
       y = x + 100;
     } else {
       x = y - 199 * x;
-      read x;
+      while (v == 0) {
+		read v;
+	}
     }
     print y;
   }

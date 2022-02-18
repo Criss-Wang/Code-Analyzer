@@ -1,7 +1,7 @@
 #include "TestWrapper.h"
 #include "parser.h"
 #include "../../spa/src/PQL/Parser.h"
-#include "../../spa/src/PQL/query_evaluator.h"
+#include "../../spa/src/PQL/query_evaluator/query_evaluator.h"
 
 using namespace std;
 
@@ -37,12 +37,17 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
 
   // store the answers to the query in the results list (it is initially empty)
   // each result must be a string.
+  try {
+    pql::Parser parser = pql::Parser(query);
+    parser.Parse();
+    pql::Query queryObj = parser.getQuery();
+    std::vector<std::string> res = EvaluateQuery(queryObj, this->pkb);
 
-  pql::Parser parser = pql::Parser(query);
-  parser.Parse();
-  std::list<std::string> res = evaluateQuery(parser.getQuery(), this->pkb);
-
-  for (string s : res) {
-    results.push_back(s);
+    for (string s : res) {
+        results.push_back(s);
+    }
+  } catch (pql::ParseException& e) {
+    // the query is invalid, do nothing
+    return ;
   }
 }

@@ -431,7 +431,7 @@ TEST_CASE("Valid tokenizer output") {
   }
 
   SECTION("Procedure with while nested in ifs") {
-    source_prog = "procedure procedure { if (x = 2) then { while (s = 0) { read s; } } else { while (s = 0) { read s; } } }";
+    source_prog = "procedure procedure {if (x == 2) then { while (s == 0) { read s;} }else{ while (s == 0) { read s; } }}";
     actual_tokens = tokenizer.parse(source_prog);
 
     Token token1{ NAME, "procedure", 0 };
@@ -440,7 +440,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token4{ NAME, "if", 1 };
     Token token5{ LEFT_PAREN, "(", 1 };
     Token token6{ LETTER, "x", 1 };
-    Token token7{ OPERATOR, "=", 1 };
+    Token token7{ OPERATOR, "==", 1 };
     Token token8{ DIGIT, "2", 1 };
     Token token9{ RIGHT_PAREN, ")", 1 };
     Token token10{ NAME, "then", 1 };
@@ -448,7 +448,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token12{ NAME, "while", 2 };
     Token token13{ LEFT_PAREN, "(", 2 };
     Token token14{ LETTER, "s", 2 };
-    Token token15{ OPERATOR, "=", 2 };
+    Token token15{ OPERATOR, "==", 2 };
     Token token16{ DIGIT, "0", 2 };
     Token token17{ RIGHT_PAREN, ")", 2 };
     Token token18{ LEFT_CURLY, "{", 2 };
@@ -462,7 +462,7 @@ TEST_CASE("Valid tokenizer output") {
     Token token26{ NAME, "while", 4 };
     Token token27{ LEFT_PAREN, "(", 4 };
     Token token28{ LETTER, "s", 4 };
-    Token token29{ OPERATOR, "=", 4 };
+    Token token29{ OPERATOR, "==", 4 };
     Token token30{ DIGIT, "0", 4 };
     Token token31{ RIGHT_PAREN, ")", 4 };
     Token token32{ LEFT_CURLY, "{", 4 };
@@ -481,7 +481,7 @@ TEST_CASE("Valid tokenizer output") {
   }
 
   SECTION("Procedure with two-symbol operator in cond expr and rel expr") {
-    source_prog = "x == 0; x >= 0; x <= 0; x != 0; x && y; x || y; !(x == 0);";
+    source_prog = "x==0; x >=0; x<= 0; x != 0; x && y; x || y; !(x == 0);";
     actual_tokens = tokenizer.parse(source_prog);
 
     Token token1{ LETTER, "x", 0 };
@@ -564,103 +564,3 @@ TEST_CASE("Invalid tokenizer output") {
     REQUIRE(expected_tokens == actual_tokens);
   }
 }
-
-// TODO: Move the validation test cases to test_validation
-  /*
-  SECTION("Procedure with no semicolon") {
-    source_prog = "procedure procName { x = y + 2 }";
-    actual_tokens = tokenizer.parse(source_prog);
-    expected_tokens = { };
-
-    REQUIRE(expected_tokens == actual_tokens);
-  }
-
-  SECTION("Invalid assign") {
-    source_prog = "procedure procName { = x + 2; }";
-
-    try {
-      actual_tokens = tokenizer.parse(source_prog);
-    } catch (const std::invalid_argument& e) {}
-  }
-
-  SECTION("Invalid read") {
-    source_prog = "procedure procName { read +; }";
-
-    try {
-      actual_tokens = tokenizer.parse(source_prog);
-    } catch (const std::invalid_argument& e) {}
-  }
-
-  SECTION("Invalid empty stmtLst") {
-    source_prog = "procedure procName { }";
-
-    try {
-      actual_tokens = tokenizer.parse(source_prog);
-    } catch (const std::invalid_argument& e) {}
-  }
-
-  SECTION("Invalid stmtLst") {
-    source_prog = "procedure procName { ; }";
-
-    try {
-      actual_tokens = tokenizer.parse(source_prog);
-    } catch (const std::invalid_argument& e) {}
-  }
-
-  SECTION("Invalid lack of close parenthesis") {
-    source_prog = "procedure procName { y = (x + 2; }";
-
-    try {
-      actual_tokens = tokenizer.parse(source_prog);
-    } catch (const std::invalid_argument& e) {}
-  }
-
-  SECTION("Invalid order of parenthesis") {
-    source_prog = "procedure procName { y = )x + 2(; }";
-
-    try {
-      actual_tokens = tokenizer.parse(source_prog);
-    } catch (const std::invalid_argument& e) {}
-  }
-
-  SECTION("Invalid number of parenthesis") {
-    source_prog = "procedure procName { x = x + (2 + y)); }";
-
-    try {
-      actual_tokens = tokenizer.parse(source_prog);
-    } catch (const std::invalid_argument& e) {}
-  }*/
-
-/*
-TEST_CASE("Run tokenizer with file input") {
-  ifstream myFile("SourceProgramInput.txt"); // Put input file in same folder as unit_testing.exe
-  Tokenizer tokenizer;
-  string source_prog;
-
-  if (myFile) {
-    try {
-      ostringstream ss;
-      ss << myFile.rdbuf();
-      source_prog = ss.str();
-
-      vector<Token> actual_tokens = tokenizer.parse(source_prog);
-
-      for (Token curr_token : actual_tokens) {
-        curr_token.print();
-      }
-
-      if (actual_tokens.size() != 0) {
-        //
-      } else {
-        cout << "No tokens";
-      }
-    } catch (const std::invalid_argument& e) {
-      cout << "Syntax error" << endl;
-    }
-    myFile.close();
-  } else {
-    cout << "Unable to open file";
-  }
-  REQUIRE(1 == 1);
-}
-*/
