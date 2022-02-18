@@ -46,8 +46,8 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
     for (string s : res) {
         results.push_back(s);
     }
-  } catch (pql::ParseException e) {
-    //the query is invalid, do nothing
-    return;
+  } catch (pql::ParseException& e) {
+    // the query is invalid, do nothing
+    return ;
   }
 }

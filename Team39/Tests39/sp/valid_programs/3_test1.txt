@@ -1,9 +1,9 @@
 procedure procName {
-x = y + (5 + z);
-if (x != 4) then {
-print x;
-read y;
-} else {
-y = 5;
-}
-}
+	x = y + (5 + z);
+	if (x != 4) then {
+		print x;
+		read z;
+	} else {
+		y = 5;
+	}
+} 
