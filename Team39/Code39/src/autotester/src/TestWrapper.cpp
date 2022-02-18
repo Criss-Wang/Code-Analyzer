@@ -47,7 +47,8 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
       results.push_back(s);
     }
   } catch (pql::ParseException& e) {
-    std::cout << "The PQL Query is invalid!" << std::endl;
+    // the query is invalid, do nothing
+    return ;
   }
 
 }

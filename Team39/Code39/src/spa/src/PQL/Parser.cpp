@@ -44,6 +44,7 @@ namespace pql {
   }
 
   void Parser::Parse() {
+    bool select_clause_parsed = false;
     while (!ps.IsEOF()) {
       ps.EatWhiteSpaces();
       std::stringstream ks;
@@ -60,6 +61,7 @@ namespace pql {
         ps.EatWhiteSpaces();
         Parser::query.SetResultSynonym(ps.ParseSynonym());
         ps.EatWhiteSpaces();
+        select_clause_parsed = true;
         if (!ps.IsEOF()) {
           if (ps.Peek() == 's') {
             ps.Expect("such that");
@@ -80,6 +82,9 @@ namespace pql {
         ps.EatWhiteSpaces();
         ps.ExpectEOF();
       }
+    }
+    if (!select_clause_parsed) {
+      throw ParseException();
     }
   }
 
@@ -125,7 +130,15 @@ namespace pql {
           throw ParseException();
         }
       }
-      q.AddSuchThatClause(*r, left, right, q.SynonymDeclared(left), q.SynonymDeclared(right));
+      bool is_synonym_left = q.SynonymDeclared(left);
+      bool is_synonym_right = q.SynonymDeclared(right);
+      if (!is_synonym_left && IsIdent(left)) {
+        left = left.substr(1, left.length() - 2);
+      }
+      if (!is_synonym_right && IsIdent(right)) {
+        right = right.substr(1, right.length() - 2);
+      }
+      q.AddSuchThatClause(*r, left, right, is_synonym_left, is_synonym_right);
     }
   }
 
@@ -142,15 +155,24 @@ namespace pql {
       ps.EatWhiteSpaces();
       if (ps.Peek() == '_') {
         exact = false;
-        ps.Next();
+        ps.Consume();
       }
-      expression = ps.ParseExpression();
-      if (!exact) {
+      ps.EatWhiteSpaces();
+      if (!exact && ps.Peek() == ')') {
+        expression = "_";
+      } else if (!exact) {
+        expression = ps.ParseExpression();
         ps.Expect("_");
+      } else {
+        expression = ps.ParseExpression();
       }
       ps.EatWhiteSpaces();
       ps.Expect(")");
-      q.AddPattern(assign_synonym, left, expression, exact, q.SynonymDeclared(left));
+      bool is_synonym_left = q.SynonymDeclared(left);
+      if (!is_synonym_left && IsIdent(left)) {
+        left = left.substr(1, left.length() - 2);
+      }
+      q.AddPattern(assign_synonym, left, expression, exact, is_synonym_left);
     }
   }
 
