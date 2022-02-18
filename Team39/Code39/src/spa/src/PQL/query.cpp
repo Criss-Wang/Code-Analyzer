@@ -1,4 +1,5 @@
 #include "query.h"
+#include <algorithm>
 
 namespace pql {
   bool Query::SynonymDeclared(const std::string &name) {
@@ -56,6 +57,11 @@ namespace pql {
   }
 
   void Query::AddUsedSynonym(const std::string &name) {
+    for (pql::Synonym s: Query::used_synonyms) {
+      if (s.equal(Query::synonyms.at(name))) {
+        return ;
+      }
+    }
     Query::used_synonyms.push_back(Query::synonyms.at(name));
   }
 
@@ -75,7 +81,7 @@ namespace pql {
     Query::pattern.emplace(PatternToken(std::move(assign_synonym), std::move(left), std::move(expression), exact, is_synonym_left));
   }
 
-  pql::PatternToken Query::GetPattern() {
-    return *Query::pattern;
+  std::optional<pql::PatternToken> Query::GetPattern() {
+    return Query::pattern;
   }
 }
