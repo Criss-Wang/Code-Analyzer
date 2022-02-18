@@ -168,6 +168,9 @@ TEST_CASE("Populating StmtToPatterns Table") {
     res = pkb.GetAllStmtsWithPattern("A + (B + C) + 2");
     REQUIRE(res == unordered_set<int>{2});
 
+    res = pkb.GetAllStmtsWithPattern("A");
+    REQUIRE(res == unordered_set<int>{2, 4});
+
     res = pkb.GetAllStmtsWithPattern("B + C");
     REQUIRE(res == unordered_set<int>{3, 2});
 
