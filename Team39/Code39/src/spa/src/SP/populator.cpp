@@ -104,9 +104,7 @@ void populateIfStmt(vector<Token> tokens, Pkb& pkb) {
 
   // Add stmt num to stmt_set_ and if_set_
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
-
-  // No api to populate if_set
-  //pkb.AddEntityToSet(EntityIdentifier::kIf, stmt_num);
+  pkb.AddEntityToSet(EntityIdentifier::kIf, stmt_num);
 
   for (auto token = begin(tokens) + 2; token != end(tokens) - 2; ++token) {
 

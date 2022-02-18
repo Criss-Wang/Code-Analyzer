@@ -354,9 +354,8 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     unordered_set<int> expected_assign = { 1, 5 };
     REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
 
-    // no api for GetAllEntityInt(EntityIdentifier::kIf)
-    //unordered_set<int> expected_if = { 2 };
-    //REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    unordered_set<int> expected_if = { 2 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -409,9 +408,8 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     unordered_set<int> expected_assign = { 3 };
     REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
 
-    // no api for GetAllEntityInt(EntityIdentifier::kWhile)
-    //unordered_set<int> expected_while = { 2 };
-    //REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
+    unordered_set<int> expected_while = { 2 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -463,13 +461,11 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     unordered_set<int> expected_assign = { 6 };
     REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
 
-    // no api for GetAllEntityInt(EntityIdentifier::kIf)
-    //unordered_set<int> expected_if = { 1 };
-    //REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    unordered_set<int> expected_if = { 1 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
     
-    // no api for GetAllEntityInt(EntityIdentifier::kWhile)
-    //unordered_set<int> expected_while = { 4 };
-    //REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
+    unordered_set<int> expected_while = { 4 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
     
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -526,9 +522,8 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     unordered_set<int> expected_assign = { 2, 5, 6 };
     REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
 
-    // no api for GetAllEntityInt(EntityIdentifier::kIf)
-    //unordered_set<int> expected_if = { 4 };
-    //REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    unordered_set<int> expected_if = { 4 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -592,13 +587,11 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
     unordered_set<int> expected_assign = { 1 };
     REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
 
-    // no api for GetAllEntityInt(EntityIdentifier::kIf)
-    //unordered_set<int> expected_if = { 3 };
-    //REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    unordered_set<int> expected_if = { 3 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
 
-    // no api for GetAllEntityInt(EntityIdentifier::kWhile)
-    //unordered_set<int> expected_while = { 2 };
-    //REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
+    unordered_set<int> expected_while = { 2 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
     
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -652,13 +645,11 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
     unordered_set<int> expected_assign = { 3, 5, 8, 10 };
     REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
 
-    // no api for GetAllEntityInt(EntityIdentifier::kIf)
-    //unordered_set<int> expected_if = { 2 };
-    //REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    unordered_set<int> expected_if = { 2 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
 
-    // no api for GetAllEntityInt(EntityIdentifier::kWhile)
-    //unordered_set<int> expected_while = { 4 };
-    //REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
+    unordered_set<int> expected_while = { 4 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -728,13 +719,11 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Population
     unordered_set<int> expected_assign = { 4, 5, 9 };
     REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
 
-    // no api for GetAllEntityInt(EntityIdentifier::kIf)
-    //unordered_set<int> expected_if = { 3 };
-    //REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    unordered_set<int> expected_if = { 3 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
 
-    // no api for GetAllEntityInt(EntityIdentifier::kWhile)
-    //unordered_set<int> expected_while = { 1, 6 };
-    //REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
+    unordered_set<int> expected_while = { 1, 6 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
