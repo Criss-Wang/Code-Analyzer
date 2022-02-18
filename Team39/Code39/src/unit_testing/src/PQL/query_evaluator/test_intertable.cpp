@@ -39,6 +39,13 @@ static vector<string> table2_duplicate_second_col({ "a","a","a","b","c","d","d"}
 static vector<vector<pql_table::element>> table2_duplicate_rows;
 static pql_table::InterTable table2_duplicate(table2_header, table2_duplicate_rows);
 
+static pql_table::InterTable table1_merge1(table2_first_syn, table2_first_col);
+static pql_table::InterTable table1_merge2(table2_second_syn, table2_second_col);
+static vector<int> table2_merge_first_col({ 2,2,2,2,4,4,4,4,6,6,6,6,8,8,8,8 });
+static vector<string> table2_merge_second_col({ "a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d" });
+static vector<vector<pql_table::element>> table2_merge_rows;
+static pql_table::InterTable table2_merge(table2_header, table2_merge_rows);
+
 static void InitializeList(vector<int>* col1, vector<string>* col2, vector<vector<pql_table::element>>* rows) {
 	(*rows).clear();
   for (int index = 0; index < col1->size(); index++) {
@@ -56,8 +63,10 @@ static void InitializeList(vector<int>* col1, vector<string>* col2, vector<vecto
 static void Initialize() {
   InitializeList(&table2_first_col, &table2_second_col, &table2_rows);
 	InitializeList(&table2_duplicate_first_col, &table2_duplicate_second_col, &table2_duplicate_rows);
+	InitializeList(&table2_merge_first_col, &table2_merge_second_col, &table2_merge_rows);
 	table2 = pql_table::InterTable(table2_header, table2_rows);
 	table2_duplicate = pql_table::InterTable(table2_header, table2_duplicate_rows);
+	table2_merge = pql_table::InterTable(table2_header, table2_merge_rows);
 }
 
 
@@ -80,6 +89,8 @@ TEST_CASE("Check equality of InterTable") {
 }
 
 TEST_CASE("Check Deduplicate function of Intertable") {
+	Initialize();
+
 	SECTION("Deduplicate will only keep unique rows") {
 	  REQUIRE(!table1.equal(table1_duplicate)); // should not be equal since number of occurence of each elements are not same
 		table1_duplicate.Deduplicate();
@@ -88,5 +99,15 @@ TEST_CASE("Check Deduplicate function of Intertable") {
 		REQUIRE(!table2.equal(table2_duplicate));
 		table2_duplicate.Deduplicate();
 		REQUIRE(table2.equal(table2_duplicate)); 
+	}
+}
+
+TEST_CASE("Check merge function of Intertable") {
+	Initialize();
+	
+	SECTION("Merge two tables with content") {
+		REQUIRE(!table1_merge1.equal(table2_merge));
+		table1_merge1.Merge(table1_merge2);
+		REQUIRE(table1_merge1.equal(table2_merge));
 	}
 }

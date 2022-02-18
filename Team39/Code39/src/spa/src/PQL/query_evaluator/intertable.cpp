@@ -143,6 +143,11 @@ namespace pql_table {
 	}
 
 	void InterTable::MergeAndFilter(InterTable& t1, Predicate& pred) {
+		//add the header of t1 to the current header
+		for (auto& syn : t1.header_) {
+			header_.push_back(syn);
+		}
+
 		std::vector<std::vector<element>> new_rows;
 		int first_syn_col_index = FindSynCol(pred.first_syn_);
 		int second_syn_col_index = t1.FindSynCol(pred.second_syn_);
@@ -171,7 +176,7 @@ namespace pql_table {
 		  if (iter == second_syn_domain.end()) {
 				//the element does not exist in the map
 				std::vector<int> v({ index });
-				second_syn_domain.insert({ rows_[index][second_syn_col_index], v });
+				second_syn_domain.insert({ t1.rows_[index][second_syn_col_index], v });
 		  }
 		  else {
 				iter->second.push_back(index);
