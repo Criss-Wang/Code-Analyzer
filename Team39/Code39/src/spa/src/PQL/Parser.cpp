@@ -44,6 +44,7 @@ namespace pql {
   }
 
   void Parser::Parse() {
+    bool select_clause_parsed = false;
     while (!ps.IsEOF()) {
       ps.EatWhiteSpaces();
       std::stringstream ks;
@@ -60,6 +61,7 @@ namespace pql {
         ps.EatWhiteSpaces();
         Parser::query.SetResultSynonym(ps.ParseSynonym());
         ps.EatWhiteSpaces();
+        select_clause_parsed = true;
         if (!ps.IsEOF()) {
           if (ps.Peek() == 's') {
             ps.Expect("such that");
@@ -80,6 +82,9 @@ namespace pql {
         ps.EatWhiteSpaces();
         ps.ExpectEOF();
       }
+    }
+    if (!select_clause_parsed) {
+      throw ParseException();
     }
   }
 
