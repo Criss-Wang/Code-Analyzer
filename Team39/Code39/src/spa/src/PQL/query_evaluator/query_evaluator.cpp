@@ -16,7 +16,7 @@
 using namespace std;
 
 namespace pql {
-
+   
   void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& stmt_hashmap, 
                     std::unordered_map<std::string, std::vector<std::string>>& var_hashmap, Pkb& pkb) {
     //hashmap stores <synonym.name, domain> pair.
@@ -94,7 +94,7 @@ namespace pql {
     std::vector<std::pair<int, std::string>> pred_lst;
 
     for (std::string& str : var_domain) {
-      std::vector<int> assign_domain = pkb.GetModifiesStmtsByVar(pattern_token.GetLeft());
+      std::vector<int> assign_domain = pkb.GetModifiesStmtsByVar(str);
 
       for (int& val : assign_domain) {
         pred_lst.push_back(std::make_pair(val, str));

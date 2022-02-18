@@ -46,6 +46,11 @@ static vector<string> table2_merge_second_col({ "a", "b", "c", "d", "a", "b", "c
 static vector<vector<pql_table::element>> table2_merge_rows;
 static pql_table::InterTable table2_merge(table2_header, table2_merge_rows);
 
+static vector<int> table2_first_empty_col({});
+static pql_table::InterTable table1_empty_merge1(table2_first_syn, table2_first_empty_col);
+static vector<vector<pql_table::element>> table2_empty_rows;
+static pql_table::InterTable table2_empty(table2_header, table2_empty_rows);
+
 static void InitializeList(vector<int>* col1, vector<string>* col2, vector<vector<pql_table::element>>* rows) {
 	(*rows).clear();
   for (int index = 0; index < col1->size(); index++) {
@@ -89,9 +94,9 @@ TEST_CASE("Check equality of InterTable") {
 }
 
 TEST_CASE("Check Deduplicate function of Intertable") {
-	Initialize();
 
 	SECTION("Deduplicate will only keep unique rows") {
+	  Initialize();
 	  REQUIRE(!table1.equal(table1_duplicate)); // should not be equal since number of occurence of each elements are not same
 		table1_duplicate.Deduplicate();
 		REQUIRE(table1.equal(table1_duplicate)); // should be equal
@@ -103,11 +108,29 @@ TEST_CASE("Check Deduplicate function of Intertable") {
 }
 
 TEST_CASE("Check merge function of Intertable") {
-	Initialize();
 	
 	SECTION("Merge two tables with content") {
+		Initialize();
 		REQUIRE(!table1_merge1.equal(table2_merge));
 		table1_merge1.Merge(table1_merge2);
 		REQUIRE(table1_merge1.equal(table2_merge));
 	}
+	
+	SECTION("One of the table is empty") {
+		Initialize();
+		REQUIRE(!table1_empty_merge1.equal(table2_empty));
+		table1_empty_merge1.Merge(table1_merge2);
+		REQUIRE(table1_empty_merge1.equal(table2_empty));
+	}
+}
+
+TEST_CASE("Check filter function of Intertable") {
+
+  SECTION("Merge two tables with content") {
+		Initialize();
+		REQUIRE(!table1_merge1.equal(table2_merge));
+		table1_merge1.Merge(table1_merge2);
+		REQUIRE(table1_merge1.equal(table2_merge));
+  }
+
 }
