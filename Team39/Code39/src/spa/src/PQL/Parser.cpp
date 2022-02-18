@@ -54,22 +54,28 @@ namespace pql {
       ks >> keyword;
       if (auto d = pql::GetDeclarationType(keyword)) {
         for (const std::string &s: Parser::GetSynonyms()) {
-        Parser::query.AddSynonym(*d, s);
+          Parser::query.AddSynonym(*d, s);
         }
       } else if (keyword == "Select") {
         ps.EatWhiteSpaces();
         Parser::query.SetResultSynonym(ps.ParseSynonym());
         ps.EatWhiteSpaces();
         if (!ps.IsEOF()) {
-          ps.Expect("such that");
-          ps.EatWhiteSpaces();
-          Parser::ParseRelationship(Parser::query);
-        }
-        ps.EatWhiteSpaces();
-        if (!ps.IsEOF()) {
-          ps.Expect("pattern");
-          ps.EatWhiteSpaces();
-          Parser::ParsePattern(Parser::query);
+          if (ps.Peek() == 's') {
+            ps.Expect("such that");
+            ps.EatWhiteSpaces();
+            Parser::ParseRelationship(Parser::query);
+            ps.EatWhiteSpaces();
+            if (!ps.IsEOF()) {
+              ps.Expect("pattern");
+              ps.EatWhiteSpaces();
+              Parser::ParsePattern(Parser::query);
+            }
+          } else {
+            ps.Expect("pattern");
+            ps.EatWhiteSpaces();
+            Parser::ParsePattern(Parser::query);
+          }
         }
         ps.EatWhiteSpaces();
         ps.ExpectEOF();
@@ -91,6 +97,7 @@ namespace pql {
     ps.EatWhiteSpaces();
     ps.Expect("(");
     pql::Ref left = ps.ParseRef(q);
+    ps.EatWhiteSpaces();
     ps.Expect(",");
     pql::Ref right = ps.ParseRef(q);
     ps.Expect(")");
@@ -135,6 +142,7 @@ namespace pql {
       ps.EatWhiteSpaces();
       if (ps.Peek() == '_') {
         exact = false;
+        ps.Next();
       }
       expression = ps.ParseExpression();
       if (!exact) {
