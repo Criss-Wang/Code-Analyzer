@@ -87,6 +87,8 @@ unordered_set<string> PatternHelper::GetPatternSetPostfix(const string& input, c
     }
   }
 
+  if (operators.empty()) return { input };
+
   // Pop operators from operators stack until it is empty and add result of each pop operation in operands stack.
   string curr_pattern;
   while (!operators.empty()) {
