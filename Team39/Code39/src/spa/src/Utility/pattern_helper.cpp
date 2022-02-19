@@ -48,13 +48,16 @@ unordered_set<string> PatternHelper::GetPatternSetPostfix(const string& input, c
 
   // result set
   unordered_set<string> res;
+  string current_token = "";
 
   for (int i = 0; i < input.length(); i++) {
+
 
     // If current character is an opening bracket, then
     // push into the operators stack.
     if (input[i] == '(') {
       operators.push(input[i]);
+      current_token = "";
     }
 
     // If current character is a closing bracket, then pop from both stacks and push result in operands stack until
@@ -67,13 +70,20 @@ unordered_set<string> PatternHelper::GetPatternSetPostfix(const string& input, c
 
       // Pop opening bracket from stack.
       operators.pop();
+
+      current_token = "";
     }
 
     // If current character is an operand then push it into operands stack.
     else if (!IsOperator(input[i])) {
       // operands.push(string(1, input[i]));
-      operands.push(string(1, input[i]));
-      if (is_full) res.insert(string(1, input[i]));
+      do {
+        current_token += input[i];
+        i++;
+      } while (!(i >= input.length()) && !IsOperator(input[i]));
+      operands.push(current_token);
+      if (is_full) res.insert(current_token);
+      i--;
     }
 
     // If current character is an operator, then push it into operators stack after popping high priority operators from
@@ -84,6 +94,7 @@ unordered_set<string> PatternHelper::GetPatternSetPostfix(const string& input, c
         if (is_full) res.insert(curr_pattern);
       }
       operators.push(input[i]);
+      current_token = "";
     }
   }
 

@@ -154,9 +154,10 @@ TEST_CASE("Populating Parent and Child Table") {
 TEST_CASE("Populating StmtToPatterns Table") {
   // PatternToStmtsTable is populated behind the scenes
   Pkb pkb = Pkb();
-  bool success = pkb.AddInfoToTable(TableIdentifier::kPattern, 2, "A + (B + C) + 2");
-  success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 4, "A + B + C + 2");
-  success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 3, "X + (B + C) * (B + C)");
+  bool success = pkb.AddInfoToTable(TableIdentifier::kPattern, 2, "A + (Bbs + C) + 2");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 3, "X + (Bbs + C) * (B + C)");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 4, "A + Bbs + C + 2");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 5, "289 * 444 + (f * cenX)");
   SECTION("Adding patterns") {
     REQUIRE(success);
   }
@@ -165,17 +166,20 @@ TEST_CASE("Populating StmtToPatterns Table") {
     unordered_set<int> res = pkb.GetAllStmtsWithPattern("X + B + C");
     REQUIRE(res.empty());
 
-    res = pkb.GetAllStmtsWithPattern("A + (B + C) + 2");
+    res = pkb.GetAllStmtsWithPattern("A + (Bbs + C) + 2");
     REQUIRE(res == unordered_set<int>{2});
 
-    res = pkb.GetAllStmtsWithPattern("A");
-    REQUIRE(res == unordered_set<int>{2, 4});
+    res = pkb.GetAllStmtsWithPattern("Bbs");
+    REQUIRE(res == unordered_set<int>{2, 3, 4});
 
-    res = pkb.GetAllStmtsWithPattern("B + C");
+    res = pkb.GetAllStmtsWithPattern("Bbs + C");
     REQUIRE(res == unordered_set<int>{3, 2});
 
-    res = pkb.GetAllStmtsWithPattern("A + (B + C)");
+    res = pkb.GetAllStmtsWithPattern("A + (Bbs + C)");
     REQUIRE(res == unordered_set<int>{2});
+
+    res = pkb.GetAllStmtsWithPattern("cenX");
+    REQUIRE(res == unordered_set<int>{5});
   }
 }
 
