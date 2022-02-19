@@ -69,6 +69,5 @@ class Tokenizer {
 
   private:
     void EndToken(Token& token, vector<Token>& tokens);
-    void CheckStmtNum(Token& token);
 };
 
