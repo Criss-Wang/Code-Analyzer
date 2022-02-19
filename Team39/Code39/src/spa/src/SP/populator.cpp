@@ -205,18 +205,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   set<int> stmt_lst;
 
   for (auto token = begin(input_tokens); token != end(input_tokens); ++token) {
-    if (token->text == "procedure") {
-      vector<Token> tokens;
-      while (token->type != LEFT_CURLY) {
-        tokens.push_back(*token);
-        token++;
-      }
-      tokens.push_back(*token);
+    if (token->type == RIGHT_CURLY) {
 
-      populateProcedure(tokens, pkb);
-
-    } else if (token->type == RIGHT_CURLY) {
-      
       int previous_stmt_num = 0;
       if (!previous.empty()) {
         previous_stmt_num = previous.top();
@@ -251,6 +241,16 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
 
       stmt_lst.insert(token->stmt_num_);
+
+    } else if (token->text == "procedure") {
+      vector<Token> tokens;
+      while (token->type != LEFT_CURLY) {
+        tokens.push_back(*token);
+        token++;
+      }
+      tokens.push_back(*token);
+
+      populateProcedure(tokens, pkb);
 
     } else if (token->text == "read") {
       vector<Token> tokens;
