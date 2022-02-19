@@ -1,7 +1,7 @@
-
-#include "../spa/src/PKB/pkb.h"
-#include "../spa/src/SP/design_extractor.h"
-#include "../spa/src/Utility/entity.h"
+#include "../../spa/src/PKB/pkb.h"
+#include "../../spa/src/SP/design_extractor.h"
+#include "../../spa/src/Utility/entity.h"
+#include "../../spa/src/PQL/query_evaluator/predicate.h"
 
 // This file contains the pkb that are going to be used in the test files in query_evaluator
 // The SIMPLE program we will be extracting from (taken from CS3203 wiki):
@@ -31,10 +31,10 @@ using namespace std;
 
 static Pkb pkb;
 
-void Initialize() {
+void InitializePkb() {
     // add all statements first
-    for (int stmt_num = 1; i <= 14; i++) {
-        pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
+    for (int stmt_num = 1; stmt_num <= 14; stmt_num++) {
+      pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
     }
 
     //line 1
@@ -46,13 +46,13 @@ void Initialize() {
     pkb.AddInfoToTable(TableIdentifier::kPattern, 1, "0");
     pkb.AddInfoToTable(TableIdentifier::kConstant, 1, vector<int>({ 0 }));
     pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 1, vector<string>{ "count" });
-    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 1, vector<string>{});
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 1, vector<string>{});  
 
     //line 2
     pkb.AddEntityToSet(EntityIdentifier::kAssign, 2);
-    pkb.AddEntityToSet(EntityIdentifier::kVariable, "cenX");
     pkb.AddEntityToSet(EntityIdentifier::kConstant, 0);
-
+    pkb.AddEntityToSet(EntityIdentifier::kVariable, "cenX");
+    
     pkb.AddInfoToTable(TableIdentifier::kAssign, 2, "0");
     pkb.AddInfoToTable(TableIdentifier::kPattern, 2, "0");
     pkb.AddInfoToTable(TableIdentifier::kConstant, 2, vector<int>({ 0 }));
@@ -180,7 +180,41 @@ void Initialize() {
 
     pkb.AddInfoToTable(TableIdentifier::kPrint, 14, "y");
     pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 14, vector<string>{ "y" });
+    
+    //add Follows relationship
+    pkb.AddInfoToTable(TableIdentifier::kFollows, 1, 2);
+    pkb.AddInfoToTable(TableIdentifier::kFollows, 2, 3);
+    pkb.AddInfoToTable(TableIdentifier::kFollows, 3, 4);
+    pkb.AddInfoToTable(TableIdentifier::kFollows, 5, 6);
+    pkb.AddInfoToTable(TableIdentifier::kFollows, 6, 7);
+    pkb.AddInfoToTable(TableIdentifier::kFollows, 4, 8);
+    pkb.AddInfoToTable(TableIdentifier::kFollows, 10, 11);
+    pkb.AddInfoToTable(TableIdentifier::kFollows, 8, 12);
+    pkb.AddInfoToTable(TableIdentifier::kFollows, 12, 13);
+    pkb.AddInfoToTable(TableIdentifier::kFollows, 13, 14);
+
+    //add Parent relationship
+    pkb.AddInfoToTable(TableIdentifier::kParent, 4, 5);
+    pkb.AddInfoToTable(TableIdentifier::kParent, 4, 6);
+    pkb.AddInfoToTable(TableIdentifier::kParent, 4, 7);
+    pkb.AddInfoToTable(TableIdentifier::kParent, 8, 9);
+    pkb.AddInfoToTable(TableIdentifier::kParent, 8, 10);
+    pkb.AddInfoToTable(TableIdentifier::kParent, 8, 11);
 
     //populate transitive relationship
     PopulateNestedRelationships(pkb);
+}
+
+bool ComparePredicates(vector<pql_table::Predicate> p1, vector<pql_table::Predicate> p2) {
+  if (p1.size() != p2.size()) {
+    return false;
+  }
+
+  for (int index = 0; index < p1.size(); index++) {
+    if (!p1[0].equal(p2[0])) {
+      return false;
+    }
+  }
+
+  return true;
 }

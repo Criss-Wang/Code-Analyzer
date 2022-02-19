@@ -80,7 +80,7 @@ namespace pql {
       std::vector<std::pair<int, int>> domain = pkb_.GetAllFollowsPairs();
 
       if (domain.size() == 0) {
-          throw pql_exceptions::EmptyDomainException();
+        throw pql_exceptions::EmptyDomainException();
       }
     }
 
