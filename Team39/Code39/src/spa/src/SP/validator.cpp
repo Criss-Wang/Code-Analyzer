@@ -34,6 +34,7 @@ bool validateAssignStmt(vector<Token> tokens) {
   int paren_count = 0;
   
   for (auto token = begin(tokens) + 2; token != end(tokens) - 1; ++token) {
+
     TokenType token_type;
 
     if (token->type == LETTER) {
@@ -51,6 +52,8 @@ bool validateAssignStmt(vector<Token> tokens) {
       check_operator = find(begin(expected_operators), end(expected_operators), token->text) != end(expected_operators);
     }
     check_rhs = check_rhs && check_type && check_operator;
+
+    expected_types = {};
 
     if (token_type == OPERATOR
       || token_type == LEFT_PAREN) { // expects variable, integer or left paren after operator/left paren
@@ -71,6 +74,7 @@ bool validateAssignStmt(vector<Token> tokens) {
       expected_types.push_back(OPERATOR);
       expected_types.push_back(RIGHT_PAREN);
     }
+
   }
 
   bool check_brackets = paren_count == 0;
