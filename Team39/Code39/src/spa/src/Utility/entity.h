@@ -11,6 +11,5 @@ enum class EntityIdentifier {
 	kCall,
 	kIf,
 	kVariable,
-	kConstant,
-	kProcedure
+	kConstant
 };

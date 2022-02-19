@@ -49,7 +49,7 @@ namespace pql {
     {"assign",    EntityIdentifier::kAssign},
     {"variable",  EntityIdentifier::kVariable},
     {"constant",  EntityIdentifier::kConstant},
-    {"procedure", EntityIdentifier::kProcedure}
+    {"procedure", EntityIdentifier::kProc}
   };
 
   const std::map<std::string, RelationshipTypes> relationshipMap {
