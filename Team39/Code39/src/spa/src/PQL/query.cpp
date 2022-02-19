@@ -35,7 +35,7 @@ namespace pql {
 
   bool Query::IsProcedure(const std::string &name) {
     if (Query::SynonymDeclared(name)) {
-      return Query::synonyms.at(name).GetDeclaration() == EntityIdentifier::kProcedure;
+      return Query::synonyms.at(name).GetDeclaration() == EntityIdentifier::kProc;
     }
     return false;
   }
