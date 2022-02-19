@@ -126,11 +126,4 @@ TEST_CASE("Check merge function of Intertable") {
 
 TEST_CASE("Check filter function of Intertable") {
 
-  SECTION("Merge two tables with content") {
-		Initialize();
-		REQUIRE(!table1_merge1.equal(table2_merge));
-		table1_merge1.Merge(table1_merge2);
-		REQUIRE(table1_merge1.equal(table2_merge));
-  }
-
 }
