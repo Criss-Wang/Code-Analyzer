@@ -14,7 +14,8 @@ void RequireValid(string path) {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     Tokenizer tokenize;
     vector<Token> tokens = tokenize.parse(input);
-    REQUIRE((!tokens.empty() && Validate(tokens)));
+    REQUIRE(!tokens.empty());
+    REQUIRE(Validate(tokens));
   }
 }
 
