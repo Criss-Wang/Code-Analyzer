@@ -61,7 +61,7 @@ namespace pql_table {
 		}
 
 		InterTable table(header, rows);
-		table.Deduplicate();
+		table = table.Deduplicate();
 
 		std::vector<element> res;
 
@@ -86,15 +86,18 @@ namespace pql_table {
 		);
 	}
 
-	void InterTable::Deduplicate() {
+  InterTable InterTable::Deduplicate() {
 	  std::unordered_set<std::vector<element>, hash_vector_fn> s(rows_.begin(), rows_.end());
-		rows_.assign(s.begin(), s.end());
+		std::vector<std::vector<element>> new_rows(s.begin(), s.end());
+		std::vector<std::string> new_header(header_);
+		return InterTable(new_header, new_rows);
 	}
 
-	void InterTable::Merge(InterTable& t1) {
-		//add the header of t1 to the current header
+	InterTable InterTable::Merge(InterTable& t1) {
+		std::vector<std::string> new_header(header_);
+		
 		for (auto& syn : t1.header_) {
-			header_.push_back(syn);
+			new_header.push_back(syn);
 		}
 
 		//apply a cross product between current rows and t1 rows
@@ -119,10 +122,11 @@ namespace pql_table {
 			}
 		);
 
-		rows_ = new_rows;
+		return InterTable(new_header, new_rows);
 	}
 	
-	void InterTable::Filter(Predicate& pred) {
+	InterTable InterTable::Filter(Predicate& pred) {
+		std::vector<std::string> new_header(header_);
 		std::vector<std::vector<element>> new_rows;
 		int first_syn_col_index = FindSynCol(pred.first_syn_);
 		int second_syn_col_index = FindSynCol(pred.second_syn_);
@@ -139,14 +143,15 @@ namespace pql_table {
 			}
 		}
 
-		rows_ = new_rows;
+		return InterTable(new_header, new_rows);
 	}
 
-	void InterTable::MergeAndFilter(InterTable& t1, Predicate& pred) {
-		//add the header of t1 to the current header
-		for (auto& syn : t1.header_) {
-			header_.push_back(syn);
-		}
+	InterTable InterTable::MergeAndFilter(InterTable& t1, Predicate& pred) {
+			std::vector<std::string> new_header(header_);
+
+			for (auto& syn : t1.header_) {
+					new_header.push_back(syn);
+			}
 
 		std::vector<std::vector<element>> new_rows;
 		int first_syn_col_index = FindSynCol(pred.first_syn_);
@@ -213,7 +218,7 @@ namespace pql_table {
 		  }
 		}
 
-		rows_ = new_rows;
+		return InterTable(new_header, new_rows);
 	}
 
 	bool InterTable::equal(InterTable& t) {

@@ -44,11 +44,11 @@ namespace pql_solver {
     if (first_index != second_index) {
       //both synonyms are in different table, can use mergeAndFilter
       //need to remove the second table because it is already merged to the first table
-      tables_[first_index].MergeAndFilter(tables_[second_index], pred);
+      tables_[first_index] = tables_[first_index].MergeAndFilter(tables_[second_index], pred);
       tables_.erase(tables_.begin() + second_index);
     } else {
       //both synonyms are in the same table, can only use filter
-      tables_[first_index].Filter(pred);
+      tables_[first_index] = tables_[first_index].Filter(pred);
     }
   }
 

@@ -33,13 +33,13 @@ namespace pql_table {
 
       void DeleteCol(int col_index);
 
-      void Deduplicate();
+      InterTable Deduplicate();
 
-      void Merge(InterTable& t1);
+      InterTable Merge(InterTable& t1);
 
-      void Filter(Predicate& pred);
+      InterTable Filter(Predicate& pred);
 
-      void MergeAndFilter(InterTable& t1, Predicate& pred);
+      InterTable MergeAndFilter(InterTable& t1, Predicate& pred);
 
       bool equal(InterTable& t);
   }; 
