@@ -9,7 +9,7 @@
 namespace pql_solver {
 
   class Solver {
-    private:
+    public:
       std::vector<pql_table::InterTable> tables_;
       std::vector<pql_table::Predicate>* predicates_;
       pql::Synonym* return_syn_;

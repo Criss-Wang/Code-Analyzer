@@ -94,7 +94,7 @@ TEST_CASE("Populating Follows and FollowsBefore Table") {
     REQUIRE(pkb.GetStmtRightAfter(3000) == vector<int>{});
 
     vector<pair<int, int>> follows_pairs = pkb.GetAllFollowsPairs();
-    vector<pair<int, int>> expected_follows_pairs = vector<pair<int, int>>{make_pair(2, 3), make_pair(1, 2)};
+    vector<pair<int, int>> expected_follows_pairs = vector<pair<int, int>>{make_pair(1, 2), make_pair(2, 3)};
     vector<pair<int, int>> invalid_first_pair = vector<pair<int, int>>{make_pair(1, 3)};
     REQUIRE(follows_pairs == expected_follows_pairs);
     REQUIRE(follows_pairs != invalid_first_pair);
