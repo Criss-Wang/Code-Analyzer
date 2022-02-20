@@ -111,3 +111,14 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Validation
 
   }
 }
+
+TEST_CASE("Sample sources") {
+
+  SECTION("Valid Programs") {
+
+    RequireValid(valid_dir + "test1_source.txt");
+    RequireValid(valid_dir + "test2_source.txt");
+    RequireValid(valid_dir + "test3_source.txt");
+
+  }
+}
