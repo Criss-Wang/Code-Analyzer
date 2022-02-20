@@ -104,7 +104,7 @@ TEST_CASE("Valid queries") {
 
   SECTION("With Select and pattern clause") {
     RequireValidQuery(valid_queries_dir + "3_test1.txt", 0, 1, 2); //pattern a(_, _)
-    RequireValidQuery(valid_queries_dir + "3_test2.txt", 0, 1, 1); //pattern a(_, "x+1")
+    RequireValidQuery(valid_queries_dir + "3_test2.txt", 0, 1, 1); //pattern a(_, "x+1") 
     RequireValidQuery(valid_queries_dir + "3_test3.txt", 0, 1, 2); //pattern a(v, "x+1")
   }
 
