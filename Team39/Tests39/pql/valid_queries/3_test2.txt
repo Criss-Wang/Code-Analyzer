@@ -1,2 +1,2 @@
 assign a;
-Select a pattern a(_, "x+1")
+Select a pattern a(_, "x")
