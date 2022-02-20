@@ -194,12 +194,33 @@ void InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kFollows, 13, 14);
 
     //add Parent relationship
-    pkb.AddInfoToTable(TableIdentifier::kParent, 4, 5);
-    pkb.AddInfoToTable(TableIdentifier::kParent, 4, 6);
-    pkb.AddInfoToTable(TableIdentifier::kParent, 4, 7);
-    pkb.AddInfoToTable(TableIdentifier::kParent, 8, 9);
-    pkb.AddInfoToTable(TableIdentifier::kParent, 8, 10);
-    pkb.AddInfoToTable(TableIdentifier::kParent, 8, 11);
+    pkb.AddInfoToTable(TableIdentifier::kParent, 4, vector<int>({5, 6, 7}));
+    pkb.AddInfoToTable(TableIdentifier::kParent, 8, vector<int>({ 9,10,11 }));
+
+    //add Uses relationship
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 4, vector<string>({ "x", "y" }));
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 5, vector<string>({ "count" }));
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 6, vector<string>({ "cenX", "x" }));
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 7, vector<string>({ "cenY", "y" }));
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 8, vector<string>({ "count" }));
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 10, vector<string>({ "cenX", "count" }));
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 11, vector<string>({ "cenY", "count" }));
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 12, vector<string>({ "cenX", "cenY" }));
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 14, vector<string>({ "y" }));
+
+    //add Modifies relationship
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 1, vector<string>({ "count" }));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 2, vector<string>({ "cenX" }));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 3, vector<string>({ "cenY" }));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 5, vector<string>({ "count" }));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 6, vector<string>({ "cenX" }));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 7, vector<string>({ "cenY" }));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 9, vector<string>({ "flag" }));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 10, vector<string>({ "cenX" }));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 11, vector<string>({ "cenY" }));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 12, vector<string>({ "normSq" }));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 13, vector<string>({ "x" }));
+
 
     //populate transitive relationship
     PopulateNestedRelationships(pkb);
