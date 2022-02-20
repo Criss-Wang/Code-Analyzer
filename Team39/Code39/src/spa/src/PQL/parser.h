@@ -4,7 +4,7 @@
 #include <sstream>
 #include <utility>
 
-#include "Token.h"
+#include "token.h"
 #include "query.h"
 
 namespace pql {
@@ -54,7 +54,7 @@ namespace pql {
 
       void Parse();
 
-      pql::Query getQuery();
+      pql::Query GetQuery();
 
       std::vector<std::string> GetSynonyms();
 

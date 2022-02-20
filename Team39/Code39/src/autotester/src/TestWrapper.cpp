@@ -1,6 +1,6 @@
 #include "TestWrapper.h"
 #include "parser.h"
-#include "../../spa/src/PQL/Parser.h"
+#include "../../spa/src/PQL/parser.h"
 #include "../../spa/src/PQL/query_evaluator/query_evaluator.h"
 
 using namespace std;
@@ -40,7 +40,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
   try {
     pql::Parser parser = pql::Parser(query);
     parser.Parse();
-    pql::Query queryObj = parser.getQuery();
+    pql::Query queryObj = parser.GetQuery();
     std::vector<std::string> res = EvaluateQuery(queryObj, this->pkb);
 
     for (string s : res) {
