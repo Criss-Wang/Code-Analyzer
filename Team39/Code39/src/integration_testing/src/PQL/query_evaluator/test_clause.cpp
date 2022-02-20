@@ -1240,8 +1240,8 @@ TEST_CASE("Checks the correctness of ModifiesS clause when two synonyms are invo
     std_var_hashmap["v"] = var_domain;
     vector<pair<int, string>> std_predicates_lst({ make_pair(1,"count"),make_pair(2,"cenX"),make_pair(3,"cenY"),make_pair(5,"count"),
         make_pair(6,"cenX"),make_pair(7,"cenY"),make_pair(9,"flag"),make_pair(10,"cenX"),make_pair(11,"cenY"),make_pair(12,"normSq"),
-        make_pair(4,"cenX"),make_pair(4,"cenY"),make_pair(4,"count"),
-        make_pair(8,"cenX"),make_pair(8,"cenY"),make_pair(8,"flag"),make_pair(13, "x")});
+        make_pair(4,"cenX"),make_pair(4,"cenY"),make_pair(4,"count"), make_pair(8,"cenX"),make_pair(8,"cenY"),make_pair(8,"flag"),
+        make_pair(13, "x")});
     string first = "s";
     string second = "v";
     std_predicates.clear();
