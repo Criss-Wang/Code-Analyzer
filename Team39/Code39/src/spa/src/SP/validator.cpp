@@ -53,7 +53,7 @@ bool validateAssignStmt(vector<Token> tokens) {
     check_rhs = check_rhs && check_type && check_operator;
 
     expected_types = {};
-    token->print();
+
     if (token_type == OPERATOR
       || token_type == LEFT_PAREN) { // expects variable, integer or left paren after operator/left paren
       expected_types.push_back(NAME);
@@ -174,7 +174,6 @@ bool Validate(vector<Token> input) {
   int if_stmts = 0;
 
   for (auto token = begin(input); token != end(input); ++token) {
-    token->print();
 
     TokenType token_type;
     string token_text;
