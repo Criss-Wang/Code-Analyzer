@@ -91,12 +91,19 @@ namespace pql {
 
     std::vector<std::string> var_domain = var_hashmap[pattern_token.GetLeft()];
     std::vector<std::pair<int, std::string>> pred_lst;
+    std::vector<int> assign_domain = stmt_hashmap[pattern_token.GetAssignSynonym()];
+    std::unordered_set<int> assign_set(assign_domain.begin(), assign_domain.end());
 
     for (std::string& str : var_domain) {
-      std::vector<int> assign_domain = pkb.GetModifiesStmtsByVar(str);
+      std::vector<int> assign_domain_by_var = pkb.GetModifiesStmtsByVar(str);
 
-      for (int& val : assign_domain) {
-        pred_lst.push_back(std::make_pair(val, str));
+      for (int& val : assign_domain_by_var) {
+        //need to check whether this val is in assign domain as well
+        std::unordered_set<int>::iterator iter = assign_set.find(val);
+
+        if (iter != assign_set.end()) {
+          pred_lst.push_back(std::make_pair(val, str));
+        }
       }
     }
 

@@ -81,6 +81,8 @@ namespace pql {
         }
         ps.EatWhiteSpaces();
         ps.ExpectEOF();
+      } else {
+        throw ParseException();
       }
     }
     if (!select_clause_parsed) {

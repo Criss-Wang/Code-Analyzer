@@ -77,7 +77,7 @@ TEST_CASE("Check correctness of ConsumePatternWithoutSyn") {
 TEST_CASE("Check correctness of ConsumPatternWithSyn") {
 
   vector<int> assign_domain({ 1,2,3,5,6,7,9,10,11,12 });
-  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag" });
+  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag", "normSq" });
   unordered_map<string, vector<int>> stmt_hashmap;
   unordered_map<string, vector<string>> var_hashmap;
   unordered_map<string, vector<int>> std_stmt_hashmap;
@@ -92,7 +92,7 @@ TEST_CASE("Check correctness of ConsumPatternWithSyn") {
     var_hashmap.clear();
     var_hashmap["v"] = var_domain;
     vector<int> std_assign_domain({ 1,2,3,5,6,7,9,10,11,12 });
-    vector<string> std_var_domain({ "count", "cenX", "cenY", "x", "y", "flag" });
+    vector<string> std_var_domain({ "count", "cenX", "cenY", "x", "y", "flag", "normSq"});
     std_stmt_hashmap.clear();
     std_stmt_hashmap["a"] = std_assign_domain;
     std_var_hashmap.clear();
@@ -107,6 +107,35 @@ TEST_CASE("Check correctness of ConsumPatternWithSyn") {
     pql::PatternToken token("a", "v", "_", false, true);
 
     REQUIRE(stmt_hashmap == std_stmt_hashmap);
+    REQUIRE(var_hashmap == std_var_hashmap);
+    REQUIRE(!ComparePredicates(predicates, std_predicates));
+    pql::ConsumePatternWithSyn(token, pkb, stmt_hashmap, var_hashmap, predicates);
+    REQUIRE(stmt_hashmap == std_stmt_hashmap);
+    REQUIRE(var_hashmap == std_var_hashmap);
+    REQUIRE(ComparePredicates(predicates, std_predicates));
+  }
+
+  SECTION("First argument is a synonym, expression is a string") {
+    //pattern a (v, _"cenX"_)
+    stmt_hashmap.clear();
+    stmt_hashmap["a"] = assign_domain;
+    var_hashmap.clear();
+    var_hashmap["v"] = var_domain;
+    vector<int> std_assign_domain({ 6,10,12 });
+    vector<string> std_var_domain({ "count", "cenX", "cenY", "x", "y", "flag", "normSq" });
+    std_stmt_hashmap.clear();
+    std_stmt_hashmap["a"] = std_assign_domain;
+    std_var_hashmap.clear();
+    std_var_hashmap["v"] = std_var_domain;
+    vector<pair<int, string>> std_predicates_lst({ make_pair(6,"cenX"),make_pair(10,"cenX"),make_pair(12,"normSq")});
+    string first = "a";
+    string second = "v";
+    std_predicates.clear();
+    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
+
+    pql::PatternToken token("a", "v", "cenX", false, true);
+
+    REQUIRE(stmt_hashmap != std_stmt_hashmap);
     REQUIRE(var_hashmap == std_var_hashmap);
     REQUIRE(!ComparePredicates(predicates, std_predicates));
     pql::ConsumePatternWithSyn(token, pkb, stmt_hashmap, var_hashmap, predicates);

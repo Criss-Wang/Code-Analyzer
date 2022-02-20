@@ -888,7 +888,7 @@ TEST_CASE("Checks the correctness of Parent/Parent* clause when two synonyms are
 TEST_CASE("Checks the correctness of UsesS clause when no synonym is involved") {
 
   vector<int> stmt_domain({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-  vector<string> var_domain({"count", "cenX", "cenY", "x", "y", "flag"});
+  vector<string> var_domain({"count", "cenX", "cenY", "x", "y", "flag", "normSq" });
 
   SECTION("The first argument is number, second argument is wildcard") {
     SECTION("Positive case") {
@@ -952,7 +952,7 @@ TEST_CASE("Checks the correctness of UsesS clause when no synonym is involved") 
 TEST_CASE("Checks the correctness of Uses clause when one synonym is involved") {
 
   vector<int> stmt_domain({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag" });
+  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag", "normSq" });
 
   SECTION("First argument is synonym, second argument is wildcard") {
     // Uses(s, _)
@@ -1035,7 +1035,7 @@ TEST_CASE("Checks the correctness of Uses clause when one synonym is involved") 
 TEST_CASE("Checks the correctness of UsesS clause when two synonyms are involved") {
 
   vector<int> stmt_domain({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag" });
+  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag", "normSq" });
 
   SECTION("Both arguments are synonym") {
     // UsesS(s, v)
@@ -1078,7 +1078,7 @@ TEST_CASE("Checks the correctness of UsesS clause when two synonyms are involved
 TEST_CASE("Checks the correctness of ModifiesS clause when no synonym is involved") {
 
   vector<int> stmt_domain({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag" });
+  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag", "normSq" });
 
   SECTION("The first argument is number, second argument is wildcard") {
     SECTION("Positive case") {
@@ -1142,7 +1142,7 @@ TEST_CASE("Checks the correctness of ModifiesS clause when no synonym is involve
 TEST_CASE("Checks the correctness of Modifies clause when one synonym is involved") {
 
   vector<int> stmt_domain({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag" });
+  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag", "normSq" });
 
   SECTION("First argument is synonym, second argument is wildcard") {
     // Modifies(s, _)
@@ -1225,7 +1225,7 @@ SECTION("First argument is number, second argument is synonym") {
 TEST_CASE("Checks the correctness of ModifiesS clause when two synonyms are involved") {
 
   vector<int> stmt_domain({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag" });
+  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag", "normSq" });
 
   SECTION("Both arguments are synonym") {
     // Modifies(s, v)

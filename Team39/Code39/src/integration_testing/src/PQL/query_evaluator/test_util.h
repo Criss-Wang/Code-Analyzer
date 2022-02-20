@@ -31,7 +31,7 @@ using namespace std;
 
 static Pkb pkb;
 
-void InitializePkb() {
+static void InitializePkb() {
     // add all statements first
     for (int stmt_num = 1; stmt_num <= 14; stmt_num++) {
       pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
@@ -226,7 +226,7 @@ void InitializePkb() {
     PopulateNestedRelationships(pkb);
 }
 
-bool ComparePredicates(vector<pql_table::Predicate> p1, vector<pql_table::Predicate> p2) {
+static bool ComparePredicates(vector<pql_table::Predicate> p1, vector<pql_table::Predicate> p2) {
   if (p1.size() != p2.size()) {
     return false;
   }

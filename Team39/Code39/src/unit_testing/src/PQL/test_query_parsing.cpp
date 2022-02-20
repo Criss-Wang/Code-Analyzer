@@ -52,12 +52,14 @@ TEST_CASE("Invalid queries") {
     RequireInvalidQuery(invalid_queries_dir + "1_test3.txt");
   }
 
+ 
   SECTION("With wrong spelling of keywords") {
     RequireInvalidQuery(invalid_queries_dir + "2_test1.txt"); //Declaration keyword spelled wrongly
     RequireInvalidQuery(invalid_queries_dir + "2_test2.txt"); //First letter of Select keyword not in capital letter
     RequireInvalidQuery(invalid_queries_dir + "2_test3.txt"); //Missing space between such that
     RequireInvalidQuery(invalid_queries_dir + "2_test4.txt"); //Misspelled keyword for relationship
   }
+  
 
   SECTION("Select clause contains synonyms that are not declared") {
     RequireInvalidQuery(invalid_queries_dir + "3_test1.txt");
@@ -79,6 +81,7 @@ TEST_CASE("Invalid queries") {
   }
 
 }
+
 
 TEST_CASE("Valid queries") {
 
