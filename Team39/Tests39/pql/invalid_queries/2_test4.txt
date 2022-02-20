@@ -1,2 +1,2 @@
-asign a;
-Select a
+stmt s;
+Select s such that Prent(1, 2)
