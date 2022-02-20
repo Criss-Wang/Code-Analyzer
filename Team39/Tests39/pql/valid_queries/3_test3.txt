@@ -1,0 +1,2 @@
+assign a; variable v;
+Select a pattern a(v, "x+1")

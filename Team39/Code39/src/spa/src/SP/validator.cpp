@@ -34,7 +34,6 @@ bool validateAssignStmt(vector<Token> tokens) {
   int paren_count = 0;
   
   for (auto token = begin(tokens) + 2; token != end(tokens) - 1; ++token) {
-
     TokenType token_type;
 
     if (token->type == LETTER) {
@@ -67,6 +66,7 @@ bool validateAssignStmt(vector<Token> tokens) {
 
     } else if (token_type == RIGHT_PAREN) { // expects operator after right paren
       expected_types.push_back(OPERATOR);
+      expected_types.push_back(RIGHT_PAREN);
 
       paren_count -= 1;
 

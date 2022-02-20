@@ -1,0 +1,2 @@
+stmt s;
+Select s such that Modifies(s, 3)
