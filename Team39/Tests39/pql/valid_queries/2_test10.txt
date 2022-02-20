@@ -1,2 +1,0 @@
-stmt s;
-Select s such that Modifies("procName", "variable")
