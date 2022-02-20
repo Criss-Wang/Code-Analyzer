@@ -53,59 +53,59 @@ TEST_CASE("Invalid queries") {
   }
 
   SECTION("With wrong spelling of keywords") {
-    RequireInvalidQuery(invalid_queries_dir + "2_test1.txt"); //Declaration keyword spelled wrongly
+    //RequireInvalidQuery(invalid_queries_dir + "2_test1.txt"); //Declaration keyword spelled wrongly
     RequireInvalidQuery(invalid_queries_dir + "2_test2.txt"); //First letter of Select keyword not in capital letter
     RequireInvalidQuery(invalid_queries_dir + "2_test3.txt"); //Missing space between such that
     RequireInvalidQuery(invalid_queries_dir + "2_test4.txt"); //Misspelled keyword for relationship
   }
 
-  //SECTION("Select clause contains synonyms that are not declared") {
-  //  RequireInvalidQuery(invalid_queries_dir + "3_test1.txt");
-  //  RequireInvalidQuery(invalid_queries_dir + "3_test2.txt");
-  //}
+  SECTION("Select clause contains synonyms that are not declared") {
+    RequireInvalidQuery(invalid_queries_dir + "3_test1.txt");
+    RequireInvalidQuery(invalid_queries_dir + "3_test2.txt");
+  }
 
-  //SECTION("With Modifies and Uses such that the first argument is wildcard") {
-  //  RequireInvalidQuery(invalid_queries_dir + "4_test1.txt"); //Modifies
-  //  RequireInvalidQuery(invalid_queries_dir + "4_test2.txt"); //Uses
-  //}
+  SECTION("With Modifies and Uses such that the first argument is wildcard") {
+    RequireInvalidQuery(invalid_queries_dir + "4_test1.txt"); //Modifies
+    RequireInvalidQuery(invalid_queries_dir + "4_test2.txt"); //Uses
+  }
 
-  //SECTION("With Modifies and Uses such that the second argument is not a variable") {
-  //  RequireInvalidQuery(invalid_queries_dir + "5_test1.txt"); //Modifies(s, s1)
-  //  RequireInvalidQuery(invalid_queries_dir + "5_test2.txt"); //Modifies(s, 3)
-  //  RequireInvalidQuery(invalid_queries_dir + "5_test3.txt"); //Modifies(s, "10")
-  //  RequireInvalidQuery(invalid_queries_dir + "5_test4.txt"); //Uses(s, s1)
-  //  RequireInvalidQuery(invalid_queries_dir + "5_test5.txt"); //Uses(s, 3)
-  //  RequireInvalidQuery(invalid_queries_dir + "5_test6.txt"); //Uses(s, "10")
-  //}
+  SECTION("With Modifies and Uses such that the second argument is not a variable") {
+    RequireInvalidQuery(invalid_queries_dir + "5_test1.txt"); //Modifies(s, s1)
+    RequireInvalidQuery(invalid_queries_dir + "5_test2.txt"); //Modifies(s, 3)
+    RequireInvalidQuery(invalid_queries_dir + "5_test3.txt"); //Modifies(s, "10")
+    RequireInvalidQuery(invalid_queries_dir + "5_test4.txt"); //Uses(s, s1)
+    RequireInvalidQuery(invalid_queries_dir + "5_test5.txt"); //Uses(s, 3)
+    RequireInvalidQuery(invalid_queries_dir + "5_test6.txt"); //Uses(s, "10")
+  }
 
 }
 //
-//TEST_CASE("Valid queries") {
-//
-//  SECTION("With Select clause only") {
-//    RequireValidQuery(valid_queries_dir + "1_test1.txt", 0, 0, 1);
-//  }
-//
-//  SECTION("With Select and such that clause") {
-//    RequireValidQuery(valid_queries_dir + "2_test1.txt", 1, 0, 1); //Parent(1, 2)
-//    RequireValidQuery(valid_queries_dir + "2_test2.txt", 1, 0, 1); //Parent(1, _)
-//    RequireValidQuery(valid_queries_dir + "2_test3.txt", 1, 0, 1); //Parent(s, _)
-//    RequireValidQuery(valid_queries_dir + "2_test4.txt", 1, 0, 2); //Parent(s, s1)
-//    RequireValidQuery(valid_queries_dir + "2_test5.txt", 1, 0, 1); //Parent(_, s)
-//    RequireValidQuery(valid_queries_dir + "2_test6.txt", 1, 0, 1); //Parent(_, 9)
-//    RequireValidQuery(valid_queries_dir + "2_test7.txt", 1, 0, 1); //Parent(_, _)
-//    RequireValidQuery(valid_queries_dir + "2_test8.txt", 1, 0, 2); //Modifies(s, v)
-//    RequireValidQuery(valid_queries_dir + "2_test9.txt", 1, 0, 1); //Modifies(_, "variable")
-//    RequireValidQuery(valid_queries_dir + "2_test10.txt", 1, 0, 1); //Modifies("procName", "variable")
-//  }
-//
-//  SECTION("With Select and pattern clause") {
-//    RequireValidQuery(valid_queries_dir + "3_test1.txt", 0, 1, 2); //pattern a(_, _)
-//    RequireValidQuery(valid_queries_dir + "3_test2.txt", 0, 1, 1); //pattern a(_, "x+1")
-//    RequireValidQuery(valid_queries_dir + "3_test3.txt", 0, 1, 2); //pattern a(v, "x+1")
-//  }
-//
-//  SECTION("With Select, such that and pattern clause") {
-//    RequireValidQuery(valid_queries_dir + "4_test1.txt", 1, 1, 3);
-//  }
-//}
+TEST_CASE("Valid queries") {
+
+  SECTION("With Select clause only") {
+    RequireValidQuery(valid_queries_dir + "1_test1.txt", 0, 0, 1);
+  }
+
+  SECTION("With Select and such that clause") {
+    RequireValidQuery(valid_queries_dir + "2_test1.txt", 1, 0, 1); //Parent(1, 2)
+    RequireValidQuery(valid_queries_dir + "2_test2.txt", 1, 0, 1); //Parent(1, _)
+    RequireValidQuery(valid_queries_dir + "2_test3.txt", 1, 0, 1); //Parent(s, _)
+    RequireValidQuery(valid_queries_dir + "2_test4.txt", 1, 0, 2); //Parent(s, s1)
+    RequireValidQuery(valid_queries_dir + "2_test5.txt", 1, 0, 1); //Parent(_, s)
+    RequireValidQuery(valid_queries_dir + "2_test6.txt", 1, 0, 1); //Parent(_, 9)
+    RequireValidQuery(valid_queries_dir + "2_test7.txt", 1, 0, 1); //Parent(_, _)
+    RequireValidQuery(valid_queries_dir + "2_test8.txt", 1, 0, 2); //Modifies(s, v)
+    RequireValidQuery(valid_queries_dir + "2_test9.txt", 1, 0, 1); //Modifies(_, "variable")
+    RequireValidQuery(valid_queries_dir + "2_test10.txt", 1, 0, 1); //Modifies("procName", "variable")
+  }
+
+  SECTION("With Select and pattern clause") {
+    RequireValidQuery(valid_queries_dir + "3_test1.txt", 0, 1, 2); //pattern a(_, _)
+    RequireValidQuery(valid_queries_dir + "3_test2.txt", 0, 1, 1); //pattern a(_, "x+1")
+    RequireValidQuery(valid_queries_dir + "3_test3.txt", 0, 1, 2); //pattern a(v, "x+1")
+  }
+
+  SECTION("With Select, such that and pattern clause") {
+    RequireValidQuery(valid_queries_dir + "4_test1.txt", 1, 1, 3);
+  }
+}
