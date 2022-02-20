@@ -78,8 +78,6 @@ namespace pql {
             ps.EatWhiteSpaces();
             Parser::ParsePattern(Parser::query);
           }
-        } else {
-          throw ParseException();
         }
         ps.EatWhiteSpaces();
         ps.ExpectEOF();

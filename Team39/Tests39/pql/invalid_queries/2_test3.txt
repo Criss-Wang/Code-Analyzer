@@ -1,2 +1,2 @@
 stmt s;
-Select s suchthat Parent(1, 2);
+Select s suchthat Parent(1, 2)
