@@ -14,6 +14,7 @@ namespace pql_table {
 		for (int val : int_list) {
 			element to_be_insert;
 			to_be_insert.val = val;
+			to_be_insert.name = "";
 			rows_.push_back(std::vector<element>({ to_be_insert }));
 		}
 	}
@@ -22,6 +23,7 @@ namespace pql_table {
     header_ = std::vector<std::string>({ synonym.GetName() });
 		for (std::string str : str_list) {
 			element to_be_insert;
+			to_be_insert.val = 0;
 			to_be_insert.name = str;
 			rows_.push_back(std::vector<element>({ to_be_insert }));
 		}

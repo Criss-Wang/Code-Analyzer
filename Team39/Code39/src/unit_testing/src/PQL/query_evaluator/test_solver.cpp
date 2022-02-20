@@ -2,11 +2,6 @@
 
 #include "catch.hpp"
 
-//Solver will solve all the clauses with two synonyms involved 
-//We focus on two cases for Consume:
-// - Case 1: having one such that clause or one pattern clause
-// - Case 2: having one such that clause and one pattern clause
-
 using namespace std;
 
 static void InitializeList(vector<int>* col1, vector<string>* col2, vector<vector<pql_table::element>>* rows) {
@@ -16,6 +11,8 @@ static void InitializeList(vector<int>* col1, vector<string>* col2, vector<vecto
     pql_table::element second;
 
     first.val = (*col1)[index];
+    first.name = "";
+    second.val = 0;
     second.name = (*col2)[index];
 
     vector<pql_table::element> row({ first, second });

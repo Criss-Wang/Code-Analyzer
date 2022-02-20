@@ -86,6 +86,8 @@ static void InitializeList(vector<int>* col1, vector<string>* col2, vector<vecto
 		pql_table::element second;
 
 		first.val = (*col1)[index];
+		first.name = "";
+		second.val = 0;
 		second.name = (*col2)[index];
 
 		vector<pql_table::element> row({ first, second });

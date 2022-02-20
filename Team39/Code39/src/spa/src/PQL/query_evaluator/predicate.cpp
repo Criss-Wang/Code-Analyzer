@@ -15,7 +15,9 @@ namespace pql_table {
       element front;
       element back;
       front.val = pair.first;
+      front.name = "";
       back.val = pair.second;
+      back.name = "";
       lst.push_back(std::make_pair(front, back));
     }
 
@@ -31,6 +33,8 @@ namespace pql_table {
       element front;
       element back;
       front.val = pair.first;
+      front.name = "";
+      back.val = 0;
       back.name = pair.second;
       lst.push_back(std::make_pair(front, back));
     }
