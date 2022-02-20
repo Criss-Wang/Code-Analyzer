@@ -1,0 +1,2 @@
+assign a; stmt s, s1; variable v;
+Select s such that Modifies(s, v) pattern a(_, _)

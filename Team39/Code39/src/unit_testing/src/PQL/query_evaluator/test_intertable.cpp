@@ -3,7 +3,7 @@
 
 #include "../../../../spa/src/PQL/query_evaluator/intertable.h"
 #include "../../../../spa/src/PQL/query_evaluator/predicate.h"
-#include "../../../../spa/src/PQL/Token.h"
+#include "../../../../spa/src/PQL/token.h"
 #include "../../../../spa/src/Utility/Entity.h"
 #include "catch.hpp"
 
@@ -125,12 +125,5 @@ TEST_CASE("Check merge function of Intertable") {
 }
 
 TEST_CASE("Check filter function of Intertable") {
-
-  SECTION("Merge two tables with content") {
-		Initialize();
-		REQUIRE(!table1_merge1.equal(table2_merge));
-		table1_merge1.Merge(table1_merge2);
-		REQUIRE(table1_merge1.equal(table2_merge));
-  }
 
 }

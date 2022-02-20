@@ -1,0 +1,2 @@
+stmt s; variable v;
+Select s such that Modifies(s, v)

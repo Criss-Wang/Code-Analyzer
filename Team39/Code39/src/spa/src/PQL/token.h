@@ -26,7 +26,12 @@ namespace pql {
       bool equal(const Synonym &s);
   };
 
-  struct ParseException : public std::exception {};
+  struct ParseException : public std::exception {
+    public:
+      const char * what() const throw() {
+        return "The query is invalid!";
+      }
+  };
 
   enum RelationshipTypes {
     kFollows,

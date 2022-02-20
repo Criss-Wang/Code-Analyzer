@@ -27,12 +27,12 @@ bool validateAssignStmt(vector<Token> tokens) {
   bool check_rhs = true;
   bool check_semicolon = tokens.at(tokens.size() - 1).type == SEMICOLON;
 
-  vector<TokenType> expected_types = { NAME, INTEGER };
+  vector<TokenType> expected_types = { NAME, INTEGER, LEFT_PAREN };
   vector<string> expected_operators = { "*", "/", "+", "-", "%" };
 
   // keep track of number of brackets
   int paren_count = 0;
-
+  
   for (auto token = begin(tokens) + 2; token != end(tokens) - 1; ++token) {
 
     TokenType token_type;
@@ -53,6 +53,8 @@ bool validateAssignStmt(vector<Token> tokens) {
     }
     check_rhs = check_rhs && check_type && check_operator;
 
+    expected_types = {};
+
     if (token_type == OPERATOR
       || token_type == LEFT_PAREN) { // expects variable, integer or left paren after operator/left paren
       expected_types.push_back(NAME);
@@ -72,6 +74,7 @@ bool validateAssignStmt(vector<Token> tokens) {
       expected_types.push_back(OPERATOR);
       expected_types.push_back(RIGHT_PAREN);
     }
+
   }
 
   bool check_brackets = paren_count == 0;
@@ -175,21 +178,7 @@ bool Validate(vector<Token> input) {
     TokenType token_type;
     string token_text;
 
-    if (token->text == "procedure") {
-      vector<Token> tokens;
-      while (token->type !=LEFT_CURLY && token != end(input) - 1) {
-        tokens.push_back(*token);
-        token++;
-      }
-      tokens.push_back(*token);
-
-      if (!validateProcedure(tokens)) {
-        return false;
-      }
-
-      curly_bracket_count += 1;
-
-    } else if (token->type == RIGHT_CURLY) {
+    if (token->type == RIGHT_CURLY) {
       bool has_two_more_tokens = token != end(input) - 1 && token != end(input) - 2;
       if (has_two_more_tokens && next(token, 1)->text == "else" && next(token, 2)->type == LEFT_CURLY) {
         if_stmts -= 1;
@@ -210,6 +199,20 @@ bool Validate(vector<Token> input) {
       if (!validateAssignStmt(tokens)) {
         return false;
       }
+
+    } else if (token->text == "procedure") {
+      vector<Token> tokens;
+      while (token->type != LEFT_CURLY && token != end(input) - 1) {
+        tokens.push_back(*token);
+        token++;
+      }
+      tokens.push_back(*token);
+
+      if (!validateProcedure(tokens)) {
+        return false;
+      }
+
+      curly_bracket_count += 1;
 
     } else if (token->text == "while") {
       vector<Token> tokens;

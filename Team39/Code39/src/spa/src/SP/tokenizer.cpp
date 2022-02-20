@@ -151,8 +151,14 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
 
 // Resets current token to WHITESPACE
 void Tokenizer::EndToken(Token &token, vector<Token> &tokens_list) {
-  if (token.type == NAME) {
-    CheckStmtNum(token);
+  if (token.type == LEFT_CURLY) {
+    Token prev_token = tokens_list.back();
+
+    if (prev_token.text == "else") {
+      tokens_list.pop_back();
+      tokens_list.push_back({NAME, "else", 0});
+      token.StopStmtNum();
+    }
   }
 
   if (token.type != WHITESPACE) {	
@@ -161,12 +167,6 @@ void Tokenizer::EndToken(Token &token, vector<Token> &tokens_list) {
 
   token.type = WHITESPACE;
   token.text.erase();
-}
-
-void Tokenizer::CheckStmtNum(Token &token) {
-  if (token.text == "else") { // To correct stmt num for "} else {"
-    token.StopStmtNum();
-  }
 }
 
 string Token::print() {

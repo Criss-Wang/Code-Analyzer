@@ -1,0 +1,2 @@
+asign a;
+Select a

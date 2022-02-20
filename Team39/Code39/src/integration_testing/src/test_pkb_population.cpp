@@ -11,6 +11,7 @@ vector<Token> parse(string path) {
   ifstream input_file(path);
   if (!input_file.is_open()) {
     cerr << "Could not open the file " << endl;
+    return {};
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     Tokenizer tokenizer;

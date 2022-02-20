@@ -548,6 +548,41 @@ TEST_CASE("Valid tokenizer output") {
 
     REQUIRE(expected_tokens == actual_tokens);
   }
+
+  SECTION("Procedure with else var") {
+    source_prog = "procedure procedure { if (else = if) then { then = 1; } else { else = 3; }}";
+    actual_tokens = tokenizer.parse(source_prog);
+
+    Token token1{ NAME, "procedure", 0 };
+    Token token2{ NAME, "procedure", 0 };
+    Token token3{ LEFT_CURLY, "{", 0 };
+    Token token4{ NAME, "if", 1 };
+    Token token5{ LEFT_PAREN, "(", 1 };
+    Token token6{ NAME, "else", 1 };
+    Token token7{ OPERATOR, "=", 1 };
+    Token token8{ NAME, "if", 1 };
+    Token token9{ RIGHT_PAREN, ")", 1 };
+    Token token10{ NAME, "then", 1 };
+    Token token11{ LEFT_CURLY, "{", 1 };
+    Token token12{ NAME, "then", 2 };
+    Token token13{ OPERATOR, "=", 2 };
+    Token token14{ DIGIT, "1", 2 };
+    Token token15{ SEMICOLON, ";", 2 };
+    Token token16{ RIGHT_CURLY, "}", 0 };
+    Token token17{ NAME, "else", 0 };
+    Token token18{ LEFT_CURLY, "{", 0 };
+    Token token19{ NAME, "else", 3 };
+    Token token20{ OPERATOR, "=", 3 };
+    Token token21{ DIGIT, "3", 3 };
+    Token token22{ SEMICOLON, ";", 3 };
+    Token token23{ RIGHT_CURLY, "}", 0 };
+    Token token24{ RIGHT_CURLY, "}", 0 };
+    expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
+                         token11, token12, token13, token14, token15, token16, token17, token18, token19, token20,
+                          token21, token22, token23, token24 };
+
+    REQUIRE(expected_tokens == actual_tokens);
+  }
 }
 
 TEST_CASE("Invalid tokenizer output") {

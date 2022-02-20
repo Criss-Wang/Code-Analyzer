@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Parser.h"
+#include "parser.h"
 
 namespace pql {
   char ParserState::Peek() {
