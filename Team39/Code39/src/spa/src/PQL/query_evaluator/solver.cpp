@@ -61,7 +61,8 @@ namespace pql_solver {
     std::vector<pql_table::element> col = curr_table.GetColByName(name);
 
     for (auto& ele : col) {
-      if (return_syn_->GetDeclaration() == EntityIdentifier::kVariable) {
+      if (return_syn_->GetDeclaration() == EntityIdentifier::kVariable
+          || return_syn_->GetDeclaration() == EntityIdentifier::kProc) {
         lst.push_back(ele.name);
       } else {
         lst.push_back(std::to_string(ele.val));
