@@ -2,11 +2,10 @@
 #include "../../spa/src/PQL/query_evaluator/clause.h"
 #include "../../spa/src/PQL/query_evaluator/predicate.h"
 #include "../../spa/src/PQL/query_evaluator/query_evaluator_exceptions.h"
-#include "../../spa/src/PQL/Token.h"
+#include "../../spa/src/PQL/token.h"
 
 #include "catch.hpp"
 
-//The query for test cases below are in this format
 static unordered_map<string, vector<int>> stmt_hashmap;
 static unordered_map<string, vector<string>> var_hashmap;
 static vector<pql_table::Predicate> predicates;
@@ -1220,5 +1219,43 @@ SECTION("First argument is number, second argument is synonym") {
 
       CHECK_THROWS_AS(modifiesS_clause.Evaluate(), pql_exceptions::EmptyDomainException);
     }
+  }
+}
+
+TEST_CASE("Checks the correctness of ModifiesS clause when two synonyms are involved") {
+
+  vector<int> stmt_domain({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
+  vector<string> var_domain({ "count", "cenX", "cenY", "x", "y", "flag" });
+
+  SECTION("Both arguments are synonym") {
+    // Modifies(s, v)
+    stmt_hashmap.clear();
+    var_hashmap.clear();
+    predicates.clear();
+    stmt_hashmap["s"] = stmt_domain;
+    var_hashmap["v"] = var_domain;
+    std_stmt_hashmap.clear();
+    std_var_hashmap.clear();
+    std_stmt_hashmap["s"] = stmt_domain;
+    std_var_hashmap["v"] = var_domain;
+    vector<pair<int, string>> std_predicates_lst({ make_pair(1,"count"),make_pair(2,"cenX"),make_pair(3,"cenY"),make_pair(5,"count"),
+        make_pair(6,"cenX"),make_pair(7,"cenY"),make_pair(9,"flag"),make_pair(10,"cenX"),make_pair(11,"cenY"),make_pair(12,"normSq"),
+        make_pair(4,"cenX"),make_pair(4,"cenY"),make_pair(4,"count"),
+        make_pair(8,"cenX"),make_pair(8,"cenY"),make_pair(8,"flag"),make_pair(13, "x")});
+    string first = "s";
+    string second = "v";
+    std_predicates.clear();
+    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
+
+    pql::RelationshipToken token(pql::RelationshipTypes::kModifiesS, "s", "v", true, true);
+    pql::ModifiesSClause modifiesS_clause(&token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
+
+    REQUIRE(stmt_hashmap == std_stmt_hashmap);
+    REQUIRE(var_hashmap == std_var_hashmap);
+    REQUIRE(!ComparePredicates(predicates, std_predicates));
+    modifiesS_clause.Evaluate();
+    REQUIRE(stmt_hashmap == std_stmt_hashmap);
+    REQUIRE(var_hashmap == std_var_hashmap);
+    REQUIRE(ComparePredicates(predicates, std_predicates));
   }
 }

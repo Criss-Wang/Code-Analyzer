@@ -9,7 +9,6 @@
 
 #include "clause.h"
 #include "solver.h"
-#include "predicate.h"
 #include "query_evaluator.h"
 #include "query_evaluator_exceptions.h"
 
