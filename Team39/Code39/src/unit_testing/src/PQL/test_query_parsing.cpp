@@ -95,14 +95,12 @@ TEST_CASE("Valid queries") {
     RequireValidQuery(valid_queries_dir + "2_test6.txt", 1, 0, 1); //Parent(_, 9)
     RequireValidQuery(valid_queries_dir + "2_test7.txt", 1, 0, 1); //Parent(_, _)
     RequireValidQuery(valid_queries_dir + "2_test8.txt", 1, 0, 2); //Modifies(s, v)
-    RequireValidQuery(valid_queries_dir + "2_test9.txt", 1, 0, 1); //Modifies(_, "variable")
-    RequireValidQuery(valid_queries_dir + "2_test10.txt", 1, 0, 1); //Modifies("procName", "variable")
   }
 
   SECTION("With Select and pattern clause") {
     RequireValidQuery(valid_queries_dir + "3_test1.txt", 0, 1, 2); //pattern a(_, _)
-    RequireValidQuery(valid_queries_dir + "3_test2.txt", 0, 1, 1); //pattern a(_, "x+1")
-    RequireValidQuery(valid_queries_dir + "3_test3.txt", 0, 1, 2); //pattern a(v, "x+1")
+    RequireValidQuery(valid_queries_dir + "3_test2.txt", 0, 1, 1); //pattern a(_, "x")
+    RequireValidQuery(valid_queries_dir + "3_test3.txt", 0, 1, 2); //pattern a(v, "1")
   }
 
   SECTION("With Select, such that and pattern clause") {
