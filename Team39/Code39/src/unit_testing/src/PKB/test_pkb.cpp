@@ -11,16 +11,16 @@ TEST_CASE("Populating Assign Table") {
   bool success = pkb.AddInfoToTable(TableIdentifier::kAssign, 2, "x");
 
   SECTION("Add item into table: int -> string") {
-    REQUIRE(success == 1);
+    REQUIRE(success == true);
   }
 
   SECTION("Add invalid item into table") {
     success = pkb.AddInfoToTable(TableIdentifier::kAssign, 2, 2);
-    REQUIRE(success == 0);
+    REQUIRE(success == false);
 
     string str;
     success = pkb.AddInfoToTable(TableIdentifier::kAssign, 2, str);
-    REQUIRE(success == 0);
+    REQUIRE(success == false);
   }
 }
 
@@ -29,16 +29,16 @@ TEST_CASE("Populating Constant Table") {
   bool success = pkb.AddInfoToTable(TableIdentifier::kConstant, 2, vector<int>{50, 100});
 
   SECTION("Add item into table: int -> vector<int>") {
-    REQUIRE(success == 1);
+    REQUIRE(success == true);
   }
 
   SECTION("Add invalid item into table") {
     success = pkb.AddInfoToTable(TableIdentifier::kConstant, 2, "invalid");
-    REQUIRE(success == 0);
+    REQUIRE(success == false);
 
     string str;
     success = pkb.AddInfoToTable(TableIdentifier::kConstant, 2, str);
-    REQUIRE(success == 0);
+    REQUIRE(success == false);
   }
 }
 
@@ -48,16 +48,16 @@ TEST_CASE("Populating If Table") {
 
   SECTION("Add item into table: int -> vector<string>") {
     const bool success = pkb.AddInfoToTable(TableIdentifier::kIf, 2, vector<string>{"x != 0"});
-    REQUIRE(success == 1);
+    REQUIRE(success == true);
   }
 
   SECTION("Add invalid item into table") {
     bool success = pkb.AddInfoToTable(TableIdentifier::kIf, 1, 1);
-    REQUIRE(success == 0);
+    REQUIRE(success == false);
 
     vector<string> vec = {};
     success = pkb.AddInfoToTable(TableIdentifier::kIf, 2, vec);
-    REQUIRE(success == 0);
+    REQUIRE(success == false);
   }
 }
 
@@ -68,20 +68,20 @@ TEST_CASE("Populating Follows and FollowsBefore Table") {
   success = pkb.AddInfoToTable(TableIdentifier::kFollows, 2, 3) && success;
 
   SECTION("Add item into table: int -> int") {
-    REQUIRE(success == 1);
+    REQUIRE(success == true);
   }
 
   SECTION("Add invalid item into table") {
     success = pkb.AddInfoToTable(TableIdentifier::kFollows, 1, vector<int>{2, 3, 4});
-    REQUIRE(success == 0);
+    REQUIRE(success == false);
 
     string str;
     success = pkb.AddInfoToTable(TableIdentifier::kFollows, 2, str);
-    REQUIRE(success == 0);
+    REQUIRE(success == false);
 
     int negative_number = -1;
     success = pkb.AddInfoToTable(TableIdentifier::kFollows, 3, negative_number);
-    REQUIRE(success == 0);
+    REQUIRE(success == false);
   }
 
   SECTION("Test API for PQL side for FollowsTable") {
