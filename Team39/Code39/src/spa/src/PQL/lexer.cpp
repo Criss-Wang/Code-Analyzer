@@ -77,10 +77,12 @@ namespace pql {
         ssm << ParserState::Next();
       }
     } else if (ParserState::Peek() == '\"') {
-      ssm << ParserState::Next();
+      ParserState::Consume();
+      ParserState::EatWhiteSpaces();
       if (!IsLetter(ParserState::Peek())) {
         throw ParseException();
       } else {
+        ssm << ParserState::Next();
         while (ParserState::Peek() != '\"') {
           if (IsLetter(ParserState::Peek()) || IsDigit(ParserState::Peek())) {
             ssm << ParserState::Next();
@@ -88,7 +90,7 @@ namespace pql {
             throw ParseException();
           }
         }
-        ssm << ParserState::Next();
+        ParserState::Consume();
       }
     } else {
       ssm << ParserState::ParseSynonym();
