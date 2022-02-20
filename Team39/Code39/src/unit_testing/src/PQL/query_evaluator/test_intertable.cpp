@@ -3,7 +3,7 @@
 
 #include "../../../../spa/src/PQL/query_evaluator/intertable.h"
 #include "../../../../spa/src/PQL/query_evaluator/predicate.h"
-#include "../../../../spa/src/PQL/Token.h"
+#include "../../../../spa/src/PQL/token.h"
 #include "../../../../spa/src/Utility/Entity.h"
 #include "catch.hpp"
 

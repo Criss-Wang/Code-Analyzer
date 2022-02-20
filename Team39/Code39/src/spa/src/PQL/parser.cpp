@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "Parser.h"
+#include "parser.h"
 
 namespace pql {
 
@@ -78,6 +78,8 @@ namespace pql {
             ps.EatWhiteSpaces();
             Parser::ParsePattern(Parser::query);
           }
+        } else {
+          throw ParseException();
         }
         ps.EatWhiteSpaces();
         ps.ExpectEOF();
@@ -88,7 +90,7 @@ namespace pql {
     }
   }
 
-  pql::Query Parser::getQuery() {
+  pql::Query Parser::GetQuery() {
     return Parser::query;
   }
 
@@ -139,6 +141,8 @@ namespace pql {
         right = right.substr(1, right.length() - 2);
       }
       q.AddSuchThatClause(*r, left, right, is_synonym_left, is_synonym_right);
+    } else {
+      throw ParseException();
     }
   }
 
