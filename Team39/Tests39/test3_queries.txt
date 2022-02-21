@@ -1,0 +1,135 @@
+1-Return procedure name 
+procedure p; 
+Select p 
+procedure 
+5000 
+2 – Follows without synonym 
+read read; 
+Select read such that Follows(10,11) 
+
+5000 
+3 – Follows without synonym, first argument is wildcard 
+stmt stmt; 
+Select stmt such that Follows(_, 7) 
+1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
+5000 
+4 – Invalid query, select is not capital 
+stmt s; 
+select s 
+
+5000 
+5 – Follows with one synonym 
+constant const; assign a; 
+Select const such that Follows(a , 13) 
+0,1,2,69,123,2000 
+5000 
+6 – Invalid query, arguments of Follows not statement 
+variable v; stmt s; 
+Select v such that Follows(s, v) 
+
+5000 
+7 – Follows with two synonyms 
+print pn; assign a; 
+Select a such that Follows(a, pn) 
+12 
+5000 
+8 – Follows* with no synonym 
+if if; 
+Select if such that Follows*(1,9) 
+
+5000 
+9 – Follows* with one synonym  
+stmt stmt; 
+Select stmt such that    Follows*(5,    stmt) 
+6,7
+5000 
+10 – Parent with no synonym 
+stmt s; 
+Select s such that Parent(3,8) 
+
+5000 
+11 – Parent* with no synonym 
+if if; 
+Select if such that Parent*(3,8) 
+4,14 
+5000 
+12 – Parent with two synonyms 
+assign a; if ifsss; 
+Select a such that Parent(ifsss, a) 
+9,10 
+5000
+13 – Parent* with wildcard 
+stmt s; 
+Select s such that Parent*(_, _) 
+1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 
+5000 
+14 - Modifies without synonyms  
+while w; 
+Select w such that Modifies(1, "procedure") 
+3, 7 
+5000 
+15 – Modifies with synonym and variable name 
+assign assign; 
+Select assign such that Modifies(assign, "figureSkate")  
+12 
+5000 
+16 - Modifies with procedure as the first argument 
+procedure p; 
+Select p such that Modifies(11, "read") 
+procedure 
+5000 
+17 - Invalid query for Modifies, first argument is wildcard 
+stmt s; 
+Select s such that Modifies(_, "x") 
+
+5000  
+18 - Uses without synonyms 
+print p; 
+Select p such that Uses(3, "while") 
+5, 13, 15, 16 
+5000 
+19 - Uses without synonyms, second argument is wildcard 
+if if; 
+Select if such that Uses(16, _) 
+4, 14 
+5000 
+20 - Uses with synonyms 
+print p; variable v; 
+Select p such that Uses(p, v) 
+5, 13, 15, 16 
+5000
+21 - Uses with procedure as the first argument 
+procedure p; 
+Select p such that Uses(p, "nonExist") 
+
+5000 
+22 - Invalid query, synonym is not pattern synonym 
+stmt s; 
+Select s pattern s (_, _) 
+
+5000 
+23 – Pattern that uses and modifies y
+assign a; 
+Select a pattern a("y", _"y"_) 
+2 
+5000
+24 – Variables that are modified in an assign statement 
+variable v;  
+assign a; Select v pattern a(v, _) 
+procedure,y,a,X,else,figureSkate 
+5000 
+25 - Uses with pattern 
+assign a; 
+Select a such that Uses(a, "y") pattern a(_, _"2000"_) 
+12 
+5000 
+26 – Assignments that modifies and uses same variable 
+variable a; assign a1; 
+Select a1 such that Uses(a1, a) pattern a1(a, _) 
+2,8
+5000 
+27 – Uses Modifies with pattern 
+assign a; 
+Select a such that Modifies(1, "procedure") pattern a("procedure", _) 
+1 
+5000 
