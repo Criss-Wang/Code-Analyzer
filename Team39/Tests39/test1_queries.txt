@@ -13,7 +13,7 @@ procedure p;
 Select p such that Uses(8, "while")
 procedure
 5000 
-4 - Select LHS variables where RHS has "y"
+4 - Select LHS variables where RHS has y
 variable v; assign a;
 Select v such that Modifies(a,v) pattern a(v, "y")
 xxxx
@@ -68,7 +68,7 @@ assign a; if ifs;
 Select a such that Parent* (ifs, a)
 3, 4, 8, 11, 14
 5000
-15 - Select assign stmts that has _"while"_ on the RHS
+15 - Select assign stmts that has while on the RHS
 assign a;
 Select a pattern a( _ , _"while"_ )
 8
