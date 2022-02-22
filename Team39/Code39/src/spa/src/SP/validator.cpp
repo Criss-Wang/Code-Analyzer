@@ -23,6 +23,9 @@ bool validateReadPrintStmt(vector<Token> tokens) {
 
 bool validateAssignStmt(vector<Token> tokens) {
   bool check_size = tokens.size() > 3;
+  if (!check_size) {
+    return false;
+  }
   bool check_lhs = tokens.at(0).type == NAME || tokens.at(0).type == LETTER;
   bool check_rhs = true;
   bool check_semicolon = tokens.at(tokens.size() - 1).type == SEMICOLON;
@@ -93,7 +96,7 @@ bool validateCondExpr(vector<Token> tokens) {
   for (auto token = begin(tokens); token != end(tokens); ++token) {
 
     TokenType token_type;
-
+    token->print();
     if (token->type == LETTER) {
       token_type = NAME;
     } else if (token->type == DIGIT) {
@@ -109,18 +112,22 @@ bool validateCondExpr(vector<Token> tokens) {
     }
 
     bool check_type = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);
-
     check_cond_expr = check_cond_expr && check_type;
+    cout << check_cond_expr << endl;
+    expected_types = {};
 
     if (token_type == LEFT_PAREN) { // expects variable, integer or left paren after left paren
       expected_types.push_back(NAME);
       expected_types.push_back(INTEGER);
       expected_types.push_back(LEFT_PAREN);
+      expected_types.push_back(NOT_OPERATOR);
 
       paren_count += 1;
 
     } else if (token_type == RIGHT_PAREN) { // expects cond operator after right paren
       expected_types.push_back(COND_OPERATOR);
+      expected_types.push_back(RIGHT_PAREN);
+      expected_types.push_back(OPERATOR);
 
       paren_count -= 1;
 
@@ -130,6 +137,12 @@ bool validateCondExpr(vector<Token> tokens) {
     } else if (token_type == NAME || token_type == INTEGER) { // expects rel operator or right paren after variable or integer
       expected_types.push_back(REL_OPERATOR);
       expected_types.push_back(RIGHT_PAREN);
+      expected_types.push_back(OPERATOR);
+
+    } else if (token_type == COND_OPERATOR || token_type == REL_OPERATOR || token_type == OPERATOR) { // expected name, int or left after operator
+      expected_types.push_back(NAME);
+      expected_types.push_back(INTEGER);
+      expected_types.push_back(LEFT_PAREN);
     }
   }
 
@@ -139,6 +152,9 @@ bool validateCondExpr(vector<Token> tokens) {
 
 bool validateWhileStmt(vector<Token> tokens) {
   bool check_size = tokens.size() > 6;
+  if (!check_size) {
+    return false;
+  }
   bool check_left_paren = tokens.at(1).type == LEFT_PAREN;
   bool check_right_paren = tokens.at(tokens.size() - 2).type == RIGHT_PAREN;
   bool check_left_curly = tokens.at(tokens.size() - 1).type == LEFT_CURLY;
@@ -153,6 +169,9 @@ bool validateWhileStmt(vector<Token> tokens) {
 
 bool validateIfStmt(vector<Token> tokens) {
   bool check_size = tokens.size() > 7;
+  if (!check_size) {
+    return false;
+  }
   bool check_left_paren = tokens.at(1).type == LEFT_PAREN;
   bool check_right_paren = tokens.at(tokens.size() - 3).type == RIGHT_PAREN;
   bool check_then_keyword = tokens.at(tokens.size() - 2).type == NAME && tokens.at(tokens.size() - 2).text == "then";
