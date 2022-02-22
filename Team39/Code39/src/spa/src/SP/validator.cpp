@@ -96,7 +96,7 @@ bool validateCondExpr(vector<Token> tokens) {
   for (auto token = begin(tokens); token != end(tokens); ++token) {
 
     TokenType token_type;
-    token->print();
+
     if (token->type == LETTER) {
       token_type = NAME;
     } else if (token->type == DIGIT) {
