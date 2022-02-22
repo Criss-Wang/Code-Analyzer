@@ -31,6 +31,7 @@ void TestWrapper::parse(std::string filename) {
     std::string input = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     Parse(input, this->pkb);
   } catch (InvalidProgramException e) {
+    //Force the autotester to stop running
     exit(0);
   }  
 }
