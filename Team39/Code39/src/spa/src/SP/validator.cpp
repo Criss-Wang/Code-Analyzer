@@ -9,6 +9,9 @@ using namespace std;
 
 bool validateProcedure(vector<Token> tokens) {
   bool check_size = tokens.size() == 3;
+  if (!check_size) {
+    return false;
+  }
   bool check_variable = tokens.at(1).type == NAME || tokens.at(1).type == LETTER;
   bool check_left_curly = tokens.at(2).type == LEFT_CURLY;
   return check_size && check_variable && check_left_curly;
@@ -16,6 +19,9 @@ bool validateProcedure(vector<Token> tokens) {
 
 bool validateReadPrintStmt(vector<Token> tokens) {
   bool check_size = tokens.size() == 3;
+  if (!check_size) {
+    return false;
+  }
   bool check_variable = tokens.at(1).type == NAME || tokens.at(1).type == LETTER;
   bool check_semicolon = tokens.at(2).type == SEMICOLON;
   return check_size && check_variable && check_semicolon;
@@ -113,7 +119,7 @@ bool validateCondExpr(vector<Token> tokens) {
 
     bool check_type = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);
     check_cond_expr = check_cond_expr && check_type;
-    cout << check_cond_expr << endl;
+
     expected_types = {};
 
     if (token_type == LEFT_PAREN) { // expects variable, integer or left paren after left paren
