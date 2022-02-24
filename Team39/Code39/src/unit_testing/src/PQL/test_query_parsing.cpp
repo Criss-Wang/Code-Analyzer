@@ -19,6 +19,7 @@ pql::Query GetQuery(std::string path) {
   std::ifstream input_file(path);
   if (!input_file.is_open()) {
     std::cerr << "Could not open the file " << std::endl;
+    return {};
   } else {
     std::string query = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     pql::Parser parser = pql::Parser(query);
@@ -35,8 +36,8 @@ void RequireValidQuery(std::string path, int such_that_clause_size, int pattern_
     std::string query = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     pql::Parser parser = pql::Parser(query);
     parser.Parse();
-    REQUIRE(parser.GetQuery().GetSuchThatClause().size() == such_that_clause_size);
-    REQUIRE(parser.GetQuery().GetPattern().has_value() == pattern_clause_exist);
+    REQUIRE(int(parser.GetQuery().GetSuchThatClause().size()) == such_that_clause_size);
+    REQUIRE(int(parser.GetQuery().GetPattern().has_value()) == pattern_clause_exist);
     REQUIRE(parser.GetQuery().GetAllUsedSynonyms().size() == used_synonyms_size);
   }
 }
@@ -52,12 +53,14 @@ TEST_CASE("Invalid queries") {
     RequireInvalidQuery(invalid_queries_dir + "1_test3.txt");
   }
 
+ 
   SECTION("With wrong spelling of keywords") {
     //RequireInvalidQuery(invalid_queries_dir + "2_test1.txt"); //Declaration keyword spelled wrongly
     RequireInvalidQuery(invalid_queries_dir + "2_test2.txt"); //First letter of Select keyword not in capital letter
     RequireInvalidQuery(invalid_queries_dir + "2_test3.txt"); //Missing space between such that
     RequireInvalidQuery(invalid_queries_dir + "2_test4.txt"); //Misspelled keyword for relationship
   }
+  
 
   SECTION("Select clause contains synonyms that are not declared") {
     RequireInvalidQuery(invalid_queries_dir + "3_test1.txt");
@@ -79,7 +82,7 @@ TEST_CASE("Invalid queries") {
   }
 
 }
-//
+
 TEST_CASE("Valid queries") {
 
   SECTION("With Select clause only") {
@@ -99,7 +102,7 @@ TEST_CASE("Valid queries") {
 
   SECTION("With Select and pattern clause") {
     RequireValidQuery(valid_queries_dir + "3_test1.txt", 0, 1, 2); //pattern a(_, _)
-    RequireValidQuery(valid_queries_dir + "3_test2.txt", 0, 1, 1); //pattern a(_, "x")
+    RequireValidQuery(valid_queries_dir + "3_test2.txt", 0, 1, 1); //pattern a(_, "x") 
     RequireValidQuery(valid_queries_dir + "3_test3.txt", 0, 1, 2); //pattern a(v, "1")
   }
 

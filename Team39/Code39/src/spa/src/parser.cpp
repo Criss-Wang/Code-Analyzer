@@ -6,6 +6,7 @@ using namespace std;
 #include "SP/tokenizer.h"
 #include "SP/validator.h"
 #include "SP/populator.h"
+#include "sp_exceptions.h"
 
 void Parse(string input, Pkb& pkb) {
 
@@ -14,5 +15,7 @@ void Parse(string input, Pkb& pkb) {
 
   if (Validate(input_tokens)) {
     populate(input_tokens, pkb);
+  } else {
+    throw InvalidProgramException();
   }
 }

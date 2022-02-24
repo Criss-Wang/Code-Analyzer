@@ -2,6 +2,7 @@
 #include "parser.h"
 #include "../../spa/src/PQL/parser.h"
 #include "../../spa/src/PQL/query_evaluator/query_evaluator.h"
+#include "../../spa/src/sp_exceptions.h"
 
 using namespace std;
 
@@ -25,9 +26,14 @@ TestWrapper::TestWrapper() {
 void TestWrapper::parse(std::string filename) {
 	// call your parser to do the parsing
   // ...rest of your code...
-  ifstream input_file(filename);
-  std::string input = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-  Parse(input, this->pkb);
+  try {
+    ifstream input_file(filename);
+    std::string input = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+    Parse(input, this->pkb);
+  } catch (InvalidProgramException e) {
+    //Force the autotester to stop running
+    exit(0);
+  }  
 }
 
 // method to evaluating a query

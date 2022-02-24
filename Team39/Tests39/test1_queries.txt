@@ -1,0 +1,75 @@
+1 - Select stmts that uses given var
+stmt s;
+Select s such that Uses(s, "while")
+2, 6, 8, 9
+5000
+2 - Select all read statements
+read r;
+Select r 
+1, 13
+5000 
+3 - Select all procedures
+procedure p;
+Select p such that Uses(8, "while")
+procedure
+5000 
+4 - Select LHS variables where RHS has y
+variable v; assign a;
+Select v such that Modifies(a,v) pattern a(v, "y")
+xxxx
+5000
+5 - Select print statements
+print pn; 
+Select pn
+5, 7, 10, 12
+5000
+6 - Select all constants
+constant c;
+Select c
+10000, 0, 1, 4, 5, 9, 99, 289, 444 
+5000
+7 - Select variables which are part of assignments
+variable v; assign a;
+Select v such that Modifies(a, v)
+x, y, while, p, xxxx
+5000
+8 - Select nested ifs
+if ifs1, ifs2; 
+Select ifs1 such that Parent*(ifs2, ifs1) 
+9 
+5000
+9 - Select stmt that follows before while loop
+stmt s; while w;
+Select s such that Follows* (s, w)
+
+5000
+10 - Find assignment with given LHS that has parent w
+assign a; while w;
+Select a such that Parent(w, a) pattern a ("p", _ )
+
+5000
+11 - Find assignment with given LHS that has parent* w
+assign a; while w;
+Select a such that Parent*(w, a) pattern a ("p", _"cenX"_ )
+11
+5000
+12 - Select stmts that an ifs follows*
+stmt s; if ifs;
+Select s such that Follows* (s, ifs)
+1, 7, 8
+5000
+13 - Select stmts that follows while loop
+stmt s; while w;
+Select s such that Follows* (w, s)
+14
+5000
+14 - Select assign stmts that are children of if statment
+assign a; if ifs;
+Select a such that Parent* (ifs, a)
+3, 4, 8, 11, 14
+5000
+15 - Select assign stmts that has while on the RHS
+assign a;
+Select a pattern a( _ , _"while"_ )
+8
+5000

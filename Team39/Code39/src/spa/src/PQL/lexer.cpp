@@ -16,7 +16,7 @@ namespace pql {
   }
 
   void ParserState::EatWhiteSpaces() {
-    while (ss.peek() == ' ' || ss.peek() == '\n') {
+    while (ss.peek() == ' ' || ss.peek() == '\n' || ss.peek() == '\r' || ss.peek() == '\t' || ss.peek() == '\0') {
       ss.get();
     }
   }
@@ -77,7 +77,7 @@ namespace pql {
         ssm << ParserState::Next();
       }
     } else if (ParserState::Peek() == '\"') {
-      ParserState::Consume();
+      ssm << ParserState::Next();
       ParserState::EatWhiteSpaces();
       if (!IsLetter(ParserState::Peek())) {
         throw ParseException();
@@ -90,7 +90,7 @@ namespace pql {
             throw ParseException();
           }
         }
-        ParserState::Consume();
+        ssm << ParserState::Next();
       }
     } else {
       ssm << ParserState::ParseSynonym();

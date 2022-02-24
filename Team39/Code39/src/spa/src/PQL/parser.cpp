@@ -135,10 +135,14 @@ namespace pql {
       bool is_synonym_left = q.SynonymDeclared(left);
       bool is_synonym_right = q.SynonymDeclared(right);
       if (!is_synonym_left && IsIdent(left)) {
-        left = left.substr(1, left.length() - 2);
+        left.erase(0, 1);
+        int left_len = left.length();
+        left.erase(left_len - 1, 1);
       }
       if (!is_synonym_right && IsIdent(right)) {
-        right = right.substr(1, right.length() - 2);
+        right.erase(0, 1);
+        int right_len = right.length();
+        right.erase(right_len - 1, 1);
       }
       q.AddSuchThatClause(*r, left, right, is_synonym_left, is_synonym_right);
     } else {
@@ -175,7 +179,9 @@ namespace pql {
       ps.Expect(")");
       bool is_synonym_left = q.SynonymDeclared(left);
       if (!is_synonym_left && IsIdent(left)) {
-        left = left.substr(1, left.length() - 2);
+        left.erase(0, 1);
+        int left_len = left.length();
+        left.erase(left_len - 1, 1);
       }
       q.AddPattern(assign_synonym, left, expression, exact, is_synonym_left);
     } else {
