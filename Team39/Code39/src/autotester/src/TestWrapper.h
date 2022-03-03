@@ -12,6 +12,9 @@
 
 class TestWrapper : public AbstractWrapper {
 public:
+    Pkb pkb;
+
+public:
   // default constructor
   TestWrapper();
 
