@@ -19,21 +19,21 @@ TEST_CASE("Valid tokenizer output") {
     source_prog = "1 23 045";
     actual_tokens = tokenizer.parse(source_prog);
 
-    Token token1{ DIGIT, "1", 0 };
-    Token token2{ INTEGER, "23", 0 };
-    Token token3{ INTEGER, "045", 0 };
+    Token token1{ DIGIT, "1", 1 };
+    Token token2{ INTEGER, "23", 1 };
+    Token token3{ INTEGER, "045", 1 };
     expected_tokens = { token1, token2, token3 };
 
     REQUIRE(expected_tokens == actual_tokens);
   }
 
   SECTION("Letters and names") {
-    source_prog = "x procedure myInt123";
+    source_prog = "x read myInt123";
     actual_tokens = tokenizer.parse(source_prog);
 
-    Token token1{ LETTER, "x", 0 };
-    Token token2{ NAME, "procedure", 0 };
-    Token token3{ NAME, "myInt123", 0 };
+    Token token1{ LETTER, "x", 1 };
+    Token token2{ NAME, "read", 1 };
+    Token token3{ NAME, "myInt123", 1 };
     expected_tokens = { token1, token2, token3 };
 
     REQUIRE(expected_tokens == actual_tokens);
@@ -43,9 +43,9 @@ TEST_CASE("Valid tokenizer output") {
     source_prog = "( ) { }";
     actual_tokens = tokenizer.parse(source_prog);
 
-    Token token1{ LEFT_PAREN, "(", 0 };
-    Token token2{ RIGHT_PAREN, ")", 0 };
-    Token token3{ LEFT_CURLY, "{", 0 };
+    Token token1{ LEFT_PAREN, "(", 1 };
+    Token token2{ RIGHT_PAREN, ")", 1 };
+    Token token3{ LEFT_CURLY, "{", 1 };
     Token token4{ RIGHT_CURLY, "}", 0 };
     expected_tokens = { token1, token2, token3, token4 };
 
@@ -56,24 +56,24 @@ TEST_CASE("Valid tokenizer output") {
     source_prog = "A + B - C * D / E % F = G < H > I ;"; // To avoid syntax error exception
     actual_tokens = tokenizer.parse(source_prog);
 
-    Token token1{ LETTER, "A", 0 };
-    Token token2{ OPERATOR, "+", 0 };
-    Token token3{ LETTER, "B", 0 };
-    Token token4{ OPERATOR, "-", 0 };
-    Token token5{ LETTER, "C", 0 };
-    Token token6{ OPERATOR, "*", 0 };
-    Token token7{ LETTER, "D", 0 };
-    Token token8{ OPERATOR, "/", 0 };
-    Token token9{ LETTER, "E", 0 };
-    Token token10{ OPERATOR, "%", 0 };
-    Token token11{ LETTER, "F", 0 };
-    Token token12{ OPERATOR, "=", 0 };
-    Token token13{ LETTER, "G", 0 };
-    Token token14{ OPERATOR, "<", 0 };
-    Token token15{ LETTER, "H", 0 };
-    Token token16{ OPERATOR, ">", 0 };
-    Token token17{ LETTER, "I", 0 };
-    Token token18{ SEMICOLON, ";", 0 };
+    Token token1{ LETTER, "A", 1 };
+    Token token2{ OPERATOR, "+", 1 };
+    Token token3{ LETTER, "B", 1 };
+    Token token4{ OPERATOR, "-", 1 };
+    Token token5{ LETTER, "C", 1 };
+    Token token6{ OPERATOR, "*", 1 };
+    Token token7{ LETTER, "D", 1 };
+    Token token8{ OPERATOR, "/", 1 };
+    Token token9{ LETTER, "E", 1 };
+    Token token10{ OPERATOR, "%", 1 };
+    Token token11{ LETTER, "F", 1 };
+    Token token12{ OPERATOR, "=", 1 };
+    Token token13{ LETTER, "G", 1 };
+    Token token14{ OPERATOR, "<", 1 };
+    Token token15{ LETTER, "H", 1 };
+    Token token16{ OPERATOR, ">", 1 };
+    Token token17{ LETTER, "I", 1 };
+    Token token18{ SEMICOLON, ";", 1 };
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9,
                             token10, token11, token12, token13, token14, token15, token16, token17, token18 };
 
@@ -484,37 +484,37 @@ TEST_CASE("Valid tokenizer output") {
     source_prog = "x==0; x >=0; x<= 0; x != 0; x && y; x || y; !(x == 0);";
     actual_tokens = tokenizer.parse(source_prog);
 
-    Token token1{ LETTER, "x", 0 };
-    Token token2{ OPERATOR, "==", 0 };
-    Token token3{ DIGIT, "0", 0 };
-    Token token4{ SEMICOLON, ";", 0 };
-    Token token5{ LETTER, "x", 1 };
-    Token token6{ OPERATOR, ">=", 1 };
-    Token token7{ DIGIT, "0", 1 };
-    Token token8{ SEMICOLON, ";", 1 };
-    Token token9{ LETTER, "x", 2 };
-    Token token10{ OPERATOR, "<=", 2 };
-    Token token11{ DIGIT, "0", 2 };
-    Token token12{ SEMICOLON, ";", 2 };
-    Token token13{ LETTER, "x", 3 };
-    Token token14{ OPERATOR, "!=", 3 };
-    Token token15{ DIGIT, "0", 3 };
-    Token token16{ SEMICOLON, ";", 3 };
-    Token token17{ LETTER, "x", 4 };
-    Token token18{ OPERATOR, "&&", 4 };
-    Token token19{ LETTER, "y", 4 };
-    Token token20{ SEMICOLON, ";", 4 };
-    Token token21{ LETTER, "x", 5 };
-    Token token22{ OPERATOR, "||", 5 };
-    Token token23{ LETTER, "y", 5 };
-    Token token24{ SEMICOLON, ";", 5 };
-    Token token25{ OPERATOR, "!", 6 };
-    Token token26{ LEFT_PAREN, "(", 6 };
-    Token token27{ LETTER, "x", 6 };
-    Token token28{ OPERATOR, "==", 6 };
-    Token token29{ DIGIT, "0", 6 };
-    Token token30{ RIGHT_PAREN, ")", 6 };
-    Token token31{ SEMICOLON, ";", 6 };
+    Token token1{ LETTER, "x", 1 };
+    Token token2{ OPERATOR, "==", 1 };
+    Token token3{ DIGIT, "0", 1 };
+    Token token4{ SEMICOLON, ";", 1 };
+    Token token5{ LETTER, "x", 2 };
+    Token token6{ OPERATOR, ">=", 2 };
+    Token token7{ DIGIT, "0", 2 };
+    Token token8{ SEMICOLON, ";", 2 };
+    Token token9{ LETTER, "x", 3 };
+    Token token10{ OPERATOR, "<=", 3 };
+    Token token11{ DIGIT, "0", 3 };
+    Token token12{ SEMICOLON, ";", 3 };
+    Token token13{ LETTER, "x", 4 };
+    Token token14{ OPERATOR, "!=", 4 };
+    Token token15{ DIGIT, "0", 4 };
+    Token token16{ SEMICOLON, ";", 4 };
+    Token token17{ LETTER, "x", 5 };
+    Token token18{ OPERATOR, "&&", 5 };
+    Token token19{ LETTER, "y", 5 };
+    Token token20{ SEMICOLON, ";", 5 };
+    Token token21{ LETTER, "x", 6 };
+    Token token22{ OPERATOR, "||", 6 };
+    Token token23{ LETTER, "y", 6 };
+    Token token24{ SEMICOLON, ";", 6 };
+    Token token25{ OPERATOR, "!", 7 };
+    Token token26{ LEFT_PAREN, "(", 7 };
+    Token token27{ LETTER, "x", 7 };
+    Token token28{ OPERATOR, "==", 7 };
+    Token token29{ DIGIT, "0", 7 };
+    Token token30{ RIGHT_PAREN, ")", 7 };
+    Token token31{ SEMICOLON, ";", 7 };
     expected_tokens = { token1, token2, token3, token4, token5, token6, token7, token8, token9, token10,
                          token11, token12, token13, token14, token15, token16, token17, token18, token19, token20,
                           token21, token22, token23, token24, token25, token26, token27, token28, token29, token30, token31 };
