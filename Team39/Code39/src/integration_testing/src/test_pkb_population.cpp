@@ -764,3 +764,60 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Population
     REQUIRE(uses_table.GetValueByKey(10) == vector<string>{"x"});
   }
 }
+
+TEST_CASE("Read/print/assign/call statments (1 level nesting) for Population") {
+
+  SECTION("6_test1") {
+    vector<Token> input_tokens = parse(populate_dir + "6_test1.txt");
+    Pkb pkb;
+    populate(input_tokens, pkb);
+
+    // check entity sets
+    unordered_set<string> expected_proc = { "proc1", "proc2"};
+    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+
+    unordered_set<string> expected_variable = { "print", "x", "proc1", "proc2", "proc3", "t" };
+    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+
+    unordered_set<int> expected_constant = { };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+
+    unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5, 6 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+
+    unordered_set<int> expected_read = { 1, 5 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+
+    unordered_set<int> expected_print = { 6 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+
+    unordered_set<int> expected_assign = { 2, 3 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+
+    unordered_set<int> expected_call = { 4 };
+    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kCall) == expected_call);
+
+    // check relation tables
+    FollowsTable follows_table = *pkb.GetFollowsTable();
+    REQUIRE(follows_table.GetTableSize() == 4);
+    REQUIRE(follows_table.GetValueByKey(1) == 2);
+    REQUIRE(follows_table.GetValueByKey(2) == 3);
+    REQUIRE(follows_table.GetValueByKey(3) == 4);
+    REQUIRE(follows_table.GetValueByKey(5) == 6);
+
+    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    //REQUIRE(modifies_table.GetTableSize() == 5);
+    REQUIRE(modifies_table.GetValueByKey(1) == vector<string>{"print"});
+    REQUIRE(modifies_table.GetValueByKey(2) == vector<string>{"x"});
+    REQUIRE(modifies_table.GetValueByKey(3) == vector<string>{"proc2"});
+    REQUIRE(modifies_table.GetValueByKey(5) == vector<string>{"x"});
+    //REQUIRE(modifies_table.GetValueByKey(4) == vector<string>{"x"});
+
+    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    //REQUIRE(uses_table.GetTableSize() == 4);
+    REQUIRE(uses_table.GetValueByKey(2) == vector<string>{"proc1"});
+    REQUIRE(uses_table.GetValueByKey(3) == vector<string>{"proc3"});
+    REQUIRE(uses_table.GetValueByKey(6) == vector<string>{"t"});
+    //REQUIRE(uses_table.GetValueByKey(4) == vector<string>{"t"});
+  }
+}

@@ -17,8 +17,8 @@ bool validateProcedure(vector<Token> tokens) {
     return false;
   }
 
-  bool check_variable = tokens.at(kSecondIndex).type == NAME || tokens.at(kSecondIndex).type == LETTER;
-  bool check_left_curly = tokens.at(kThirdIndex).type == LEFT_CURLY;
+  bool check_variable = tokens.at(kSecondIndex).type_ == NAME || tokens.at(kSecondIndex).type_ == LETTER;
+  bool check_left_curly = tokens.at(kThirdIndex).type_ == LEFT_CURLY;
   return check_variable && check_left_curly;
 }
 
@@ -28,8 +28,8 @@ bool validateReadPrintStmt(vector<Token> tokens) {
     return false;
   }
 
-  bool check_variable = tokens.at(kSecondIndex).type == NAME || tokens.at(kSecondIndex).type == LETTER;
-  bool check_semicolon = tokens.at(kThirdIndex).type == SEMICOLON;
+  bool check_variable = tokens.at(kSecondIndex).type_ == NAME || tokens.at(kSecondIndex).type_ == LETTER;
+  bool check_semicolon = tokens.at(kThirdIndex).type_ == SEMICOLON;
   return check_variable && check_semicolon;
 }
 
@@ -39,11 +39,11 @@ bool validateAssignStmt(vector<Token> tokens) {
     return false;
   }
 
-  bool check_lhs = tokens.at(kFirstIndex).type == NAME || tokens.at(kFirstIndex).type == LETTER;
+  bool check_lhs = tokens.at(kFirstIndex).type_ == NAME || tokens.at(kFirstIndex).type_ == LETTER;
   bool check_rhs = true;
 
   const int kLastIndex = tokens.size() - 1;
-  bool check_semicolon = tokens.at(kLastIndex).type == SEMICOLON;
+  bool check_semicolon = tokens.at(kLastIndex).type_ == SEMICOLON;
 
   vector<TokenType> expected_types = { NAME, INTEGER, LEFT_PAREN };
   vector<string> expected_operators = { "*", "/", "+", "-", "%" };
@@ -58,21 +58,21 @@ bool validateAssignStmt(vector<Token> tokens) {
   for (auto token = begin(expr); token != end(expr); ++token) {
     TokenType token_type;
 
-    if (token->type == LETTER) {
+    if (token->type_ == LETTER) {
       token_type = NAME;
-    } else if (token->type == DIGIT) {
+    } else if (token->type_ == DIGIT) {
       token_type = INTEGER;
     } else {
-      token_type = token->type;
+      token_type = token->type_;
     }
 
-    bool check_type = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);
+    bool check_type_ = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);
     bool check_operator = true;
 
     if (token_type == OPERATOR) {
-      check_operator = find(begin(expected_operators), end(expected_operators), token->text) != end(expected_operators);
+      check_operator = find(begin(expected_operators), end(expected_operators), token->text_) != end(expected_operators);
     }
-    check_rhs = check_rhs && check_type && check_operator;
+    check_rhs = check_rhs && check_type_ && check_operator;
 
     expected_types = {};
 
@@ -120,22 +120,22 @@ bool validateCondExpr(vector<Token> tokens) {
 
     TokenType token_type;
 
-    if (token->type == LETTER) {
+    if (token->type_ == LETTER) {
       token_type = NAME;
-    } else if (token->type == DIGIT) {
+    } else if (token->type_ == DIGIT) {
       token_type = INTEGER;
-    } else if (token->text == "!") {
+    } else if (token->text_ == "!") {
       token_type = NOT_OPERATOR;
-    } else if (token->text == "||" || token->text == "&&") {
+    } else if (token->text_ == "||" || token->text_ == "&&") {
       token_type = COND_OPERATOR;
-    } else if (find(begin(rel_operators), end(rel_operators), token->text) != end(rel_operators)) {
+    } else if (find(begin(rel_operators), end(rel_operators), token->text_) != end(rel_operators)) {
       token_type = REL_OPERATOR;
     } else {
-      token_type = token->type;
+      token_type = token->type_;
     }
 
-    bool check_type = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);
-    check_cond_expr = check_cond_expr && check_type;
+    bool check_type_ = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);
+    check_cond_expr = check_cond_expr && check_type_;
 
     expected_types = {};
 
@@ -179,13 +179,13 @@ bool validateWhileStmt(vector<Token> tokens) {
     return false;
   }
 
-  bool check_left_paren = tokens.at(kSecondIndex).type == LEFT_PAREN;
+  bool check_left_paren = tokens.at(kSecondIndex).type_ == LEFT_PAREN;
 
   const int kLastIndex = tokens.size() - 1;
   const int kSecondLastIndex = kLastIndex - 1;
 
-  bool check_right_paren = tokens.at(kSecondLastIndex).type == RIGHT_PAREN;
-  bool check_left_curly = tokens.at(kLastIndex).type == LEFT_CURLY;
+  bool check_right_paren = tokens.at(kSecondLastIndex).type_ == RIGHT_PAREN;
+  bool check_left_curly = tokens.at(kLastIndex).type_ == LEFT_CURLY;
 
   vector<Token>::const_iterator cond_expr_start = tokens.begin() + kThirdIndex;
   vector<Token>::const_iterator cond_expr_end = tokens.begin() + kSecondLastIndex;
@@ -205,10 +205,10 @@ bool validateIfStmt(vector<Token> tokens) {
   const int kSecondLastIndex = kLastIndex - 1;
   const int kThirdLastIndex = kSecondLastIndex - 1;
 
-  bool check_left_paren = tokens.at(kSecondIndex).type == LEFT_PAREN;
-  bool check_right_paren = tokens.at(kThirdLastIndex).type == RIGHT_PAREN;
-  bool check_then_keyword = tokens.at(kSecondLastIndex).type == NAME && tokens.at(kSecondLastIndex).text == "then";
-  bool check_left_curly = tokens.at(kLastIndex).type == LEFT_CURLY;
+  bool check_left_paren = tokens.at(kSecondIndex).type_ == LEFT_PAREN;
+  bool check_right_paren = tokens.at(kThirdLastIndex).type_ == RIGHT_PAREN;
+  bool check_then_keyword = tokens.at(kSecondLastIndex).type_ == NAME && tokens.at(kSecondLastIndex).text_ == "then";
+  bool check_left_curly = tokens.at(kLastIndex).type_ == LEFT_CURLY;
 
   vector<Token>::const_iterator first = tokens.begin() + kThirdIndex;
   vector<Token>::const_iterator last = tokens.begin() + kThirdLastIndex;
@@ -225,12 +225,10 @@ bool Validate(vector<Token> input) {
   int if_stmts = 0;
 
   for (auto token = begin(input); token != end(input); ++token) {
-    TokenType token_type;
-    string token_text;
 
-    if (token->type == RIGHT_CURLY) {
+    if (token->type_ == RIGHT_CURLY) {
       bool has_two_more_tokens = token != end(input) - 1 && token != end(input) - 2;
-      if (has_two_more_tokens && next(token, 1)->text == "else" && next(token, 2)->type == LEFT_CURLY) {
+      if (has_two_more_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == LEFT_CURLY) {
         if_stmts -= 1;
         token++;
         token++;
@@ -238,9 +236,9 @@ bool Validate(vector<Token> input) {
         curly_bracket_count -= 1;
       }
 
-    } else if (next(token, 1)->text == "=") {
+    } else if (next(token, 1)->text_ == "=") {
       vector<Token> tokens;
-      while (token->type != SEMICOLON && token != end(input) - 1) {
+      while (token->type_ != SEMICOLON && token != end(input) - 1) {
         tokens.push_back(*token);
         token++;
       }
@@ -250,9 +248,9 @@ bool Validate(vector<Token> input) {
         return false;
       }
 
-    } else if (token->text == "procedure") {
+    } else if (token->text_ == "procedure") {
       vector<Token> tokens;
-      while (token->type != LEFT_CURLY && token != end(input) - 1) {
+      while (token->type_ != LEFT_CURLY && token != end(input) - 1) {
         tokens.push_back(*token);
         token++;
       }
@@ -264,9 +262,9 @@ bool Validate(vector<Token> input) {
 
       curly_bracket_count += 1;
 
-    } else if (token->text == "while") {
+    } else if (token->text_ == "while") {
       vector<Token> tokens;
-      while (token->type != LEFT_CURLY && token != end(input) - 1) {
+      while (token->type_ != LEFT_CURLY && token != end(input) - 1) {
         tokens.push_back(*token);
         token++;
       }
@@ -278,9 +276,9 @@ bool Validate(vector<Token> input) {
         curly_bracket_count += 1;
       }
 
-    } else if (token->text == "if") {
+    } else if (token->text_ == "if") {
       vector<Token> tokens;
-      while (token->type != LEFT_CURLY && token != end(input) - 1) {
+      while (token->type_ != LEFT_CURLY && token != end(input) - 1) {
         tokens.push_back(*token);
         token++;
       }
@@ -293,9 +291,9 @@ bool Validate(vector<Token> input) {
         if_stmts += 1;
       }
 
-    } else if (token->text == "read" || token->text == "print") {
+    } else if (token->text_ == "read" || token->text_ == "print") {
       vector<Token> tokens;
-      while (token->type != SEMICOLON && token != end(input) - 1) {
+      while (token->type_ != SEMICOLON && token != end(input) - 1) {
         tokens.push_back(*token);
         token++;
       }
