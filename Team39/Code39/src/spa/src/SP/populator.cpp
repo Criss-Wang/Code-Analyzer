@@ -7,16 +7,20 @@ using namespace std;
 #include "populator.h"
 #include "SP/design_extractor.h"
 
+const int kFirstIndex = 0;
+const int kSecondIndex = 1;
+const int kThirdIndex = 2;
+
 void populateProcedure(vector<Token> tokens, Pkb& pkb) {
-  string proc_name = tokens.at(1).text;
+  string proc_name = tokens.at(kSecondIndex).text;
 
   // Add procedure name to procedure_set_
   pkb.AddEntityToSet(EntityIdentifier::kProc, proc_name);
 }
 
 void populateReadStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(0).stmt_num_;
-  string read_var = tokens.at(1).text;
+  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+  string read_var = tokens.at(kSecondIndex).text;
 
   // Add stmt num to stmt_set_ and read_set_
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
@@ -33,8 +37,8 @@ void populateReadStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 void populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(0).stmt_num_;
-  string print_var = tokens.at(1).text;
+  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+  string print_var = tokens.at(kSecondIndex).text;
 
   // Add stmt num to stmt_set_ and print_set_
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
@@ -51,8 +55,8 @@ void populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 void populateAssignStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(0).stmt_num_;
-  string lhs_var = tokens.at(0).text;
+  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+  string lhs_var = tokens.at(kFirstIndex).text;
   vector<string> rhs_vars;
   vector<int> rhs_constants;
   string assignment_pattern = "";
@@ -65,7 +69,12 @@ void populateAssignStmt(vector<Token> tokens, Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kVariable, lhs_var);
 
   // Build assignment pattern
-  for (auto token = begin(tokens) + 2; token != end(tokens) - 1; ++token) {
+  const int kLastIndex = tokens.size() - 1;
+  vector<Token>::const_iterator expr_start = tokens.begin() + kThirdIndex;
+  vector<Token>::const_iterator expr_end = tokens.begin() + kLastIndex;
+  vector<Token> expr(expr_start, expr_end);
+
+  for (auto token = begin(expr); token != end(expr); ++token) {
     assignment_pattern += token->text;
 
     if (token->type == LETTER || token->type == NAME) {
@@ -99,7 +108,7 @@ void populateAssignStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 void populateIfStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(0).stmt_num_;
+  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
   vector<string> vars_in_cond_expr;
   vector<int> constants_in_cond_expr;
 
@@ -107,8 +116,12 @@ void populateIfStmt(vector<Token> tokens, Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
   pkb.AddEntityToSet(EntityIdentifier::kIf, stmt_num);
 
-  for (auto token = begin(tokens) + 2; token != end(tokens) - 2; ++token) {
+  const int kThirdLastIndex = tokens.size() - 3;
+  vector<Token>::const_iterator cond_expr_start = tokens.begin() + kThirdIndex;
+  vector<Token>::const_iterator cond_expr_end = tokens.begin() + kThirdLastIndex;
+  vector<Token> cond_expr(cond_expr_start, cond_expr_end);
 
+  for (auto token = begin(cond_expr); token != end(cond_expr); ++token) {
     if (token->type == LETTER || token->type == NAME) {
       // Add variable to variable_set_
       pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text);
@@ -136,7 +149,7 @@ void populateIfStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 void populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(0).stmt_num_;
+  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
   vector<string> vars_in_cond_expr;
   vector<int> constants_in_cond_expr;
 
@@ -144,7 +157,13 @@ void populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
   pkb.AddEntityToSet(EntityIdentifier::kWhile, stmt_num);
 
-  for (auto token = begin(tokens) + 2; token != end(tokens) - 2; ++token) {
+  const int kSecondLastIndex = tokens.size() - 2;
+  vector<Token>::const_iterator cond_expr_start = tokens.begin() + kThirdIndex;
+  vector<Token>::const_iterator cond_expr_end = tokens.begin() + kSecondLastIndex;
+  vector<Token> cond_expr(cond_expr_start, cond_expr_end);
+
+  for (auto token = begin(cond_expr); token != end(cond_expr); ++token) {
+    token->print();
     if (token->type == LETTER || token->type == NAME) {
       // Add variable to variable_set_
       pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text);

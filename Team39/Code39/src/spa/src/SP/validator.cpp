@@ -7,34 +7,43 @@ using namespace std;
 #include "validator.h"
 #include "tokenizer.h"
 
+const int kFirstIndex = 0;
+const int kSecondIndex = 1;
+const int kThirdIndex = 2;
+
 bool validateProcedure(vector<Token> tokens) {
-  bool check_size = tokens.size() == 3;
-  if (!check_size) {
+  int expected_size = 3;
+  if (tokens.size() != expected_size) {
     return false;
   }
-  bool check_variable = tokens.at(1).type == NAME || tokens.at(1).type == LETTER;
-  bool check_left_curly = tokens.at(2).type == LEFT_CURLY;
-  return check_size && check_variable && check_left_curly;
+
+  bool check_variable = tokens.at(kSecondIndex).type == NAME || tokens.at(kSecondIndex).type == LETTER;
+  bool check_left_curly = tokens.at(kThirdIndex).type == LEFT_CURLY;
+  return check_variable && check_left_curly;
 }
 
 bool validateReadPrintStmt(vector<Token> tokens) {
-  bool check_size = tokens.size() == 3;
-  if (!check_size) {
+  int expected_size = 3;
+  if (tokens.size() != expected_size) {
     return false;
   }
-  bool check_variable = tokens.at(1).type == NAME || tokens.at(1).type == LETTER;
-  bool check_semicolon = tokens.at(2).type == SEMICOLON;
-  return check_size && check_variable && check_semicolon;
+
+  bool check_variable = tokens.at(kSecondIndex).type == NAME || tokens.at(kSecondIndex).type == LETTER;
+  bool check_semicolon = tokens.at(kThirdIndex).type == SEMICOLON;
+  return check_variable && check_semicolon;
 }
 
 bool validateAssignStmt(vector<Token> tokens) {
-  bool check_size = tokens.size() > 3;
-  if (!check_size) {
+  int min_stmt_size = 4;
+  if (tokens.size() < min_stmt_size) {
     return false;
   }
-  bool check_lhs = tokens.at(0).type == NAME || tokens.at(0).type == LETTER;
+
+  bool check_lhs = tokens.at(kFirstIndex).type == NAME || tokens.at(kFirstIndex).type == LETTER;
   bool check_rhs = true;
-  bool check_semicolon = tokens.at(tokens.size() - 1).type == SEMICOLON;
+
+  const int kLastIndex = tokens.size() - 1;
+  bool check_semicolon = tokens.at(kLastIndex).type == SEMICOLON;
 
   vector<TokenType> expected_types = { NAME, INTEGER, LEFT_PAREN };
   vector<string> expected_operators = { "*", "/", "+", "-", "%" };
@@ -42,7 +51,11 @@ bool validateAssignStmt(vector<Token> tokens) {
   // keep track of number of brackets
   int paren_count = 0;
   
-  for (auto token = begin(tokens) + 2; token != end(tokens) - 1; ++token) {
+  vector<Token>::const_iterator expr_start = tokens.begin() + kThirdIndex;
+  vector<Token>::const_iterator expr_end = tokens.begin() + kLastIndex;
+  vector<Token> expr(expr_start, expr_end);
+
+  for (auto token = begin(expr); token != end(expr); ++token) {
     TokenType token_type;
 
     if (token->type == LETTER) {
@@ -87,10 +100,14 @@ bool validateAssignStmt(vector<Token> tokens) {
   }
 
   bool check_brackets = paren_count == 0;
-  return check_size && check_lhs && check_rhs && check_semicolon && check_brackets;
+  return check_lhs && check_rhs && check_semicolon && check_brackets;
 }
 
 bool validateCondExpr(vector<Token> tokens) {
+  int min_expr_size = 3;
+  if (tokens.size() < min_expr_size) {
+    return false;
+  }
   bool check_cond_expr = true;
 
   vector<TokenType> expected_types = { NAME, INTEGER, LEFT_PAREN, NOT_OPERATOR };
@@ -157,39 +174,48 @@ bool validateCondExpr(vector<Token> tokens) {
 }
 
 bool validateWhileStmt(vector<Token> tokens) {
-  bool check_size = tokens.size() > 6;
-  if (!check_size) {
+  int min_stmt_size = 7;
+  if (tokens.size() < min_stmt_size) {
     return false;
   }
-  bool check_left_paren = tokens.at(1).type == LEFT_PAREN;
-  bool check_right_paren = tokens.at(tokens.size() - 2).type == RIGHT_PAREN;
-  bool check_left_curly = tokens.at(tokens.size() - 1).type == LEFT_CURLY;
 
-  vector<Token>::const_iterator first = tokens.begin() + 2;
-  vector<Token>::const_iterator last = tokens.end() - 2;
-  vector<Token> cond_expr(first, last);
+  bool check_left_paren = tokens.at(kSecondIndex).type == LEFT_PAREN;
+
+  const int kLastIndex = tokens.size() - 1;
+  const int kSecondLastIndex = kLastIndex - 1;
+
+  bool check_right_paren = tokens.at(kSecondLastIndex).type == RIGHT_PAREN;
+  bool check_left_curly = tokens.at(kLastIndex).type == LEFT_CURLY;
+
+  vector<Token>::const_iterator cond_expr_start = tokens.begin() + kThirdIndex;
+  vector<Token>::const_iterator cond_expr_end = tokens.begin() + kSecondLastIndex;
+  vector<Token> cond_expr(cond_expr_start, cond_expr_end);
   bool check_cond_expr = validateCondExpr(cond_expr);
 
-  return check_size && check_left_paren && check_right_paren && check_left_curly && check_cond_expr;
+  return check_left_paren && check_right_paren && check_left_curly && check_cond_expr;
 }
 
 bool validateIfStmt(vector<Token> tokens) {
-  bool check_size = tokens.size() > 7;
-  if (!check_size) {
+  int min_stmt_size = 8;
+  if (tokens.size() < min_stmt_size) {
     return false;
   }
-  bool check_left_paren = tokens.at(1).type == LEFT_PAREN;
-  bool check_right_paren = tokens.at(tokens.size() - 3).type == RIGHT_PAREN;
-  bool check_then_keyword = tokens.at(tokens.size() - 2).type == NAME && tokens.at(tokens.size() - 2).text == "then";
-  bool check_left_curly = tokens.at(tokens.size() - 1).type == LEFT_CURLY;
 
-  vector<Token>::const_iterator first = tokens.begin() + 2;
-  vector<Token>::const_iterator last = tokens.end() - 3;
+  const int kLastIndex = tokens.size() - 1;
+  const int kSecondLastIndex = kLastIndex - 1;
+  const int kThirdLastIndex = kSecondLastIndex - 1;
+
+  bool check_left_paren = tokens.at(kSecondIndex).type == LEFT_PAREN;
+  bool check_right_paren = tokens.at(kThirdLastIndex).type == RIGHT_PAREN;
+  bool check_then_keyword = tokens.at(kSecondLastIndex).type == NAME && tokens.at(kSecondLastIndex).text == "then";
+  bool check_left_curly = tokens.at(kLastIndex).type == LEFT_CURLY;
+
+  vector<Token>::const_iterator first = tokens.begin() + kThirdIndex;
+  vector<Token>::const_iterator last = tokens.begin() + kThirdLastIndex;
   vector<Token> cond_expr(first, last);
   bool check_cond_expr = validateCondExpr(cond_expr);
 
-  return check_size && check_left_paren && check_right_paren && check_left_curly
-    && check_cond_expr;
+  return check_left_paren && check_right_paren && check_left_curly && check_cond_expr;
 }
 
 bool Validate(vector<Token> input) {
@@ -199,7 +225,6 @@ bool Validate(vector<Token> input) {
   int if_stmts = 0;
 
   for (auto token = begin(input); token != end(input); ++token) {
-
     TokenType token_type;
     string token_text;
 
