@@ -116,6 +116,10 @@ bool validateAssignStmt(vector<Token> tokens) {
       token_type = token->type_;
     }
 
+    if (token_type == INTEGER && token->text_.size() > 1 && token->text_[0] == '0') {
+      return false;
+    }
+
     bool check_type_ = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);
     bool check_operator = true;
 
@@ -182,6 +186,10 @@ bool validateCondExpr(vector<Token> tokens) {
       token_type = REL_OPERATOR;
     } else {
       token_type = token->type_;
+    }
+
+    if (token_type == INTEGER && token->text_.size() > 1 && token->text_[0] == '0') {
+      return false;
     }
 
     bool check_type_ = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);

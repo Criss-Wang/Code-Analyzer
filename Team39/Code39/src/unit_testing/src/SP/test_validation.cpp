@@ -76,6 +76,7 @@ TEST_CASE("Read/print/assign statments for Validation") {
     RequireInvalid(invalid_dir + "2_test4.txt");
     RequireInvalid(invalid_dir + "2_test5.txt");
     RequireInvalid(invalid_dir + "2_test6.txt");
+    RequireInvalid(invalid_dir + "2_test7.txt");
 
   }
 
@@ -95,6 +96,7 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation
   SECTION("Invalid Programs") {
 
     RequireInvalid(invalid_dir + "3_test1.txt");
+    RequireInvalid(invalid_dir + "3_test2.txt");
 
   }
 }
