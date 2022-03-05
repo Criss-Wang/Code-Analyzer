@@ -39,6 +39,13 @@ class Pkb {
     ChildTable *child_table_ = new ChildTable();
     ParentStarTable *parent_star_table_ = new ParentStarTable();
     ChildStarTable *child_star_table_ = new ChildStarTable();
+    CallsTable *calls_table_ = new CallsTable();
+    CalledByTable *called_by_table_ = new CalledByTable();
+    CallsStarTable *calls_star_table_ = new CallsStarTable();
+    CalledByStarTable *called_by_star_table_ = new CalledByStarTable();
+    NextTable *next_table_ = new NextTable();
+    BeforeTable *before_table_ = new BeforeTable();
+
     UsesStmtToVariablesTable *uses_stmt_to_variables_table_ = new UsesStmtToVariablesTable();
     UsesVariableToStmtsTable *uses_variable_to_stmts_table_ = new UsesVariableToStmtsTable();
     ModifiesStmtToVariablesTable *modifies_stmt_to_variables_table_ = new ModifiesStmtToVariablesTable();
@@ -64,6 +71,8 @@ class Pkb {
     bool AddPattern(int line_num, const string& input);
     bool AddParent(int key, const vector<int>& value);
     bool AddFollows(int key, int value);
+    bool AddCalls(const string& key, const string& value);
+    bool AddNext(int key, int value);
     bool AddModifies(int key, const vector<string>& value);
     bool AddUses(int key, const vector<string>& value);
 
@@ -76,6 +85,7 @@ class Pkb {
     bool AddInfoToTable(TableIdentifier table_identifier, int key, const vector<string>& value);
     bool AddInfoToTable(TableIdentifier table_identifier, int key, int value);
     bool AddInfoToTable(TableIdentifier table_identifier, int key, const string& value);
+    bool AddInfoToTable(TableIdentifier table_identifier, const string& key, const string& value);
 
     // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
     bool AddEntityToSet(EntityIdentifier entity_identifier, int entity_val);
