@@ -765,7 +765,7 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Population
   }
 }
 
-TEST_CASE("Read/print/assign/call statments (1 level nesting) for Population") {
+TEST_CASE("Read/print/assign/call statments for Population") {
 
   SECTION("6_test1") {
     vector<Token> input_tokens = parse(populate_dir + "6_test1.txt");

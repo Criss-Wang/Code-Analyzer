@@ -91,6 +91,12 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation
     RequireValid(valid_dir + "3_test4.txt");
 
   }
+
+  SECTION("Invalid Programs") {
+
+    RequireInvalid(invalid_dir + "3_test1.txt");
+
+  }
 }
 
 TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Validation") {
@@ -108,6 +114,25 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Validation
   SECTION("Valid Programs") {
 
     RequireValid(valid_dir + "5_test1.txt");
+
+  }
+}
+
+TEST_CASE("Read/print/assign/call statments for Validation") {
+
+  SECTION("Valid Programs") {
+
+    RequireValid(valid_dir + "6_test1.txt");
+    RequireValid(valid_dir + "6_test2.txt");
+    RequireValid(valid_dir + "6_test3.txt");
+
+  }
+
+  SECTION("Invalid Programs") {
+
+    RequireInvalid(invalid_dir + "6_test1.txt");
+    RequireInvalid(invalid_dir + "6_test2.txt");
+    RequireInvalid(invalid_dir + "6_test3.txt");
 
   }
 }
