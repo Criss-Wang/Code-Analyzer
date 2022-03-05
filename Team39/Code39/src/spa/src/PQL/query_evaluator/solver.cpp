@@ -1,6 +1,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 
 #include "solver.h"
@@ -11,20 +12,21 @@ namespace pql_solver {
   Solver::Solver(std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
     std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
     std::vector<pql_table::Predicate>* preds,
-    std::vector<pql::Synonym>& syn_list, pql::Synonym* selected_syn) {
-      predicates_ = preds;
-      return_syn_ = selected_syn;
+    std::vector<pql::Synonym>& syn_list, std::vector<pql::Synonym> selected_syns) {
+    
+    predicates_ = preds;
+    return_syns_ = selected_syns;
 
-      for (pql::Synonym& syn : syn_list) {
-        if (syn.GetDeclaration() == EntityIdentifier::kVariable
-            || syn.GetDeclaration() == EntityIdentifier::kProc) {
-          pql_table::InterTable table(syn, (*var_hashmap)[syn.GetName()]);
-          tables_.push_back(table);
-        } else {
-          pql_table::InterTable table(syn, (*stmt_hashmap)[syn.GetName()]);
-          tables_.push_back(table);
-        }
+    for (pql::Synonym& syn : syn_list) {
+      if (syn.GetDeclaration() == EntityIdentifier::kVariable
+        || syn.GetDeclaration() == EntityIdentifier::kProc) {
+        pql_table::InterTable table(syn, (*var_hashmap)[syn.GetName()]);
+        tables_.push_back(table);
+      } else {
+        pql_table::InterTable table(syn, (*stmt_hashmap)[syn.GetName()]);
+        tables_.push_back(table);
       }
+    }
   }
 
   int Solver::GetTableIndex(std::string& name) {
@@ -52,24 +54,62 @@ namespace pql_solver {
     }
   }
 
-  std::vector<std::string> Solver::ExtractResult() {
-    std::string name = return_syn_->GetName();
-    int index = GetTableIndex(name);
-    pql_table::InterTable curr_table = tables_[index];
-    std::vector<std::string> lst;
+  std::vector<pql_table::InterTable> Solver::GetReturnTables() {
+    std::vector<pql_table::InterTable> new_tables;
 
-    std::vector<pql_table::element> col = curr_table.GetColByName(name);
+    for (auto& table : tables_) {
+      std::vector<int> return_idxs;
 
-    for (auto& ele : col) {
-      if (return_syn_->GetDeclaration() == EntityIdentifier::kVariable
-          || return_syn_->GetDeclaration() == EntityIdentifier::kProc) {
-        lst.push_back(ele.name);
-      } else {
-        lst.push_back(std::to_string(ele.val));
+      for (auto& syn : return_syns_) {
+        int cur_idx = table.FindSynCol(syn.GetName());
+        if (cur_idx >= 0) {
+          return_idxs.push_back(cur_idx);
+        }
+      }
+
+      if (!return_idxs.empty()) {
+        new_tables.push_back(table.GetColsByIndices(return_idxs));
       }
     }
+
+    return new_tables;
+  }
+
+  pql_table::InterTable MergeComponents(std::vector<pql_table::InterTable>& tables) {
+    pql_table::InterTable return_table = tables[0];
+
+    for (int index = 1; index < tables.size(); index++) {
+      return_table = return_table.Merge(tables[index]);
+    }
+
+    return return_table;
+  }
+
+  std::vector<std::string> Solver::ExtractResult() {
+    std::vector<pql_table::InterTable> tables = GetReturnTables();
+    pql_table::InterTable final_table = MergeComponents(tables);
+
+    std::vector<std::string> result_string(final_table.GetRowNum());
     
-    return lst;
+    //We add the synonym according to their position in return_syns_
+    for (auto& syn : return_syns_) {
+      int col_num_in_table = final_table.FindSynCol(syn.GetName());
+
+      for (int index = 0; index < final_table.GetRowNum(); index++) {
+        std::string cur_string = "";
+
+        if (syn.GetDeclaration() == EntityIdentifier::kVariable
+            || syn.GetDeclaration() == EntityIdentifier::kProc) {
+            cur_string = final_table.rows_[index][col_num_in_table].name;
+        } else {
+            cur_string = std::to_string(final_table.rows_[index][col_num_in_table].val);
+        }
+
+        result_string[index] += cur_string;
+      }
+    }
+
+    return result_string;
   }
 
   std::vector<std::string> Solver::Solve() {

@@ -133,7 +133,8 @@ namespace pql {
       std::vector<pql::RelationshipToken> such_that_clauses = query.GetSuchThatClause();
       std::optional<pql::PatternToken> pattern_token_opt = query.GetPattern();
       std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
-      pql::Synonym selected_syn = query.GetResultSynonym();
+      //Need to wait for query preprocessor
+      std::vector<pql::Synonym> selected_syns = query.GetResultSynonym();
 
       std::vector<pql_table::Predicate> predicates;
       std::unordered_map<std::string, std::vector<int>> stmt_hashmap;
@@ -152,7 +153,7 @@ namespace pql {
         clause->Evaluate();
       }
 
-      pql_solver::Solver solver(&stmt_hashmap, &var_hashmap, &predicates, synonyms, &selected_syn);
+      pql_solver::Solver solver(&stmt_hashmap, &var_hashmap, &predicates, synonyms, &selected_syns);
       std::vector<std::string> res = solver.Solve();
 
       return res;
