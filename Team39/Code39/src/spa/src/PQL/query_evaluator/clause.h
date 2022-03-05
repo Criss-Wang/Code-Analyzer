@@ -79,14 +79,6 @@ namespace pql {
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist() override;
-
-      void ExtractRelDomain() override;
-
-      void ExtractInverseRelDomain() override;
-
-      void ExtractRelPair() override;
-
       void Evaluate() override;
   };
 
@@ -99,14 +91,6 @@ namespace pql {
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist() override;
-
-      void ExtractRelDomain() override;
-
-      void ExtractInverseRelDomain() override;
-
-      void ExtractRelPair() override;
-
       void Evaluate() override;
   };
 
@@ -119,14 +103,6 @@ namespace pql {
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist() override;
-
-      void ExtractRelDomain() override;
-
-      void ExtractInverseRelDomain() override;
-
-      void ExtractRelPair() override;
-
       void Evaluate() override;
   };
 
@@ -139,14 +115,6 @@ namespace pql {
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist() override;
-
-      void ExtractRelDomain() override;
-
-      void ExtractInverseRelDomain() override;
-
-      void ExtractRelPair() override;
-
       void Evaluate() override;
   };
 
@@ -159,14 +127,6 @@ namespace pql {
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist() override;
-
-      void ExtractRelDomain() override;
-
-      void ExtractInverseRelDomain() override;
-
-      void ExtractRelPair() override;
-
       void Evaluate() override;
   };
 }
