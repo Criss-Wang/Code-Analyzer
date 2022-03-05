@@ -100,9 +100,9 @@ namespace pql_solver {
 
         if (syn.GetDeclaration() == EntityIdentifier::kVariable
             || syn.GetDeclaration() == EntityIdentifier::kProc) {
-            cur_string = final_table.rows_[index][col_num_in_table].name;
+          cur_string = final_table.rows_[index][col_num_in_table].name;
         } else {
-            cur_string = std::to_string(final_table.rows_[index][col_num_in_table].val);
+          cur_string = std::to_string(final_table.rows_[index][col_num_in_table].val);
         }
 
         result_string[index] += cur_string;

@@ -6,10 +6,24 @@
 using namespace std;
 
 namespace pql_exceptions {
-  class EmptyDomainException final : public exception {
+  class EmptyResultException : public exception {
+    public:
+      const char* what() const throw() {
+        return "The result string should be empty";
+      }
+  };
+
+  class EmptyDomainException final : public EmptyResultException {
     public:
       const char* what() const throw() {
         return "The domain is empty";
+      }
+  };
+
+  class FalseRelationException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+        return "The relation does not empty";
       }
   };
 }

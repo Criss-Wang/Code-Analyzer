@@ -59,72 +59,80 @@ namespace pql {
     predicates_ = predicates;
   }
 
-  void FollowsClause::ExtractRelExist() {
+  void EvaluateRelExist(pql::RelationshipToken& token, Pkb& pkb,
+    bool(Pkb::* IsRelHolds)(const int, const int) const, std::vector<int>(Pkb::* GetRelDomain)(const int) const,
+    std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const) {
     //The parameter can be "_", e.g. Follows(_,2)
-    bool is_left_num = IsNumber(token_->GetLeft());
-    bool is_right_num = IsNumber(token_->GetRight());
+    bool is_left_num = IsNumber(token.GetLeft());
+    bool is_right_num = IsNumber(token.GetRight());
 
     if (is_left_num && is_right_num) {
-      bool rel_exist = pkb_.IsFollows(stoi(token_->GetLeft()), stoi(token_->GetRight()));
+      bool rel_exist = (pkb.*IsRelHolds)(stoi(token.GetLeft()), stoi(token.GetRight()));
 
       if (!rel_exist) {
-        throw pql_exceptions::EmptyDomainException();
+        throw pql_exceptions::FalseRelationException();
       }
     } else if (is_left_num || is_right_num) {
-      std::vector<int> domain = is_left_num ? pkb_.GetStmtRightAfter(stoi(token_->GetLeft()))
-                                            : pkb_.GetStmtRightBefore(stoi(token_->GetRight()));
+      std::vector<int> domain = is_left_num ? (pkb.*GetRelDomain)(stoi(token.GetLeft()))
+                                            : (pkb.*GetInverseRelDomain)(stoi(token.GetRight()));
       if (domain.size() == 0) {
         throw pql_exceptions::EmptyDomainException();
       }
     } else {
-      std::vector<std::pair<int, int>> domain = pkb_.GetAllFollowsPairs();
+      std::vector<std::pair<int, int>> domain = (pkb.*GetRelPairs)();
 
       if (domain.size() == 0) {
         throw pql_exceptions::EmptyDomainException();
       }
     }
-
   }
 
-  void FollowsClause::ExtractRelDomain() {
-    //Follows(_, s1) or Follows(1, s1)
-    bool is_left_num = IsNumber(token_->GetLeft());
+  void EvaluateRelDomain(pql::RelationshipToken& token, Pkb& pkb,
+    std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
+    std::vector<int>(Pkb::* GetRelDomain)(const int) const, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const) {
+    //Rel(_, s1) or Rel(1, s1)
+    bool is_left_num = IsNumber(token.GetLeft());
     std::vector<int> domain;
 
     if (is_left_num) {
-      domain = pkb_.GetStmtRightAfter(stoi(token_->GetLeft()));    
-    } else {
-      std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllFollowsPairs();
+      domain = (pkb.*GetRelDomain)(stoi(token.GetLeft()));
+    }
+    else {
+      std::vector<std::pair<int, int>> domain_pair = (pkb.*GetRelPairs)();
       std::vector<int> domain_with_duplicates = ExtractSecond<int>(domain_pair);
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(*stmt_hashmap_, token_->GetRight(), domain);
+    UpdateHashmap<int>(stmt_hashmap, token.GetRight(), domain);
   }
 
-  void FollowsClause::ExtractInverseRelDomain() {
+  void EvaluateInverseRelDomain(pql::RelationshipToken& token, Pkb& pkb,
+    std::unordered_map<std::string, std::vector<int>>& stmt_hashmap,
+    std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const) {
     //Follows(s1, _) or Follows(s1, 2)
-    bool is_right_num = IsNumber(token_->GetRight());
+    bool is_right_num = IsNumber(token.GetRight());
     std::vector<int> domain;
 
     if (is_right_num) {
-      domain = pkb_.GetStmtRightBefore(stoi(token_->GetRight()));
-    } else {
-      std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllFollowsPairs();
+      domain = (pkb.*GetInverseRelDomain)(stoi(token.GetRight()));
+    }
+    else {
+      std::vector<std::pair<int, int>> domain_pair = (pkb.*GetRelPairs)();
       std::vector<int> domain_with_duplicates = ExtractFirst<int>(domain_pair);
       domain = RemoveDuplicate<int>(domain_with_duplicates);
     }
 
-    UpdateHashmap<int>(*stmt_hashmap_, token_->GetLeft(), domain);
+    UpdateHashmap<int>(stmt_hashmap, token.GetLeft(), domain);
   }
 
-  void FollowsClause::ExtractRelPair() {
-    std::string left = token_->GetLeft();
-    std::string right = token_->GetRight();
-    std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllFollowsPairs();
+  void EvaluateRelPair(pql::RelationshipToken& token, Pkb& pkb, 
+    std::vector<pql_table::Predicate>* predicates, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const) {
+    std::string left = token.GetLeft();
+    std::string right = token.GetRight();
+    std::vector<std::pair<int, int>> domain_pair = (pkb.*GetRelPairs)();
     pql_table::Predicate pred(left, right, domain_pair);
 
-    (*predicates_).push_back(pred);
+    (*predicates).push_back(pred);
   }
 
   void FollowsClause::Evaluate() {
@@ -132,79 +140,15 @@ namespace pql {
     bool is_right_syn = token_->IsSynonymRight();
 
     if (!is_left_syn && !is_right_syn) {
-      FollowsClause::ExtractRelExist();
+      EvaluateRelExist(*token_, pkb_, &Pkb::IsFollows, &Pkb::GetStmtRightAfter, 
+          &Pkb::GetStmtRightBefore, &Pkb::GetAllFollowsPairs);
     } else if (!is_left_syn && is_right_syn) {
-      FollowsClause::ExtractRelDomain();
+      EvaluateRelDomain(*token_, pkb_, *stmt_hashmap_, &Pkb::GetStmtRightAfter, &Pkb::GetAllFollowsPairs);
     } else if (is_left_syn && !is_right_syn) {
-      FollowsClause::ExtractInverseRelDomain();
+      EvaluateInverseRelDomain(*token_, pkb_, *stmt_hashmap_, &Pkb::GetStmtRightBefore, &Pkb::GetAllFollowsPairs);
     } else {
-      FollowsClause::ExtractRelPair();
+      EvaluateRelPair(*token_, pkb_, predicates_, &Pkb::GetAllFollowsPairs);
     }
-  }
-
-  void FollowsTClause::ExtractRelExist() {
-    bool is_left_num = IsNumber(token_->GetLeft());
-    bool is_right_num = IsNumber(token_->GetRight());
-
-    if (is_left_num && is_right_num) {
-      bool rel_exist = pkb_.IsTransitiveFollows(stoi(token_->GetLeft()), stoi(token_->GetRight()));
-
-      if (!rel_exist) {
-        throw pql_exceptions::EmptyDomainException();
-      }
-    } else if (is_left_num || is_right_num) {
-      std::vector<int> domain = is_left_num ? pkb_.GetStmtsAfter(stoi(token_->GetLeft()))
-                                            : pkb_.GetStmtsBefore(stoi(token_->GetRight()));
-      if (domain.size() == 0) {
-        throw pql_exceptions::EmptyDomainException();
-      }
-    } else {
-      std::vector<std::pair<int, int>> domain = pkb_.GetAllTransitiveFollowsPairs();
-
-      if (domain.size() == 0) {
-        throw pql_exceptions::EmptyDomainException();
-      }
-    }
-
-  }
-
-  void FollowsTClause::ExtractRelDomain() {
-    bool is_left_num = IsNumber(token_->GetLeft());
-    std::vector<int> domain;
-
-    if (is_left_num) {
-      domain = pkb_.GetStmtsAfter(stoi(token_->GetLeft()));
-    } else {
-      std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllTransitiveFollowsPairs();
-      std::vector<int> domain_with_duplicates = ExtractSecond<int>(domain_pair);
-      domain = RemoveDuplicate<int>(domain_with_duplicates);
-    }
-
-    UpdateHashmap<int>(*stmt_hashmap_, token_->GetRight(), domain);
-  }
-
-  void FollowsTClause::ExtractInverseRelDomain() {
-    bool is_right_num = IsNumber(token_->GetRight());
-    std::vector<int> domain;
-
-    if (is_right_num) {
-      domain = pkb_.GetStmtsBefore(stoi(token_->GetRight()));
-    } else {
-      std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllTransitiveFollowsPairs();
-      std::vector<int> domain_with_duplicates = ExtractFirst<int>(domain_pair);
-      domain = RemoveDuplicate<int>(domain_with_duplicates);
-    }
-
-    UpdateHashmap<int>(*stmt_hashmap_, token_->GetLeft(), domain);
-  }
-
-  void FollowsTClause::ExtractRelPair() {
-    std::string left = token_->GetLeft();
-    std::string right = token_->GetRight();
-    std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllTransitiveFollowsPairs();
-    pql_table::Predicate pred(left, right, domain_pair);
-
-    (*predicates_).push_back(pred);
   }
 
   void FollowsTClause::Evaluate() {
@@ -212,78 +156,15 @@ namespace pql {
     bool is_right_syn = token_->IsSynonymRight();
 
     if (!is_left_syn && !is_right_syn) {
-      FollowsTClause::ExtractRelExist();
+      EvaluateRelExist(*token_, pkb_, &Pkb::IsTransitiveFollows, &Pkb::GetStmtsAfter,
+        &Pkb::GetStmtsBefore, &Pkb::GetAllTransitiveFollowsPairs);
     } else if (!is_left_syn && is_right_syn) {
-      FollowsTClause::ExtractRelDomain();
+      EvaluateRelDomain(*token_, pkb_, *stmt_hashmap_, &Pkb::GetStmtsAfter, &Pkb::GetAllTransitiveFollowsPairs);
     } else if (is_left_syn && !is_right_syn) {
-      FollowsTClause::ExtractInverseRelDomain();
+      EvaluateInverseRelDomain(*token_, pkb_, *stmt_hashmap_, &Pkb::GetStmtsBefore, &Pkb::GetAllTransitiveFollowsPairs);
     } else {
-      FollowsTClause::ExtractRelPair();
+      EvaluateRelPair(*token_, pkb_, predicates_, &Pkb::GetAllTransitiveFollowsPairs);
     }
-  }
-
-  void ParentClause::ExtractRelExist() {
-    bool is_left_num = IsNumber(token_->GetLeft());
-    bool is_right_num = IsNumber(token_->GetRight());
-
-    if (is_left_num && is_right_num) {
-      bool rel_exist = pkb_.IsParent(stoi(token_->GetLeft()), stoi(token_->GetRight()));
-
-      if (!rel_exist) {
-        throw pql_exceptions::EmptyDomainException();
-      }
-    } else if (is_left_num || is_right_num) {
-      std::vector<int> domain = is_left_num ? pkb_.GetChild(stoi(token_->GetLeft()))
-                                            : pkb_.GetParent(stoi(token_->GetRight()));
-      if (domain.size() == 0) {
-        throw pql_exceptions::EmptyDomainException();
-      }
-    } else {
-      std::vector<std::pair<int, int>> domain = pkb_.GetAllParentPairs();
-
-      if (domain.size() == 0) {
-        throw pql_exceptions::EmptyDomainException();
-      }
-    }
-  }
-
-  void ParentClause::ExtractRelDomain() {
-    bool is_left_num = IsNumber(token_->GetLeft());
-    std::vector<int> domain;
-
-    if (is_left_num) {
-      domain = pkb_.GetChild(stoi(token_->GetLeft()));
-    } else {
-      std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllParentPairs();
-      std::vector<int> domain_with_duplicates = ExtractSecond<int>(domain_pair);
-      domain = RemoveDuplicate<int>(domain_with_duplicates);
-    }
-
-    UpdateHashmap<int>(*stmt_hashmap_, token_->GetRight(), domain);
-  }
-
-  void ParentClause::ExtractInverseRelDomain() {
-    bool is_right_num = IsNumber(token_->GetRight());
-    std::vector<int> domain;
-
-    if (is_right_num) {
-      domain = pkb_.GetParent(stoi(token_->GetRight()));
-    } else {
-      std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllParentPairs();
-      std::vector<int> domain_with_duplicates = ExtractFirst<int>(domain_pair);
-      domain = RemoveDuplicate<int>(domain_with_duplicates);
-    }
-
-    UpdateHashmap<int>(*stmt_hashmap_, token_->GetLeft(), domain);
-  }
-
-  void ParentClause::ExtractRelPair() {
-    std::string left = token_->GetLeft();
-    std::string right = token_->GetRight();
-    std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllParentPairs();
-    pql_table::Predicate pred(left, right, domain_pair);
-
-    (*predicates_).push_back(pred);
   }
 
   void ParentClause::Evaluate() {
@@ -291,80 +172,15 @@ namespace pql {
     bool is_right_syn = token_->IsSynonymRight();
 
     if (!is_left_syn && !is_right_syn) {
-      ParentClause::ExtractRelExist();
+      EvaluateRelExist(*token_, pkb_, &Pkb::IsParent, &Pkb::GetChild,
+        &Pkb::GetParent, &Pkb::GetAllParentPairs);
     } else if (!is_left_syn && is_right_syn) {
-      ParentClause::ExtractRelDomain();
+      EvaluateRelDomain(*token_, pkb_, *stmt_hashmap_, &Pkb::GetChild, &Pkb::GetAllParentPairs);
     } else if (is_left_syn && !is_right_syn) {
-      ParentClause::ExtractInverseRelDomain();
+      EvaluateInverseRelDomain(*token_, pkb_, *stmt_hashmap_, &Pkb::GetParent, &Pkb::GetAllParentPairs);
     } else {
-      ParentClause::ExtractRelPair();
+      EvaluateRelPair(*token_, pkb_, predicates_, &Pkb::GetAllParentPairs);
     }
-  }
-
-  void ParentTClause::ExtractRelExist() {
-    bool is_left_num = IsNumber(token_->GetLeft());
-    bool is_right_num = IsNumber(token_->GetRight());
-
-    if (is_left_num && is_right_num) {
-      bool rel_exist = pkb_.IsTransitiveParent(stoi(token_->GetLeft()), stoi(token_->GetRight()));
-
-      if (!rel_exist) {
-        throw pql_exceptions::EmptyDomainException();
-      }
-    } else if (is_left_num || is_right_num) {
-      std::vector<int> domain = is_left_num ? pkb_.GetAllChildren(stoi(token_->GetLeft()))
-                                            : pkb_.GetAllParents(stoi(token_->GetRight()));
-      if (domain.size() == 0) {
-        throw pql_exceptions::EmptyDomainException();
-      }
-    } else {
-      std::vector<std::pair<int, int>> domain = pkb_.GetAllTransitiveParentPairs();
-
-      if (domain.size() == 0) {
-        throw pql_exceptions::EmptyDomainException();
-      }
-    }
-  }
-
-  void ParentTClause::ExtractRelDomain() {
-    bool is_left_num = IsNumber(token_->GetLeft());
-    std::vector<int> domain;
-
-    if (is_left_num) {
-        domain = pkb_.GetAllChildren(stoi(token_->GetLeft()));
-    }
-    else {
-      std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllTransitiveParentPairs();
-      std::vector<int> domain_with_duplicates = ExtractSecond<int>(domain_pair);
-      domain = RemoveDuplicate<int>(domain_with_duplicates);
-    }
-
-    UpdateHashmap<int>(*stmt_hashmap_, token_->GetRight(), domain);
-  }
-
-  void ParentTClause::ExtractInverseRelDomain() {
-    bool is_right_num = IsNumber(token_->GetRight());
-    std::vector<int> domain;
-
-    if (is_right_num) {
-      domain = pkb_.GetAllParents(stoi(token_->GetRight()));
-    }
-    else {
-      std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllTransitiveParentPairs();
-      std::vector<int> domain_with_duplicates = ExtractFirst<int>(domain_pair);
-      domain = RemoveDuplicate<int>(domain_with_duplicates);
-    }
-
-    UpdateHashmap<int>(*stmt_hashmap_, token_->GetLeft(), domain);
-  }
-
-  void ParentTClause::ExtractRelPair() {
-    std::string left = token_->GetLeft();
-    std::string right = token_->GetRight();
-    std::vector<std::pair<int, int>> domain_pair = pkb_.GetAllTransitiveParentPairs();
-    pql_table::Predicate pred(left, right, domain_pair);
-
-    (*predicates_).push_back(pred);
   }
 
   void ParentTClause::Evaluate() {
@@ -372,16 +188,18 @@ namespace pql {
     bool is_right_syn = token_->IsSynonymRight();
 
     if (!is_left_syn && !is_right_syn) {
-      ParentTClause::ExtractRelExist();
+      EvaluateRelExist(*token_, pkb_, &Pkb::IsTransitiveParent, &Pkb::GetAllChildren,
+        &Pkb::GetAllParents, &Pkb::GetAllTransitiveParentPairs);
     } else if (!is_left_syn && is_right_syn) {
-      ParentTClause::ExtractRelDomain();
+      EvaluateRelDomain(*token_, pkb_, *stmt_hashmap_, &Pkb::GetAllChildren, &Pkb::GetAllTransitiveParentPairs);
     } else if (is_left_syn && !is_right_syn) {
-      ParentTClause::ExtractInverseRelDomain();
+      EvaluateInverseRelDomain(*token_, pkb_, *stmt_hashmap_, &Pkb::GetAllParents, &Pkb::GetAllTransitiveParentPairs);
     } else {
-      ParentTClause::ExtractRelPair();
+      EvaluateRelPair(*token_, pkb_, predicates_, &Pkb::GetAllTransitiveParentPairs);
     }
   }
 
+ 
   void UsesSClause::ExtractRelExist() {
     //Uses(1, "x") or Uses(1, _)
     //first parameter must be a string of digits, second argument can be wildcard

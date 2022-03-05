@@ -55,14 +55,6 @@ namespace pql {
              std::vector<pql_table::Predicate>* predicates);
 
     public:
-      virtual void ExtractRelExist() = 0;
-      
-      virtual void ExtractRelDomain() = 0;
-
-      virtual void ExtractInverseRelDomain() = 0;
-
-      virtual void ExtractRelPair() = 0;
-
       virtual void Evaluate() = 0;
   };
 
@@ -75,14 +67,6 @@ namespace pql {
           Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
 
     public:
-      void ExtractRelExist() override;
-
-      void ExtractRelDomain() override;
-
-      void ExtractInverseRelDomain() override;
-
-      void ExtractRelPair() override;
-
       void Evaluate() override;
   };
 

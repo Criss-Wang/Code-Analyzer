@@ -153,12 +153,12 @@ namespace pql {
         clause->Evaluate();
       }
 
-      pql_solver::Solver solver(&stmt_hashmap, &var_hashmap, &predicates, synonyms, &selected_syns);
+      pql_solver::Solver solver(&stmt_hashmap, &var_hashmap, &predicates, synonyms, selected_syns);
       std::vector<std::string> res = solver.Solve();
 
       return res;
 
-    } catch (pql_exceptions::EmptyDomainException e) {
+    } catch (pql_exceptions::EmptyResultException e) {
       std::vector<std::string> empty_res({});
       return empty_res;
     }
