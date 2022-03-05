@@ -29,6 +29,7 @@ class Pkb {
     ConstantTable *constant_table_ = new ConstantTable();
     IfTable *if_table_ = new IfTable();
     WhileTable *while_table_ = new WhileTable();
+    ProcRangeTable *proc_range_table_ = new ProcRangeTable();
 
     // Relation tables
     FollowsTable *follows_table_ = new FollowsTable();
@@ -86,6 +87,7 @@ class Pkb {
     bool AddInfoToTable(TableIdentifier table_identifier, int key, int value);
     bool AddInfoToTable(TableIdentifier table_identifier, int key, const string& value);
     bool AddInfoToTable(TableIdentifier table_identifier, const string& key, const string& value);
+    bool AddInfoToTable(TableIdentifier table_identifier, const string& key, const pair<int, int>& value);
 
     // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
     bool AddEntityToSet(EntityIdentifier entity_identifier, int entity_val);
