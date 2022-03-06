@@ -41,10 +41,10 @@ static const string tokenTypeStrings[] = {
 
 class Token {
   public:
-    enum TokenType type { WHITESPACE }; // Initialised to WHITESPACE
-    string text = "";
-    int stmt_num_ = 0;
-    int stored_stmt_num_ = 0;
+    enum TokenType type_ { WHITESPACE }; // Initialised to WHITESPACE
+    string text_ = "";
+    int stmt_num_ = 1;
+    int stored_stmt_num_ = 1;
     
     string print();
 
@@ -59,7 +59,7 @@ class Token {
     }
 
     bool operator==(const Token& t) const {
-      return t.type == type && t.text == text && t.stmt_num_ == stmt_num_;
+      return t.type_ == this->type_ && t.text_ == this->text_ && t.stmt_num_ == this->stmt_num_;
     }
 };
 

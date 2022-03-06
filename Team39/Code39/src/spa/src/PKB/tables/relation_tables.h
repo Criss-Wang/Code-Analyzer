@@ -38,6 +38,21 @@ class ParentStarTable : public Table<int, vector<int>> {};
 // Nested line number will be the key and the parent line number such that parent*([value], key) holds will be the value
 class ChildStarTable : public Table<int, vector<int>> {};
 
+// Procedure name will be the key mapping to other procedure name
+class CallsTable : public Table<string, string> {};
+
+class CalledByTable : public Table<string, string> {};
+
+// Procedure name mapping to list of procedure names
+class CallsStarTable : public Table<string, vector<string>> {};
+
+class CalledByStarTable : public Table<string, vector<string>> {};
+
+// Line number will be the key mapping to another line number which is next in the execution flow
+class NextTable: public Table<int, int> {};
+
+class BeforeTable: public Table<int, int> {};
+
 
 /**
  * Relationship tables between different types of entities

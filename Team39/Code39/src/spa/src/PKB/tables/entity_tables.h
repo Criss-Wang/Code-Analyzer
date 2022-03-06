@@ -25,3 +25,6 @@ class IfTable : public Table<int, vector<string>> {};
 
 // Line number will be the key and the list of variables in the condition expression will be the value
 class WhileTable : public Table<int, vector<string>> {};
+
+// Procedure name mapping to a pair of integers — the start and end numbers for that procedure
+class ProcRangeTable: public Table<string, pair<int, int>> {};

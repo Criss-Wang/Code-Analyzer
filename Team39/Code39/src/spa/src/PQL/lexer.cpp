@@ -1,4 +1,5 @@
 #pragma once
+#define END_OF_FILE -1
 
 #include "parser.h"
 
@@ -12,7 +13,7 @@ namespace pql {
   }
 
   bool ParserState::IsEOF() {
-    return (ss.peek() == -1);
+    return (ss.peek() == END_OF_FILE);
   }
 
   void ParserState::EatWhiteSpaces() {
@@ -33,23 +34,26 @@ namespace pql {
     }
   }
 
-  void ParserState::Expect(const std::string &s) {
+  char ParserState::ExpectChar(const char& c) {
+    char expected = ParserState::Next();
+    if (expected == c) {
+      return expected;
+    } else {
+      throw ParseException();
+    }
+  }
+
+  void ParserState::Expect(const std::string& s) {
     std::stringstream ssm;
     ssm << s;
-    while (ssm.peek() != -1) {
+    while (ssm.peek() != END_OF_FILE) {
       if (ss.get() != ssm.get()) {
         throw ParseException();
       }
     }
   }
 
-  void ParserState::ExpectEOF() {
-    if (!ParserState::IsEOF()) {
-      throw ParseException();
-    }
-  }
-
-  std::string ParserState::ParseSynonym() {
+  std::string ParserState::ParseName() {
     std::string sm;
     std::stringstream ssm;
     ParserState::EatWhiteSpaces();
@@ -64,6 +68,23 @@ namespace pql {
     return sm;
   }
 
+  std::string ParserState::ParseInteger() {
+    std::stringstream ssm;
+    std::string integer;
+    ParserState::EatWhiteSpaces();
+    if (ParserState::Peek() == '0') {
+      ssm << ParserState::Next();
+    } else {
+      ssm << ParserState::Next();
+      for (char next_char = ParserState::Peek(); pql::IsDigit(next_char); next_char = ParserState::Peek()) {
+        ssm << ParserState::Next();
+      }
+    }
+    ssm >> integer;
+    ParserState::EatWhiteSpaces();
+    return integer;
+  }
+
   pql::Ref ParserState::ParseRef(Query &q) {
     pql::Ref ref;
     std::stringstream ssm;
@@ -72,28 +93,13 @@ namespace pql {
     if (ParserState::Peek() == '_') {
       ssm << ParserState::Next();
     } else if (IsDigit(ParserState::Peek())) {
-      ssm << ParserState::Next();
-      for (char next_char = ParserState::Peek(); pql::IsDigit(next_char); next_char = ParserState::Peek()) {
-        ssm << ParserState::Next();
-      }
+      ssm << ParserState::ParseInteger();
     } else if (ParserState::Peek() == '\"') {
       ssm << ParserState::Next();
-      ParserState::EatWhiteSpaces();
-      if (!IsLetter(ParserState::Peek())) {
-        throw ParseException();
-      } else {
-        ssm << ParserState::Next();
-        while (ParserState::Peek() != '\"') {
-          if (IsLetter(ParserState::Peek()) || IsDigit(ParserState::Peek())) {
-            ssm << ParserState::Next();
-          } else {
-            throw ParseException();
-          }
-        }
-        ssm << ParserState::Next();
-      }
+      ssm << ParserState::ParseName();
+      ssm << ParserState::ExpectChar('\"');
     } else {
-      ssm << ParserState::ParseSynonym();
+      ssm << ParserState::ParseName();
       is_synonym = true;
     }
     ssm >> ref;
@@ -107,23 +113,18 @@ namespace pql {
   }
 
   std::string ParserState::ParseExpression() {
-    std::stringstream s;
+    std::stringstream ssm;
     std::string expression;
     ParserState::Expect("\"");
-    ParserState::EatWhiteSpaces();
     if (IsDigit(ParserState::Peek())) {
-      for (char next_char = ParserState::Peek(); IsDigit(next_char); next_char = ParserState::Peek()) {
-        s << ParserState::Next();
-      }
+      ssm << ParserState::ParseInteger();
     } else if (IsLetter(ParserState::Peek())) {
-      for (char next_char = ParserState::Peek(); IsDigit(next_char) || IsLetter(next_char); next_char = ParserState::Peek()) {
-        s << ParserState::Next();
-      }
+      ssm << ParserState::ParseName();
     } else {
       throw ParseException();
     }
     ParserState::Expect("\"");
-    s >> expression;
+    ssm >> expression;
     return expression;
   }
 

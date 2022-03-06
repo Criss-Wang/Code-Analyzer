@@ -1,39 +1,21 @@
-#pragma once
+#define NO_CURRENT_CLAUSE 0
+#define IS_SUCH_THAT 1
+#define IS_PATTERN 2
+#define IS_WITH 3
 
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
 #include "parser.h"
+#include "utility.h"
 
 namespace pql {
-
-  bool IsLetter(char c) {
-    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-  }
-
-  bool IsDigit(char c) {
-    return c >= '0' && c <= '9';
-  }
-
-  bool IsIdent(const std::string& ident) {
-    return ident[0] == '\"' && ident[ident.length() - 1] == '\"';
-  }
-
-  bool IsInteger(const std::string& s) {
-    std::stringstream ssm;
-    ssm << s;
-    if (!IsDigit(ssm.get())) {
-      return false;
-    }
-    return true;
-  }
-
   std::vector<std::string> Parser::GetSynonyms() {
     std::vector<std::string> synonyms;
     while (ps.Peek() != ';') {
       ps.EatWhiteSpaces();
-      synonyms.push_back(ps.ParseSynonym());
+      synonyms.push_back(ps.ParseName());
       ps.EatWhiteSpaces();
       if (ps.Peek() == ',') {
         ps.Consume();
@@ -45,6 +27,8 @@ namespace pql {
 
   void Parser::Parse() {
     bool select_clause_parsed = false;
+    bool declarations_parsed = false;
+    int current_clause = NO_CURRENT_CLAUSE;
     while (!ps.IsEOF()) {
       ps.EatWhiteSpaces();
       std::stringstream ks;
@@ -54,33 +38,41 @@ namespace pql {
       std::string keyword;
       ks >> keyword;
       if (auto d = pql::GetDeclarationType(keyword)) {
+        if (declarations_parsed) {
+          throw ParseException();
+        }
         for (const std::string &s: Parser::GetSynonyms()) {
           Parser::query.AddSynonym(*d, s);
         }
       } else if (keyword == "Select") {
         ps.EatWhiteSpaces();
-        Parser::query.SetResultSynonym(ps.ParseSynonym());
+        Parser::query.AddResultSynonym(ps.ParseName());
         ps.EatWhiteSpaces();
         select_clause_parsed = true;
-        if (!ps.IsEOF()) {
-          if (ps.Peek() == 's') {
-            ps.Expect("such that");
-            ps.EatWhiteSpaces();
-            Parser::ParseRelationship(Parser::query);
-            ps.EatWhiteSpaces();
-            if (!ps.IsEOF()) {
-              ps.Expect("pattern");
-              ps.EatWhiteSpaces();
-              Parser::ParsePattern(Parser::query);
-            }
-          } else {
-            ps.Expect("pattern");
-            ps.EatWhiteSpaces();
-            Parser::ParsePattern(Parser::query);
-          }
-        }
+        declarations_parsed = true;
+      } else if (keyword == "such" && select_clause_parsed) {
+        ps.Expect(" that");
         ps.EatWhiteSpaces();
-        ps.ExpectEOF();
+        Parser::ParseRelationship();
+        ps.EatWhiteSpaces();
+        current_clause = IS_SUCH_THAT;
+      } else if (keyword == "pattern" && select_clause_parsed) {
+        ps.EatWhiteSpaces();
+        Parser::ParsePattern();
+        current_clause = IS_PATTERN;
+      } else if (keyword == "and" && select_clause_parsed) {
+        if (current_clause == IS_SUCH_THAT) {
+          ps.EatWhiteSpaces();
+          Parser::ParseRelationship();
+          ps.EatWhiteSpaces();
+        } else if (current_clause == IS_PATTERN) {
+          ps.EatWhiteSpaces();
+          ps.Expect("pattern");
+          ps.EatWhiteSpaces();
+          Parser::ParsePattern();
+        } else {
+          throw ParseException();
+        }
       } else {
         throw ParseException();
       }
@@ -94,7 +86,7 @@ namespace pql {
     return Parser::query;
   }
 
-  void Parser::ParseRelationship(Query &q) {
+  void Parser::ParseRelationship() {
     std::string relationship;
     std::stringstream ssm;
     while (IsLetter(ps.Peek()) || ps.Peek() == '*') {
@@ -103,62 +95,37 @@ namespace pql {
     ssm >> relationship;
     ps.EatWhiteSpaces();
     ps.Expect("(");
-    pql::Ref left = ps.ParseRef(q);
+    pql::Ref left = ps.ParseRef(Parser::query);
     ps.EatWhiteSpaces();
     ps.Expect(",");
-    pql::Ref right = ps.ParseRef(q);
+    pql::Ref right = ps.ParseRef(Parser::query);
     ps.Expect(")");
     if (relationship == "Uses" || relationship == "Modifies") {
       if (left == "_") {
         throw ParseException();
       }
-      if (q.IsProcedure(left) || IsIdent(left)) {
+      if (Parser::query.IsProcedure(left) || IsIdent(left)) {
         relationship.push_back('P');
       }
     }
     if (auto r = pql::GetRelationshipType(relationship)) {
-      if (*r != pql::RelationshipTypes::kUsesP && *r != pql::RelationshipTypes::kModifiesP) {
-        if (!q.IsStatement(left) && left != "_" && !IsInteger(left)) {
-          throw ParseException();
-        }
-      }
-      if (*r == pql::RelationshipTypes::kFollows || *r == pql::RelationshipTypes::kFollowsT
-        || *r == pql::RelationshipTypes::kParent || *r == pql::RelationshipTypes::kParentT) {
-        if (!q.IsStatement(right) && right != "_" && !IsInteger(right)) {
-          throw ParseException();
-        }
-      } else {
-        if (!q.IsVariable(right) && right != "_" && !IsIdent(right)) {
-          throw ParseException();
-        }
-      }
-      bool is_synonym_left = q.SynonymDeclared(left);
-      bool is_synonym_right = q.SynonymDeclared(right);
-      if (!is_synonym_left && IsIdent(left)) {
-        left.erase(0, 1);
-        int left_len = left.length();
-        left.erase(left_len - 1, 1);
-      }
-      if (!is_synonym_right && IsIdent(right)) {
-        right.erase(0, 1);
-        int right_len = right.length();
-        right.erase(right_len - 1, 1);
-      }
-      q.AddSuchThatClause(*r, left, right, is_synonym_left, is_synonym_right);
+      bool is_synonym_left = Parser::query.SynonymDeclared(left);
+      bool is_synonym_right = Parser::query.SynonymDeclared(right);
+      Parser::query.AddSuchThatClause(*r, left, right, is_synonym_left, is_synonym_right);
     } else {
       throw ParseException();
     }
   }
 
-  void Parser::ParsePattern(Query& q) {
-    std::string assign_synonym = ps.ParseSynonym();
+  void Parser::ParsePattern() {
+    std::string assign_synonym = ps.ParseName();
     std::string expression;
     bool exact = true;
-    if (q.IsAssignSynonym(assign_synonym)) {
-      q.AddUsedSynonym(assign_synonym);
+    if (Parser::query.IsAssignSynonym(assign_synonym)) {
+      Parser::query.AddUsedSynonym(assign_synonym);
       ps.EatWhiteSpaces();
       ps.Expect("(");
-      pql::Ref left = ps.ParseRef(q);
+      pql::Ref left = ps.ParseRef(Parser::query);
       ps.EatWhiteSpaces();
       ps.Expect(",");
       ps.EatWhiteSpaces();
@@ -177,13 +144,13 @@ namespace pql {
       }
       ps.EatWhiteSpaces();
       ps.Expect(")");
-      bool is_synonym_left = q.SynonymDeclared(left);
+      bool is_synonym_left = Parser::query.SynonymDeclared(left);
       if (!is_synonym_left && IsIdent(left)) {
         left.erase(0, 1);
         int left_len = left.length();
         left.erase(left_len - 1, 1);
       }
-      q.AddPattern(assign_synonym, left, expression, exact, is_synonym_left);
+      Parser::query.AddPattern(assign_synonym, left, expression, exact, is_synonym_left);
     } else {
       throw ParseException();
     }

@@ -303,6 +303,20 @@ bool Pkb::AddFollows(const int key, const int value) {
   return add_success;
 }
 
+bool Pkb::AddCalls(const string& key, const string& value) {
+  bool add_success = calls_table_->AddKeyValuePair(key, value);
+  // Populate the reverse relation
+  add_success = called_by_table_->AddKeyValuePair(value, key) && add_success;
+  return add_success;
+}
+
+bool Pkb::AddNext(const int key, const int value) {
+  bool add_success = next_table_->AddKeyValuePair(key, value);
+  // Populate the reverse relation
+  add_success = before_table_->AddKeyValuePair(value, key) && add_success;
+  return add_success;
+}
+
 bool Pkb::AddModifies(const int key, const vector<string>& value) {
   bool add_success = modifies_stmt_to_variables_table_->AddKeyValuePair(key, value);
   // Populate the reverse relation
@@ -378,6 +392,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
     if (value < 1) throw EmptyValueException();
     switch (table_identifier) {
       case TableIdentifier::kFollows: return AddFollows(key, value);
+      case TableIdentifier::kNext: return AddNext(key, value);
       default:
         throw InvalidIdentifierException();
     }
@@ -402,6 +417,35 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
     return false;
   }
 }
+
+bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& key, const string& value) {
+  try {
+    if (value.empty()) throw EmptyValueException();
+    switch (table_identifier) {
+      case TableIdentifier::kCalls: return AddCalls(key, value);
+      default:
+        throw InvalidIdentifierException();
+    }
+  } catch (exception& e) {
+    return false;
+  }
+}
+
+bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& key, const pair<int, int>& value) {
+  try {
+    if (!value.first || !value.second) {
+      throw EmptyValueException();
+    }
+    switch (table_identifier) {
+      case TableIdentifier::KProcedure: return proc_range_table_->AddKeyValuePair(key, value);
+      default:
+        throw InvalidIdentifierException();
+    }
+  } catch (exception& e) {
+    return false;
+  }
+}
+
 
 bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const int entity_val) {
   try {
