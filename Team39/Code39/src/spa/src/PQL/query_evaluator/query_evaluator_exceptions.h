@@ -23,7 +23,14 @@ namespace pql_exceptions {
   class FalseRelationException final : public EmptyResultException {
     public:
       const char* what() const throw() {
-        return "The relation does not empty";
+        return "The relation does not hold";
+      }
+  };
+
+  class EmptyTableException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+          return "Intermediate table is empty";
       }
   };
 }

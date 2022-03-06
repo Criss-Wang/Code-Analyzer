@@ -81,46 +81,6 @@ bool validateProcedures(vector<string>& procedures, vector<unordered_set<string>
     }
   }
 
- /* bool check_called_procedure_exists = true;
-  for (int i = 1; i < calls.size(); i++) {
-    for (auto proc = begin(calls.at(i)); proc != end(calls.at(i)); ++proc) {
-      check_called_procedure_exists = check_called_procedure_exists &&
-        (find(begin(procedures), end(procedures), *proc) != end(procedures));
-    }
-  }*/
-
-  //// check cyclical calls
-  //for (int i = 0; i < calls.size(); i++) { // check call flow for each procedure
-  //  string caller = calls.at(i).at(0);
-  //  vector<string> called_procedures = { caller };
-  //  vector<string> callees((calls.at(i)).begin() + kSecondIndex, (calls.at(i)).end());
-
-  //  while (!callees.empty()) {
-  //    string callee = *(callees.end() - 1);
-  //    callees.pop_back();
-
-  //    // check if callee exists in previously called procedures/is the caller
-  //    bool check_cyclic = (find(begin(called_procedures), end(called_procedures), callee) == end(called_procedures));
-  //    if (!check_cyclic) {
-  //      return false;
-  //    }
-  //    called_procedures.push_back(callee);
-
-  //    // find procedures called by callee
-  //    int callee_idx = -1;
-  //    for (vector<string> call : calls) {
-  //      callee_idx++;
-  //      if (call.at(0) == callee) {
-  //        break;
-  //      }
-  //    }
-
-  //    for (int i = 1; i < calls.at(callee_idx).size(); i++) {
-  //      callees.push_back(calls.at(callee_idx).at(i));
-  //    }
-  //  }
-  //}
-
   return CheckCycle(procedures, calls);
 }
 

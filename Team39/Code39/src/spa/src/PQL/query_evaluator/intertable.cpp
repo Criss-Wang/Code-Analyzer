@@ -6,6 +6,7 @@
 #include <set>
 
 #include "intertable.h"
+#include "query_evaluator_exceptions.h"
 
 namespace pql_table {
 
@@ -165,6 +166,10 @@ namespace pql_table {
 			}
 		}
 
+		if (new_rows.empty()) {
+		  throw pql_exceptions::EmptyTableException();
+		}
+
 		return InterTable(new_header, new_rows);
 	}
 		
@@ -230,6 +235,10 @@ namespace pql_table {
 				  new_rows.push_back(row_to_be_insert);
 				}
 		  }
+		}
+
+		if (new_rows.empty()) {
+				throw pql_exceptions::EmptyTableException();
 		}
 
 		return InterTable(new_header, new_rows);
