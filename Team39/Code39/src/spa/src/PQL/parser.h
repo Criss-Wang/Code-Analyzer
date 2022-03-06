@@ -8,6 +8,11 @@
 #include "query.h"
 
 namespace pql {
+
+  bool IsLetter(char c);
+
+  bool IsDigit(char c);
+
   class ParserState {
     private:
       std::stringstream ss;
