@@ -1,7 +1,117 @@
 #include "query.h"
 #include <algorithm>
+#include <map>
+#include <unordered_set>
+#include <sstream>
 
 namespace pql {
+  std::unordered_set<EntityIdentifier> stmts({
+    EntityIdentifier::kStmt,
+    EntityIdentifier::kAssign,
+    EntityIdentifier::kIf,
+    EntityIdentifier::kWhile,
+    EntityIdentifier::kCall,
+    EntityIdentifier::kRead,
+    EntityIdentifier::kPrint,
+    EntityIdentifier::kWildcard,
+    EntityIdentifier::kStmtNumber
+  });
+
+  std::unordered_set<EntityIdentifier> procs({
+    EntityIdentifier::kProc,
+    EntityIdentifier::kIdent,
+    EntityIdentifier::kWildcard
+  });
+
+  std::unordered_set<EntityIdentifier> uses_and_modifies_left_domain ({
+    EntityIdentifier::kProc,
+    EntityIdentifier::kIdent
+  });
+
+  std::unordered_set<EntityIdentifier> vars({
+    EntityIdentifier::kVariable,
+    EntityIdentifier::kWildcard,
+    EntityIdentifier::kIdent
+  });
+
+  const std::map<pql::RelationshipTypes, std::unordered_set<EntityIdentifier>> left_synonym_domains {
+      {kFollows, stmts},
+      {kFollowsT, stmts},
+      {kParent, stmts},
+      {kParentT, stmts},
+      {kUsesS, stmts},
+      {kUsesP, uses_and_modifies_left_domain},
+      {kModifiesS, stmts},
+      {kModifiesP, uses_and_modifies_left_domain},
+      {kCalls, procs},
+      {kCallsT, procs}
+  };
+
+  const std::map<pql::RelationshipTypes, std::unordered_set<EntityIdentifier>> right_synonym_domains {
+      {kFollows, stmts},
+      {kFollowsT, stmts},
+      {kParent, stmts},
+      {kParentT, stmts},
+      {kUsesS, vars},
+      {kUsesP, vars},
+      {kModifiesS, vars},
+      {kModifiesP, vars},
+      {kCalls, procs},
+      {kCallsT, procs}
+  };
+
+  bool IsDigit(char c) {
+    return c >= '0' && c <= '9';
+  }
+
+  bool IsIdent(const std::string& ident) {
+    return ident[0] == '\"' && ident[ident.length() - 1] == '\"';
+  }
+
+  bool IsInteger(const std::string& s) {
+    std::stringstream ssm;
+    ssm << s;
+    if (!pql::IsDigit(ssm.get())) {
+      return false;
+    }
+    return true;
+  }
+
+  bool Query::IsValid(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right) {
+    std::unordered_set<EntityIdentifier> left_domains = pql::left_synonym_domains.at(r);
+    std::unordered_set<EntityIdentifier> right_domains = pql::right_synonym_domains.at(r);
+    if (Query::SynonymDeclared(left)) {
+      if (left_domains.find(Query::synonyms.at(left).GetDeclaration()) == left_domains.end()) {
+        return false;
+      }
+    } else {
+      if (left == "_" && left_domains.find(EntityIdentifier::kWildcard) == left_domains.end()) {
+        return false;
+      } else if (pql::IsIdent(left) && left_domains.find(EntityIdentifier::kIdent) == left_domains.end()) {
+        return false;
+      } else if (pql::IsInteger(left) && left_domains.find(EntityIdentifier::kStmtNumber) == left_domains.end()) {
+        return false;
+      }
+    }
+
+    if (Query::SynonymDeclared(right)) {
+      if (right_domains.find(Query::synonyms.at(right).GetDeclaration()) == right_domains.end()) {
+        return false;
+      }
+    } else {
+      if (right == "_" && right_domains.find(EntityIdentifier::kWildcard) == right_domains.end()) {
+        return false;
+      } else if (pql::IsIdent(right) && right_domains.find(EntityIdentifier::kIdent) == right_domains.end()) {
+        return false;
+      } else if (pql::IsInteger(right) && right_domains.find(EntityIdentifier::kStmtNumber) == right_domains.end()) {
+        return false;
+      }
+    }
+
+    return (Query::SynonymDeclared(left) || left == "_" || pql::IsIdent(left) || pql::IsInteger(left)) &&
+        (Query::SynonymDeclared(right) || right == "_" || pql::IsIdent(right) || pql::IsInteger(right));
+  }
+
   bool Query::SynonymDeclared(const std::string &name) {
     return synonyms.find(name) != synonyms.end();
   }
@@ -20,38 +130,22 @@ namespace pql {
     }
   }
 
-  void Query::SetResultSynonym(const std::string &name) {
+  void Query::AddResultSynonym(const std::string &name) {
     if (Query::SynonymDeclared(name)) {
-      Query::result_synonym = Query::synonyms.at(name);
+      Query::result_synonym.push_back(Query::synonyms.at(name));
       Query::AddUsedSynonym(name);
     } else {
       throw ParseException();
     }
   }
 
-  pql::Synonym Query::GetResultSynonym() {
-    return *Query::result_synonym;
+  std::vector<pql::Synonym> Query::GetResultSynonym() {
+    return Query::result_synonym;
   }
 
   bool Query::IsProcedure(const std::string &name) {
     if (Query::SynonymDeclared(name)) {
       return Query::synonyms.at(name).GetDeclaration() == EntityIdentifier::kProc;
-    }
-    return false;
-  }
-
-  bool Query::IsStatement(const std::string &name) {
-    if (Query::SynonymDeclared(name)) {
-      return !Query::IsProcedure(name) &&
-        Query::synonyms.at(name).GetDeclaration() != EntityIdentifier::kConstant &&
-        Query::synonyms.at(name).GetDeclaration() != EntityIdentifier::kVariable;
-    }
-    return false;
-  }
-
-  bool Query::IsVariable(const std::string &name) {
-    if (Query::SynonymDeclared(name)) {
-      return Query::synonyms.at(name).GetDeclaration() == EntityIdentifier::kVariable;
     }
     return false;
   }
@@ -69,8 +163,22 @@ namespace pql {
     return Query::used_synonyms;
   }
 
-  void Query::AddSuchThatClause(RelationshipTypes r, const pql::Ref &left, const pql::Ref &right, bool is_synonym_left, bool is_synonym_right) {
-    Query::such_that_clauses.emplace_back(r, left, right, is_synonym_left, is_synonym_right);
+  void Query::AddSuchThatClause(RelationshipTypes r, pql::Ref &left, pql::Ref &right, bool is_synonym_left, bool is_synonym_right) {
+    if (Query::IsValid(r, left, right)) {
+      if (!is_synonym_left && IsIdent(left)) {
+        left.erase(0, 1);
+        int left_len = left.length();
+        left.erase(left_len - 1, 1);
+      }
+      if (!is_synonym_right && IsIdent(right)) {
+        right.erase(0, 1);
+        int right_len = right.length();
+        right.erase(right_len - 1, 1);
+      }
+      Query::such_that_clauses.emplace_back(r, left, right, is_synonym_left, is_synonym_right);
+    } else {
+      throw ParseException();
+    }
   }
 
   std::vector<RelationshipToken> Query::GetSuchThatClause() {
@@ -78,10 +186,10 @@ namespace pql {
   }
 
   void Query::AddPattern(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left) {
-    Query::pattern.emplace(PatternToken(std::move(assign_synonym), std::move(left), std::move(expression), exact, is_synonym_left));
+    Query::patterns.emplace_back(PatternToken(std::move(assign_synonym), std::move(left), std::move(expression), exact, is_synonym_left));
   }
 
-  std::optional<pql::PatternToken> Query::GetPattern() {
-    return Query::pattern;
+  std::vector<pql::PatternToken> Query::GetPattern() {
+    return Query::patterns;
   }
 }

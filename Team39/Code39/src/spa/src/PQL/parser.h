@@ -33,11 +33,13 @@ namespace pql {
 
       char ExpectLetter();
 
+      char ExpectChar(const char& c);
+
       void Expect(const std::string& s);
 
-      void ExpectEOF();
+      std::string ParseName();
 
-      std::string ParseSynonym();
+      std::string ParseInteger();
 
       pql::Ref ParseRef(Query& q);
 
@@ -58,9 +60,9 @@ namespace pql {
 
       std::vector<std::string> GetSynonyms();
 
-      void ParseRelationship(Query& q);
+      void ParseRelationship();
 
-      void ParsePattern(Query& q);
+      void ParsePattern();
   };
 
 }
