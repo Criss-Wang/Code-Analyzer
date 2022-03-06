@@ -131,4 +131,28 @@ namespace pql {
     public:
       void Evaluate() override;
   };
+
+  class CallsClause : public Clause {
+    public:
+      CallsClause(pql::RelationshipToken* token, Pkb& pkb,
+          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::vector<pql_table::Predicate>* predicates) :
+          Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
+
+    public:
+      void Evaluate() override;
+  };
+
+  class CallsTClause : public Clause {
+    public:
+      CallsTClause(pql::RelationshipToken* token, Pkb& pkb,
+          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
+          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::vector<pql_table::Predicate>* predicates) :
+          Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
+
+    public:
+      void Evaluate() override;
+  };
 }

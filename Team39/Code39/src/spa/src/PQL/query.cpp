@@ -1,8 +1,9 @@
 #include "query.h"
+#include "utility.h"
+
 #include <algorithm>
 #include <map>
 #include <unordered_set>
-#include <sstream>
 
 namespace pql {
   std::unordered_set<EntityIdentifier> stmts({
@@ -59,27 +60,6 @@ namespace pql {
       {kCalls, procs},
       {kCallsT, procs}
   };
-
-  bool IsDigit(char c) {
-    return c >= '0' && c <= '9';
-  }
-
-  bool IsIdent(const std::string& ident) {
-    return ident[0] == '\"' && ident[ident.length() - 1] == '\"';
-  }
-
-  bool IsLetter(char c) {
-      return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-  }
-
-  bool IsInteger(const std::string& s) {
-    std::stringstream ssm;
-    ssm << s;
-    if (!pql::IsDigit(ssm.get())) {
-      return false;
-    }
-    return true;
-  }
 
   bool Query::IsValid(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right) {
     std::unordered_set<EntityIdentifier> left_domains = pql::left_synonym_domains.at(r);
