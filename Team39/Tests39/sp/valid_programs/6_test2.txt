@@ -1,0 +1,16 @@
+procedure proc1 {
+	read proc1;
+	x = y - (f * 4);
+	procedure = proc3;
+}
+
+procedure proc2 {
+	read x;
+	print t;
+	call proc1;
+}
+
+procedure proc3 {
+	x = t;
+	call proc1;
+}

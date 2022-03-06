@@ -1,9 +1,9 @@
 #include "TestWrapper.h"
 #include "AbstractWrapper.h"
-#include "parser.h"
+#include "SP/parser.h"
 #include "../../spa/src/PQL/parser.h"
 #include "../../spa/src/PQL/query_evaluator/query_evaluator.h"
-#include "../../spa/src/sp_exceptions.h"
+#include "../../spa/src/SP/sp_exceptions.h"
 
 using namespace std;
 

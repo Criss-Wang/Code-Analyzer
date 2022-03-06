@@ -7,16 +7,20 @@ using namespace std;
 #include "populator.h"
 #include "SP/design_extractor.h"
 
+const int kFirstIndex = 0;
+const int kSecondIndex = 1;
+const int kThirdIndex = 2;
+
 void populateProcedure(vector<Token> tokens, Pkb& pkb) {
-  string proc_name = tokens.at(1).text;
+  string proc_name = tokens.at(kSecondIndex).text_;
 
   // Add procedure name to procedure_set_
   pkb.AddEntityToSet(EntityIdentifier::kProc, proc_name);
 }
 
 void populateReadStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(0).stmt_num_;
-  string read_var = tokens.at(1).text;
+  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+  string read_var = tokens.at(kSecondIndex).text_;
 
   // Add stmt num to stmt_set_ and read_set_
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
@@ -33,8 +37,8 @@ void populateReadStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 void populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(0).stmt_num_;
-  string print_var = tokens.at(1).text;
+  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+  string print_var = tokens.at(kSecondIndex).text_;
 
   // Add stmt num to stmt_set_ and print_set_
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
@@ -51,8 +55,8 @@ void populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 void populateAssignStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(0).stmt_num_;
-  string lhs_var = tokens.at(0).text;
+  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+  string lhs_var = tokens.at(kFirstIndex).text_;
   vector<string> rhs_vars;
   vector<int> rhs_constants;
   string assignment_pattern = "";
@@ -65,21 +69,26 @@ void populateAssignStmt(vector<Token> tokens, Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kVariable, lhs_var);
 
   // Build assignment pattern
-  for (auto token = begin(tokens) + 2; token != end(tokens) - 1; ++token) {
-    assignment_pattern += token->text;
+  const int kLastIndex = tokens.size() - 1;
+  vector<Token>::const_iterator expr_start = tokens.begin() + kThirdIndex;
+  vector<Token>::const_iterator expr_end = tokens.begin() + kLastIndex;
+  vector<Token> expr(expr_start, expr_end);
 
-    if (token->type == LETTER || token->type == NAME) {
+  for (auto token = begin(expr); token != end(expr); ++token) {
+    assignment_pattern += token->text_;
+
+    if (token->type_ == LETTER || token->type_ == NAME) {
       // Add RHS variable to variable_set_
-      pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text);
-      if (find(begin(rhs_vars), end(rhs_vars), token->text) == end(rhs_vars)) {
-        rhs_vars.push_back(token->text);
+      pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text_);
+      if (find(begin(rhs_vars), end(rhs_vars), token->text_) == end(rhs_vars)) {
+        rhs_vars.push_back(token->text_);
       }
 
-    } else if (token->type == DIGIT || token->type == INTEGER) {
+    } else if (token->type_ == DIGIT || token->type_ == INTEGER) {
       // Add RHS constant to constant_set_
-      pkb.AddEntityToSet(EntityIdentifier::kConstant, stoi(token->text));
-      if (find(begin(rhs_constants), end(rhs_constants), stoi(token->text)) == end(rhs_constants)) {
-        rhs_constants.push_back(stoi(token->text));
+      pkb.AddEntityToSet(EntityIdentifier::kConstant, stoi(token->text_));
+      if (find(begin(rhs_constants), end(rhs_constants), stoi(token->text_)) == end(rhs_constants)) {
+        rhs_constants.push_back(stoi(token->text_));
       }
     }
   }
@@ -99,7 +108,7 @@ void populateAssignStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 void populateIfStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(0).stmt_num_;
+  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
   vector<string> vars_in_cond_expr;
   vector<int> constants_in_cond_expr;
 
@@ -107,20 +116,24 @@ void populateIfStmt(vector<Token> tokens, Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
   pkb.AddEntityToSet(EntityIdentifier::kIf, stmt_num);
 
-  for (auto token = begin(tokens) + 2; token != end(tokens) - 2; ++token) {
+  const int kThirdLastIndex = tokens.size() - 3;
+  vector<Token>::const_iterator cond_expr_start = tokens.begin() + kThirdIndex;
+  vector<Token>::const_iterator cond_expr_end = tokens.begin() + kThirdLastIndex;
+  vector<Token> cond_expr(cond_expr_start, cond_expr_end);
 
-    if (token->type == LETTER || token->type == NAME) {
+  for (auto token = begin(cond_expr); token != end(cond_expr); ++token) {
+    if (token->type_ == LETTER || token->type_ == NAME) {
       // Add variable to variable_set_
-      pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text);
-      if (find(begin(vars_in_cond_expr), end(vars_in_cond_expr), token->text) == end(vars_in_cond_expr)) {
-        vars_in_cond_expr.push_back(token->text);
+      pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text_);
+      if (find(begin(vars_in_cond_expr), end(vars_in_cond_expr), token->text_) == end(vars_in_cond_expr)) {
+        vars_in_cond_expr.push_back(token->text_);
       }
 
-    } else if (token->type == DIGIT || token->type == INTEGER) {
+    } else if (token->type_ == DIGIT || token->type_ == INTEGER) {
       // Add constant to constant_set_
-      pkb.AddEntityToSet(EntityIdentifier::kConstant, stoi(token->text));
-      if (find(begin(constants_in_cond_expr), end(constants_in_cond_expr), stoi(token->text)) == end(constants_in_cond_expr)) {
-        constants_in_cond_expr.push_back(stoi(token->text));
+      pkb.AddEntityToSet(EntityIdentifier::kConstant, stoi(token->text_));
+      if (find(begin(constants_in_cond_expr), end(constants_in_cond_expr), stoi(token->text_)) == end(constants_in_cond_expr)) {
+        constants_in_cond_expr.push_back(stoi(token->text_));
       }
     }
   }
@@ -136,7 +149,7 @@ void populateIfStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 void populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(0).stmt_num_;
+  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
   vector<string> vars_in_cond_expr;
   vector<int> constants_in_cond_expr;
 
@@ -144,19 +157,24 @@ void populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
   pkb.AddEntityToSet(EntityIdentifier::kWhile, stmt_num);
 
-  for (auto token = begin(tokens) + 2; token != end(tokens) - 2; ++token) {
-    if (token->type == LETTER || token->type == NAME) {
+  const int kSecondLastIndex = tokens.size() - 2;
+  vector<Token>::const_iterator cond_expr_start = tokens.begin() + kThirdIndex;
+  vector<Token>::const_iterator cond_expr_end = tokens.begin() + kSecondLastIndex;
+  vector<Token> cond_expr(cond_expr_start, cond_expr_end);
+
+  for (auto token = begin(cond_expr); token != end(cond_expr); ++token) {
+    if (token->type_ == LETTER || token->type_ == NAME) {
       // Add variable to variable_set_
-      pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text);
-      if (find(begin(vars_in_cond_expr), end(vars_in_cond_expr), token->text) == end(vars_in_cond_expr)) {
-        vars_in_cond_expr.push_back(token->text);
+      pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text_);
+      if (find(begin(vars_in_cond_expr), end(vars_in_cond_expr), token->text_) == end(vars_in_cond_expr)) {
+        vars_in_cond_expr.push_back(token->text_);
       }
 
-    } else if (token->type == DIGIT || token->type == INTEGER) {
+    } else if (token->type_ == DIGIT || token->type_ == INTEGER) {
       // Add constant to constant_set_
-      pkb.AddEntityToSet(EntityIdentifier::kConstant, stoi(token->text));
-      if (find(begin(constants_in_cond_expr), end(constants_in_cond_expr), stoi(token->text)) == end(constants_in_cond_expr)) {
-        constants_in_cond_expr.push_back(stoi(token->text));
+      pkb.AddEntityToSet(EntityIdentifier::kConstant, stoi(token->text_));
+      if (find(begin(constants_in_cond_expr), end(constants_in_cond_expr), stoi(token->text_)) == end(constants_in_cond_expr)) {
+        constants_in_cond_expr.push_back(stoi(token->text_));
       }
     }
   }
@@ -169,6 +187,18 @@ void populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
 
   // Add stmt num and variables in cond expr into Uses Table
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_in_cond_expr);
+}
+
+void populateCallStmt(vector<Token> tokens, Pkb& pkb) {
+  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+  string called_proc = tokens.at(kSecondIndex).text_;
+
+  // Add stmt num to stmt_set_ and call_set_
+  pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
+  pkb.AddEntityToSet(EntityIdentifier::kCall, stmt_num);
+
+  // Add stmt num and call_proc to CallsTable
+  pkb.AddInfoToTable(TableIdentifier::kCalls, stmt_num, called_proc);
 }
 
 stack<int> populateFollowsRelationship(stack<int> previous, Pkb& pkb, int stmt_num) {
@@ -202,10 +232,15 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   children.push({});
   stack<int> previous;
   
-  set<int> stmt_lst;
+  set<int> stmt_lst; // right now is just populating one statement set
 
+  // Stores procedure range
+  string prev_proc = "";
+  int start_stmt_num = 1;
+  int end_stmt_num = 0;
+  
   for (auto token = begin(input_tokens); token != end(input_tokens); ++token) {
-    if (token->type == RIGHT_CURLY) {
+    if (token->type_ == RIGHT_CURLY) {
 
       int previous_stmt_num = 0;
       if (!previous.empty()) {
@@ -214,7 +249,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       }
 
       bool has_two_more_tokens = token != end(input_tokens) - 1 && token != end(input_tokens) - 2;
-      bool is_else_stmt = has_two_more_tokens && next(token, 1)->text == "else" && next(token, 2)->type == LEFT_CURLY;
+      bool is_else_stmt = has_two_more_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == LEFT_CURLY;
 
       if (is_else_stmt) {
         previous.push(previous_stmt_num + 1);
@@ -229,9 +264,9 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
         }
       }
 
-    } else if (next(token, 1)->text == "=") {
+    } else if (next(token, 1)->text_ == "=") {
       vector<Token> tokens;
-      while (token->type != SEMICOLON) {
+      while (token->type_ != SEMICOLON) {
         tokens.push_back(*token);
         token++;
       }
@@ -241,10 +276,11 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
 
       stmt_lst.insert(token->stmt_num_);
+      end_stmt_num += 1;
 
-    } else if (token->text == "procedure") {
+    } else if (token->text_ == "procedure") {
       vector<Token> tokens;
-      while (token->type != LEFT_CURLY) {
+      while (token->type_ != LEFT_CURLY) {
         tokens.push_back(*token);
         token++;
       }
@@ -252,9 +288,15 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       populateProcedure(tokens, pkb);
 
-    } else if (token->text == "read") {
+      if (prev_proc != "") {
+        pkb.AddInfoToTable(TableIdentifier::KProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
+      }
+      start_stmt_num = end_stmt_num + 1;
+      prev_proc = tokens.at(kSecondIndex).text_;
+
+    } else if (token->text_ == "read") {
       vector<Token> tokens;
-      while (token->type != SEMICOLON) {
+      while (token->type_ != SEMICOLON) {
         tokens.push_back(*token);
         token++;
       }
@@ -266,9 +308,11 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       stmt_lst.insert(token->stmt_num_);
 
-    } else if (token->text == "print") {
+      end_stmt_num += 1;
+
+    } else if (token->text_ == "print") {
       vector<Token> tokens;
-      while (token->type != SEMICOLON) {
+      while (token->type_ != SEMICOLON) {
         tokens.push_back(*token);
         token++;
       }
@@ -280,9 +324,11 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       stmt_lst.insert(token->stmt_num_);
 
-    } else if (token->text == "if") {
+      end_stmt_num += 1;
+
+    } else if (token->text_ == "if") {
       vector<Token> tokens;
-      while (token->type != LEFT_CURLY) {
+      while (token->type_ != LEFT_CURLY) {
         tokens.push_back(*token);
         token++;
       }
@@ -298,9 +344,11 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       stmt_lst.insert(token->stmt_num_);
 
-    } else if (token->text == "while") {
+      end_stmt_num += 1;
+
+    } else if (token->text_ == "while") {
       vector<Token> tokens;
-      while (token->type != LEFT_CURLY) {
+      while (token->type_ != LEFT_CURLY) {
         tokens.push_back(*token);
         token++;
       }
@@ -315,15 +363,31 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       previous.push(token->stmt_num_ + 1);
 
       stmt_lst.insert(token->stmt_num_);
+      end_stmt_num += 1;
 
-    } else if (token->text == "call") {
-      // TODO (Yuxuan): Add implementation in future iterations
+    } else if (token->text_ == "call") {
+      vector<Token> tokens;
+      while (token->type_ != SEMICOLON) {
+        tokens.push_back(*token);
+        token++;
+      }
+      tokens.push_back(*token);
+
+      populateCallStmt(tokens, pkb);
+      children = populateParentRelationship(parent, children, token->stmt_num_);
+      previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
+
+      stmt_lst.insert(token->stmt_num_);
+      end_stmt_num += 1;
 
     }
   }
 
   // Add stmt_lst to stmt_list_set_
   pkb.AddEntityToSet(EntityIdentifier::kStmtLst, stmt_lst);
+
+  // Add procedure range for last procedure
+  pkb.AddInfoToTable(TableIdentifier::KProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
 
   if (PopulateNestedRelationships(pkb) == 0) {
     throw invalid_argument("PKB Population failed");
