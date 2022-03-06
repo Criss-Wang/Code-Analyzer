@@ -14,6 +14,9 @@ class ReadTable : public Table<int, string> {};
 // Line number will be the key and the single variable being printed will be the value
 class PrintTable : public Table<int, string> {};
 
+// Line number will be the key and the single procedure name being called will be the value
+class CallerTable : public Table<int, string> {};
+
 // Line number will be the key and the list of constants will be the value
 class ConstantTable : public Table<int, vector<int>> {};
 

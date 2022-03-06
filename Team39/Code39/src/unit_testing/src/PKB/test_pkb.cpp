@@ -169,7 +169,7 @@ TEST_CASE("Populating StmtToPatterns Table") {
     res = pkb.GetAllStmtsWithPattern("A + (Bbs + C) + 2");
     REQUIRE(res == unordered_set<int>{2});
 
-    res = pkb.GetAllStmtsWithPattern("Bbs");
+    res = pkb.GetAllStmtsWithPattern("Bbs ");
     REQUIRE(res == unordered_set<int>{2, 3, 4});
 
     res = pkb.GetAllStmtsWithPattern("Bbs + C");
@@ -183,7 +183,7 @@ TEST_CASE("Populating StmtToPatterns Table") {
   }
 }
 
-TEST_CASE("Add Statement Entity") {
+TEST_CASE("Add Integer Entity") {
   Pkb pkb = Pkb();
 
   SECTION("Adding statement") {
@@ -200,7 +200,7 @@ TEST_CASE("Add Statement Entity") {
   }
 }
 
-TEST_CASE("Add Variable Entity") {
+TEST_CASE("Add String Entity") {
   Pkb pkb = Pkb();
 
   SECTION("Adding variable name") {

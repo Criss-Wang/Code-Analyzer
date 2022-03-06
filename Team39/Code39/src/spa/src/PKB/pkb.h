@@ -27,6 +27,7 @@ class Pkb {
     ReadTable *read_table_ = new ReadTable();
     PrintTable *print_table_ = new PrintTable();
     ConstantTable *constant_table_ = new ConstantTable();
+    CallerTable* caller_table_ = new CallerTable();
     IfTable *if_table_ = new IfTable();
     WhileTable *while_table_ = new WhileTable();
 
@@ -44,7 +45,8 @@ class Pkb {
     ModifiesStmtToVariablesTable *modifies_stmt_to_variables_table_ = new ModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable *modifies_variable_to_stmts_table_ = new ModifiesVariableToStmtsTable();
     StmtToPatternsTable *stmt_to_patterns_table_ = new StmtToPatternsTable();
-    PatternToStmtsTable* pattern_to_stmts_table_ = new PatternToStmtsTable();
+    PatternToStmtsTable *pattern_to_stmts_table_ = new PatternToStmtsTable();
+    ExactPatternToStmtTable* exact_pattern_to_stmt_table_ = new ExactPatternToStmtTable();
 
     // Stores the line numbers into a set
     unordered_set<int> stmt_set_;
@@ -66,6 +68,7 @@ class Pkb {
     bool AddFollows(int key, int value);
     bool AddModifies(int key, const vector<string>& value);
     bool AddUses(int key, const vector<string>& value);
+    bool AddPattern(bool& add_success, unordered_set<string> pattern_set, Table<string, unordered_set<int>>* table_to_update, int line_num);
 
   public:
     /**
@@ -126,9 +129,12 @@ class Pkb {
     [[nodiscard]] vector<pair<int, string>> GetAllModifiesStmtVarPairs() const;
 
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
+    [[nodiscard]] unordered_set<int> GetStmtsWithExactPattern(const string& pattern) const;
 
     // Get all the items of a certain entity type
     unordered_set<int> GetAllEntityInt(const EntityIdentifier entity_identifier);
     unordered_set<string> GetAllEntityString(const EntityIdentifier entity_identifier);
     unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier entity_identifier);
+
+    // Get all the attribute
 };

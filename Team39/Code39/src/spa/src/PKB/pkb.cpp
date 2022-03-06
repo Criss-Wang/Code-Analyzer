@@ -279,6 +279,14 @@ unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern) const {
   return pattern_to_stmts_table_->GetValueByKey(s);
 }
 
+unordered_set<int> Pkb::GetStmtsWithExactPattern(const string& pattern) const {
+  try {
+    return exact_pattern_to_stmt_table_->GetValueByKey(pattern);
+  } catch (exception& e) {
+    return unordered_set<int>{};
+  }
+}
+
 bool Pkb::AddParent(const int key, const vector<int>& value) {
   bool add_success = parent_table_->AddKeyValuePair(key, value);
   // Populate the reverse relation
@@ -309,23 +317,29 @@ bool Pkb::AddUses(const int key, const vector<string>& value) {
   return add_success;
 }
 
+bool Pkb::AddPattern(bool& add_success, unordered_set<string> pattern_set, Table<string, unordered_set<int>>* table_to_update, const int line_num) {
+  for (auto p : pattern_set) {
+    if (!table_to_update->KeyExistsInTable(p)) {
+      add_success = add_success && table_to_update->AddKeyValuePair(p, unordered_set<int>{line_num});
+    } else {
+      unordered_set<int> current_set = table_to_update->GetValueByKey(p);
+      current_set.insert(line_num);
+      add_success = add_success && table_to_update->UpdateKeyWithNewValue(p, current_set);
+    }
+  }
+  return add_success;
+}
+
 bool Pkb::AddPattern(const int line_num, const string& input) {
   // First the SP side should guarantee a valid input is sent
   // We then proceed to parse the set of valid substring patterns
   const string clean_input = PatternHelper::PreprocessPattern(input);
-  const bool is_full = true;
-  const unordered_set<string> valid_sub_patterns = PatternHelper::GetPatternSetPostfix(clean_input, is_full);
+
+  const unordered_set<string> valid_sub_patterns = PatternHelper::GetPatternSetPostfix(clean_input, true);
+  const unordered_set<string> valid_exact_patterns = PatternHelper::GetPatternSetPostfix(clean_input, false);
   bool add_success = stmt_to_patterns_table_->AddKeyValuePair(line_num, valid_sub_patterns);
-  for (auto p: valid_sub_patterns) {
-    if (!pattern_to_stmts_table_->KeyExistsInTable(p)) {
-      add_success = add_success && pattern_to_stmts_table_->AddKeyValuePair(p, unordered_set<int>{line_num});
-    }
-    else {
-      unordered_set<int> current_set = pattern_to_stmts_table_->GetValueByKey(p);
-      current_set.insert(line_num);
-      add_success = add_success && pattern_to_stmts_table_->UpdateKeyWithNewValue(p, current_set);
-    }
-  }
+  add_success = AddPattern(add_success, valid_sub_patterns, pattern_to_stmts_table_, line_num);
+  add_success = AddPattern(add_success, valid_exact_patterns, exact_pattern_to_stmt_table_, line_num);
   return add_success;
 }
 
@@ -378,6 +392,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
     switch (table_identifier) {
       case TableIdentifier::kAssign: return assign_table_->AddKeyValuePair(key, value);
       case TableIdentifier::kRead: return read_table_->AddKeyValuePair(key, value);
+      case TableIdentifier::kCaller: return caller_table_->AddKeyValuePair(key, value);
       case TableIdentifier::kPrint: return print_table_->AddKeyValuePair(key, value);
       case TableIdentifier::kPattern: return AddPattern(key, value);
       default:
