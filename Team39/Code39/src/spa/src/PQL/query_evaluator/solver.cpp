@@ -61,7 +61,8 @@ namespace pql_solver {
       std::vector<int> return_idxs;
 
       for (auto& syn : return_syns_) {
-        int cur_idx = table.FindSynCol(syn.GetName());
+        std::string syn_name = syn.GetName();
+        int cur_idx = table.FindSynCol(syn_name);
         if (cur_idx >= 0) {
           return_idxs.push_back(cur_idx);
         }
@@ -93,7 +94,8 @@ namespace pql_solver {
     
     //We add the synonym according to their position in return_syns_
     for (auto& syn : return_syns_) {
-      int col_num_in_table = final_table.FindSynCol(syn.GetName());
+      std::string syn_name = syn.GetName();
+      int col_num_in_table = final_table.FindSynCol(syn_name);
 
       for (int index = 0; index < final_table.GetRowNum(); index++) {
         std::string cur_string = "";
