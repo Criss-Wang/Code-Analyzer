@@ -135,68 +135,45 @@ namespace pql {
     (*predicates).push_back(pred);
   }
 
-  void FollowsClause::Evaluate() {
-    bool is_left_syn = token_->IsSynonymLeft();
-    bool is_right_syn = token_->IsSynonymRight();
+  void GenericEvaluate(pql::RelationshipToken& token, Pkb& pkb,
+      std::unordered_map<std::string, std::vector<int>>& stmt_hashmap, std::vector<pql_table::Predicate>* predicates,
+      bool(Pkb::* IsRelHolds)(const int, const int) const, std::vector<int>(Pkb::* GetRelDomain)(const int) const,
+      std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const) {
+    bool is_left_syn = token.IsSynonymLeft();
+    bool is_right_syn = token.IsSynonymRight();
 
     if (!is_left_syn && !is_right_syn) {
-      EvaluateRelExistStmt(*token_, pkb_, &Pkb::IsFollows, &Pkb::GetStmtRightAfter, 
-          &Pkb::GetStmtRightBefore, &Pkb::GetAllFollowsPairs);
-    } else if (!is_left_syn && is_right_syn) {
-      EvaluateRelDomainStmt(*token_, pkb_, *stmt_hashmap_, &Pkb::GetStmtRightAfter, &Pkb::GetAllFollowsPairs);
-    } else if (is_left_syn && !is_right_syn) {
-      EvaluateInverseRelDomainStmt(*token_, pkb_, *stmt_hashmap_, &Pkb::GetStmtRightBefore, &Pkb::GetAllFollowsPairs);
-    } else {
-      EvaluateRelPairStmt(*token_, pkb_, predicates_, &Pkb::GetAllFollowsPairs);
+      EvaluateRelExistStmt(token, pkb, IsRelHolds, GetRelDomain, GetInverseRelDomain, GetRelPairs);
     }
+    else if (!is_left_syn && is_right_syn) {
+      EvaluateRelDomainStmt(token, pkb, stmt_hashmap, GetRelDomain, GetRelPairs);
+    }
+    else if (is_left_syn && !is_right_syn) {
+      EvaluateInverseRelDomainStmt(token, pkb, stmt_hashmap, GetInverseRelDomain, GetRelPairs);
+    }
+    else {
+      EvaluateRelPairStmt(token, pkb, predicates, GetRelPairs);
+    }
+  }
+
+  void FollowsClause::Evaluate() {
+    GenericEvaluate(*token_, pkb_, *stmt_hashmap_, predicates_,
+        &Pkb::IsFollows, &Pkb::GetStmtRightAfter, &Pkb::GetStmtRightBefore, &Pkb::GetAllFollowsPairs);
   }
 
   void FollowsTClause::Evaluate() {
-    bool is_left_syn = token_->IsSynonymLeft();
-    bool is_right_syn = token_->IsSynonymRight();
-
-    if (!is_left_syn && !is_right_syn) {
-      EvaluateRelExistStmt(*token_, pkb_, &Pkb::IsTransitiveFollows, &Pkb::GetStmtsAfter,
-        &Pkb::GetStmtsBefore, &Pkb::GetAllTransitiveFollowsPairs);
-    } else if (!is_left_syn && is_right_syn) {
-      EvaluateRelDomainStmt(*token_, pkb_, *stmt_hashmap_, &Pkb::GetStmtsAfter, &Pkb::GetAllTransitiveFollowsPairs);
-    } else if (is_left_syn && !is_right_syn) {
-      EvaluateInverseRelDomainStmt(*token_, pkb_, *stmt_hashmap_, &Pkb::GetStmtsBefore, &Pkb::GetAllTransitiveFollowsPairs);
-    } else {
-      EvaluateRelPairStmt(*token_, pkb_, predicates_, &Pkb::GetAllTransitiveFollowsPairs);
-    }
+    GenericEvaluate(*token_, pkb_, *stmt_hashmap_, predicates_,
+        &Pkb::IsTransitiveFollows, &Pkb::GetStmtsAfter, &Pkb::GetStmtsBefore, &Pkb::GetAllTransitiveFollowsPairs);
   }
 
   void ParentClause::Evaluate() {
-    bool is_left_syn = token_->IsSynonymLeft();
-    bool is_right_syn = token_->IsSynonymRight();
-
-    if (!is_left_syn && !is_right_syn) {
-      EvaluateRelExistStmt(*token_, pkb_, &Pkb::IsParent, &Pkb::GetChild,
-        &Pkb::GetParent, &Pkb::GetAllParentPairs);
-    } else if (!is_left_syn && is_right_syn) {
-      EvaluateRelDomainStmt(*token_, pkb_, *stmt_hashmap_, &Pkb::GetChild, &Pkb::GetAllParentPairs);
-    } else if (is_left_syn && !is_right_syn) {
-      EvaluateInverseRelDomainStmt(*token_, pkb_, *stmt_hashmap_, &Pkb::GetParent, &Pkb::GetAllParentPairs);
-    } else {
-      EvaluateRelPairStmt(*token_, pkb_, predicates_, &Pkb::GetAllParentPairs);
-    }
+    GenericEvaluate(*token_, pkb_, *stmt_hashmap_, predicates_,
+        &Pkb::IsParent, &Pkb::GetChild, &Pkb::GetParent, &Pkb::GetAllParentPairs);
   }
 
   void ParentTClause::Evaluate() {
-    bool is_left_syn = token_->IsSynonymLeft();
-    bool is_right_syn = token_->IsSynonymRight();
-
-    if (!is_left_syn && !is_right_syn) {
-      EvaluateRelExistStmt(*token_, pkb_, &Pkb::IsTransitiveParent, &Pkb::GetAllChildren,
-        &Pkb::GetAllParents, &Pkb::GetAllTransitiveParentPairs);
-    } else if (!is_left_syn && is_right_syn) {
-      EvaluateRelDomainStmt(*token_, pkb_, *stmt_hashmap_, &Pkb::GetAllChildren, &Pkb::GetAllTransitiveParentPairs);
-    } else if (is_left_syn && !is_right_syn) {
-      EvaluateInverseRelDomainStmt(*token_, pkb_, *stmt_hashmap_, &Pkb::GetAllParents, &Pkb::GetAllTransitiveParentPairs);
-    } else {
-      EvaluateRelPairStmt(*token_, pkb_, predicates_, &Pkb::GetAllTransitiveParentPairs);
-    }
+    GenericEvaluate(*token_, pkb_, *stmt_hashmap_, predicates_,
+        &Pkb::IsTransitiveParent, &Pkb::GetAllChildren, &Pkb::GetAllParents, &Pkb::GetAllTransitiveParentPairs);
   }
    
   void EvaluateRelExistVar(pql::RelationshipToken& token, Pkb& pkb, bool(Pkb::* IsRelHolds)(const int, const string&) const,
