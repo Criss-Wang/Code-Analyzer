@@ -8,20 +8,9 @@
 #include <string>
 
 #include "parser.h"
+#include "utility.h"
 
 namespace pql {
-  bool IsLetter(char c) {
-    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-  }
-
-  bool IsDigit(char c) {
-    return c >= '0' && c <= '9';
-  }
-
-  bool IsIdent(const std::string& ident) {
-    return ident[0] == '\"' && ident[ident.length() - 1] == '\"';
-  }
-
   std::vector<std::string> Parser::GetSynonyms() {
     std::vector<std::string> synonyms;
     while (ps.Peek() != ';') {
@@ -73,9 +62,11 @@ namespace pql {
         current_clause = IS_PATTERN;
       } else if (keyword == "and" && select_clause_parsed) {
         if (current_clause == IS_SUCH_THAT) {
+          ps.EatWhiteSpaces();
           Parser::ParseRelationship();
           ps.EatWhiteSpaces();
         } else if (current_clause == IS_PATTERN) {
+          ps.EatWhiteSpaces();
           ps.Expect("pattern");
           ps.EatWhiteSpaces();
           Parser::ParsePattern();
