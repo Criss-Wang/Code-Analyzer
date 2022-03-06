@@ -28,7 +28,7 @@ namespace pql {
 
   struct ParseException : public std::exception {
     public:
-      const char * what() const throw() {
+      [[nodiscard]] const char * what() const noexcept override {
         return "The query is invalid!";
       }
   };
@@ -41,7 +41,9 @@ namespace pql {
     kUsesS,
     kUsesP,
     kModifiesS,
-    kModifiesP
+    kModifiesP,
+    kCalls,
+    kCallsT
   };
 
   const std::map<std::string, EntityIdentifier> declarationMap {
@@ -65,7 +67,9 @@ namespace pql {
       {"Uses",      kUsesS},
       {"UsesP",     kUsesP},
       {"Modifies",  kModifiesS},
-      {"ModifiesP", kModifiesP}
+      {"ModifiesP", kModifiesP},
+      {"Calls", kCalls},
+      {"Calls*", kCallsT}
   };
 
   std::optional<EntityIdentifier> GetDeclarationType(const std::string &keyword);
@@ -81,7 +85,7 @@ namespace pql {
       bool is_synonym_right;
     public:
       RelationshipToken(pql::RelationshipTypes relationship, pql::Ref left, pql::Ref right, bool is_synonym_left, bool is_synonym_right) :
-        relationship(relationship), left(std::move(left)), right(std::move(right)), is_synonym_left(is_synonym_left), is_synonym_right(is_synonym_right) {};
+      relationship(relationship), left(std::move(left)), right(std::move(right)), is_synonym_left(is_synonym_left), is_synonym_right(is_synonym_right) {}
 
       pql::Ref GetLeft();
 
