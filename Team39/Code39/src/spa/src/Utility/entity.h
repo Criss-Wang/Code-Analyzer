@@ -11,5 +11,8 @@ enum class EntityIdentifier {
 	kCall,
 	kIf,
 	kVariable,
-	kConstant
+	kConstant,
+  kWildcard,
+  kIdent,
+  kStmtNumber
 };
