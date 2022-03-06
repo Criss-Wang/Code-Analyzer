@@ -1,16 +1,16 @@
 procedure proc1 {
 	read print;
 	x = proc1;
-	proc2 = proc3;
+	proc2 = procedure;
 }
 
 procedure proc2 {
 	read x;
 	print t;
-	call proc3;
+	call procedure;
 }
 
-procedure proc3 {
-	x = t;
+procedure procedure {
+	t = x + 1;
 	call proc1;
 }

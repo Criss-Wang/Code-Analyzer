@@ -1,7 +1,7 @@
 procedure proc1 {
-	read print;
-	x = proc1;
-	proc2 = proc3;
+	read proc1;
+	x = y - (f * 4);
+	procedure = proc3;
 }
 
 procedure proc2 {
