@@ -3,6 +3,12 @@
 #include "token.h"
 
 namespace pql {
+  bool IsLetter(char c);
+
+  bool IsDigit(char c);
+
+  bool IsIdent(const std::string& ident);
+
   class Query {
   private:
     std::vector <pql::Synonym> declarations;

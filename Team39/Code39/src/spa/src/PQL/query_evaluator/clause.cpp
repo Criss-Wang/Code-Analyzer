@@ -212,7 +212,8 @@ namespace pql {
         throw pql_exceptions::FalseRelationException();
       }
     } else {
-      std::vector<std::string> domain = (pkb.*GetRelDomain)(stoi(token.GetLeft()));
+        std::vector<std::string> domain;
+        domain = (pkb.*GetRelDomain)(stoi(token.GetLeft()));
 
       if (domain.size() == 0) {
         throw pql_exceptions::EmptyDomainException();
@@ -223,7 +224,8 @@ namespace pql {
   void EvaluateRelDomainVar(pql::RelationshipToken& token, Pkb& pkb, std::unordered_map<std::string, std::vector<std::string>>& var_hashmap,
       std::vector<std::string>(Pkb::* GetRelDomain)(const int) const) {
     //Rel(1, v) only since the first parameter cannot be "_"
-    std::vector<std::string> domain = (pkb.*GetRelDomain)(stoi(token.GetLeft()));
+    std::vector<std::string> domain;
+    domain = (pkb.*GetRelDomain)(stoi(token.GetLeft()));
     UpdateHashmap<std::string>(var_hashmap, token.GetRight(), domain);
   }
  

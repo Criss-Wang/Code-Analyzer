@@ -10,7 +10,7 @@
 #include "parser.h"
 
 namespace pql {
-  bool IsLetter(char c) {
+ /* bool IsLetter(char c) {
     return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
   }
 
@@ -20,7 +20,7 @@ namespace pql {
 
   bool IsIdent(const std::string& ident) {
     return ident[0] == '\"' && ident[ident.length() - 1] == '\"';
-  }
+  }*/
 
   std::vector<std::string> Parser::GetSynonyms() {
     std::vector<std::string> synonyms;

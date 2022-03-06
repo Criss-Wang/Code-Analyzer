@@ -68,6 +68,10 @@ namespace pql {
     return ident[0] == '\"' && ident[ident.length() - 1] == '\"';
   }
 
+  bool IsLetter(char c) {
+      return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+  }
+
   bool IsInteger(const std::string& s) {
     std::stringstream ssm;
     ssm << s;

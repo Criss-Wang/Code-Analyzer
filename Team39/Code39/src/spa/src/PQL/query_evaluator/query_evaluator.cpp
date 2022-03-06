@@ -12,10 +12,10 @@
 #include "query_evaluator.h"
 #include "query_evaluator_exceptions.h"
 
-using namespace std;
-
 namespace pql {
-   
+  std::vector<std::string> empty_res({});
+
+
   void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& stmt_hashmap, 
                     std::unordered_map<std::string, std::vector<std::string>>& var_hashmap, Pkb& pkb) {
     //hashmap stores <synonym.name, domain> pair.
@@ -131,11 +131,9 @@ namespace pql {
   std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
     try {
       std::vector<pql::RelationshipToken> such_that_clauses = query.GetSuchThatClause();
-      std::optional<pql::PatternToken> pattern_token_opt = query.GetPattern();
+      std::vector<pql::PatternToken> pattern_clauses = query.GetPattern();
       std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
-      //Need to wait for query preprocessor
       std::vector<pql::Synonym> selected_syns = query.GetResultSynonym();
-
       std::vector<pql_table::Predicate> predicates;
       std::unordered_map<std::string, std::vector<int>> stmt_hashmap;
       std::unordered_map<std::string, std::vector<std::string>> var_hashmap;
@@ -143,13 +141,12 @@ namespace pql {
 
       GetAllDomain(synonyms, stmt_hashmap, var_hashmap, pkb);
 
-      if (pattern_token_opt != std::nullopt) {
-        pql::PatternToken pattern_token = pattern_token_opt.value();
+      for (pql::PatternToken& pattern_token : pattern_clauses) {
         ConsumePattern(pattern_token, pkb, stmt_hashmap, var_hashmap, predicates);
       }
 
-      for (pql::RelationshipToken& token : such_that_clauses) {
-        std::unique_ptr<pql::Clause> clause = GenerateClause(token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
+      for (pql::RelationshipToken& such_that_token : such_that_clauses) {
+        std::unique_ptr<pql::Clause> clause = GenerateClause(such_that_token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
         clause->Evaluate();
       }
 

@@ -9,9 +9,9 @@
 
 namespace pql {
 
-  bool IsLetter(char c);
+  /*bool IsLetter(char c);
 
-  bool IsDigit(char c);
+  bool IsDigit(char c);*/
 
   class ParserState {
     private:
