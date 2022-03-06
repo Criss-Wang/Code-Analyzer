@@ -437,7 +437,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
       throw EmptyValueException();
     }
     switch (table_identifier) {
-      case TableIdentifier::KProcedure: return proc_range_table_->AddKeyValuePair(key, value);
+      case TableIdentifier::kProcedure: return proc_range_table_->AddKeyValuePair(key, value);
       default:
         throw InvalidIdentifierException();
     }

@@ -289,7 +289,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       populateProcedure(tokens, pkb);
 
       if (prev_proc != "") {
-        pkb.AddInfoToTable(TableIdentifier::KProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
+        pkb.AddInfoToTable(TableIdentifier::kProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
       }
       start_stmt_num = end_stmt_num + 1;
       prev_proc = tokens.at(kSecondIndex).text_;
@@ -387,7 +387,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kStmtLst, stmt_lst);
 
   // Add procedure range for last procedure
-  pkb.AddInfoToTable(TableIdentifier::KProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
+  pkb.AddInfoToTable(TableIdentifier::kProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
 
   if (PopulateNestedRelationships(pkb) == 0) {
     throw invalid_argument("PKB Population failed");
