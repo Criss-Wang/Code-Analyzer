@@ -1,0 +1,16 @@
+procedure proc1 {
+	read print;
+	x = proc1;
+	proc2 = procedure;
+}
+
+procedure proc2 {
+	read x;
+	print t;
+	call procedure;
+}
+
+procedure procedure {
+	t = x + 1;
+	call proc1;
+}

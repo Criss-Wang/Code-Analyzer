@@ -1,19 +1,21 @@
 #include "TestWrapper.h"
-#include "parser.h"
+#include "AbstractWrapper.h"
+#include "SP/parser.h"
 #include "../../spa/src/PQL/parser.h"
 #include "../../spa/src/PQL/query_evaluator/query_evaluator.h"
-#include "../../spa/src/sp_exceptions.h"
+#include "../../spa/src/SP/sp_exceptions.h"
 
 using namespace std;
 
 // implementation code of WrapperFactory - do NOT modify the next 5 lines
 AbstractWrapper* WrapperFactory::wrapper = 0;
 AbstractWrapper* WrapperFactory::createWrapper() {
-  if (wrapper == 0) wrapper = new TestWrapper;
-  return wrapper;
+    if (wrapper == 0) wrapper = new TestWrapper;
+    return wrapper;
 }
 // Do not modify the following line
 volatile bool AbstractWrapper::GlobalStop = false;
+AbstractWrapper::~AbstractWrapper() = default;
 
 // a default constructor
 TestWrapper::TestWrapper() {
@@ -21,6 +23,8 @@ TestWrapper::TestWrapper() {
   // as well as any initialization required for your spa program
 	Pkb pkb = Pkb();
 }
+
+TestWrapper::~TestWrapper() = default;
 
 // method for parsing the SIMPLE source
 void TestWrapper::parse(std::string filename) {

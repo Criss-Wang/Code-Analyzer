@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "SP/parser.h"
 #include "SP/validator.h"
 
 #include <fstream>
@@ -76,6 +76,7 @@ TEST_CASE("Read/print/assign statments for Validation") {
     RequireInvalid(invalid_dir + "2_test4.txt");
     RequireInvalid(invalid_dir + "2_test5.txt");
     RequireInvalid(invalid_dir + "2_test6.txt");
+    RequireInvalid(invalid_dir + "2_test7.txt");
 
   }
 
@@ -89,6 +90,13 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation
     RequireValid(valid_dir + "3_test2.txt");
     RequireValid(valid_dir + "3_test3.txt");
     RequireValid(valid_dir + "3_test4.txt");
+
+  }
+
+  SECTION("Invalid Programs") {
+
+    RequireInvalid(invalid_dir + "3_test1.txt");
+    RequireInvalid(invalid_dir + "3_test2.txt");
 
   }
 }
@@ -108,6 +116,25 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Validation
   SECTION("Valid Programs") {
 
     RequireValid(valid_dir + "5_test1.txt");
+
+  }
+}
+
+TEST_CASE("Read/print/assign/call statments for Validation") {
+
+  SECTION("Valid Programs") {
+
+    RequireValid(valid_dir + "6_test1.txt");
+    RequireValid(valid_dir + "6_test2.txt");
+    RequireValid(valid_dir + "6_test3.txt");
+
+  }
+
+  SECTION("Invalid Programs") {
+
+    RequireInvalid(invalid_dir + "6_test1.txt");
+    RequireInvalid(invalid_dir + "6_test2.txt");
+    RequireInvalid(invalid_dir + "6_test3.txt");
 
   }
 }

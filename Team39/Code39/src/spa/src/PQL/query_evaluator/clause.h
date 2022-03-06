@@ -39,13 +39,13 @@ namespace pql {
 
     hmap[name] = inter;
   }
-  
+
   class Clause {
     public:
       pql::RelationshipToken* token_;
       Pkb pkb_;
       std::unordered_map<std::string, std::vector<int>>* stmt_hashmap_;
-      std::unordered_map<std::string, std::vector<std::string>>* var_hashmap_; 
+      std::unordered_map<std::string, std::vector<std::string>>* var_hashmap_;
       std::vector<pql_table::Predicate>* predicates_;
 
     public:
@@ -53,6 +53,8 @@ namespace pql {
              std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
              std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
              std::vector<pql_table::Predicate>* predicates);
+
+      virtual ~Clause() = default;
 
     public:
       virtual void Evaluate() = 0;
