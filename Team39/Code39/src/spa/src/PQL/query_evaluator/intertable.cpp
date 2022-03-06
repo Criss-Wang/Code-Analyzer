@@ -69,7 +69,7 @@ namespace pql_table {
 			}
 		}
 
-		return InterTable(new_header, new_rows);
+		return InterTable(new_header, new_rows).Deduplicate();
 	}
 
 	std::vector<element> InterTable::GetColByName(std::string& name) {
