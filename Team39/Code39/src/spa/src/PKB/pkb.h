@@ -113,6 +113,7 @@ class Pkb {
 
     // Relationship utility APIs for PQL
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
+    [[nodiscard]] bool IsParentExists() const;
     [[nodiscard]] bool IsTransitiveParent(int stmt_1, int stmt_2) const;
     [[nodiscard]] vector<int> GetParent(int stmt) const;
     [[nodiscard]] vector<int> GetAllParents(int stmt) const;
@@ -122,6 +123,7 @@ class Pkb {
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs() const;
 
     [[nodiscard]] bool IsFollows(int stmt_1, int stmt_2) const;
+    [[nodiscard]] bool IsFollowsExists() const;
     [[nodiscard]] bool IsTransitiveFollows(int stmt_1, int stmt_2) const;
     [[nodiscard]] vector<int> GetStmtRightBefore(int stmt) const;
     [[nodiscard]] vector<pair<int,int>> GetAllFollowsPairs() const;
@@ -131,11 +133,13 @@ class Pkb {
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs() const;
 
     [[nodiscard]] bool IsUsesStmt(int stmt, const string& var) const;
+    [[nodiscard]] bool IsUsesStmtExists() const;
     [[nodiscard]] vector<int> GetUsesStmtsByVar(const string& var) const;
     [[nodiscard]] vector<string> GetUsesVarByStmt(int stmt) const;
     [[nodiscard]] vector<pair<int, string>> GetAllUsesStmtVarPairs() const;
 
     [[nodiscard]] bool IsModifiesStmt(int stmt, const string& var) const;
+    [[nodiscard]] bool IsModifiesStmtExists() const;
     [[nodiscard]] vector<int> GetModifiesStmtsByVar(const string& var) const;
     [[nodiscard]] vector<string> GetModifiesVarByStmt(int stmt) const;
     [[nodiscard]] vector<pair<int, string>> GetAllModifiesStmtVarPairs() const;
