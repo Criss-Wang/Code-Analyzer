@@ -10,6 +10,13 @@ namespace pql {
   bool IsIdent(const std::string& ident);
 
   bool IsInteger(const std::string& s);
+
+  bool IsOperator(char c);
+
+  bool IsOpenBracket(char c);
+
+  bool IsCloseBracket(char c);
+
     
   class Query {
   private:

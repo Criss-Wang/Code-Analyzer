@@ -1,0 +1,2 @@
+assign a; stmt s;
+Select s pattern a(_, "(3 % 4) / x")
