@@ -132,6 +132,7 @@ namespace pql {
 
     for (next_char = ParserState::Peek(); next_char != '\"' && !ParserState::IsEOF(); next_char = ParserState::Peek()) {
       // Check that char is expected 
+
       if (IsDigit(next_char) && expected_next) {
         s << ParserState::Next();
         incomplete_operator = false;
@@ -168,13 +169,13 @@ namespace pql {
       } else {
         throw ParseException();
       }
+    }
 
-      if (!incomplete_operator && bracket_count == 0) {
-        s >> expression;
-        return expression;
-      } else {
-        throw ParseException();
-      }
+    if (!incomplete_operator && bracket_count == 0) {
+      s >> expression;
+      return expression;
+    } else {
+      throw ParseException();
     }
   }
 
