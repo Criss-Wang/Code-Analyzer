@@ -70,6 +70,8 @@ namespace pql_table {
 
       Predicate(std::string& first, std::string& second, std::vector<std::pair<int, std::string>> pairs);
 
+      Predicate(std::string& first, std::string& second, std::vector<std::pair<std::string, std::string>> pairs);
+
       bool equal(Predicate &p);
   };
 }

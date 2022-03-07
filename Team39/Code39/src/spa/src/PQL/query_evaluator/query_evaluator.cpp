@@ -12,10 +12,10 @@
 #include "query_evaluator.h"
 #include "query_evaluator_exceptions.h"
 
-using namespace std;
-
 namespace pql {
-   
+  std::vector<std::string> empty_res({});
+
+
   void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& stmt_hashmap, 
                     std::unordered_map<std::string, std::vector<std::string>>& var_hashmap, Pkb& pkb) {
     //hashmap stores <synonym.name, domain> pair.
@@ -51,6 +51,10 @@ namespace pql {
         return std::make_unique<UsesSClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
       case RelationshipTypes::kModifiesS:
         return std::make_unique<ModifiesSClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+      case RelationshipTypes::kCalls:
+        return std::make_unique<CallsClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+      case RelationshipTypes::kCallsT:
+        return std::make_unique<CallsTClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
       default: 
         throw pql_exceptions::EmptyDomainException();
     }
@@ -131,10 +135,9 @@ namespace pql {
   std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
     try {
       std::vector<pql::RelationshipToken> such_that_clauses = query.GetSuchThatClause();
-      std::optional<pql::PatternToken> pattern_token_opt = query.GetPattern();
+      std::vector<pql::PatternToken> pattern_clauses = query.GetPattern();
       std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
-      pql::Synonym selected_syn = query.GetResultSynonym();
-
+      std::vector<pql::Synonym> selected_syns = query.GetResultSynonym();
       std::vector<pql_table::Predicate> predicates;
       std::unordered_map<std::string, std::vector<int>> stmt_hashmap;
       std::unordered_map<std::string, std::vector<std::string>> var_hashmap;
@@ -142,22 +145,21 @@ namespace pql {
 
       GetAllDomain(synonyms, stmt_hashmap, var_hashmap, pkb);
 
-      if (pattern_token_opt != std::nullopt) {
-        pql::PatternToken pattern_token = pattern_token_opt.value();
+      for (pql::PatternToken& pattern_token : pattern_clauses) {
         ConsumePattern(pattern_token, pkb, stmt_hashmap, var_hashmap, predicates);
       }
 
-      for (pql::RelationshipToken& token : such_that_clauses) {
-        std::unique_ptr<pql::Clause> clause = GenerateClause(token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
+      for (pql::RelationshipToken& such_that_token : such_that_clauses) {
+        std::unique_ptr<pql::Clause> clause = GenerateClause(such_that_token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
         clause->Evaluate();
       }
 
-      pql_solver::Solver solver(&stmt_hashmap, &var_hashmap, &predicates, synonyms, &selected_syn);
+      pql_solver::Solver solver(&stmt_hashmap, &var_hashmap, &predicates, synonyms, selected_syns);
       std::vector<std::string> res = solver.Solve();
 
       return res;
 
-    } catch (pql_exceptions::EmptyDomainException e) {
+    } catch (pql_exceptions::EmptyResultException e) {
       std::vector<std::string> empty_res({});
       return empty_res;
     }

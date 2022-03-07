@@ -8,7 +8,6 @@
 #include <string>
 
 #include "parser.h"
-#include "utility.h"
 
 namespace pql {
   std::vector<std::string> Parser::GetSynonyms() {

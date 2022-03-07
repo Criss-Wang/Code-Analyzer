@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <stack>
+#include <unordered_set>
 
 using namespace std;
 
@@ -23,53 +24,64 @@ bool validateProcedureStmt(vector<Token> tokens) {
   return check_variable && check_left_curly;
 }
 
-bool validateProcedures(vector<string> procedures, vector<vector<string>> calls) {
+bool dfs(const string& vertex, vector<string>& vertices, vector<unordered_set<string>>& edges,
+    unordered_set<string>& visited, unordered_set<string>& finished) {
+  if (finished.find(vertex) != finished.end()) {
+    return true;
+  }
+
+  if (visited.find(vertex) != visited.end()) {
+    return false;
+  }
+
+  visited.insert(vertex);
+
+  //find the index of vertex in vertices vector
+  auto iter = find(vertices.begin(), vertices.end(), vertex);
+  int idx = iter - vertices.begin();
+
+  for (auto& neighbour : edges[idx]) {
+    if (!dfs(neighbour, vertices, edges, visited, finished)) {
+        return false;
+    }
+  }
+
+  finished.insert(vertex);
+  return true;
+}
+
+bool CheckCycle(vector<string>& vertices, vector<unordered_set<string>>& edges) { 
+  unordered_set<string> visited({}); 
+  unordered_set<string> finished({}); //Vertices in finished have no cyclic dependecies
+  
+  for (auto& vertex : vertices) {
+    if (!(finished.find(vertex) != finished.end())) {
+      //We only visit vertices that are not in finished
+      if (!dfs(vertex, vertices, edges, visited, finished)) {
+        return false;
+      }
+    }
+  }
+  
+  return true;
+}
+
+bool validateProcedures(vector<string>& procedures, vector<unordered_set<string>>& calls) {
   int min_procedures = 1;
   if (procedures.size() < min_procedures) {
     return false;
   }
 
-  bool check_called_procedure_exists = true;
-  for (int i = 1; i < calls.size(); i++) {
-    for (auto proc = begin(calls.at(i)); proc != end(calls.at(i)); ++proc) {
-      check_called_procedure_exists = check_called_procedure_exists &&
-        (find(begin(procedures), end(procedures), *proc) != end(procedures));
-    }
-  }
-
-  // check cyclical calls
-  for (int i = 0; i < calls.size(); i++) { // check call flow for each procedure
-    string caller = calls.at(i).at(0);
-    vector<string> called_procedures = { caller };
-    vector<string> callees((calls.at(i)).begin() + kSecondIndex, (calls.at(i)).end());
-
-    while (!callees.empty()) {
-      string callee = *(callees.end() - 1);
-      callees.pop_back();
-
-      // check if callee exists in previously called procedures/is the caller
-      bool check_cyclic = (find(begin(called_procedures), end(called_procedures), callee) == end(called_procedures));
-      if (!check_cyclic) {
+  //Check whether callee exist 
+  for (auto& call : calls) {
+    for (auto& callee : call) {
+      if (find(procedures.begin(), procedures.end(), callee) == procedures.end()) {
         return false;
       }
-      called_procedures.push_back(callee);
-
-      // find procedures called by callee
-      int callee_idx = -1;
-      for (vector<string> call : calls) {
-        callee_idx++;
-        if (call.at(0) == callee) {
-          break;
-        }
-      }
-
-      for (int i = 1; i < calls.at(callee_idx).size(); i++) {
-        callees.push_back(calls.at(callee_idx).at(i));
-      }
     }
   }
 
-  return check_called_procedure_exists;
+  return CheckCycle(procedures, calls);
 }
 
 bool validateReadPrintCallStmt(vector<Token> tokens) {
@@ -287,7 +299,8 @@ bool Validate(vector<Token> input) {
 
   // keep track of procedures and called procedures
   vector<string> procedures = {};
-  vector<vector<string>> called_procedures = {};
+  // Each set will store the procedure name called (might have multiple calls to the same procedure)
+  vector<unordered_set<string>> called_procedures_set = {};
   int curr_procedure = -1;
 
   // check if/else/while containers for empty stmtLst
@@ -348,7 +361,8 @@ bool Validate(vector<Token> input) {
       }
 
       procedures.push_back(tokens.at(kSecondIndex).text_);
-      called_procedures.push_back({ tokens.at(kSecondIndex).text_ });
+      //Need to create an edge list for the new procedure
+      called_procedures_set.push_back(unordered_set<string>({}));
       curr_procedure += 1;
 
       proc_curly_bracket_count += 1;
@@ -403,7 +417,7 @@ bool Validate(vector<Token> input) {
         return false;
       }
       if (tokens.at(kFirstIndex).text_ == "call") {
-        called_procedures.at(curr_procedure).push_back(tokens.at(kSecondIndex).text_);
+        called_procedures_set.at(curr_procedure).insert(tokens.at(kSecondIndex).text_);
       }
 
     } else {
@@ -412,7 +426,7 @@ bool Validate(vector<Token> input) {
   }
 
   bool check_curly_brackets = proc_curly_bracket_count == 0 && if_curly_bracket_count == 0 && while_curly_bracket_count == 0;
-  if (check_curly_brackets && if_else_stmts == 0 && validateProcedures(procedures, called_procedures)) {
+  if (check_curly_brackets && if_else_stmts == 0 && validateProcedures(procedures, called_procedures_set)) {
     return true;
   } else {
     return false;

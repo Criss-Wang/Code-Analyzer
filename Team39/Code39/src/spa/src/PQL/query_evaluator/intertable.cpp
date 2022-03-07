@@ -6,6 +6,7 @@
 #include <set>
 
 #include "intertable.h"
+#include "query_evaluator_exceptions.h"
 
 namespace pql_table {
 
@@ -50,6 +51,26 @@ namespace pql_table {
 		}
 
 		return -1;
+	}
+
+	InterTable InterTable::GetColsByIndices(std::vector<int>& valid_col_nums) {
+	  std::vector<std::string> new_header;
+		std::vector<std::vector<element>> new_rows;
+
+		//intialize new_rows to have the same size as rows_ with each new_row being an empty vector
+		for (int index = 0; index < rows_.size(); index++) {
+		  new_rows.push_back(std::vector<element>());
+		}
+
+		for (int& col_num : valid_col_nums) {
+			new_header.push_back(header_[col_num]);
+
+			for (int index = 0; index < rows_.size(); index++) {
+				new_rows[index].push_back(rows_[index][col_num]);
+			}
+		}
+
+		return InterTable(new_header, new_rows).Deduplicate();
 	}
 
 	std::vector<element> InterTable::GetColByName(std::string& name) {
@@ -137,7 +158,7 @@ namespace pql_table {
 
 		for (int index = 0; index < rows_.size(); index++) {
 			std::pair<element, element> cur_pair(rows_[index][first_syn_col_index], rows_[index][second_syn_col_index]);
-			std::unordered_set < std::pair<element, element>, int>::iterator iter;
+			std::unordered_set<std::pair<element, element>>::iterator iter;
 			iter = pair_domain.find(cur_pair);
 
 			if (iter != pair_domain.end()) {
@@ -145,50 +166,46 @@ namespace pql_table {
 			}
 		}
 
+		if (new_rows.empty()) {
+		  throw pql_exceptions::EmptyTableException();
+		}
+
 		return InterTable(new_header, new_rows);
+	}
+		
+	std::unordered_map<element, std::vector<int>, hash_fn> GenerateIndexMap(std::vector<std::vector<element>>& rows, int col_index) {
+		std::unordered_map<element, std::vector<int>, hash_fn> row_domain;
+
+		for (int index = 0; index < rows.size(); index++) {
+		  std::unordered_map<element, std::vector<int>>::iterator iter;
+		  iter = row_domain.find(rows[index][col_index]);
+
+  		if (iter == row_domain.end()) {
+				//the element does not exist in the map
+				std::vector<int> v({ index });
+				row_domain.insert({ rows[index][col_index], v });
+	  	}	else {
+				iter->second.push_back(index);
+	  	}
+		}
+
+		return row_domain;
 	}
 
 	InterTable InterTable::MergeAndFilter(InterTable& t1, Predicate& pred) {
-			std::vector<std::string> new_header(header_);
+		std::vector<std::string> new_header(header_);
 
-			for (auto& syn : t1.header_) {
-					new_header.push_back(syn);
-			}
+		for (auto& syn : t1.header_) {
+			new_header.push_back(syn);
+		}
 
 		std::vector<std::vector<element>> new_rows;
 		int first_syn_col_index = FindSynCol(pred.first_syn_);
 		int second_syn_col_index = t1.FindSynCol(pred.second_syn_);
 
 		//The maps store element to a list of row indices that contain the element
-		std::unordered_map<element, std::vector<int>, hash_fn> first_syn_domain;
-		std::unordered_map<element, std::vector<int>, hash_fn> second_syn_domain;
-
-		for (int index = 0; index < rows_.size(); index++) {
-		  std::unordered_map<element, std::vector<int>>::iterator iter;
-		  iter = first_syn_domain.find(rows_[index][first_syn_col_index]);
-
-		  if (iter == first_syn_domain.end()) {
-				//the element does not exist in the map
-				std::vector<int> v({ index });
-				first_syn_domain.insert({ rows_[index][first_syn_col_index], v });
-		  } else {
-				iter->second.push_back(index);
-		  }
-		}
-
-		for (int index = 0; index < t1.rows_.size(); index++) {
-		  std::unordered_map<element, std::vector<int>>::iterator iter;
-		  iter = second_syn_domain.find(t1.rows_[index][second_syn_col_index]);
-
-		  if (iter == second_syn_domain.end()) {
-				//the element does not exist in the map
-				std::vector<int> v({ index });
-				second_syn_domain.insert({ t1.rows_[index][second_syn_col_index], v });
-		  }
-		  else {
-				iter->second.push_back(index);
-		  }
-		}
+		std::unordered_map<element, std::vector<int>, hash_fn> first_syn_domain = GenerateIndexMap(rows_, first_syn_col_index);
+		std::unordered_map<element, std::vector<int>, hash_fn> second_syn_domain = GenerateIndexMap(t1.rows_, second_syn_col_index);
 
 		for (auto& ele_pair : pred.allowed_pairs_) {
 		  std::unordered_map<element, std::vector<int>>::iterator it1;
@@ -218,6 +235,10 @@ namespace pql_table {
 				  new_rows.push_back(row_to_be_insert);
 				}
 		  }
+		}
+
+		if (new_rows.empty()) {
+				throw pql_exceptions::EmptyTableException();
 		}
 
 		return InterTable(new_header, new_rows);

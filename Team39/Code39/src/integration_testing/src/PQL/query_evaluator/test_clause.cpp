@@ -121,7 +121,7 @@ TEST_CASE("Checks the correctness of Follows clause when no synonym is involved"
       pql::RelationshipToken token(pql::RelationshipTypes::kFollows, "4", "5", false, false);
       pql::FollowsClause follows_clause(&token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
 
-      CHECK_THROWS_AS(follows_clause.Evaluate(), pql_exceptions::EmptyDomainException);
+      CHECK_THROWS_AS(follows_clause.Evaluate(), pql_exceptions::FalseRelationException);
     }
   }
 }
@@ -359,7 +359,7 @@ TEST_CASE("Checks the correctness of Follows* clause when no synonym is involved
       pql::RelationshipToken token(pql::RelationshipTypes::kFollowsT, "7", "3", false, false);
       pql::FollowsTClause followsT_clause(&token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
 
-      CHECK_THROWS_AS(followsT_clause.Evaluate(), pql_exceptions::EmptyDomainException);
+      CHECK_THROWS_AS(followsT_clause.Evaluate(), pql_exceptions::FalseRelationException);
     }
   }
 }
@@ -662,7 +662,7 @@ TEST_CASE("Checks the correctness of Parent/Parent* clause when no synonym is in
       pql::RelationshipToken parent_token(pql::RelationshipTypes::kParent, "5", "4", false, false);
       pql::ParentClause parent_clause(&parent_token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
 
-      CHECK_THROWS_AS(parent_clause.Evaluate(), pql_exceptions::EmptyDomainException);
+      CHECK_THROWS_AS(parent_clause.Evaluate(), pql_exceptions::FalseRelationException);
 
       //e.g Parent*(1, 3)
       stmt_hashmap.clear();
@@ -671,7 +671,7 @@ TEST_CASE("Checks the correctness of Parent/Parent* clause when no synonym is in
       pql::RelationshipToken parentT_token(pql::RelationshipTypes::kParentT, "1", "3", false, false);
       pql::ParentTClause parentT_clause(&parentT_token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
 
-      CHECK_THROWS_AS(parentT_clause.Evaluate(), pql_exceptions::EmptyDomainException);
+      CHECK_THROWS_AS(parentT_clause.Evaluate(), pql_exceptions::FalseRelationException);
     }
   }
 }
@@ -944,7 +944,7 @@ TEST_CASE("Checks the correctness of UsesS clause when no synonym is involved") 
       pql::RelationshipToken token(pql::RelationshipTypes::kUsesS, "5", "y", false, false);
       pql::UsesSClause usesS_clause(&token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
 
-      CHECK_THROWS_AS(usesS_clause.Evaluate(), pql_exceptions::EmptyDomainException);
+      CHECK_THROWS_AS(usesS_clause.Evaluate(), pql_exceptions::FalseRelationException);
     }
   }
 }
@@ -1134,7 +1134,7 @@ TEST_CASE("Checks the correctness of ModifiesS clause when no synonym is involve
       pql::RelationshipToken token(pql::RelationshipTypes::kModifiesS, "2", "flag", false, false);
       pql::ModifiesSClause modifiesS_clause(&token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
 
-      CHECK_THROWS_AS(modifiesS_clause.Evaluate(), pql_exceptions::EmptyDomainException);
+      CHECK_THROWS_AS(modifiesS_clause.Evaluate(), pql_exceptions::FalseRelationException);
     }
   }
 }

@@ -12,13 +12,13 @@ namespace pql_solver {
     public:
       std::vector<pql_table::InterTable> tables_;
       std::vector<pql_table::Predicate>* predicates_;
-      pql::Synonym* return_syn_;
+      std::vector<pql::Synonym> return_syns_;
       
     public:
       Solver(std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
              std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
              std::vector<pql_table::Predicate>* preds,
-             std::vector<pql::Synonym>& syn_list, pql::Synonym* selected_syn);
+             std::vector<pql::Synonym>& syn_list, std::vector<pql::Synonym> selected_syns);
      
     public:
       int GetTableIndex(std::string& name);
@@ -28,6 +28,9 @@ namespace pql_solver {
       std::vector<std::string> ExtractResult();
 
       std::vector<std::string> Solve();
+    
+    private:
+        std::vector<pql_table::InterTable> GetReturnTables();
   };
 
 }
