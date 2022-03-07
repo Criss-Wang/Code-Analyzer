@@ -61,6 +61,10 @@ bool Pkb::IsParent(const int stmt_1, const int stmt_2) const {
   }
 }
 
+bool Pkb::IsParentExists() const {
+  return child_table_->GetTableSize() > 0;
+}
+
 bool Pkb::IsTransitiveParent(const int stmt_1, const int stmt_2) const {
   try {
     vector<int> parent_stmt_lst = child_star_table_->GetValueByKey(stmt_2);
@@ -140,6 +144,10 @@ bool Pkb::IsFollows(const int stmt_1, const int stmt_2) const {
   }
 }
 
+bool Pkb::IsFollowsExists() const {
+  return follows_table_->GetTableSize() > 0;
+}
+
 bool Pkb::IsTransitiveFollows(const int stmt_1, const int stmt_2) const {
   try {
     vector<int> stmts_lst = follows_star_table_->GetValueByKey(stmt_1);
@@ -210,6 +218,10 @@ bool Pkb::IsUsesStmt(const int stmt, const string& var) const {
   }
 }
 
+bool Pkb::IsUsesStmtExists() const {
+  return uses_stmt_to_variables_table_->GetTableSize() > 0;
+}
+
 vector<int> Pkb::GetUsesStmtsByVar(const string& var) const {
   try {
     return uses_variable_to_stmts_table_->GetValueByKey(var);
@@ -241,6 +253,10 @@ bool Pkb::IsModifiesStmt(const int stmt, const string& var) const {
   } catch (exception& e) {
     return false;
   }
+}
+
+bool Pkb::IsModifiesStmtExists() const {
+  return modifies_stmt_to_variables_table_->GetTableSize() > 0;
 }
 
 vector<int> Pkb::GetModifiesStmtsByVar(const string& var) const {
@@ -280,11 +296,15 @@ unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern) const {
 }
 
 unordered_set<int> Pkb::GetStmtsWithExactPattern(const string& pattern) const {
-  try {
-    return exact_pattern_to_stmt_table_->GetValueByKey(pattern);
-  } catch (exception& e) {
-    return unordered_set<int>{};
-  }
+  const string usable_pattern = PatternHelper::PreprocessPattern(pattern);
+  constexpr bool is_full = false;
+  unordered_set<int> empty_set{};
+  const unordered_set<string> res = PatternHelper::GetPatternSetPostfix(usable_pattern, is_full);
+  if (res.size() != 1) throw BadResultException();
+  const string s = *(res.begin());
+
+  if (!exact_pattern_to_stmt_table_->KeyExistsInTable(s)) return empty_set;
+  return exact_pattern_to_stmt_table_->GetValueByKey(s);
 }
 
 bool Pkb::AddParent(const int key, const vector<int>& value) {

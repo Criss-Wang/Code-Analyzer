@@ -181,9 +181,57 @@ TEST_CASE("Populating StmtToPatterns Table") {
     res = pkb.GetAllStmtsWithPattern("cenX");
     REQUIRE(res == unordered_set<int>{5});
   }
+
+  SECTION("Search Exact pattern") {
+    unordered_set<int> res = pkb.GetStmtsWithExactPattern("A + (Bbs + C) + 2");
+    REQUIRE(res == unordered_set<int>{2});
+
+    res = pkb.GetStmtsWithExactPattern("Bbs");
+    REQUIRE(res.empty());
+
+    res = pkb.GetStmtsWithExactPattern("289 * 444 + (f * cenX)");
+    REQUIRE(res == unordered_set<int>{5});
+  }
 }
 
+TEST_CASE("Sample Tests for Pattern") {
+  Pkb pkb = Pkb();
+  bool success = pkb.AddInfoToTable(TableIdentifier::kPattern, 2, "v + x * y + z % t");
+  SECTION("Adding patterns") {
+    REQUIRE(success);
+  }
 
+  SECTION("Nonempty results") {
+    unordered_set<int> res = pkb.GetStmtsWithExactPattern("v + x * y + z % t");
+    REQUIRE(res == unordered_set<int>{2});
+
+    res = pkb.GetAllStmtsWithPattern("v");
+    REQUIRE(res == unordered_set<int>{2});
+
+    res = pkb.GetAllStmtsWithPattern("x*y");
+    REQUIRE(res == unordered_set<int>{2});
+
+    res = pkb.GetAllStmtsWithPattern("v+x*y");
+    REQUIRE(res == unordered_set<int>{2});
+
+    res = pkb.GetAllStmtsWithPattern("v + x * y + z % t");
+    REQUIRE(res == unordered_set<int>{2});
+  }
+
+  SECTION("Empty result") {
+    unordered_set<int> res = pkb.GetStmtsWithExactPattern("v");
+    REQUIRE(res.empty());
+
+    res = pkb.GetAllStmtsWithPattern("v+x");
+    REQUIRE(res.empty());
+
+    res = pkb.GetAllStmtsWithPattern("y+z%t");
+    REQUIRE(res.empty());
+
+    res = pkb.GetAllStmtsWithPattern("x * y + z % t");
+    REQUIRE(res.empty());
+  }
+}
 
 TEST_CASE("Add Integer Entity") {
   Pkb pkb = Pkb();
