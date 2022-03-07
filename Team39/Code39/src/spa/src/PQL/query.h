@@ -23,9 +23,10 @@ namespace pql {
     std::vector <pql::Synonym> declarations;
     std::map <std::string, pql::Synonym> synonyms;
     std::vector <pql::Synonym> used_synonyms;
-    std::vector <pql::Synonym> result_synonym;
+    std::vector <pql::Synonym> result_synonyms;
     std::vector <RelationshipToken> such_that_clauses;
     std::vector <pql::PatternToken> patterns;
+    bool is_boolean;
   public:
     bool IsValid(RelationshipTypes relationship, const pql::Ref& left, const pql::Ref& right);
 
@@ -52,5 +53,7 @@ namespace pql {
     void AddPattern(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left);
 
     std::vector<pql::PatternToken> GetPattern();
+
+    void SetBoolean(bool b);
   };
 }
