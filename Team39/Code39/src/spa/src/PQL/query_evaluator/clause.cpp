@@ -61,7 +61,7 @@ namespace pql {
 
   void EvaluateRelExistStmt(pql::RelationshipToken& token, Pkb& pkb,
     bool(Pkb::* IsRelHolds)(const int, const int) const, std::vector<int>(Pkb::* GetRelDomain)(const int) const,
-    std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const) {
+    std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const, bool(Pkb::*DoesRelExist)() const) {
     //The parameter can be "_", e.g. Follows(_,2)
     bool is_left_entity = token.GetLeft() != "_";
     bool is_right_entity = token.GetRight() != "_";
@@ -80,9 +80,9 @@ namespace pql {
         throw pql_exceptions::EmptyDomainException();
       }
     } else {
-      std::vector<std::pair<int, int>> domain = (pkb.*GetRelPairs)();
+      bool rel_exist = (pkb.*DoesRelExist)();
 
-      if (domain.size() == 0) {
+      if (!rel_exist) {
         throw pql_exceptions::EmptyDomainException();
       }
     }
@@ -139,12 +139,13 @@ namespace pql {
   void GenericEvaluate(pql::RelationshipToken& token, Pkb& pkb,
       std::unordered_map<std::string, std::vector<int>>& stmt_hashmap, std::vector<pql_table::Predicate>* predicates,
       bool(Pkb::* IsRelHolds)(const int, const int) const, std::vector<int>(Pkb::* GetRelDomain)(const int) const,
-      std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const) {
+      std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const,
+      bool(Pkb::* DoesRelExist)() const) {
     bool is_left_syn = token.IsSynonymLeft();
     bool is_right_syn = token.IsSynonymRight();
 
     if (!is_left_syn && !is_right_syn) {
-      EvaluateRelExistStmt(token, pkb, IsRelHolds, GetRelDomain, GetInverseRelDomain, GetRelPairs);
+      EvaluateRelExistStmt(token, pkb, IsRelHolds, GetRelDomain, GetInverseRelDomain, DoesRelExist);
     }
     else if (!is_left_syn && is_right_syn) {
       EvaluateRelDomainStmt(token, pkb, stmt_hashmap, GetRelDomain, GetRelPairs);
@@ -159,22 +160,22 @@ namespace pql {
 
   void FollowsClause::Evaluate() {
     GenericEvaluate(*token_, pkb_, *stmt_hashmap_, predicates_,
-        &Pkb::IsFollows, &Pkb::GetStmtRightAfter, &Pkb::GetStmtRightBefore, &Pkb::GetAllFollowsPairs);
+        &Pkb::IsFollows, &Pkb::GetStmtRightAfter, &Pkb::GetStmtRightBefore, &Pkb::GetAllFollowsPairs, &Pkb::IsFollowsExists);
   }
 
   void FollowsTClause::Evaluate() {
     GenericEvaluate(*token_, pkb_, *stmt_hashmap_, predicates_,
-        &Pkb::IsTransitiveFollows, &Pkb::GetStmtsAfter, &Pkb::GetStmtsBefore, &Pkb::GetAllTransitiveFollowsPairs);
+        &Pkb::IsTransitiveFollows, &Pkb::GetStmtsAfter, &Pkb::GetStmtsBefore, &Pkb::GetAllTransitiveFollowsPairs, &Pkb::IsFollowsExists);
   }
 
   void ParentClause::Evaluate() {
     GenericEvaluate(*token_, pkb_, *stmt_hashmap_, predicates_,
-        &Pkb::IsParent, &Pkb::GetChild, &Pkb::GetParent, &Pkb::GetAllParentPairs);
+        &Pkb::IsParent, &Pkb::GetChild, &Pkb::GetParent, &Pkb::GetAllParentPairs, &Pkb::IsParentExists);
   }
 
   void ParentTClause::Evaluate() {
     GenericEvaluate(*token_, pkb_, *stmt_hashmap_, predicates_,
-        &Pkb::IsTransitiveParent, &Pkb::GetAllChildren, &Pkb::GetAllParents, &Pkb::GetAllTransitiveParentPairs);
+        &Pkb::IsTransitiveParent, &Pkb::GetAllChildren, &Pkb::GetAllParents, &Pkb::GetAllTransitiveParentPairs, &Pkb::IsParentExists);
   }
    
   void EvaluateRelExistVar(pql::RelationshipToken& token, Pkb& pkb, bool(Pkb::* IsRelHolds)(const int, const string&) const,
@@ -347,7 +348,7 @@ namespace pql {
     (*predicates).push_back(pred);
   }
 
-  void GenericEvaluate(pql::RelationshipToken& token, Pkb& pkb,
+  void GenericEvaluateProc(pql::RelationshipToken& token, Pkb& pkb,
       std::unordered_map<std::string, std::vector<std::string>>& var_hashmap, std::vector<pql_table::Predicate>* predicates,
       bool(Pkb::* IsRelHolds)(const std::string&, const std::string&) const, 
       std::vector<std::string>(Pkb::* GetRelDomain)(const std::string&) const,
@@ -368,7 +369,8 @@ namespace pql {
   }
 
   void CallsClause::Evaluate() {
-
+    GenericEvaluateProc(*token_, pkb_, *var_hashmap_, predicates_,
+        &Pkb::IsCalls, &Pkb::GetCallees, &Pkb::GetCallers, &Pkb::GetAllCallsPairs);
   }
 
   void CallsTClause::Evaluate() {
