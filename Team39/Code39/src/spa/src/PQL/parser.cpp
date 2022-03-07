@@ -45,7 +45,22 @@ namespace pql {
         }
       } else if (keyword == "Select") {
         ps.EatWhiteSpaces();
-        Parser::query.AddResultSynonym(ps.ParseName());
+        bool is_tuple = false;
+        if (ps.Peek() == '<') {
+          is_tuple = true;
+          ps.Consume();
+        }
+        if (is_tuple) {
+          while (ps.Peek() != '>') {
+            Parser::query.AddResultSynonym(ps.ParseName());
+            if (ps.Peek() != '>') {
+              ps.Expect(",");
+            }
+          }
+          ps.Consume();
+        } else {
+          Parser::query.AddResultSynonym(ps.ParseName());
+        }
         ps.EatWhiteSpaces();
         select_clause_parsed = true;
         declarations_parsed = true;
