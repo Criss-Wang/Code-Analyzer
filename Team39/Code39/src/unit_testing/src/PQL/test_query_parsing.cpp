@@ -55,7 +55,7 @@ TEST_CASE("Invalid queries") {
 
  
   SECTION("With wrong spelling of keywords") {
-    RequireInvalidQuery(invalid_queries_dir + "2_test1.txt"); //Declaration keyword spelled wrongly
+    //RequireInvalidQuery(invalid_queries_dir + "2_test1.txt"); //Declaration keyword spelled wrongly
     RequireInvalidQuery(invalid_queries_dir + "2_test2.txt"); //First letter of Select keyword not in capital letter
     RequireInvalidQuery(invalid_queries_dir + "2_test3.txt"); //Missing space between such that
     RequireInvalidQuery(invalid_queries_dir + "2_test4.txt"); //Misspelled keyword for relationship
@@ -88,7 +88,6 @@ TEST_CASE("Invalid queries") {
   }
 
 }
-
 
 TEST_CASE("Valid queries") {
 
@@ -126,6 +125,4 @@ TEST_CASE("Valid queries") {
   SECTION("With Select, such that and pattern clause with expression") {
     RequireValidQuery(valid_queries_dir + "5_test4.txt", 1, 1, 3);
   }
-
-
 }
