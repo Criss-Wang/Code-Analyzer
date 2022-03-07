@@ -51,6 +51,10 @@ namespace pql {
         return std::make_unique<UsesSClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
       case RelationshipTypes::kModifiesS:
         return std::make_unique<ModifiesSClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+      case RelationshipTypes::kCalls:
+        return std::make_unique<CallsClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
+      case RelationshipTypes::kCallsT:
+        return std::make_unique<CallsTClause>(&token, pkb, stmt_hashmap, var_hashmap, predicates);
       default: 
         throw pql_exceptions::EmptyDomainException();
     }

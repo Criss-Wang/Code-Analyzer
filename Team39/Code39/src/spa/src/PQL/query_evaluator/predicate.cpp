@@ -42,6 +42,24 @@ namespace pql_table {
     allowed_pairs_ = lst;
   }
 
+  Predicate::Predicate(std::string& first, std::string& second, std::vector<std::pair<std::string, std::string>> pairs) {
+    first_syn_ = first;
+    second_syn_ = second;
+    std::vector<std::pair<element, element>> lst;
+
+    for (auto& pair : pairs) {
+        element front;
+        element back;
+        front.val = 0;
+        front.name = pair.first;
+        back.val = 0;
+        back.name = pair.second;
+        lst.push_back(std::make_pair(front, back));
+    }
+
+    allowed_pairs_ = lst;
+  }
+
   bool Predicate::equal(Predicate& p) {
     if (first_syn_ != p.first_syn_ || second_syn_ != p.second_syn_) {
       return false;
