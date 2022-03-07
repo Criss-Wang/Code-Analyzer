@@ -28,6 +28,20 @@ namespace pql {
     return true;
   }
 
+  bool IsOperator(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/' || c == '%';
+  }
+
+
+  bool IsOpenBracket(char c) {
+    return c == '(';
+  }
+
+
+  bool IsCloseBracket(char c) {
+    return c == ')';
+  }
+
   std::unordered_set<EntityIdentifier> stmts({
     EntityIdentifier::kStmt,
     EntityIdentifier::kAssign,
