@@ -113,19 +113,72 @@ namespace pql {
   }
 
   std::string ParserState::ParseExpression() {
-    std::stringstream ssm;
     std::string expression;
     ParserState::Expect("\"");
-    if (IsDigit(ParserState::Peek())) {
-      ssm << ParserState::ParseInteger();
-    } else if (IsLetter(ParserState::Peek())) {
-      ssm << ParserState::ParseName();
+    ParserState::EatWhiteSpaces();
+    expression = IsValidExpression();
+    return expression;
+  }
+
+  std::string ParserState::IsValidExpression() {
+    std::stringstream s;
+    std::string expression;
+    int bracket_count = 0;
+    bool incomplete_operator = false;
+    char next_char = ParserState::Peek();
+    char curr_char;
+
+    bool expected_next = IsDigit(next_char) || IsLetter(next_char) || IsOpenBracket(next_char);
+
+    for (next_char = ParserState::Peek(); next_char != '\"' && !ParserState::IsEOF(); next_char = ParserState::Peek()) {
+      // Check that char is expected 
+
+      if (IsDigit(next_char) && expected_next) {
+        s << ParserState::Next();
+        incomplete_operator = false;
+      } else if (IsLetter(next_char) && expected_next) {
+        s << ParserState::Next();
+        incomplete_operator = false;
+      } else if (IsOperator(next_char) && expected_next) {
+        s << ParserState::Next();
+        incomplete_operator = true;
+      } else if (IsOpenBracket(next_char) && expected_next) {
+        s << ParserState::Next();
+        bracket_count++;
+      } else if (IsCloseBracket(next_char) && expected_next && bracket_count > 0) {
+        s << ParserState::Next();
+        bracket_count--;
+      } else {
+        throw ParseException();
+      }
+
+      // Set expected_next bool
+      ParserState::EatWhiteSpaces();
+      curr_char = next_char;
+      next_char = ParserState::Peek();
+      if (IsDigit(curr_char)) {
+        expected_next = IsDigit(next_char) || IsOperator(next_char) || IsCloseBracket(next_char);
+      } else if (IsLetter(curr_char)) {
+        expected_next = IsDigit(next_char) || IsLetter(next_char) || IsOperator(next_char) || IsCloseBracket(next_char);
+      } else if (IsOperator(curr_char)) {
+        expected_next = IsDigit(next_char) || IsLetter(next_char) || IsOpenBracket(next_char);
+      } else if (IsOpenBracket(curr_char)) {
+        expected_next = IsDigit(next_char) || IsLetter(next_char);
+      } else if (IsCloseBracket(curr_char)) {
+        expected_next = IsOperator(next_char) || IsCloseBracket(next_char);
+      } else {
+        throw ParseException();
+      }
+    }
+
+    if (!incomplete_operator && bracket_count == 0) {
+      s >> expression;
+      return expression;
     } else {
       throw ParseException();
     }
-    ParserState::Expect("\"");
-    ssm >> expression;
-    return expression;
   }
+
+
 
 }

@@ -1,0 +1,2 @@
+assign a; stmt s; variable v;
+Select s such that Modifies(5, v) pattern a(v, "x / 1")

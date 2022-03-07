@@ -44,6 +44,8 @@ namespace pql {
       pql::Ref ParseRef(Query& q);
 
       std::string ParseExpression();
+
+      std::string IsValidExpression();
   };
 
   class Parser {
