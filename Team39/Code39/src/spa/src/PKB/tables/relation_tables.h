@@ -38,12 +38,11 @@ class ParentStarTable : public Table<int, vector<int>> {};
 // Nested line number will be the key and the parent line number such that parent*([value], key) holds will be the value
 class ChildStarTable : public Table<int, vector<int>> {};
 
-// Procedure name will be the key mapping to other procedure name
-class CallsTable : public Table<string, string> {};
+// Procedure name will be the key mapping to list of procedure names
+class CallsTable : public Table<string, vector<string>> {};
 
-class CalledByTable : public Table<string, string> {};
+class CalledByTable : public Table<string, vector<string>> {};
 
-// Procedure name mapping to list of procedure names
 class CallsStarTable : public Table<string, vector<string>> {};
 
 class CalledByStarTable : public Table<string, vector<string>> {};

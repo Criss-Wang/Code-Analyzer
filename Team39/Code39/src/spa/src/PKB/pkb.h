@@ -72,7 +72,7 @@ class Pkb {
     bool AddPattern(int line_num, const string& input);
     bool AddParent(int key, const vector<int>& value);
     bool AddFollows(int key, int value);
-    bool AddCalls(const string& key, const string& value);
+    bool AddCalls(const string& key, const vector<string>& value);
     bool AddNext(int key, int value);
     bool AddModifies(int key, const vector<string>& value);
     bool AddUses(int key, const vector<string>& value);
@@ -86,7 +86,7 @@ class Pkb {
     bool AddInfoToTable(TableIdentifier table_identifier, int key, const vector<string>& value);
     bool AddInfoToTable(TableIdentifier table_identifier, int key, int value);
     bool AddInfoToTable(TableIdentifier table_identifier, int key, const string& value);
-    bool AddInfoToTable(TableIdentifier table_identifier, const string& key, const string& value);
+    bool AddInfoToTable(TableIdentifier table_identifier, const string& key, const vector<string>& value);
     bool AddInfoToTable(TableIdentifier table_identifier, const string& key, const pair<int, int>& value);
 
     // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
@@ -117,6 +117,11 @@ class Pkb {
     [[nodiscard]] vector<int> GetChild(int stmt) const;
     [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs() const;
+
+    [[nodiscard]] bool IsCalls(const string& proc_1, const string& proc_2) const;
+    [[nodiscard]] vector<string> GetCallers(const string& proc) const;
+    [[nodiscard]] vector<string> GetCallees(const string& proc) const;
+    [[nodiscard]] vector<pair<string, string>> GetAllCallsPairs() const;
 
     [[nodiscard]] bool IsFollows(int stmt_1, int stmt_2) const;
     [[nodiscard]] bool IsTransitiveFollows(int stmt_1, int stmt_2) const;
