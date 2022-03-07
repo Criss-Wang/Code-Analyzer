@@ -29,9 +29,7 @@ namespace pql_table {
 
       std::vector<element> GetColByName(std::string& name);
 
-      void DeleteRow(int row_index);
-
-      void DeleteCol(int col_index);
+      InterTable GetColsByIndices(std::vector<int>& valid_col_nums);
 
       InterTable Deduplicate();
 
@@ -42,5 +40,10 @@ namespace pql_table {
       InterTable MergeAndFilter(InterTable& t1, Predicate& pred);
 
       bool equal(InterTable& t);
+
+    private:
+      void DeleteRow(int row_index);
+
+      void DeleteCol(int col_index);
   }; 
 }
