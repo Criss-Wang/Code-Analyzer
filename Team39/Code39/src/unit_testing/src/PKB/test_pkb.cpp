@@ -151,6 +151,51 @@ TEST_CASE("Populating Parent and Child Table") {
   }
 }
 
+TEST_CASE("Populating Calls Table") {
+  // Called by reverse relation is populated behind the scenes
+  Pkb pkb = Pkb();
+  bool success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p1", vector<string>{"p4", "p5"});
+  success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p2", vector<string>{"p3", "p4"}) && success;
+
+  SECTION("Add item into table: string -> vector<string>") {
+    REQUIRE(success);
+  }
+
+  SECTION("Add invalid item into table") {
+    success = pkb.AddInfoToTable(TableIdentifier::kCalls, 1, 2);
+    REQUIRE(!success);
+
+    vector<string> empty_vector = {};
+    success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p100", empty_vector);
+    REQUIRE(!success);
+  }
+
+  SECTION("Test API for PQL side for Calls Table") {
+    REQUIRE(pkb.IsCalls("p1", "p4"));
+    REQUIRE(pkb.IsCalls("p1", "p5"));
+    REQUIRE(pkb.IsCalls("p2", "p3"));
+    REQUIRE(pkb.IsCalls("p2", "p4"));
+    REQUIRE(!pkb.IsCalls("p1", "p2"));
+    REQUIRE(!pkb.IsCalls("p1", "p100"));
+
+    REQUIRE(pkb.GetCallers("p5") == vector<string>{"p1"});
+    REQUIRE(pkb.GetCallers("p3") == vector<string>{"p2"});
+    REQUIRE(pkb.GetCallers("p4") == vector<string>{"p1", "p2"});
+    REQUIRE(pkb.GetCallers("p5") != vector<string>{"p1", "p2"});
+
+    REQUIRE(pkb.GetCallees("p1") == vector<string>{"p4", "p5"});
+    REQUIRE(pkb.GetCallees("p2") == vector<string>{"p3", "p4"});
+    REQUIRE(pkb.GetCallees("p100") == vector<string>{});
+    REQUIRE(pkb.GetCallees("p1") != vector<string>{"p4"});
+
+    vector<pair<string, string>> expected_calls_pairs = {make_pair("p1", "p4"), make_pair("p1", "p5"), make_pair("p2", "p3"), make_pair("p2", "p4")};
+    vector<pair<string, string>> calls_pairs = pkb.GetAllCallsPairs();
+    std::sort(calls_pairs.begin(), calls_pairs.end());
+    std::sort(expected_calls_pairs.begin(), expected_calls_pairs.end());
+    REQUIRE(calls_pairs == expected_calls_pairs);
+  }
+}
+
 TEST_CASE("Populating StmtToPatterns Table") {
   // PatternToStmtsTable is populated behind the scenes
   Pkb pkb = Pkb();
