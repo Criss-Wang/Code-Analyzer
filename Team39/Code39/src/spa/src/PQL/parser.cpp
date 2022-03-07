@@ -137,9 +137,11 @@ namespace pql {
         expression = "_";
       } else if (!exact) {
         expression = ps.ParseExpression();
+        ps.Expect("\"");
         ps.Expect("_");
       } else {
         expression = ps.ParseExpression();
+        ps.Expect("\"");
       }
       ps.EatWhiteSpaces();
       ps.Expect(")");

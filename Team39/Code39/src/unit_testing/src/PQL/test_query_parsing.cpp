@@ -81,6 +81,12 @@ TEST_CASE("Invalid queries") {
     RequireInvalidQuery(invalid_queries_dir + "5_test6.txt"); //Uses(s, "10")
   }
 
+  SECTION("Pattern clause such that the second argument is not a valid expression") {
+    RequireInvalidQuery(invalid_queries_dir + "6_test1.txt"); //pattern a(_, "x +")
+    RequireInvalidQuery(invalid_queries_dir + "6_test2.txt"); //pattern a(_, "x (3 + 3)")
+    RequireInvalidQuery(invalid_queries_dir + "6_test3.txt"); //pattern a(_, "(3 + y / 3")
+  }
+
 }
 
 TEST_CASE("Valid queries") {
@@ -108,5 +114,15 @@ TEST_CASE("Valid queries") {
 
   SECTION("With Select, such that and pattern clause") {
     RequireValidQuery(valid_queries_dir + "4_test1.txt", 1, 1, 3);
+  }
+
+  SECTION("With Select and pattern clause with expression") {
+    RequireValidQuery(valid_queries_dir + "5_test1.txt", 0, 1, 2); //pattern a(_, _"x + 1"_)
+    RequireValidQuery(valid_queries_dir + "5_test2.txt", 0, 1, 2); // pattern a(_, "(3 % 4) / x")
+    RequireValidQuery(valid_queries_dir + "5_test3.txt", 0, 1, 3); // pattern a(v, "x+1*2")
+  }
+
+  SECTION("With Select, such that and pattern clause with expression") {
+    RequireValidQuery(valid_queries_dir + "5_test4.txt", 1, 1, 3);
   }
 }

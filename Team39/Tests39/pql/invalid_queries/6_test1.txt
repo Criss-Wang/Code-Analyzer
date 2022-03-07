@@ -1,0 +1,2 @@
+stmt s; assign a;
+Select s pattern a(_, "x +")
