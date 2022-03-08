@@ -189,7 +189,8 @@ void populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_in_cond_expr);
 }
 
-void populateCallStmt(vector<Token> tokens, Pkb& pkb) {
+// Returns the procedure called
+string populateCallStmt(vector<Token> tokens, Pkb& pkb) {
   int stmt_num = tokens.at(kFirstIndex).stmt_num_;
   string called_proc = tokens.at(kSecondIndex).text_;
 
@@ -197,8 +198,10 @@ void populateCallStmt(vector<Token> tokens, Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
   pkb.AddEntityToSet(EntityIdentifier::kCall, stmt_num);
 
-  // Add stmt num and call_proc to CallsTable
-  pkb.AddInfoToTable(TableIdentifier::kCalls, stmt_num, called_proc);
+  // Add stmt num and call_proc to CallerTable
+  pkb.AddInfoToTable(TableIdentifier::kCaller, stmt_num, called_proc);
+  
+  return called_proc;
 }
 
 stack<int> populateFollowsRelationship(stack<int> previous, Pkb& pkb, int stmt_num) {
@@ -232,12 +235,17 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   children.push({});
   stack<int> previous;
   
-  set<int> stmt_lst; // right now is just populating one statement set
+  //set<int> stmt_lst;
 
   // Stores procedure range
   string prev_proc = "";
   int start_stmt_num = 1;
   int end_stmt_num = 0;
+
+  // Stores information for UsesP, ModifiesP and calls
+  //vector<string> uses_p = {};
+  //vector<string> modifies_p = {};
+  vector<string> called_procedures = {};
   
   for (auto token = begin(input_tokens); token != end(input_tokens); ++token) {
     if (token->type_ == RIGHT_CURLY) {
@@ -275,7 +283,6 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
 
-      stmt_lst.insert(token->stmt_num_);
       end_stmt_num += 1;
 
     } else if (token->text_ == "procedure") {
@@ -289,10 +296,17 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       populateProcedure(tokens, pkb);
 
       if (prev_proc != "") {
+        // Add procedure name and range to ProcRangeTable
         pkb.AddInfoToTable(TableIdentifier::kProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
+
+        // Add procedure name and callees to CallsTable
+        pkb.AddInfoToTable(TableIdentifier::kCalls, prev_proc, called_procedures);
       }
+
+      // reset values for next procedure
       start_stmt_num = end_stmt_num + 1;
       prev_proc = tokens.at(kSecondIndex).text_;
+      called_procedures = {};
 
     } else if (token->text_ == "read") {
       vector<Token> tokens;
@@ -305,8 +319,6 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       populateReadStmt(tokens, pkb);
       children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
-
-      stmt_lst.insert(token->stmt_num_);
 
       end_stmt_num += 1;
 
@@ -321,8 +333,6 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       populatePrintStmt(tokens, pkb);
       children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
-
-      stmt_lst.insert(token->stmt_num_);
 
       end_stmt_num += 1;
 
@@ -342,8 +352,6 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       children.push({});
       previous.push(token->stmt_num_ + 1);
 
-      stmt_lst.insert(token->stmt_num_);
-
       end_stmt_num += 1;
 
     } else if (token->text_ == "while") {
@@ -362,7 +370,6 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       children.push({});
       previous.push(token->stmt_num_ + 1);
 
-      stmt_lst.insert(token->stmt_num_);
       end_stmt_num += 1;
 
     } else if (token->text_ == "call") {
@@ -373,21 +380,24 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       }
       tokens.push_back(*token);
 
-      populateCallStmt(tokens, pkb);
+      string called_proc = populateCallStmt(tokens, pkb);
       children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
 
-      stmt_lst.insert(token->stmt_num_);
+      if (find(begin(called_procedures), end(called_procedures), called_proc) == end(called_procedures)) {
+        called_procedures.push_back(called_proc);
+      }
       end_stmt_num += 1;
-
+      
     }
   }
 
   // Add stmt_lst to stmt_list_set_
-  pkb.AddEntityToSet(EntityIdentifier::kStmtLst, stmt_lst);
+  // pkb.AddEntityToSet(EntityIdentifier::kStmtLst, stmt_lst);
 
-  // Add procedure range for last procedure
+  // Populate ProcRangeTable and CallsTable for the last procedure
   pkb.AddInfoToTable(TableIdentifier::kProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
+  pkb.AddInfoToTable(TableIdentifier::kCalls, prev_proc, called_procedures);
 
   if (PopulateNestedRelationships(pkb) == 0) {
     throw invalid_argument("PKB Population failed");
