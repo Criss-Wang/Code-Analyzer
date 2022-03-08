@@ -64,8 +64,6 @@ namespace pql {
           ps.EatWhiteSpaces();
         } else if (current_clause == IS_PATTERN) {
           ps.EatWhiteSpaces();
-          ps.Expect("pattern");
-          ps.EatWhiteSpaces();
           Parser::ParsePattern();
         } else {
           throw ParseException();
