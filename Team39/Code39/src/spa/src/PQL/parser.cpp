@@ -44,9 +44,7 @@ namespace pql {
           Parser::query.AddSynonym(*d, s);
         }
       } else if (keyword == "Select") {
-        ps.EatWhiteSpaces();
-        Parser::query.AddResultSynonym(ps.ParseName());
-        ps.EatWhiteSpaces();
+        Parser::ParseSelect();
         select_clause_parsed = true;
         declarations_parsed = true;
       } else if (keyword == "such" && select_clause_parsed) {
@@ -83,6 +81,39 @@ namespace pql {
 
   pql::Query Parser::GetQuery() {
     return Parser::query;
+  }
+
+  void Parser::ParseSelect() {
+    ps.EatWhiteSpaces();
+    if (ps.Peek() == '<') {
+      Parser::ParseTuple();
+      Parser::query.SetBoolean(false);
+    } else {
+      std::string name = ps.ParseName();
+      if (name == "BOOLEAN") {
+        if (Parser::query.SynonymDeclared(name)) {
+          Parser::query.AddResultSynonym(name);
+          Parser::query.SetBoolean(false);
+        } else {
+          Parser::query.SetBoolean(true);
+        }
+      } else {
+        Parser::query.AddResultSynonym(name);
+        Parser::query.SetBoolean(false);
+      }
+    }
+    ps.EatWhiteSpaces();
+  }
+
+  void Parser::ParseTuple() {
+    ps.Consume();
+    while (ps.Peek() != '>') {
+      Parser::query.AddResultSynonym(ps.ParseName());
+      if (ps.Peek() != '>') {
+        ps.Expect(",");
+      }
+    }
+    ps.Consume();
   }
 
   void Parser::ParseRelationship() {

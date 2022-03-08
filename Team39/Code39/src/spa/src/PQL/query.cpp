@@ -152,7 +152,7 @@ namespace pql {
 
   void Query::AddResultSynonym(const std::string &name) {
     if (Query::SynonymDeclared(name)) {
-      Query::result_synonym.push_back(Query::synonyms.at(name));
+      Query::result_synonyms.push_back(Query::synonyms.at(name));
       Query::AddUsedSynonym(name);
     } else {
       throw ParseException();
@@ -160,7 +160,7 @@ namespace pql {
   }
 
   std::vector<pql::Synonym> Query::GetResultSynonym() {
-    return Query::result_synonym;
+    return Query::result_synonyms;
   }
 
   bool Query::IsProcedure(const std::string &name) {
@@ -211,5 +211,9 @@ namespace pql {
 
   std::vector<pql::PatternToken> Query::GetPattern() {
     return Query::patterns;
+  }
+
+  void Query::SetBoolean(bool b) {
+    Query::is_boolean = b;
   }
 }
