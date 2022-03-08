@@ -153,8 +153,8 @@ namespace pql {
         std::unique_ptr<pql::Clause> clause = GenerateClause(such_that_token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
         clause->Evaluate();
       }
-
-      pql_solver::Solver solver(&stmt_hashmap, &var_hashmap, &predicates, synonyms, selected_syns);
+      
+      pql_solver::Solver solver(&stmt_hashmap, &var_hashmap, &predicates, synonyms, selected_syns, false);
       std::vector<std::string> res = solver.Solve();
 
       return res;
