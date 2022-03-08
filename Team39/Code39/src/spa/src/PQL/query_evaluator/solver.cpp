@@ -92,8 +92,9 @@ namespace pql_solver {
 
   std::vector<std::string> Solver::ExtractResult() {
     //At this stage all the tabls will not be empty
+    //Or there will be no tables which means there are no constrains
     if (is_return_boolean_) {
-        return std::vector<std::string>({ "True" });
+        return std::vector<std::string>({ "TRUE" });
     }
 
     std::vector<pql_table::InterTable> tables = GetReturnTables();
@@ -115,6 +116,10 @@ namespace pql_solver {
           cur_string = final_table.rows_[index][col_num_in_table].name;
         } else {
           cur_string = std::to_string(final_table.rows_[index][col_num_in_table].val);
+        }
+
+        if (result_string[index] != "") {
+          result_string[index] += " ";
         }
 
         result_string[index] += cur_string;
