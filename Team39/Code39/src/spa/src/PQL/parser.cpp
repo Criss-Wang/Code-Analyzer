@@ -97,6 +97,9 @@ namespace pql {
         } else {
           Parser::query.SetBoolean(true);
         }
+      } else {
+        Parser::query.AddResultSynonym(name);
+        Parser::query.SetBoolean(false);
       }
     }
     ps.EatWhiteSpaces();
