@@ -11,8 +11,7 @@
 
 namespace pql_solver {
 
-  Solver::Solver(std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
-    std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+  Solver::Solver(std::unordered_map<std::string, std::vector<int>>* domain,
     std::vector<pql_table::Predicate>* preds,
     std::vector<pql::Synonym>& syn_list, std::vector<pql::Synonym> selected_syns,
     bool is_return_boolean) {
@@ -22,14 +21,8 @@ namespace pql_solver {
     is_return_boolean_ = is_return_boolean;
 
     for (pql::Synonym& syn : syn_list) {
-      if (syn.GetDeclaration() == EntityIdentifier::kVariable
-        || syn.GetDeclaration() == EntityIdentifier::kProc) {
-        pql_table::InterTable table(syn, (*var_hashmap)[syn.GetName()]);
-        tables_.push_back(table);
-      } else {
-        pql_table::InterTable table(syn, (*stmt_hashmap)[syn.GetName()]);
-        tables_.push_back(table);
-      }
+      pql_table::InterTable table(syn, (*domain)[syn.GetName()]);
+      tables_.push_back(table);
     }
   }
 
@@ -90,63 +83,25 @@ namespace pql_solver {
     return return_table;
   }
 
-  std::vector<std::string> Solver::ExtractResult() {
+  pql_table::InterTable Solver::ExtractResult() {
     //At this stage all the tabls will not be empty
-    //Or there will be no tables which means there are no constrains
+    //Or there will be no tables which means there are no constraints
     if (is_return_boolean_) {
-        return std::vector<std::string>({ "TRUE" });
+      throw pql_exceptions::TrueResultException();
     }
 
     std::vector<pql_table::InterTable> tables = GetReturnTables();
     pql_table::InterTable final_table = MergeComponents(tables);
-
     
-    std::vector<std::string> result_string(final_table.GetRowNum());
-    
-    //We add the synonym according to their position in return_syns_
-    for (auto& syn : return_syns_) {
-      std::string syn_name = syn.GetName();
-      int col_num_in_table = final_table.FindSynCol(syn_name);
-
-      for (int index = 0; index < final_table.GetRowNum(); index++) {
-        std::string cur_string = "";
-
-        if (syn.GetDeclaration() == EntityIdentifier::kVariable
-            || syn.GetDeclaration() == EntityIdentifier::kProc) {
-          cur_string = final_table.rows_[index][col_num_in_table].name;
-        } else {
-          cur_string = std::to_string(final_table.rows_[index][col_num_in_table].val);
-        }
-
-        if (result_string[index] != "") {
-          result_string[index] += " ";
-        }
-
-        result_string[index] += cur_string;
-      }
-    }
-
-    return result_string;
+    return final_table;
   }
 
-  std::vector<std::string> Solver::Solve() {
-    try {
-      for (pql_table::Predicate& pred : *predicates_) {
-        Consume(pred);
-      }
-
-      std::vector<std::string> res = ExtractResult();
-
-      return res;
-
-    } catch (pql_exceptions::EmptyTableException e) {
-      std::vector<std::string> res;
-
-      if (is_return_boolean_) {
-          res.push_back("FALSE");
-      }
-
-      return res;
+  pql_table::InterTable Solver::Solve() {
+ 
+    for (pql_table::Predicate& pred : *predicates_) {
+    Consume(pred);
     }
+
+    return ExtractResult();
   }
 }

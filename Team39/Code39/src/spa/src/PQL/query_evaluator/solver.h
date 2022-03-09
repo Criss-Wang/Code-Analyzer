@@ -16,8 +16,7 @@ namespace pql_solver {
       bool is_return_boolean_;
       
     public:
-      Solver(std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
-             std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+      Solver(std::unordered_map<std::string, std::vector<int>>* domain,
              std::vector<pql_table::Predicate>* preds,
              std::vector<pql::Synonym>& syn_list, std::vector<pql::Synonym> selected_syns,
              bool is_return_boolean);
@@ -27,9 +26,9 @@ namespace pql_solver {
       
       void Consume(pql_table::Predicate& pred);
 
-      std::vector<std::string> ExtractResult();
+      pql_table::InterTable ExtractResult();
 
-      std::vector<std::string> Solve();
+      pql_table::InterTable Solve();
     
     private:
         std::vector<pql_table::InterTable> GetReturnTables();

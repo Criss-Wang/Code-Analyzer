@@ -44,14 +44,12 @@ namespace pql {
     public:
       pql::RelationshipToken* token_;
       Pkb pkb_;
-      std::unordered_map<std::string, std::vector<int>>* stmt_hashmap_;
-      std::unordered_map<std::string, std::vector<std::string>>* var_hashmap_;
+      std::unordered_map<std::string, std::vector<int>>* domain_;
       std::vector<pql_table::Predicate>* predicates_;
 
     public:
       Clause(pql::RelationshipToken* token, Pkb& pkb,
-             std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
-             std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+             std::unordered_map<std::string, std::vector<int>>* domain,
              std::vector<pql_table::Predicate>* predicates);
 
       virtual ~Clause() = default;
@@ -63,10 +61,9 @@ namespace pql {
   class FollowsClause : public Clause {
     public:
       FollowsClause(pql::RelationshipToken* token, Pkb& pkb,
-                    std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
-                    std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+                    std::unordered_map<std::string, std::vector<int>>* domain,
                     std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
+          Clause(token, pkb, domain, predicates) {}
 
     public:
       void Evaluate() override;
@@ -75,10 +72,9 @@ namespace pql {
   class FollowsTClause : public Clause {
     public:
       FollowsTClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::unordered_map<std::string, std::vector<int>>* domain,
           std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
+          Clause(token, pkb, domain, predicates) {}
 
     public:
       void Evaluate() override;
@@ -87,10 +83,9 @@ namespace pql {
   class ParentClause : public Clause {
     public:
       ParentClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::unordered_map<std::string, std::vector<int>>* domain,
           std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
+          Clause(token, pkb, domain, predicates) {}
 
     public:
       void Evaluate() override;
@@ -99,10 +94,9 @@ namespace pql {
   class ParentTClause : public Clause {
     public:
       ParentTClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::unordered_map<std::string, std::vector<int>>* domain,
           std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
+          Clause(token, pkb, domain, predicates) {}
 
     public:
       void Evaluate() override;
@@ -111,10 +105,9 @@ namespace pql {
   class UsesSClause : public Clause {
     public:
       UsesSClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::unordered_map<std::string, std::vector<int>>* domain,
           std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
+          Clause(token, pkb, domain, predicates) {}
 
     public:
       void Evaluate() override;
@@ -123,10 +116,9 @@ namespace pql {
   class ModifiesSClause : public Clause {
     public:
       ModifiesSClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::unordered_map<std::string, std::vector<int>>* domain,
           std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
+          Clause(token, pkb, domain, predicates) {}
 
     public:
       void Evaluate() override;
@@ -135,10 +127,9 @@ namespace pql {
   class CallsClause : public Clause {
     public:
       CallsClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::unordered_map<std::string, std::vector<int>>* domain,
           std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
+          Clause(token, pkb, domain, predicates) {}
 
     public:
       void Evaluate() override;
@@ -147,10 +138,9 @@ namespace pql {
   class CallsTClause : public Clause {
     public:
       CallsTClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
-          std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
+          std::unordered_map<std::string, std::vector<int>>* domain,
           std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, stmt_hashmap, var_hashmap, predicates) {}
+          Clause(token, pkb, domain, predicates) {}
 
     public:
       void Evaluate() override;
