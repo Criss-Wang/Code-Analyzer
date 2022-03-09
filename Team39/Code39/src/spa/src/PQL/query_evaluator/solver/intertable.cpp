@@ -6,7 +6,7 @@
 #include <set>
 
 #include "intertable.h"
-#include "query_evaluator_exceptions.h"
+#include "../query_evaluator_exceptions.h"
 
 namespace pql_table {
 

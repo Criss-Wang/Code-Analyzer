@@ -7,11 +7,11 @@
 #include <unordered_set>
 #include <algorithm>
 
-#include "clause.h"
-#include "solver.h"
+#include "clause/clause.h"
+#include "solver/solver.h"
 #include "query_evaluator.h"
 #include "query_evaluator_exceptions.h"
-#include "formatter.h"
+#include "formatter/formatter.h"
 
 namespace pql {
   void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& domain, Pkb& pkb) {

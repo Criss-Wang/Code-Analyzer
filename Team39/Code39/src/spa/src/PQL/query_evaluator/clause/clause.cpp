@@ -4,7 +4,7 @@
 #include <unordered_set>
 
 #include "clause.h"
-#include "query_evaluator_exceptions.h"
+#include "../query_evaluator_exceptions.h"
 
 namespace pql {
 

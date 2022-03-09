@@ -1,6 +1,6 @@
 #include "test_util.h"
-#include "../../spa/src/PQL/query_evaluator/clause.h"
-#include "../../spa/src/PQL/query_evaluator/predicate.h"
+#include "../../spa/src/PQL/query_evaluator/clause/clause.h"
+#include "../../spa/src/PQL/query_evaluator/solver/predicate.h"
 #include "../../spa/src/PQL/query_evaluator/query_evaluator_exceptions.h"
 #include "../../spa/src/PQL/token.h"
 

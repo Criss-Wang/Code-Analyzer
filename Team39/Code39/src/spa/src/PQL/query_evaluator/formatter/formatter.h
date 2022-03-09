@@ -1,9 +1,9 @@
 #include <string>
 #include <vector>
 
-#include "../../PKB/pkb.h"
-#include "intertable.h"
-#include "../token.h"
+#include "../../../PKB/pkb.h"
+#include "../solver/intertable.h"
+#include "../../token.h"
 
 class Formatter {
   private:

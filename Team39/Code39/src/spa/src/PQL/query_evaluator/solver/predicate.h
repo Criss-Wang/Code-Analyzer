@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
-#include "../token.h"
-#include "../../Utility/entity.h"
+#include "../../token.h"
+#include "../../../Utility/entity.h"
 
 namespace pql_table {
 

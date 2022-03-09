@@ -3,10 +3,9 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "../token.h"
-#include "predicate.h"
-#include "../../PKB/pkb.h"
-#include "query_evaluator_exceptions.h"
+#include "../../token.h"
+#include "../solver/predicate.h"
+#include "../../../PKB/pkb.h"
 
 namespace pql {
   template <typename T>
