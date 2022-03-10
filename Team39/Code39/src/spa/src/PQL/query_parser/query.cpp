@@ -97,6 +97,10 @@ namespace pql {
       {kCallsT, procs}
   };
 
+  void Query::SetSemanticallyInvalid() {
+    Query::is_semantically_valid = false;
+  }
+
   bool Query::IsValid(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right) {
     std::unordered_set<EntityIdentifier> left_domains = pql::left_synonym_domains.at(r);
     std::unordered_set<EntityIdentifier> right_domains = pql::right_synonym_domains.at(r);
@@ -197,7 +201,7 @@ namespace pql {
       }
       Query::such_that_clauses.emplace_back(r, left, right, is_synonym_left, is_synonym_right);
     } else {
-      throw ParseException();
+      throw SemanticallyInvalidException();
     }
   }
 
@@ -215,5 +219,9 @@ namespace pql {
 
   void Query::SetBoolean(bool b) {
     Query::is_boolean = b;
+  }
+
+  bool Query::IsBoolean() {
+    return Query::is_boolean;
   }
 }

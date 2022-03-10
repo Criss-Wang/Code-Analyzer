@@ -27,7 +27,10 @@ namespace pql {
     std::vector <RelationshipToken> such_that_clauses;
     std::vector <pql::PatternToken> patterns;
     bool is_boolean = false;
+    bool is_semantically_valid = true;
   public:
+    void SetSemanticallyInvalid();
+
     bool IsValid(RelationshipTypes relationship, const pql::Ref& left, const pql::Ref& right);
 
     bool SynonymDeclared(const std::string &name);
@@ -55,5 +58,7 @@ namespace pql {
     std::vector<pql::PatternToken> GetPattern();
 
     void SetBoolean(bool b);
+
+    bool IsBoolean();
   };
 }
