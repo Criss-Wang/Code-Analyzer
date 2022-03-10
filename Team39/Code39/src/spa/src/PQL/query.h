@@ -55,5 +55,7 @@ namespace pql {
     std::vector<pql::PatternToken> GetPattern();
 
     void SetBoolean(bool b);
+
+    bool GetBoolean();
   };
 }

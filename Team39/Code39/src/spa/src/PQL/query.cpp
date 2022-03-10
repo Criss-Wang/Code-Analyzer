@@ -216,4 +216,8 @@ namespace pql {
   void Query::SetBoolean(bool b) {
     Query::is_boolean = b;
   }
+
+  bool Query::GetBoolean() {
+    return Query::is_boolean;
+  }
 }

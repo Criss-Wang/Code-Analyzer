@@ -3,6 +3,7 @@
 
 #include "../../../../spa/src/PQL/query_evaluator/intertable.h"
 #include "../../../../spa/src/PQL/query_evaluator/predicate.h"
+#include "../../../../spa/src/PQL/query_evaluator/query_evaluator_exceptions.h"
 #include "../../../../spa/src/PQL/token.h"
 #include "../../../../spa/src/Utility/Entity.h"
 #include "catch.hpp"
@@ -71,7 +72,9 @@ static pql_table::InterTable table2_empty(table2_header, table2_empty_rows);
 
 static vector<pair<int, string>> pred_lst({make_pair(2, "a"), make_pair(8, "c"), make_pair(4, "b"), make_pair(8, "d"), 
 		make_pair(2, "c"), make_pair(2, "d")});
-static pql_table::Predicate predicates(table2_first_syn.GetName(), table2_second_syn.GetName(), pred_lst);
+static string first_syn_name = table2_first_syn.GetName();
+static string second_syn_name = table2_second_syn.GetName();
+static pql_table::Predicate predicates(first_syn_name, second_syn_name, pred_lst);
 
 static vector<int> table2_filter_first_col({2,2,2,4,8,8});
 static vector<string> table2_filter_second_col({ "a", "c", "d", "b", "c", "d" });
@@ -178,7 +181,7 @@ TEST_CASE("Check filter function of Intertable") {
 		}
 
 		SECTION("Filter empty table should result in empty table") {
-				REQUIRE(table2_empty.Filter(predicates).equal(table2_empty));
+		  CHECK_THROWS_AS(table2_empty.Filter(predicates), pql_exceptions::EmptyTableException);
 		}
 }
 
@@ -190,7 +193,7 @@ TEST_CASE("Check MergeAndFilter function of Intertable") {
 		}
 
 		SECTION("MergeAndFilter empty table should result in empty table") {
-				REQUIRE(table1_empty_merge1.MergeAndFilter(table1_merge2, predicates).equal(table2_empty));
-				REQUIRE(table1_merge1.MergeAndFilter(table1_empty_merge2, predicates).equal(table2_empty));
+				CHECK_THROWS_AS(table1_empty_merge1.MergeAndFilter(table1_merge2, predicates), pql_exceptions::EmptyTableException);
+				CHECK_THROWS_AS(table1_merge1.MergeAndFilter(table1_empty_merge2, predicates), pql_exceptions::EmptyTableException);
 		}
 }
