@@ -221,7 +221,7 @@ namespace pql {
     Query::is_boolean = b;
   }
 
-  bool Query::IsBoolean() {
+  bool Query::GetBoolean() {
     return Query::is_boolean;
   }
 }

@@ -59,6 +59,6 @@ namespace pql {
 
     void SetBoolean(bool b);
 
-    bool IsBoolean();
+    bool GetBoolean();
   };
 }
