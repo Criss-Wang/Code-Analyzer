@@ -1,10 +1,12 @@
+#ifndef INTERTABLE_H
+#define INTERTABLE_H
+
 #include <vector>
 #include <string>
 #include <algorithm>
 
 
-#include "predicate.h"
-#include "../../token.h"
+#include "../solver/predicate.h"
 
 namespace pql_table {
 
@@ -38,3 +40,5 @@ namespace pql_table {
       bool equal(InterTable& t);
   }; 
 }
+
+#endif

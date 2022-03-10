@@ -3,11 +3,10 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "../../token.h"
 #include "../solver/predicate.h"
 #include "../../../PKB/pkb.h"
 
-namespace pql {
+namespace pql_clause {
   template <typename T>
   std::vector<T> Intersect(const std::vector<T>& lst1, const std::vector<T>& lst2) {
     //refer from stack overflow https://stackoverflow.com/questions/38993415/how-to-apply-the-intersection-between-two-lists-in-c
@@ -55,93 +54,5 @@ namespace pql {
 
     public:
       virtual void Evaluate() = 0;
-  };
-
-  class FollowsClause : public Clause {
-    public:
-      FollowsClause(pql::RelationshipToken* token, Pkb& pkb,
-                    std::unordered_map<std::string, std::vector<int>>* domain,
-                    std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, domain, predicates) {}
-
-    public:
-      void Evaluate() override;
-  };
-
-  class FollowsTClause : public Clause {
-    public:
-      FollowsTClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, domain, predicates) {}
-
-    public:
-      void Evaluate() override;
-  };
-
-  class ParentClause : public Clause {
-    public:
-      ParentClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, domain, predicates) {}
-
-    public:
-      void Evaluate() override;
-  };
-
-  class ParentTClause : public Clause {
-    public:
-      ParentTClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, domain, predicates) {}
-
-    public:
-      void Evaluate() override;
-  };
-
-  class UsesSClause : public Clause {
-    public:
-      UsesSClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, domain, predicates) {}
-
-    public:
-      void Evaluate() override;
-  };
-
-  class ModifiesSClause : public Clause {
-    public:
-      ModifiesSClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, domain, predicates) {}
-
-    public:
-      void Evaluate() override;
-  };
-
-  class CallsClause : public Clause {
-    public:
-      CallsClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, domain, predicates) {}
-
-    public:
-      void Evaluate() override;
-  };
-
-  class CallsTClause : public Clause {
-    public:
-      CallsTClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) :
-          Clause(token, pkb, domain, predicates) {}
-
-    public:
-      void Evaluate() override;
   };
 }

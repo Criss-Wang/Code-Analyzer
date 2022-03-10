@@ -6,7 +6,6 @@
 
 #include "solver.h"
 #include "../query_evaluator_exceptions.h"
-#include "../../../Utility/entity.h"
 
 
 namespace pql_solver {

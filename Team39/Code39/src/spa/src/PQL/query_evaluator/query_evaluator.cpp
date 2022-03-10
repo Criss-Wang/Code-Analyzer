@@ -7,9 +7,9 @@
 #include <unordered_set>
 #include <algorithm>
 
-#include "clause/clause.h"
-#include "solver/solver.h"
 #include "query_evaluator.h"
+#include "solver/solver.h"
+#include "clause/such_that_clause.h"
 #include "query_evaluator_exceptions.h"
 #include "formatter/formatter.h"
 
@@ -23,26 +23,26 @@ namespace pql {
     }
   }
 
-  std::unique_ptr<Clause> GenerateClause(pql::RelationshipToken& token, Pkb& pkb,
+  std::unique_ptr<pql_clause::Clause> GenerateClause(pql::RelationshipToken& token, Pkb& pkb,
                         std::unordered_map<std::string, std::vector<int>>* domain,
                         std::vector<pql_table::Predicate>* predicates) {
     switch (token.GetRelationship()) {
       case RelationshipTypes::kFollows:
-        return std::make_unique<FollowsClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::FollowsClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kFollowsT:
-        return std::make_unique<FollowsTClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::FollowsTClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kParent:
-        return std::make_unique<ParentClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::ParentClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kParentT:
-        return std::make_unique<ParentTClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::ParentTClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kUsesS:
-        return std::make_unique<UsesSClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::UsesSClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kModifiesS:
-        return std::make_unique<ModifiesSClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::ModifiesSClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kCalls:
-        return std::make_unique<CallsClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::CallsClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kCallsT:
-        return std::make_unique<CallsTClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::CallsTClause>(&token, pkb, domain, predicates);
       default: 
         throw pql_exceptions::EmptyDomainException();
     }
@@ -58,13 +58,13 @@ namespace pql {
 
     if (!is_left_wildcard) {
       std::vector<int> assign_domain = pkb.GetModifiesStmtsByVar(pattern_token.GetLeft());
-      UpdateHashmap<int>(domain, pattern_token.GetAssignSynonym(), assign_domain);
+      pql_clause::UpdateHashmap<int>(domain, pattern_token.GetAssignSynonym(), assign_domain);
     }
 
     if (!is_expr_wildcard) {
       std::unordered_set<int> domain_set = pkb.GetAllStmtsWithPattern(pattern_token.GetExpression());
       std::vector<int> domain_lst(domain_set.begin(), domain_set.end());
-      UpdateHashmap<int>(domain, pattern_token.GetAssignSynonym(), domain_lst);
+      pql_clause::UpdateHashmap<int>(domain, pattern_token.GetAssignSynonym(), domain_lst);
     }
   }
 
@@ -78,7 +78,7 @@ namespace pql {
     if (!is_expr_wildcard) {
       std::unordered_set<int> domain_set = pkb.GetAllStmtsWithPattern(pattern_token.GetExpression());
       std::vector<int> domain_lst(domain_set.begin(), domain_set.end());
-      UpdateHashmap<int>(domain, pattern_token.GetAssignSynonym(), domain_lst);
+      pql_clause::UpdateHashmap<int>(domain, pattern_token.GetAssignSynonym(), domain_lst);
     }
 
     std::vector<int> var_domain = domain[pattern_token.GetLeft()];
@@ -136,14 +136,14 @@ namespace pql {
       }
 
       for (pql::RelationshipToken& such_that_token : such_that_clauses) {
-        std::unique_ptr<pql::Clause> clause = GenerateClause(such_that_token, pkb, &domain, &predicates);
+        std::unique_ptr<pql_clause::Clause> clause = GenerateClause(such_that_token, pkb, &domain, &predicates);
         clause->Evaluate();
       }
       
       pql_solver::Solver solver(&domain, &predicates, synonyms, selected_syns, is_return_boolean);
       pql_table::InterTable table = solver.Solve();
       Formatter formatter = Formatter(pkb);
-
+      
       return formatter.FormatRawInput(table, selected_syns);
 
     } catch (pql_exceptions::TrueResultException e) {

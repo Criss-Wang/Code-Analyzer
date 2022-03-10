@@ -3,7 +3,6 @@
 
 #include "../../../PKB/pkb.h"
 #include "../solver/intertable.h"
-#include "../../token.h"
 
 class Formatter {
   private:
