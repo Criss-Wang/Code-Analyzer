@@ -134,6 +134,7 @@ namespace pql {
 
   std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
     try {
+      bool is_return_boolean = query.GetBoolean();
       std::vector<pql::RelationshipToken> such_that_clauses = query.GetSuchThatClause();
       std::vector<pql::PatternToken> pattern_clauses = query.GetPattern();
       std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
@@ -141,7 +142,6 @@ namespace pql {
       std::vector<pql_table::Predicate> predicates;
       std::unordered_map<std::string, std::vector<int>> stmt_hashmap;
       std::unordered_map<std::string, std::vector<std::string>> var_hashmap;
-
 
       GetAllDomain(synonyms, stmt_hashmap, var_hashmap, pkb);
 
@@ -153,15 +153,19 @@ namespace pql {
         std::unique_ptr<pql::Clause> clause = GenerateClause(such_that_token, pkb, &stmt_hashmap, &var_hashmap, &predicates);
         clause->Evaluate();
       }
-
-      pql_solver::Solver solver(&stmt_hashmap, &var_hashmap, &predicates, synonyms, selected_syns);
+      
+      pql_solver::Solver solver(&stmt_hashmap, &var_hashmap, &predicates, synonyms, selected_syns, is_return_boolean);
       std::vector<std::string> res = solver.Solve();
 
       return res;
 
     } catch (pql_exceptions::EmptyResultException e) {
-      std::vector<std::string> empty_res({});
-      return empty_res;
+      std::vector<std::string> res({});
+      
+      if (query.GetBoolean()) {
+        res.push_back("FALSE");
+      }
+      return res;
     }
   }
 }

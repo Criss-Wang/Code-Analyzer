@@ -52,6 +52,31 @@ UsesVariableToStmtsTable* Pkb::GetUsesVariableToStmtsTable() {
 }
 
 // Following are for search handlers
+bool Pkb::IsCalls(const string& proc_1, const string& proc_2) const {
+  try {
+    vector<string> callees = calls_table_->GetValueByKey(proc_1);
+    return find(callees.begin(), callees.end(), proc_2) != callees.end();
+  } catch (exception& e) {
+    return false;
+  }
+}
+
+vector<string> Pkb::GetCallers(const string& proc) const {
+  try {
+    return called_by_table_->GetValueByKey(proc);
+  } catch (exception& e) {
+    return vector<string>{};
+  }
+}
+
+vector<string> Pkb::GetCallees(const string& proc) const {
+  try {
+    return calls_table_->GetValueByKey(proc);
+  } catch (exception& e) {
+    return vector<string>{};
+  }
+}
+
 bool Pkb::IsParent(const int stmt_1, const int stmt_2) const {
   try {
     vector<int> parent_stmt_lst = child_table_->GetValueByKey(stmt_2);
@@ -118,6 +143,14 @@ vector<pair<T2, T3>> UnfoldResults(T1 table_to_unfold) {
     }
   }
   return result;
+}
+
+vector<pair<string, string>> Pkb::GetAllCallsPairs() const {
+  try {
+    return UnfoldResults<CallsTable*, string, string>(calls_table_);
+  } catch (exception& e) {
+    return vector<pair<string, string>>{};
+  }
 }
 
 vector<pair<int, int>> Pkb::GetAllParentPairs() const {
@@ -323,10 +356,20 @@ bool Pkb::AddFollows(const int key, const int value) {
   return add_success;
 }
 
-bool Pkb::AddCalls(const string& key, const string& value) {
+bool Pkb::AddCalls(const string& key, const vector<string>& value) {
   bool add_success = calls_table_->AddKeyValuePair(key, value);
   // Populate the reverse relation
-  add_success = called_by_table_->AddKeyValuePair(value, key) && add_success;
+  for (const string called : value) {
+    try {
+      // Get the callers and then add in the new caller
+      vector<string> callers = called_by_table_->GetValueByKey(called);
+      callers.push_back(key);
+      called_by_table_->UpdateKeyWithNewValue(called, callers);
+    } catch (InvalidKeyException& e) {
+      add_success = called_by_table_->AddKeyValuePair(called, vector<string>{key});
+    }
+  }
+
   return add_success;
 }
 
@@ -438,7 +481,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
   }
 }
 
-bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& key, const string& value) {
+bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& key, const vector<string>& value) {
   try {
     if (value.empty()) throw EmptyValueException();
     switch (table_identifier) {
@@ -465,7 +508,6 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
     return false;
   }
 }
-
 
 bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const int entity_val) {
   try {

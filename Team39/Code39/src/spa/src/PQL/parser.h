@@ -62,6 +62,10 @@ namespace pql {
 
       std::vector<std::string> GetSynonyms();
 
+      void ParseSelect();
+
+      void ParseTuple();
+
       void ParseRelationship();
 
       void ParsePattern();

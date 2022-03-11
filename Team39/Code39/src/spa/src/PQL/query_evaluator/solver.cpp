@@ -5,17 +5,21 @@
 
 
 #include "solver.h"
+#include "query_evaluator_exceptions.h"
 #include "../../Utility/entity.h"
+
 
 namespace pql_solver {
 
   Solver::Solver(std::unordered_map<std::string, std::vector<int>>* stmt_hashmap,
     std::unordered_map<std::string, std::vector<std::string>>* var_hashmap,
     std::vector<pql_table::Predicate>* preds,
-    std::vector<pql::Synonym>& syn_list, std::vector<pql::Synonym> selected_syns) {
+    std::vector<pql::Synonym>& syn_list, std::vector<pql::Synonym> selected_syns,
+    bool is_return_boolean) {
     
     predicates_ = preds;
     return_syns_ = selected_syns;
+    is_return_boolean_ = is_return_boolean;
 
     for (pql::Synonym& syn : syn_list) {
       if (syn.GetDeclaration() == EntityIdentifier::kVariable
@@ -87,9 +91,16 @@ namespace pql_solver {
   }
 
   std::vector<std::string> Solver::ExtractResult() {
+    //At this stage all the tabls will not be empty
+    //Or there will be no tables which means there are no constrains
+    if (is_return_boolean_) {
+        return std::vector<std::string>({ "TRUE" });
+    }
+
     std::vector<pql_table::InterTable> tables = GetReturnTables();
     pql_table::InterTable final_table = MergeComponents(tables);
 
+    
     std::vector<std::string> result_string(final_table.GetRowNum());
     
     //We add the synonym according to their position in return_syns_
@@ -107,6 +118,10 @@ namespace pql_solver {
           cur_string = std::to_string(final_table.rows_[index][col_num_in_table].val);
         }
 
+        if (result_string[index] != "") {
+          result_string[index] += " ";
+        }
+
         result_string[index] += cur_string;
       }
     }
@@ -115,12 +130,23 @@ namespace pql_solver {
   }
 
   std::vector<std::string> Solver::Solve() {
-    for (pql_table::Predicate& pred : *predicates_) {
-      Consume(pred);
+    try {
+      for (pql_table::Predicate& pred : *predicates_) {
+        Consume(pred);
+      }
+
+      std::vector<std::string> res = ExtractResult();
+
+      return res;
+
+    } catch (pql_exceptions::EmptyTableException e) {
+      std::vector<std::string> res;
+
+      if (is_return_boolean_) {
+          res.push_back("FALSE");
+      }
+
+      return res;
     }
-
-    std::vector<std::string> res = ExtractResult();
-
-    return res;
   }
 }
