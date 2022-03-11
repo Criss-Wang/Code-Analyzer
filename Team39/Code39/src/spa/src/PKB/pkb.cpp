@@ -575,3 +575,60 @@ unordered_set<set<int>, HashFunction> Pkb::GetAllEntityStmtLst(const EntityIdent
       throw InvalidIdentifierException();
   }
 }
+
+bool Pkb::IsVar(const string& var_string) const {
+  return variable_set_.find(var_string) != variable_set_.end();
+}
+
+bool Pkb::IsRead(const int stmt_no) const {
+  // O(1) find for unordered_set
+  return read_set_.find(stmt_no) != read_set_.end();
+}
+
+string Pkb::GetVarFromRead(const int stmt_no) const {
+  if (!IsRead(stmt_no)) return "";
+  return read_table_->GetValueByKey(stmt_no);
+  
+}
+
+vector<int> Pkb::GetReadByVar(const string& var_string) const {
+  vector<int> res = {};
+  if (!IsVar(var_string)) return res;
+  for (const auto& [key, val] : read_table_->GetKeyValueLst()) {
+    if (val == var_string) res.push_back(key);
+  }
+
+  return res;
+}
+
+bool Pkb::IsPrint(const int stmt_no) const {
+  return print_set_.find(stmt_no) != print_set_.end();
+}
+
+bool Pkb::IsCall(const int stmt_no) const {
+  return call_set_.find(stmt_no) != call_set_.end();
+}
+
+bool Pkb::IsIf(const int stmt_no) const {
+  return if_set_.find(stmt_no) != if_set_.end();
+}
+
+bool Pkb::IsWhile(const int stmt_no) const {
+  return while_set_.find(stmt_no) != while_set_.end();
+}
+
+bool Pkb::IsStmt(const int stmt_no) const {
+  return stmt_set_.find(stmt_no) != stmt_set_.end();
+}
+
+bool Pkb::IsConstant(const int stmt_no) const {
+  return constant_set_.find(stmt_no) != constant_set_.end();
+}
+
+bool Pkb::IsProcedure(const string& proc_name) const {
+  return procedure_set_.find(proc_name) != procedure_set_.end();
+}
+
+bool Pkb::IsAssign(int stmt_no) const {
+  return assign_set_.find(stmt_no) != assign_set_.end();
+}

@@ -266,3 +266,37 @@ TEST_CASE("Add String Entity") {
     REQUIRE(res.find("z") != res.end());
   }
 }
+
+TEST_CASE("Entity Attribute Operations") {
+  Pkb pkb = Pkb();
+  bool success = pkb.AddInfoToTable(TableIdentifier::kRead, 1, "x");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kRead, 1);
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "x");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kRead, 2, "x");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kRead, 2);
+  success = success && pkb.AddInfoToTable(TableIdentifier::kRead, 3, "y");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kRead, 3);
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "y");
+
+  SECTION("Positive Test Cases") {
+    bool res = pkb.IsRead(1);
+    REQUIRE(res == true);
+
+    string string_res = pkb.GetVarFromRead(1);
+    REQUIRE(string_res == "x");
+
+    vector<int> stmt_res = pkb.GetReadByVar("x");
+    REQUIRE(stmt_res == vector<int>{1, 2});
+  }
+
+  SECTION("Negative Test Cases") {
+    bool res = pkb.IsRead(4);
+    REQUIRE(res == false);
+
+    string string_res = pkb.GetVarFromRead(4);
+    REQUIRE(string_res == "");
+
+    vector<int> stmt_res = pkb.GetReadByVar("xy");
+    REQUIRE(stmt_res == vector<int>{});
+  }
+}

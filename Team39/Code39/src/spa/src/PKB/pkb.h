@@ -153,4 +153,18 @@ class Pkb {
     unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier entity_identifier);
 
     // Get all the attribute
+    [[nodiscard]] bool IsVar(const string& var_string) const;
+
+    [[nodiscard]] bool IsRead(int stmt_no) const;
+    [[nodiscard]] string GetVarFromRead(int stmt_no) const;
+    [[nodiscard]] vector<int> GetReadByVar(const string& var_string) const;
+    
+    [[nodiscard]] bool IsPrint(int stmt_no) const;
+    [[nodiscard]] bool IsCall(int stmt_no) const;
+    [[nodiscard]] bool IsIf(int stmt_no) const;
+    [[nodiscard]] bool IsWhile(int stmt_no) const;
+    [[nodiscard]] bool IsAssign(int stmt_no) const;
+    [[nodiscard]] bool IsProcedure(const string& proc_name) const;
+    [[nodiscard]] bool IsStmt(int stmt_no) const;
+    [[nodiscard]] bool IsConstant(int stmt_no) const;
 };
