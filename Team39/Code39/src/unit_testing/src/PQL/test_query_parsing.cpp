@@ -1,5 +1,5 @@
-#include "PQL/parser.h"
-#include "PQL/token.h"
+#include "PQL/query_parser/parser.h"
+#include "PQL/query_parser/token.h"
 
 #include <fstream>
 #include "catch.hpp"

@@ -24,7 +24,7 @@ namespace pql {
     return synonyms;
   }
 
-  void Parser::Parse() {
+  void Parser::ParseQuery() {
     bool select_clause_parsed = false;
     bool declarations_parsed = false;
     int current_clause = NO_CURRENT_CLAUSE;
@@ -74,6 +74,14 @@ namespace pql {
     }
     if (!select_clause_parsed) {
       throw ParseException();
+    }
+  }
+
+  void Parser::Parse() {
+    try {
+      Parser::ParseQuery();
+    } catch (SemanticallyInvalidException& e) {
+      Parser::query.SetSemanticallyInvalid();
     }
   }
 
@@ -130,7 +138,7 @@ namespace pql {
     ps.Expect(")");
     if (relationship == "Uses" || relationship == "Modifies") {
       if (left == "_") {
-        throw ParseException();
+        throw SemanticallyInvalidException();
       }
       if (Parser::query.IsProcedure(left) || IsIdent(left)) {
         relationship.push_back('P');
@@ -182,7 +190,7 @@ namespace pql {
       }
       Parser::query.AddPattern(assign_synonym, left, expression, exact, is_synonym_left);
     } else {
-      throw ParseException();
+      throw SemanticallyInvalidException();
     }
   }
 

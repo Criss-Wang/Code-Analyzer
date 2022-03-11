@@ -7,7 +7,7 @@
 #include <exception>
 #include <optional>
 
-#include "../Utility/entity.h"
+#include "Utility/entity.h"
 
 namespace pql {
   typedef std::string Ref;
@@ -29,8 +29,15 @@ namespace pql {
   struct ParseException : public std::exception {
     public:
       [[nodiscard]] const char * what() const noexcept override {
-        return "The query is invalid!";
+        return "The query is syntactically invalid!";
       }
+  };
+
+  struct SemanticallyInvalidException : public std::exception {
+  public:
+    [[nodiscard]] const char * what() const noexcept override {
+      return "The query is semantically invalid!";
+    }
   };
 
   enum RelationshipTypes {
