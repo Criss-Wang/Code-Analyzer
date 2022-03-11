@@ -403,3 +403,144 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
     throw invalid_argument("PKB Population failed");
   }
 }
+
+vector<CFG> buildCFG(vector<Token> input_tokens) {
+  vector<CFG> cfgs = {};
+  CFG cfg = CFG();
+  GraphNode* current_node = nullptr;
+  stack<GraphNode*> previous_nodes = {};
+
+  // Keep track of nodes which are waiting for alternative paths to be created
+  stack<GraphNode*> waiting_nodes = {};
+  stack<GraphNode*> waiting_nodes_in_if = {};
+  bool link_two_nodes = false;
+
+  for (auto token = begin(input_tokens); token != end(input_tokens); ++token) {
+
+    if (token->type_ == RIGHT_CURLY) {
+      bool has_two_more_tokens = token != end(input_tokens) - 1 && token != end(input_tokens) - 2;
+      bool is_else_stmt = has_two_more_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == LEFT_CURLY;
+
+      if (previous_nodes.empty()) { // end of procedure
+        current_node->InsertNextNode(new GraphNode(NodeType::END));
+        current_node = current_node->GetNextNode();
+
+        if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::WHILE) {
+          waiting_nodes.top()->InsertAlternativeNode(current_node);
+          waiting_nodes.pop();
+
+        } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::IF) {
+          waiting_nodes.top()->InsertAlternativeNode(current_node);
+          waiting_nodes.pop();
+
+        } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::STMT) {
+          waiting_nodes.top()->InsertNextNode(current_node);
+          waiting_nodes.pop();
+          waiting_nodes_in_if.top()->InsertNextNode(current_node);
+          waiting_nodes_in_if.pop();
+        }
+
+        cfgs.push_back(cfg);
+        cfg = CFG();
+
+      } else if (is_else_stmt) {
+        waiting_nodes.push(waiting_nodes_in_if.top());
+        waiting_nodes_in_if.pop();
+        waiting_nodes_in_if.push(current_node);
+        current_node = new GraphNode(NodeType::DUMMY);
+
+      } else if (previous_nodes.top()->GetNodeType() == NodeType::WHILE) {
+        current_node->InsertNextNode(previous_nodes.top());
+        waiting_nodes.push(previous_nodes.top());
+        previous_nodes.pop();
+        current_node = new GraphNode(NodeType::DUMMY);
+
+      } else if (previous_nodes.top()->GetNodeType() == NodeType::IF) {
+        waiting_nodes.push(current_node);
+        previous_nodes.pop();
+        current_node = new GraphNode(NodeType::DUMMY);
+
+      }
+
+    } else if (next(token, 1)->text_ == "=" || token->text_ == "read" || token->text_ == "print" || token->text_ == "call") {
+      if (current_node->GetNodeType() != NodeType::STMT) {
+        current_node->InsertNextNode(new GraphNode(NodeType::STMT));
+        current_node = current_node->GetNextNode();
+      }
+
+      current_node->AddStmtNum(token->stmt_num_);
+
+      // the stmtLst inside the loop will be set as alternative Node instead of Next
+      if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::WHILE) {
+        waiting_nodes.top()->InsertAlternativeNode(current_node);
+        waiting_nodes.pop();
+
+      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::IF) {
+        waiting_nodes.top()->InsertAlternativeNode(current_node);
+        waiting_nodes.pop();
+
+      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::STMT) {
+        waiting_nodes.top()->InsertNextNode(current_node);
+        waiting_nodes.pop();
+        waiting_nodes_in_if.top()->InsertNextNode(current_node);
+        waiting_nodes_in_if.pop();
+      }
+
+    } else if (token->text_ == "procedure") {
+
+      // Initialize CFG for new procedure
+      cfg = CFG(next(token, 1)->text_);
+      current_node = cfg.GetStartNode();
+
+    } else if (token->text_ == "if") {
+      current_node->InsertNextNode(new GraphNode(NodeType::IF));
+      current_node = current_node->GetNextNode();
+      current_node->AddStmtNum(token->stmt_num_);
+
+      if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::WHILE) {
+        waiting_nodes.top()->InsertAlternativeNode(current_node);
+        waiting_nodes.pop();
+
+      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::IF) {
+        waiting_nodes.top()->InsertAlternativeNode(current_node);
+        waiting_nodes.pop();
+
+      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::STMT) {
+        waiting_nodes.top()->InsertNextNode(current_node);
+        waiting_nodes.pop();
+        waiting_nodes_in_if.top()->InsertNextNode(current_node);
+        waiting_nodes_in_if.pop();
+      }
+
+      waiting_nodes_in_if.push(current_node);
+      previous_nodes.push(current_node);
+
+    } else if (token->text_ == "while") {
+      current_node->InsertNextNode(new GraphNode(NodeType::WHILE));
+      current_node = current_node->GetNextNode();
+      current_node->AddStmtNum(token->stmt_num_);
+
+      if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::WHILE) {
+        waiting_nodes.top()->InsertAlternativeNode(current_node);
+        waiting_nodes.pop();
+
+      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::IF) {
+        waiting_nodes.top()->InsertNextNode(current_node);
+        waiting_nodes.pop();
+
+      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::STMT) {
+        waiting_nodes.top()->InsertNextNode(current_node);
+        waiting_nodes.pop();
+        waiting_nodes_in_if.top()->InsertNextNode(current_node);
+        waiting_nodes_in_if.pop();
+      }
+
+      waiting_nodes_in_if.push(current_node);
+      previous_nodes.push(current_node);
+
+    }
+  }
+
+  return cfgs;
+}
+
