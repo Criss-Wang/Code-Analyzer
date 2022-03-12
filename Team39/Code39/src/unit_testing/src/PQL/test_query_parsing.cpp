@@ -61,7 +61,6 @@ TEST_CASE("Invalid queries") {
     RequireInvalidQuery(invalid_queries_dir + "2_test4.txt"); //Misspelled keyword for relationship
   }
   
-
   SECTION("Select clause contains synonyms that are not declared") {
     RequireInvalidQuery(invalid_queries_dir + "3_test1.txt");
     RequireInvalidQuery(invalid_queries_dir + "3_test2.txt");
@@ -80,11 +79,18 @@ TEST_CASE("Invalid queries") {
     RequireInvalidQuery(invalid_queries_dir + "5_test5.txt"); //Uses(s, 3)
     RequireInvalidQuery(invalid_queries_dir + "5_test6.txt"); //Uses(s, "10")
   }
-
+  
   SECTION("Pattern clause such that the second argument is not a valid expression") {
     RequireInvalidQuery(invalid_queries_dir + "6_test1.txt"); //pattern a(_, "x +")
     RequireInvalidQuery(invalid_queries_dir + "6_test2.txt"); //pattern a(_, "x (3 + 3)")
     RequireInvalidQuery(invalid_queries_dir + "6_test3.txt"); //pattern a(_, "(3 + y / 3")
+  }
+
+  SECTION("Select clause such that invalid attributes are used") {
+    RequireInvalidQuery(invalid_queries_dir + "7_test1.txt"); //stmt.procName
+    RequireInvalidQuery(invalid_queries_dir + "7_test2.txt"); //proc.Procname
+    RequireInvalidQuery(invalid_queries_dir + "7_test3.txt"); //read.value
+    RequireInvalidQuery(invalid_queries_dir + "7_test4.txt"); //variable.var
   }
 
 }
@@ -118,11 +124,18 @@ TEST_CASE("Valid queries") {
 
   SECTION("With Select and pattern clause with expression") {
     RequireValidQuery(valid_queries_dir + "5_test1.txt", 0, 1, 2); //pattern a(_, _"x + 1"_)
-    RequireValidQuery(valid_queries_dir + "5_test2.txt", 0, 1, 2); // pattern a(_, "(3 % 4) / x")
-    RequireValidQuery(valid_queries_dir + "5_test3.txt", 0, 1, 3); // pattern a(v, "x+1*2")
+    RequireValidQuery(valid_queries_dir + "5_test2.txt", 0, 1, 2); //pattern a(_, "(3 % 4) / x")
+    RequireValidQuery(valid_queries_dir + "5_test3.txt", 0, 1, 3); //pattern a(v, "x+1*2")
   }
 
   SECTION("With Select, such that and pattern clause with expression") {
     RequireValidQuery(valid_queries_dir + "5_test4.txt", 1, 1, 3);
+  }
+
+  SECTION("With Select clause with synonym and attribute") {
+    RequireValidQuery(valid_queries_dir + "6_test1.txt", 0, 0, 1); //Select p.procName
+    RequireValidQuery(valid_queries_dir + "6_test2.txt", 0, 1, 1); //Select a.stmt#
+    RequireValidQuery(valid_queries_dir + "6_test3.txt", 1, 1, 3); //Select v.varName
+    RequireValidQuery(valid_queries_dir + "6_test4.txt", 1, 1, 3); //Select c.value
   }
 }

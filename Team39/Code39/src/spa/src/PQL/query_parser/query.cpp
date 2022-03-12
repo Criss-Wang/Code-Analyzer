@@ -276,8 +276,15 @@ namespace pql {
 
   // Overloaded method with specified attribute 
   void Query::AddAttrRef(Synonym s, AttrIdentifier attr) {
-    AttrRef *attr_ref = new AttrRef(s, attr);
-    Query::attr_refs.push_back(*attr_ref);
+    EntityIdentifier entity_id = s.GetDeclaration();
+    std::unordered_set<AttrIdentifier> expected_attrs = validAttrMap.at(entity_id);
+    bool isAttrExpected = expected_attrs.find(attr) != expected_attrs.end();
+    if (isAttrExpected) {
+      AttrRef* attr_ref = new AttrRef(s, attr);
+      Query::attr_refs.push_back(*attr_ref);
+    } else {
+      throw ParseException();
+    }
   }
 
   std::vector<pql::AttrRef> Query::GetAttrRef() {

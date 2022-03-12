@@ -1,0 +1,2 @@
+constant c; assign a; stmt s;
+Select c.value pattern a(_, _"x"_) such that Uses(s, "p")
