@@ -686,3 +686,14 @@ FodyWeavers.xsd
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/qt,qtcreator,linux,windows,macos,visualstudio,visualstudiocode,clion,c++
+Team39/analysis.xsl
+Team39/autotester.txt
+Team39/test1_out.xml
+Team39/test2_out.xml
+Team39/test3_out.xml
+Team39/Tests39/sp/valid_programs/test1_source.txt
+Team39/Tests39/sp/valid_programs/test2_source.txt
+Team39/Tests39/sp/valid_programs/test3_source.txt
+Team39/1.xml
+Team39/q.txt
+Team39/s.txt

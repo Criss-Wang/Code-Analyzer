@@ -11,14 +11,18 @@ const int kFirstIndex = 0;
 const int kSecondIndex = 1;
 const int kThirdIndex = 2;
 
-void populateProcedure(vector<Token> tokens, Pkb& pkb) {
+// Returns procedure name
+string populateProcedure(vector<Token> tokens, Pkb& pkb) {
   string proc_name = tokens.at(kSecondIndex).text_;
 
   // Add procedure name to procedure_set_
   pkb.AddEntityToSet(EntityIdentifier::kProc, proc_name);
+  
+  return proc_name;
 }
 
-void populateReadStmt(vector<Token> tokens, Pkb& pkb) {
+// Returns variable being read
+string populateReadStmt(vector<Token> tokens, Pkb& pkb) {
   int stmt_num = tokens.at(kFirstIndex).stmt_num_;
   string read_var = tokens.at(kSecondIndex).text_;
 
@@ -34,9 +38,12 @@ void populateReadStmt(vector<Token> tokens, Pkb& pkb) {
 
   // Add read_var to variable_set_
   pkb.AddEntityToSet(EntityIdentifier::kVariable, read_var);
+
+  return read_var;
 }
 
-void populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
+// Returns variable being printed
+string populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
   int stmt_num = tokens.at(kFirstIndex).stmt_num_;
   string print_var = tokens.at(kSecondIndex).text_;
 
@@ -52,9 +59,12 @@ void populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
 
   // Add read_var to variable_set_
   pkb.AddEntityToSet(EntityIdentifier::kVariable, print_var);
+
+  return print_var;
 }
 
-void populateAssignStmt(vector<Token> tokens, Pkb& pkb) {
+// Returns a pair - first contains variable modified and second contains variables used
+pair<string, vector<string>> populateAssignStmt(vector<Token> tokens, Pkb& pkb) {
   int stmt_num = tokens.at(kFirstIndex).stmt_num_;
   string lhs_var = tokens.at(kFirstIndex).text_;
   vector<string> rhs_vars;
@@ -105,9 +115,12 @@ void populateAssignStmt(vector<Token> tokens, Pkb& pkb) {
 
   // Add stmt num and vector of variables into Uses Table
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, rhs_vars);
+
+  return make_pair(lhs_var, rhs_vars);
 }
 
-void populateIfStmt(vector<Token> tokens, Pkb& pkb) {
+// Returns a vector of variables used
+vector<string> populateIfStmt(vector<Token> tokens, Pkb& pkb) {
   int stmt_num = tokens.at(kFirstIndex).stmt_num_;
   vector<string> vars_in_cond_expr;
   vector<int> constants_in_cond_expr;
@@ -146,9 +159,12 @@ void populateIfStmt(vector<Token> tokens, Pkb& pkb) {
 
   // Add stmt num and variables in cond expr into Uses Table
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_in_cond_expr);
+
+  return vars_in_cond_expr;
 }
 
-void populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
+// Returns a vector of variables used
+vector<string> populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
   int stmt_num = tokens.at(kFirstIndex).stmt_num_;
   vector<string> vars_in_cond_expr;
   vector<int> constants_in_cond_expr;
@@ -187,9 +203,11 @@ void populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
 
   // Add stmt num and variables in cond expr into Uses Table
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_in_cond_expr);
+
+  return vars_in_cond_expr;
 }
 
-// Returns the procedure called
+// Returns the name of procedure called
 string populateCallStmt(vector<Token> tokens, Pkb& pkb) {
   int stmt_num = tokens.at(kFirstIndex).stmt_num_;
   string called_proc = tokens.at(kSecondIndex).text_;
@@ -227,6 +245,15 @@ stack<vector<int>> populateParentRelationship(stack<int> parent, stack<vector<in
   return children;
 }
 
+vector<string> AppendToVector(vector<string> v, vector<string> vars) {
+  for (auto var : vars) {
+    if (find(begin(v), end(v), var) == end(v)) {
+      v.push_back(var);
+    }
+  }
+  return v;
+}
+
 void populate(vector<Token> input_tokens, Pkb& pkb) {
 
   // Stores parent/previous stmt's line number for Parent/Follows relationship
@@ -243,8 +270,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   int end_stmt_num = 0;
 
   // Stores information for UsesP, ModifiesP and calls
-  //vector<string> uses_p = {};
-  //vector<string> modifies_p = {};
+  vector<string> uses_p = {};
+  vector<string> modifies_p = {};
   vector<string> called_procedures = {};
   
   for (auto token = begin(input_tokens); token != end(input_tokens); ++token) {
@@ -279,7 +306,11 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
         token++;
       }
       tokens.push_back(*token);
-      populateAssignStmt(tokens, pkb);
+      pair<string, vector<string>> variables = populateAssignStmt(tokens, pkb);
+
+      modifies_p = AppendToVector(modifies_p, { variables.first });
+      uses_p = AppendToVector(uses_p, { variables.second });
+
       children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
 
@@ -293,20 +324,27 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       }
       tokens.push_back(*token);
 
-      populateProcedure(tokens, pkb);
-
       if (prev_proc != "") {
         // Add procedure name and range to ProcRangeTable
         pkb.AddInfoToTable(TableIdentifier::kProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
 
         // Add procedure name and callees to CallsTable
         pkb.AddInfoToTable(TableIdentifier::kCalls, prev_proc, called_procedures);
+
+        // Add procedure name and modified variables to ModifiesProcToVariablesTable
+        //pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, prev_proc, modifies_p);
+
+        // Add procedure name and used variables to UsesProcToVariablesTable
+        //pkb.AddInfoToTable(TableIdentifier::KUsesProcToVar, prev_proc, uses_p);
+        
       }
 
       // reset values for next procedure
       start_stmt_num = end_stmt_num + 1;
-      prev_proc = tokens.at(kSecondIndex).text_;
+      prev_proc = populateProcedure(tokens, pkb);
       called_procedures = {};
+      modifies_p = {};
+      uses_p = {};
 
     } else if (token->text_ == "read") {
       vector<Token> tokens;
@@ -316,7 +354,9 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       }
       tokens.push_back(*token);
 
-      populateReadStmt(tokens, pkb);
+      string read_var = populateReadStmt(tokens, pkb);
+      modifies_p = AppendToVector(modifies_p, { read_var });
+
       children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
 
@@ -330,7 +370,9 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       }
       tokens.push_back(*token);
 
-      populatePrintStmt(tokens, pkb);
+      string print_var = populatePrintStmt(tokens, pkb);
+      uses_p = AppendToVector(uses_p, { print_var });
+      
       children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
 
@@ -344,7 +386,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       }
       tokens.push_back(*token);
 
-      populateIfStmt(tokens, pkb);
+      vector<string> used_vars = populateIfStmt(tokens, pkb);
+      uses_p = AppendToVector(uses_p, used_vars);
 
       children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
@@ -362,7 +405,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       }
       tokens.push_back(*token);
       
-      populateWhileStmt(tokens, pkb);
+      vector<string> used_vars = populateWhileStmt(tokens, pkb);
+      uses_p = AppendToVector(uses_p, used_vars);
 
       children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
@@ -381,6 +425,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       tokens.push_back(*token);
 
       string called_proc = populateCallStmt(tokens, pkb);
+
       children = populateParentRelationship(parent, children, token->stmt_num_);
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
 
@@ -395,9 +440,11 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   // Add stmt_lst to stmt_list_set_
   // pkb.AddEntityToSet(EntityIdentifier::kStmtLst, stmt_lst);
 
-  // Populate ProcRangeTable and CallsTable for the last procedure
+  // Populate ProcRangeTable, CallsTable, ModifiesProcToVariablesTable, UsesProcToVariablesTable for the last procedure
   pkb.AddInfoToTable(TableIdentifier::kProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
   pkb.AddInfoToTable(TableIdentifier::kCalls, prev_proc, called_procedures);
+  //pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, prev_proc, modifies_p);
+  //pkb.AddInfoToTable(TableIdentifier::KUsesProcToVar, prev_proc, uses_p);
 
   if (PopulateNestedRelationships(pkb) == 0) {
     throw invalid_argument("PKB Population failed");
