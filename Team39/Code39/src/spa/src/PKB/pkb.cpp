@@ -436,10 +436,24 @@ bool Pkb::AddModifies(const int key, const vector<string>& value) {
   return add_success;
 }
 
+bool Pkb::AddModifiesP(const string& key, const vector<string>& value) {
+  bool add_success = modifies_proc_to_variables_table_->AddKeyValuePair(key, value);
+  // Populate the reverse relation
+  add_success = add_success && modifies_variable_to_procs_table_->UpdateKeyValuePair(key, value);
+  return add_success;
+}
+
 bool Pkb::AddUses(const int key, const vector<string>& value) {
   bool add_success = uses_stmt_to_variables_table_->AddKeyValuePair(key, value);
   // Populate the reverse relation
   add_success = add_success && uses_variable_to_stmts_table_->UpdateKeyValuePair(key, value);
+  return add_success;
+}
+
+bool Pkb::AddUsesP(const string& key, const vector<string>& value) {
+  bool add_success = uses_proc_to_variables_table_->AddKeyValuePair(key, value);
+  // Populate the reverse relation
+  add_success = add_success && uses_variable_to_procs_table_->UpdateKeyValuePair(key, value);
   return add_success;
 }
 
@@ -535,6 +549,8 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
     if (value.empty()) throw EmptyValueException();
     switch (table_identifier) {
       case TableIdentifier::kCalls: return AddCalls(key, value);
+      case TableIdentifier::KModifiesProcToVar: return AddModifiesP(key, value);
+      case TableIdentifier::kUsesProcToVar: return AddUsesP(key, value);
       default:
         throw InvalidIdentifierException();
     }

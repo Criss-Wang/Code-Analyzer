@@ -78,6 +78,13 @@ class UsesVariableToStmtsTable : public Table<string, vector<int>> {
     bool UpdateKeyValuePair(int value_to_update, const vector<string>& keys);
 };
 
+class UsesProcToVariablesTable : public Table<string, vector<string>> {};
+
+class UsesVariableToProcsTable : public Table<string, vector<string>> {
+  public:
+    bool UpdateKeyValuePair(const string& value_to_update, const vector<string>& keys);
+};
+
 // Line number will be the key and the list of variables modified will be the value
 class ModifiesStmtToVariablesTable : public Table<int, vector<string>> {};
 
@@ -85,4 +92,11 @@ class ModifiesStmtToVariablesTable : public Table<int, vector<string>> {};
 class ModifiesVariableToStmtsTable : public Table<string, vector<int>> {
   public:
     bool UpdateKeyValuePair(int value_to_update, const vector<string>& keys);
+};
+
+class ModifiesProcToVariablesTable : public Table<string, vector<string>> {};
+
+class ModifiesVariableToProcsTable : public Table<string, vector<string>> {
+  public:
+    bool UpdateKeyValuePair(const string& value_to_update, const vector<string>& keys);
 };
