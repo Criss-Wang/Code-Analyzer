@@ -39,13 +39,13 @@ class ParentStarTable : public Table<int, vector<int>> {};
 class ChildStarTable : public Table<int, vector<int>> {};
 
 // Procedure name will be the key mapping to list of procedure names
-class CallsTable : public Table<string, vector<string>> {};
+class CallsTable : public Table<int, vector<int>> {};
 
-class CalledByTable : public Table<string, vector<string>> {};
+class CalledByTable : public Table<int, vector<int>> {};
 
-class CallsStarTable : public Table<string, vector<string>> {};
+class CallsStarTable : public Table<int, vector<int>> {};
 
-class CalledByStarTable : public Table<string, vector<string>> {};
+class CalledByStarTable : public Table<int, vector<int>> {};
 
 // Line number will be the key mapping to another line number which is next in the execution flow
 class NextTable: public Table<int, int> {};

@@ -68,53 +68,53 @@ UsesVariableToStmtsTable* Pkb::GetUsesVariableToStmtsTable() {
 }
 
 // Following are for search handlers
-bool Pkb::IsCalls(const string& proc_1, const string& proc_2) const {
+bool Pkb::IsCalls(const int proc_1, const int proc_2) const {
   try {
-    vector<string> callees = calls_table_->GetValueByKey(proc_1);
+    vector<int> callees = calls_table_->GetValueByKey(proc_1);
     return find(callees.begin(), callees.end(), proc_2) != callees.end();
   } catch (exception& e) {
     return false;
   }
 }
 
-bool Pkb::IsTransitiveCalls(const string& proc_1, const string& proc_2) const {
+bool Pkb::IsTransitiveCalls(const int proc_1, const int proc_2) const {
   try {
-    vector<string> callees_star = calls_star_table_->GetValueByKey(proc_1);
+    vector<int> callees_star = calls_star_table_->GetValueByKey(proc_1);
     return find(callees_star.begin(), callees_star.end(), proc_2) != callees_star.end();
   } catch (exception& e) {
     return false;
   }
 }
 
-vector<string> Pkb::GetCallers(const string& proc) const {
+vector<int> Pkb::GetCallers(const int proc) const {
   try {
     return called_by_table_->GetValueByKey(proc);
   } catch (exception& e) {
-    return vector<string>{};
+    return vector<int>{};
   }
 }
 
-vector<string> Pkb::GetAllCallers(const string& proc) const {
+vector<int> Pkb::GetAllCallers(const int proc) const {
   try {
     return called_by_star_table_->GetValueByKey(proc);
   } catch (exception& e) {
-    return vector<string>{};
+    return vector<int>{};
   }
 }
 
-vector<string> Pkb::GetCallees(const string& proc) const {
+vector<int> Pkb::GetCallees(const int proc) const {
   try {
     return calls_table_->GetValueByKey(proc);
   } catch (exception& e) {
-    return vector<string>{};
+    return vector<int>{};
   }
 }
 
-vector<string> Pkb::GetAllCallees(const string& proc) const {
+vector<int> Pkb::GetAllCallees(const int proc) const {
   try {
     return calls_star_table_->GetValueByKey(proc);
   } catch (exception& e) {
-    return vector<string>{};
+    return vector<int>{};
   }
 }
 
@@ -186,19 +186,19 @@ vector<pair<T2, T3>> UnfoldResults(T1 table_to_unfold) {
   return result;
 }
 
-vector<pair<string, string>> Pkb::GetAllCallsPairs() const {
+vector<pair<int, int>> Pkb::GetAllCallsPairs() const {
   try {
-    return UnfoldResults<CallsTable*, string, string>(calls_table_);
+    return UnfoldResults<CallsTable*, int, int>(calls_table_);
   } catch (exception& e) {
-    return vector<pair<string, string>>{};
+    return vector<pair<int, int>>{};
   }
 }
 
-vector<pair<string, string>> Pkb::GetAllTransitiveCallsPairs() const {
+vector<pair<int, int>> Pkb::GetAllTransitiveCallsPairs() const {
   try {
-    return UnfoldResults<CallsStarTable*, string, string>(calls_star_table_);
+    return UnfoldResults<CallsStarTable*, int, int>(calls_star_table_);
   } catch (exception& e) {
-    return vector<pair<string, string>>{};
+    return vector<pair<int, int>>{};
   }
 }
 
@@ -406,16 +406,31 @@ bool Pkb::AddFollows(const int key, const int value) {
 }
 
 bool Pkb::AddCalls(const string& key, const vector<string>& value) {
-  bool add_success = calls_table_->AddKeyValuePair(key, value);
+  bool add_success;
+  if (procedure_set_.find(key) == procedure_set_.end()) {
+    add_success = AddEntityToSet(EntityIdentifier::kProc, key);
+  }
+  for (const string proc: value) {
+    if (procedure_set_.find(proc) == procedure_set_.end()) {
+      add_success = add_success && AddEntityToSet(EntityIdentifier::kProc, proc);
+    }
+  }
+  int key_idx = GetIndexByProc(key);
+  vector<int> value_idx_lst;
+  for (const string proc: value) {
+    value_idx_lst.push_back(GetIndexByProc(proc));
+  }
+  add_success = add_success && calls_table_->AddKeyValuePair(key_idx, value_idx_lst);
   // Populate the reverse relation
   for (const string called : value) {
+    const int called_idx = GetIndexByProc(called);
     try {
       // Get the callers and then add in the new caller
-      vector<string> callers = called_by_table_->GetValueByKey(called);
-      callers.push_back(key);
-      called_by_table_->UpdateKeyWithNewValue(called, callers);
+      vector<int> callers = called_by_table_->GetValueByKey(called_idx);
+      callers.push_back(key_idx);
+      called_by_table_->UpdateKeyWithNewValue(called_idx, callers);
     } catch (InvalidKeyException& e) {
-      add_success = called_by_table_->AddKeyValuePair(called, vector<string>{key});
+      add_success = called_by_table_->AddKeyValuePair(called_idx, vector<int>{key_idx});
     }
   }
 

@@ -31,7 +31,7 @@ void PopulateForP(T1 table_to_refer, T2 table_to_update) {
 
 // Helper
 template<typename T1, typename T2, typename T3>
-T3 DFS(T1 table_to_refer, T2 table_to_update, T3 key) {
+T3 Dfs(T1 table_to_refer, T2 table_to_update, T3 key) {
   if (table_to_update->KeyExistsInTable(key)) {
     return key;
   }
@@ -45,7 +45,7 @@ T3 DFS(T1 table_to_refer, T2 table_to_update, T3 key) {
 
   vector<T3> ans;
   for (T3 child_key : children_lst) {
-    string end_val = DFS<T1, T2, string>(table_to_refer, table_to_update, child_key);
+    int end_val = Dfs<T1, T2, int>(table_to_refer, table_to_update, child_key);
     ans.push_back(end_val);
     // Add the children of the current key if the key exists
     if (table_to_update->KeyExistsInTable(end_val)) {
@@ -66,7 +66,7 @@ T3 DFS(T1 table_to_refer, T2 table_to_update, T3 key) {
 template<typename T1, typename T2, typename T3>
 void PopulateForC(T1 table_to_refer, T2 table_to_update) {
   for (const T3 key : table_to_refer->GetKeyLst()) {
-    DFS<T1, T2, string>(table_to_refer, table_to_update, key);
+    Dfs<T1, T2, int>(table_to_refer, table_to_update, key);
   }
 }
 
