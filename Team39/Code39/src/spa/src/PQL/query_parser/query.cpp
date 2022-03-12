@@ -41,10 +41,6 @@ namespace pql {
   bool IsCloseBracket(char c) {
     return c == ')';
   }
-  
-  bool IsDot(char c) {
-    return c == '.';
-  }
 
   bool IsHash(char c) {
     return c == '#';
@@ -80,29 +76,29 @@ namespace pql {
   });
 
   const std::map<pql::RelationshipTypes, std::unordered_set<EntityIdentifier>> left_synonym_domains {
-      {kFollows, stmts},
-      {kFollowsT, stmts},
-      {kParent, stmts},
-      {kParentT, stmts},
-      {kUsesS, stmts},
-      {kUsesP, uses_and_modifies_left_domain},
-      {kModifiesS, stmts},
-      {kModifiesP, uses_and_modifies_left_domain},
-      {kCalls, procs},
-      {kCallsT, procs}
+    {kFollows, stmts},
+    {kFollowsT, stmts},
+    {kParent, stmts},
+    {kParentT, stmts},
+    {kUsesS, stmts},
+    {kUsesP, uses_and_modifies_left_domain},
+    {kModifiesS, stmts},
+    {kModifiesP, uses_and_modifies_left_domain},
+    {kCalls, procs},
+    {kCallsT, procs}
   };
 
   const std::map<pql::RelationshipTypes, std::unordered_set<EntityIdentifier>> right_synonym_domains {
-      {kFollows, stmts},
-      {kFollowsT, stmts},
-      {kParent, stmts},
-      {kParentT, stmts},
-      {kUsesS, vars},
-      {kUsesP, vars},
-      {kModifiesS, vars},
-      {kModifiesP, vars},
-      {kCalls, procs},
-      {kCallsT, procs}
+    {kFollows, stmts},
+    {kFollowsT, stmts},
+    {kParent, stmts},
+    {kParentT, stmts},
+    {kUsesS, vars},
+    {kUsesP, vars},
+    {kModifiesS, vars},
+    {kModifiesP, vars},
+    {kCalls, procs},
+    {kCallsT, procs}
   };
   
   const std::map<std::string, AttrIdentifier> attributeMap{
@@ -268,8 +264,8 @@ namespace pql {
   
   void Query::AddAttrRef(Synonym s) {
     AttrIdentifier attr = defaultAttrMap.at(s.GetDeclaration()); 
-    AttrRef *attr_ref = new AttrRef(s, attr);
-    Query::attr_refs.push_back(*attr_ref);
+    AttrRef attr_ref = AttrRef(s, attr);
+    Query::attr_refs.push_back(attr_ref);
   }
 
   void Query::AddAttrRef(Synonym s, AttrIdentifier attr) {
@@ -277,10 +273,10 @@ namespace pql {
     std::unordered_set<AttrIdentifier> expected_attrs = validAttrMap.at(entity_id);
     bool isAttrExpected = expected_attrs.find(attr) != expected_attrs.end();
     if (isAttrExpected) {
-      AttrRef* attr_ref = new AttrRef(s, attr);
-      Query::attr_refs.push_back(*attr_ref);
+      AttrRef attr_ref = AttrRef(s, attr);
+      Query::attr_refs.push_back(attr_ref);
     } else {
-      throw ParseException();
+      throw SemanticallyInvalidException();
     }
   }
 
