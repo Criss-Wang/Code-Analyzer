@@ -60,7 +60,7 @@ TEST_CASE("Invalid queries") {
     RequireInvalidQuery(invalid_queries_dir + "2_test3.txt"); //Missing space between such that
     RequireInvalidQuery(invalid_queries_dir + "2_test4.txt"); //Misspelled keyword for relationship
   }
-  /*
+  
   SECTION("Select clause contains synonyms that are not declared") {
     RequireInvalidQuery(invalid_queries_dir + "3_test1.txt");
     RequireInvalidQuery(invalid_queries_dir + "3_test2.txt");
@@ -84,7 +84,7 @@ TEST_CASE("Invalid queries") {
     RequireInvalidQuery(invalid_queries_dir + "6_test1.txt"); //pattern a(_, "x +")
     RequireInvalidQuery(invalid_queries_dir + "6_test2.txt"); //pattern a(_, "x (3 + 3)")
     RequireInvalidQuery(invalid_queries_dir + "6_test3.txt"); //pattern a(_, "(3 + y / 3")
-  }*/
+  }
 
   SECTION("Select clause such that invalid attributes are used") {
     RequireInvalidQuery(invalid_queries_dir + "7_test1.txt"); //stmt.procName

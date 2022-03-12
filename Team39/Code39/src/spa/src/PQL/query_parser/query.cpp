@@ -5,7 +5,6 @@
 #include <unordered_set>
 #include <string>
 #include <sstream>
-#include <iostream>
 
 namespace pql {
   bool IsLetter(char c) {
@@ -236,7 +235,6 @@ namespace pql {
     }
   }
 
-  // Overloaded method with specified attribute
   void Query::AddResultSynonym(const std::string& name, const std::string& attribute) {
     if (Query::SynonymDeclared(name) && IsAttrStringValid(attribute)) {
       Query::result_synonyms.push_back(Query::synonyms.at(name));
@@ -269,12 +267,11 @@ namespace pql {
   }
   
   void Query::AddAttrRef(Synonym s) {
-    AttrIdentifier attr = defaultAttrMap.at(s.GetDeclaration()); // Use default attribute 
+    AttrIdentifier attr = defaultAttrMap.at(s.GetDeclaration()); 
     AttrRef *attr_ref = new AttrRef(s, attr);
     Query::attr_refs.push_back(*attr_ref);
   }
 
-  // Overloaded method with specified attribute 
   void Query::AddAttrRef(Synonym s, AttrIdentifier attr) {
     EntityIdentifier entity_id = s.GetDeclaration();
     std::unordered_set<AttrIdentifier> expected_attrs = validAttrMap.at(entity_id);
