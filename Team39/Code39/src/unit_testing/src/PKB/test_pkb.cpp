@@ -136,7 +136,7 @@ TEST_CASE("Populating Parent and Child Table") {
     REQUIRE(!pkb.IsParent(2, 3));
     REQUIRE(!pkb.IsParent(1, 5));
 
-    REQUIRE(pkb.GetParent(1) == vector<int>{});
+    REQUIRE(pkb.GetParent(1).empty());
     REQUIRE(pkb.GetParent(2) == vector<int>{1});
     REQUIRE(pkb.GetParent(5) == vector<int>{4});
     REQUIRE(pkb.GetParent(5) != vector<int>{1});
@@ -146,7 +146,7 @@ TEST_CASE("Populating Parent and Child Table") {
   SECTION("Test API for PQL side for ChildTable") {
     REQUIRE(pkb.GetChild(1) == vector<int>{2, 3, 4});
     REQUIRE(pkb.GetChild(1) != vector<int>{1, 2});
-    REQUIRE(pkb.GetChild(5) == vector<int>{});
+    REQUIRE(pkb.GetChild(5).empty());
     REQUIRE(pkb.GetChild(4) == vector<int>{5, 6});
   }
 }
@@ -185,7 +185,7 @@ TEST_CASE("Populating Calls Table") {
 
     REQUIRE(pkb.GetCallees("p1") == vector<string>{"p4", "p5"});
     REQUIRE(pkb.GetCallees("p2") == vector<string>{"p3", "p4"});
-    REQUIRE(pkb.GetCallees("p100") == vector<string>{});
+    REQUIRE(pkb.GetCallees("p100").empty());
     REQUIRE(pkb.GetCallees("p1") != vector<string>{"p4"});
 
     vector<pair<string, string>> expected_calls_pairs = {make_pair("p1", "p4"), make_pair("p1", "p5"), make_pair("p2", "p3"), make_pair("p2", "p4")};
@@ -309,6 +309,37 @@ TEST_CASE("Add String Entity") {
     REQUIRE(res.find("x") != res.end());
     REQUIRE(res.find("y") != res.end());
     REQUIRE(res.find("z") != res.end());
+
+    const vector<pair<int, string>> full_res = pkb.GetAllIndexVarPairs();
+    REQUIRE(full_res.size() == 3);
+    const vector<pair<string, int>> full_res_2 = pkb.GetAllVarIndexPairs();
+    REQUIRE(full_res_2.size() == 3);
+    const string var_res = pkb.GetVarByIndex(0);
+    REQUIRE(var_res == "x");
+    const int idx_res = pkb.GetIndexByVar("y");
+    REQUIRE(idx_res == 1);
+  }
+
+  SECTION("Adding procedure name") {
+    bool success = pkb.AddEntityToSet(EntityIdentifier::kProc, "x");
+    success = success && pkb.AddEntityToSet(EntityIdentifier::kProc, "y");
+    success = success && pkb.AddEntityToSet(EntityIdentifier::kProc, "z");
+    REQUIRE(success);
+
+    const unordered_set<string> res = pkb.GetAllEntityString(EntityIdentifier::kProc);
+    REQUIRE(res.size() == 3);
+    REQUIRE(res.find("x") != res.end());
+    REQUIRE(res.find("y") != res.end());
+    REQUIRE(res.find("z") != res.end());
+
+    const vector<pair<int, string>> full_res = pkb.GetAllIndexProcPairs();
+    REQUIRE(full_res.size() == 3);
+    const vector<pair<string, int>> full_res_2 = pkb.GetAllProcIndexPairs();
+    REQUIRE(full_res_2.size() == 3);
+    const string proc_res = pkb.GetProcByIndex(0);
+    REQUIRE(proc_res == "x");
+    const int idx_res = pkb.GetIndexByProc("y");
+    REQUIRE(idx_res == 1);
   }
 }
 

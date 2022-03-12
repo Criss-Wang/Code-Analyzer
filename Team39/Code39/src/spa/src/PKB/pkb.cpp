@@ -407,6 +407,18 @@ bool Pkb::AddPattern(bool& add_success, unordered_set<string> pattern_set, Table
   return add_success;
 }
 
+bool Pkb::UpdateIndexTable(Table<int, string>* index_to_string_table, Table<string, int>* string_to_int_table, const string& entity_value) {
+  try {
+    vector<string> curr_string_lst = string_to_int_table->GetKeyLst();
+    if (find(curr_string_lst.begin(), curr_string_lst.end(), entity_value) != curr_string_lst.end()) return true;
+    bool success = string_to_int_table->AddKeyValuePair(entity_value, curr_string_lst.size());
+    success = success && index_to_string_table->AddKeyValuePair(curr_string_lst.size(), entity_value);
+    return success;
+  } catch (exception& e) {
+    return false;
+  }
+}
+
 bool Pkb::AddPattern(const int line_num, const string& input) {
   // First the SP side should guarantee a valid input is sent
   // We then proceed to parse the set of valid substring patterns
@@ -557,10 +569,12 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const string&
     switch (entity_identifier) {
       case EntityIdentifier::kVariable: {
         variable_set_.insert(entity_val);
+        UpdateIndexTable(index_var_table_, var_index_table_, entity_val);
         return true;
       }
       case EntityIdentifier::kProc: {
         procedure_set_.insert(entity_val);
+        UpdateIndexTable(index_proc_table_, proc_index_table_, entity_val);
         return true;
       }
       default:
@@ -673,4 +687,52 @@ bool Pkb::IsProcedure(const string& proc_name) const {
 
 bool Pkb::IsAssign(int stmt_no) const {
   return assign_set_.find(stmt_no) != assign_set_.end();
+}
+
+
+vector<pair<int, string>> Pkb::GetAllIndexVarPairs() const {
+  return index_var_table_->GetKeyValueLst();
+}
+vector<pair<string, int>> Pkb::GetAllVarIndexPairs() const {
+  return var_index_table_->GetKeyValueLst();
+}
+
+string Pkb::GetVarByIndex(const int idx) const {
+  try {
+    return index_var_table_->GetValueByKey(idx);
+  }
+  catch (exception& e) {
+    return "";
+  }
+}
+
+int Pkb::GetIndexByVar(const string& var_name) const {
+  try {
+    return var_index_table_->GetValueByKey(var_name);
+  } catch (exception& e) {
+    return -1;
+  }
+}
+
+vector<pair<int, string>> Pkb::GetAllIndexProcPairs() const {
+  return index_proc_table_->GetKeyValueLst();
+}
+vector<pair<string, int>> Pkb::GetAllProcIndexPairs() const {
+  return proc_index_table_->GetKeyValueLst();
+}
+
+string Pkb::GetProcByIndex(const int idx) const {
+  try {
+    return index_proc_table_->GetValueByKey(idx);
+  } catch (exception& e) {
+    return "";
+  }
+}
+
+int Pkb::GetIndexByProc(const string& proc_name) const {
+  try {
+    return proc_index_table_->GetValueByKey(proc_name);
+  } catch (exception& e) {
+    return -1;
+  }
 }

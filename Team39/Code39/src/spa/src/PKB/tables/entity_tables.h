@@ -28,3 +28,11 @@ class WhileTable : public Table<int, vector<string>> {};
 
 // Procedure name mapping to a pair of integers - the start and end numbers for that procedure
 class ProcRangeTable: public Table<string, pair<int, int>> {};
+
+class VarIndexTable: public Table<string, int>{};
+
+class IndexVarTable: public Table<int, string>{};
+
+class ProcIndexTable : public Table<string, int> {};
+
+class IndexProcTable : public Table<int, string> {};

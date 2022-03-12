@@ -31,6 +31,10 @@ class Pkb {
     IfTable *if_table_ = new IfTable();
     WhileTable *while_table_ = new WhileTable();
     ProcRangeTable *proc_range_table_ = new ProcRangeTable();
+    VarIndexTable* var_index_table_ = new VarIndexTable();
+    IndexVarTable* index_var_table_ = new IndexVarTable();
+    ProcIndexTable* proc_index_table_ = new ProcIndexTable();
+    IndexProcTable* index_proc_table_ = new IndexProcTable();
 
     // Relation tables
     FollowsTable *follows_table_ = new FollowsTable();
@@ -79,6 +83,7 @@ class Pkb {
     bool AddModifies(int key, const vector<string>& value);
     bool AddUses(int key, const vector<string>& value);
     bool AddPattern(bool& add_success, unordered_set<string> pattern_set, Table<string, unordered_set<int>>* table_to_update, int line_num);
+    bool UpdateIndexTable(Table<int, string>* index_to_string_table, Table<string, int>* string_to_int_table, const string& entity_value);
 
   public:
     /**
@@ -156,6 +161,17 @@ class Pkb {
     unordered_set<int> GetAllEntityInt(const EntityIdentifier entity_identifier);
     unordered_set<string> GetAllEntityString(const EntityIdentifier entity_identifier);
     unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier entity_identifier);
+
+    // Get all the index-string relationships
+    [[nodiscard]] vector<pair<int, string>> GetAllIndexVarPairs() const;
+    [[nodiscard]] vector<pair<string, int>> GetAllVarIndexPairs() const;
+    [[nodiscard]] string GetVarByIndex(int idx) const;
+    [[nodiscard]] int GetIndexByVar(const string& var_name) const;
+
+    [[nodiscard]] vector<pair<int, string>> GetAllIndexProcPairs() const;
+    [[nodiscard]] vector<pair<string, int>> GetAllProcIndexPairs() const;
+    [[nodiscard]] string GetProcByIndex(int idx) const;
+    [[nodiscard]] int GetIndexByProc(const string& proc_name) const;
 
     // Get all the attribute
     [[nodiscard]] bool IsVar(const string& var_string) const;

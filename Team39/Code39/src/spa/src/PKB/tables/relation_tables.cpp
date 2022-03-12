@@ -2,10 +2,10 @@
 #include "table.h"
 
 // Helper function for populating the reverse relation for uses or modifies i.e. variable -> [line numbers]
-bool PopulateReverseRelationship(const vector<string>& keys, const int value_to_update, Table<string, vector<int>>& t) {
+bool PopulateReverseRelationship(const vector<int>& keys, const int value_to_update, Table<int, vector<int>>& t) {
   try {
     bool add_success = true;
-    for (const string var : keys) {
+    for (const int var : keys) {
       if (!t.KeyExistsInTable(var)) {
         add_success = t.AddKeyValuePair(var, { value_to_update }) && add_success;
         continue;
@@ -21,10 +21,10 @@ bool PopulateReverseRelationship(const vector<string>& keys, const int value_to_
   }
 }
 
-bool UsesVariableToStmtsTable::UpdateKeyValuePair(const int value_to_update, const vector<string>& keys) {
+bool UsesVariableToStmtsTable::UpdateKeyValuePair(const int value_to_update, const vector<int>& keys) {
   return PopulateReverseRelationship(keys, value_to_update, *this);
 }
 
-bool ModifiesVariableToStmtsTable::UpdateKeyValuePair(const int value_to_update, const vector<string>& keys) {
+bool ModifiesVariableToStmtsTable::UpdateKeyValuePair(const int value_to_update, const vector<int>& keys) {
   return PopulateReverseRelationship(keys, value_to_update, *this);
 }
