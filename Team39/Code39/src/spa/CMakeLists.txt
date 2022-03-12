@@ -4,7 +4,7 @@ file(GLOB srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Utility/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/SP/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_parser/*.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/*.cpp")
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Utility/CFG/*.cpp")
 file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PKB/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PKB/*.hpp"
@@ -12,7 +12,7 @@ file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h" "${CMAKE_CURRENT_SOURCE_
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Utility/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/Utility/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/SP/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/SP/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_parser/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_parser/*.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/*.hpp")
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Utility/CFG/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/Utility/CFG/*.hpp")
 
 add_library(spa ${srcs} ${headers})
