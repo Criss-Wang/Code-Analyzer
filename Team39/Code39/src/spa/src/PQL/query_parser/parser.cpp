@@ -116,12 +116,20 @@ namespace pql {
     ps.EatWhiteSpaces();
   }
 
-  void Parser::ParseTuple() { // TODO: implement attr in tuple
+  void Parser::ParseTuple() {
     ps.Consume();
     while (ps.Peek() != '>') {
-      Parser::query.AddResultSynonym(ps.ParseName());
-      if (ps.Peek() != '>') {
-        ps.Expect(",");
+      std::string name = ps.ParseName();
+      if (ps.Peek() == '.') {
+        ps.Next();
+        std::string attr = ps.ParseAttribute();
+        Parser::query.AddResultSynonym(name, attr);
+      } else {
+        Parser::query.AddResultSynonym(name);
+      }
+
+      if (ps.Peek() == ',') {
+        ps.Next();
       }
     }
     ps.Consume();

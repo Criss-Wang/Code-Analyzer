@@ -60,7 +60,7 @@ TEST_CASE("Invalid queries") {
     RequireInvalidQuery(invalid_queries_dir + "2_test3.txt"); //Missing space between such that
     RequireInvalidQuery(invalid_queries_dir + "2_test4.txt"); //Misspelled keyword for relationship
   }
-  
+  /*
   SECTION("Select clause contains synonyms that are not declared") {
     RequireInvalidQuery(invalid_queries_dir + "3_test1.txt");
     RequireInvalidQuery(invalid_queries_dir + "3_test2.txt");
@@ -70,7 +70,7 @@ TEST_CASE("Invalid queries") {
     RequireInvalidQuery(invalid_queries_dir + "4_test1.txt"); //Modifies
     RequireInvalidQuery(invalid_queries_dir + "4_test2.txt"); //Uses
   }
-
+  
   SECTION("With Modifies and Uses such that the second argument is not a variable") {
     RequireInvalidQuery(invalid_queries_dir + "5_test1.txt"); //Modifies(s, s1)
     RequireInvalidQuery(invalid_queries_dir + "5_test2.txt"); //Modifies(s, 3)
@@ -84,13 +84,14 @@ TEST_CASE("Invalid queries") {
     RequireInvalidQuery(invalid_queries_dir + "6_test1.txt"); //pattern a(_, "x +")
     RequireInvalidQuery(invalid_queries_dir + "6_test2.txt"); //pattern a(_, "x (3 + 3)")
     RequireInvalidQuery(invalid_queries_dir + "6_test3.txt"); //pattern a(_, "(3 + y / 3")
-  }
+  }*/
 
   SECTION("Select clause such that invalid attributes are used") {
     RequireInvalidQuery(invalid_queries_dir + "7_test1.txt"); //stmt.procName
     RequireInvalidQuery(invalid_queries_dir + "7_test2.txt"); //proc.Procname
     RequireInvalidQuery(invalid_queries_dir + "7_test3.txt"); //read.value
     RequireInvalidQuery(invalid_queries_dir + "7_test4.txt"); //variable.var
+    RequireInvalidQuery(invalid_queries_dir + "7_test5.txt"); //<ifs.stmt#, w.stmt #>
   }
 
 }
@@ -137,5 +138,12 @@ TEST_CASE("Valid queries") {
     RequireValidQuery(valid_queries_dir + "6_test2.txt", 0, 1, 1); //Select a.stmt#
     RequireValidQuery(valid_queries_dir + "6_test3.txt", 1, 1, 3); //Select v.varName
     RequireValidQuery(valid_queries_dir + "6_test4.txt", 1, 1, 3); //Select c.value
+  }
+
+  SECTION("With Select tuple and attribute") {
+    RequireValidQuery(valid_queries_dir + "6_test5.txt", 0, 0, 2); //<c.value, s.stmt#>
+    RequireValidQuery(valid_queries_dir + "6_test6.txt", 0, 1, 3); //<v.varName, pr.procName>
+    RequireValidQuery(valid_queries_dir + "6_test7.txt", 0, 0, 1); //<r.stmt#, r .varName>
+    RequireValidQuery(valid_queries_dir + "6_test8.txt", 0, 0, 2); //<p, p.varName, pr>
   }
 }

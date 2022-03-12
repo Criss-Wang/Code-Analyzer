@@ -1,0 +1,2 @@
+print p; procedure pr;
+Select <p, p.varName, pr>
