@@ -233,8 +233,8 @@ TEST_CASE("Uses Statement to Variables Table") {
     REQUIRE(key_lst.empty());
   }
 
-  bool add_success = uses_stmt_to_variables_table.AddKeyValuePair(1, vector<string>{"x", "y"});
-  add_success = uses_stmt_to_variables_table.AddKeyValuePair(2, vector<string>{"z"}) && add_success;
+  bool add_success = uses_stmt_to_variables_table.AddKeyValuePair(1, vector<int>{0, 1});
+  add_success = uses_stmt_to_variables_table.AddKeyValuePair(2, vector<int>{2}) && add_success;
 
   SECTION("Check population success") {
     REQUIRE(uses_stmt_to_variables_table.GetTableSize() == 2);
@@ -242,12 +242,12 @@ TEST_CASE("Uses Statement to Variables Table") {
   }
 
   SECTION("Throw custom exception if key already exists in the table") {
-    CHECK_THROWS_AS(uses_stmt_to_variables_table.AddKeyValuePair(1, vector<string>{"z"}), KeyInUseException);
+    CHECK_THROWS_AS(uses_stmt_to_variables_table.AddKeyValuePair(1, vector<int>{2}), KeyInUseException);
   }
 
   SECTION("Get value from table by key") {
-    vector<string> value = uses_stmt_to_variables_table.GetValueByKey(1);
-    vector<string> expected_value = {"x", "y"};
+    vector<int> value = uses_stmt_to_variables_table.GetValueByKey(1);
+    vector<int> expected_value = {"x", "y"};
     REQUIRE(value == expected_value);
   }
 
@@ -265,8 +265,8 @@ TEST_CASE("Uses Statement to Variables Table") {
   }
 
   SECTION("Get key-value list from table") {
-    vector<pair<int, vector<string>>> key_value_lst = uses_stmt_to_variables_table.GetKeyValueLst();
-    vector<pair<int, vector<string>>> expected_key_value_lst = {make_pair(1, vector<string>{"x", "y"}), make_pair(2, vector<string>{"z"})};
+    vector<pair<int, vector<int>>> key_value_lst = uses_stmt_to_variables_table.GetKeyValueLst();
+    vector<pair<int, vector<int>>> expected_key_value_lst = {make_pair(1, vector<int>{0, 1}), make_pair(2, vector<int>{2})};
 
     std::sort(key_value_lst.begin(), key_value_lst.end());
     std::sort(expected_key_value_lst.begin(), expected_key_value_lst.end());
@@ -274,8 +274,8 @@ TEST_CASE("Uses Statement to Variables Table") {
   }
 
   SECTION("Update value in table") {
-    uses_stmt_to_variables_table.UpdateKeyWithNewValue(2, vector<string>{"z", "update"});
-    REQUIRE(uses_stmt_to_variables_table.GetValueByKey(2) == vector<string>{"z", "update"});
+    uses_stmt_to_variables_table.UpdateKeyWithNewValue(2, vector<int>{2, 3});
+    REQUIRE(uses_stmt_to_variables_table.GetValueByKey(2) == vector<int>{2, 3});
   }
 }
 
@@ -284,13 +284,13 @@ TEST_CASE("Uses Variable to Statements Table") {
   UsesVariableToStmtsTable uses_variable_to_stmts_table = UsesVariableToStmtsTable();
 
   SECTION("Get key list when table is empty") {
-    vector<string> key_lst = uses_variable_to_stmts_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    vector<int> key_lst = uses_variable_to_stmts_table.GetKeyLst();
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 
-  bool add_success = uses_variable_to_stmts_table.AddKeyValuePair("x", vector<int>{1, 2});
-  add_success = uses_variable_to_stmts_table.AddKeyValuePair("y", vector<int>{3}) && add_success;
+  bool add_success = uses_variable_to_stmts_table.AddKeyValuePair(0, vector<int>{1, 2});
+  add_success = uses_variable_to_stmts_table.AddKeyValuePair(1, vector<int>{3}) && add_success;
 
   SECTION("Check population success") {
     REQUIRE(uses_variable_to_stmts_table.GetTableSize() == 2);
@@ -298,22 +298,22 @@ TEST_CASE("Uses Variable to Statements Table") {
   }
 
   SECTION("Throw custom exception if key already exists in the table") {
-    CHECK_THROWS_AS(uses_variable_to_stmts_table.AddKeyValuePair("x", vector<int>{3, 4, 5}), KeyInUseException);
+    CHECK_THROWS_AS(uses_variable_to_stmts_table.AddKeyValuePair(0, vector<int>{3, 4, 5}), KeyInUseException);
   }
 
   SECTION("Get value from table by key") {
-    vector<int> value = uses_variable_to_stmts_table.GetValueByKey("x");
+    vector<int> value = uses_variable_to_stmts_table.GetValueByKey(0);
     vector<int> expected_value = {1, 2};
     REQUIRE(value == expected_value);
   }
 
   SECTION("Throw custom exception if key does not exist in the table when retrieving value by key") {
-    CHECK_THROWS_AS(uses_variable_to_stmts_table.GetValueByKey("invalid"), InvalidKeyException);
+    CHECK_THROWS_AS(uses_variable_to_stmts_table.GetValueByKey(4), InvalidKeyException);
   }
 
   SECTION("Get key list from table") {
-    vector<string> key_lst = uses_variable_to_stmts_table.GetKeyLst();
-    vector<string> expected_key_lst = {"x", "y"};
+    vector<int> key_lst = uses_variable_to_stmts_table.GetKeyLst();
+    vector<int> expected_key_lst = {0, 1};
 
     std::sort(key_lst.begin(), key_lst.end());
     std::sort(expected_key_lst.begin(), expected_key_lst.end());
@@ -321,8 +321,8 @@ TEST_CASE("Uses Variable to Statements Table") {
   }
 
   SECTION("Get key-value list from table") {
-    vector<pair<string, vector<int>>> key_value_lst = uses_variable_to_stmts_table.GetKeyValueLst();
-    vector<pair<string, vector<int>>> expected_key_value_lst = {make_pair("x", vector<int>{1, 2}), make_pair("y", vector<int>{3})};
+    vector<pair<int, vector<int>>> key_value_lst = uses_variable_to_stmts_table.GetKeyValueLst();
+    vector<pair<int, vector<int>>> expected_key_value_lst = {make_pair(0, vector<int>{1, 2}), make_pair(1, vector<int>{3})};
 
     std::sort(key_value_lst.begin(), key_value_lst.end());
     std::sort(expected_key_value_lst.begin(), expected_key_value_lst.end());
@@ -330,7 +330,7 @@ TEST_CASE("Uses Variable to Statements Table") {
   }
 
   SECTION("Update value in table") {
-    uses_variable_to_stmts_table.UpdateKeyWithNewValue("x", vector<int>{100, 200});
-    REQUIRE(uses_variable_to_stmts_table.GetValueByKey("x") == vector<int>{100, 200});
+    uses_variable_to_stmts_table.UpdateKeyWithNewValue(0, vector<int>{100, 200});
+    REQUIRE(uses_variable_to_stmts_table.GetValueByKey(0) == vector<int>{100, 200});
   }
 }

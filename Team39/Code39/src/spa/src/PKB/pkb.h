@@ -142,17 +142,17 @@ class Pkb {
     [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs() const;
 
-    [[nodiscard]] bool IsUsesStmt(int stmt, const string& var) const;
+    [[nodiscard]] bool IsUsesStmt(int stmt, int var_idx) const;
     [[nodiscard]] bool IsUsesStmtExists() const;
-    [[nodiscard]] vector<int> GetUsesStmtsByVar(const string& var) const;
-    [[nodiscard]] vector<string> GetUsesVarByStmt(int stmt) const;
-    [[nodiscard]] vector<pair<int, string>> GetAllUsesStmtVarPairs() const;
+    [[nodiscard]] vector<int> GetUsesStmtsByVar(int var_idx) const;
+    [[nodiscard]] vector<int> GetUsesVarByStmt(int stmt) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllUsesStmtVarPairs() const;
 
-    [[nodiscard]] bool IsModifiesStmt(int stmt, const string& var) const;
+    [[nodiscard]] bool IsModifiesStmt(int stmt, int var_idx) const;
     [[nodiscard]] bool IsModifiesStmtExists() const;
-    [[nodiscard]] vector<int> GetModifiesStmtsByVar(const string& var) const;
-    [[nodiscard]] vector<string> GetModifiesVarByStmt(int stmt) const;
-    [[nodiscard]] vector<pair<int, string>> GetAllModifiesStmtVarPairs() const;
+    [[nodiscard]] vector<int> GetModifiesStmtsByVar(int var_idx) const;
+    [[nodiscard]] vector<int> GetModifiesVarByStmt(int stmt) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllModifiesStmtVarPairs() const;
 
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
     [[nodiscard]] unordered_set<int> GetStmtsWithExactPattern(const string& pattern) const;

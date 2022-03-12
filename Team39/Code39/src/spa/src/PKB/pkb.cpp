@@ -242,10 +242,10 @@ vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs() const {
   }
 }
 
-bool Pkb::IsUsesStmt(const int stmt, const string& var) const {
+bool Pkb::IsUsesStmt(const int stmt, const int var_idx) const {
   try {
-    vector<string> value = uses_stmt_to_variables_table_->GetValueByKey(stmt);
-    return find(value.begin(), value.end(), var) != value.end();
+    vector<int> value = uses_stmt_to_variables_table_->GetValueByKey(stmt);
+    return find(value.begin(), value.end(), var_idx) != value.end();
   } catch (exception& e) {
     return false;
   }
@@ -255,34 +255,34 @@ bool Pkb::IsUsesStmtExists() const {
   return uses_stmt_to_variables_table_->GetTableSize() > 0;
 }
 
-vector<int> Pkb::GetUsesStmtsByVar(const string& var) const {
+vector<int> Pkb::GetUsesStmtsByVar(const int var_idx) const {
   try {
-    return uses_variable_to_stmts_table_->GetValueByKey(var);
+    return uses_variable_to_stmts_table_->GetValueByKey(var_idx);
   } catch (exception& e) {
     return vector<int>{};
   }
 }
 
-vector<string> Pkb::GetUsesVarByStmt(const int stmt) const {
+vector<int> Pkb::GetUsesVarByStmt(const int stmt) const {
   try {
     return uses_stmt_to_variables_table_->GetValueByKey(stmt);
   } catch (exception& e) {
-    return vector<string>{};
+    return vector<int>{};
   }
 }
 
-vector<pair<int, string>> Pkb::GetAllUsesStmtVarPairs() const {
+vector<pair<int, int>> Pkb::GetAllUsesStmtVarPairs() const {
   try {
-    return UnfoldResults<UsesStmtToVariablesTable*, int, string>(uses_stmt_to_variables_table_);
+    return UnfoldResults<UsesStmtToVariablesTable*, int, int>(uses_stmt_to_variables_table_);
   } catch (exception& e) {
-    return vector<pair<int, string>>{};
+    return vector<pair<int, int>>{};
   }
 }
 
-bool Pkb::IsModifiesStmt(const int stmt, const string& var) const {
+bool Pkb::IsModifiesStmt(const int stmt, const int var_idx) const {
   try {
-    vector<string> value = modifies_stmt_to_variables_table_->GetValueByKey(stmt);
-    return find(value.begin(), value.end(), var) != value.end();
+    vector<int> value = modifies_stmt_to_variables_table_->GetValueByKey(stmt);
+    return find(value.begin(), value.end(), var_idx) != value.end();
   } catch (exception& e) {
     return false;
   }
@@ -292,27 +292,27 @@ bool Pkb::IsModifiesStmtExists() const {
   return modifies_stmt_to_variables_table_->GetTableSize() > 0;
 }
 
-vector<int> Pkb::GetModifiesStmtsByVar(const string& var) const {
+vector<int> Pkb::GetModifiesStmtsByVar(const int var_idx) const {
   try {
-    return modifies_variable_to_stmts_table_->GetValueByKey(var);
+    return modifies_variable_to_stmts_table_->GetValueByKey(var_idx);
   } catch (exception& e) {
     return vector<int>{};
   }
 }
 
-vector<string> Pkb::GetModifiesVarByStmt(const int stmt) const {
+vector<int> Pkb::GetModifiesVarByStmt(const int stmt) const {
   try {
     return modifies_stmt_to_variables_table_->GetValueByKey(stmt);
   } catch (exception& e) {
-    return vector<string>{};
+    return vector<int>{};
   }
 }
 
-vector<pair<int, string>> Pkb::GetAllModifiesStmtVarPairs() const {
+vector<pair<int, int>> Pkb::GetAllModifiesStmtVarPairs() const {
   try {
-    return UnfoldResults<ModifiesStmtToVariablesTable*, int, string>(modifies_stmt_to_variables_table_);
+    return UnfoldResults<ModifiesStmtToVariablesTable*, int, int>(modifies_stmt_to_variables_table_);
   } catch (exception& e) {
-    return vector<pair<int, string>>{};
+    return vector<pair<int, int>>{};
   }
 }
 
@@ -381,16 +381,24 @@ bool Pkb::AddNext(const int key, const int value) {
 }
 
 bool Pkb::AddModifies(const int key, const vector<string>& value) {
-  bool add_success = modifies_stmt_to_variables_table_->AddKeyValuePair(key, value);
+  vector<int> value_idx;
+  for (auto var_name: value) {
+    value_idx.push_back(GetIndexByVar(var_name));
+  }
+  bool add_success = modifies_stmt_to_variables_table_->AddKeyValuePair(key, value_idx);
   // Populate the reverse relation
-  add_success = add_success && modifies_variable_to_stmts_table_->UpdateKeyValuePair(key, value);
+  add_success = add_success && modifies_variable_to_stmts_table_->UpdateKeyValuePair(key, value_idx);
   return add_success;
 }
 
 bool Pkb::AddUses(const int key, const vector<string>& value) {
-  bool add_success = uses_stmt_to_variables_table_->AddKeyValuePair(key, value);
+  vector<int> value_idx;
+  for (auto var_name : value) {
+    value_idx.push_back(GetIndexByVar(var_name));
+  }
+  bool add_success = uses_stmt_to_variables_table_->AddKeyValuePair(key, value_idx);
   // Populate the reverse relation
-  add_success = add_success && uses_variable_to_stmts_table_->UpdateKeyValuePair(key, value);
+  add_success = add_success && uses_variable_to_stmts_table_->UpdateKeyValuePair(key, value_idx);
   return add_success;
 }
 
