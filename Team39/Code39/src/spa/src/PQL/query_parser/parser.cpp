@@ -90,12 +90,18 @@ namespace pql {
   }
 
   void Parser::ParseSelect() {
+    bool has_attribute = false;
     ps.EatWhiteSpaces();
     if (ps.Peek() == '<') {
       Parser::ParseTuple();
       Parser::query.SetBoolean(false);
     } else {
       std::string name = ps.ParseName();
+      if (ps.Peek() == '.') {
+        ps.Next(); 
+        std::string attribute = ps.ParseAttribute();
+        has_attribute = true; 
+      }
       if (name == "BOOLEAN") {
         if (Parser::query.SynonymDeclared(name)) {
           Parser::query.AddResultSynonym(name);
@@ -111,7 +117,7 @@ namespace pql {
     ps.EatWhiteSpaces();
   }
 
-  void Parser::ParseTuple() {
+  void Parser::ParseTuple() { // TODO: implement attr in tuple
     ps.Consume();
     while (ps.Peek() != '>') {
       Parser::query.AddResultSynonym(ps.ParseName());

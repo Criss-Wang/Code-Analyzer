@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <string>
 #include <sstream>
+#include <iostream>
 
 namespace pql {
   bool IsLetter(char c) {
@@ -40,6 +41,14 @@ namespace pql {
 
   bool IsCloseBracket(char c) {
     return c == ')';
+  }
+  
+  bool IsDot(char c) {
+    return c == '.';
+  }
+
+  bool IsHash(char c) {
+    return c == '#';
   }
 
   std::unordered_set<EntityIdentifier> stmts({
@@ -96,7 +105,66 @@ namespace pql {
       {kCalls, procs},
       {kCallsT, procs}
   };
+  
+  const std::map<std::string, AttrIdentifier> attributeMap{
+    {"value",      AttrIdentifier::kValue},
+    {"stmt#",      AttrIdentifier::kStmtNum},
+    {"varName",    AttrIdentifier::kVarName},
+    {"procName",   AttrIdentifier::kProcName}
+  };
 
+  const std::map<EntityIdentifier, AttrIdentifier> defaultAttrMap{
+    {EntityIdentifier::kProc,      AttrIdentifier::kProcName},
+    {EntityIdentifier::kVariable,  AttrIdentifier::kVarName},
+    {EntityIdentifier::kConstant,  AttrIdentifier::kValue},
+    {EntityIdentifier::kCall,      AttrIdentifier::kStmtNum},
+    {EntityIdentifier::kRead,      AttrIdentifier::kStmtNum},
+    {EntityIdentifier::kPrint,     AttrIdentifier::kStmtNum},
+    {EntityIdentifier::kWhile,     AttrIdentifier::kStmtNum},
+    {EntityIdentifier::kIf,        AttrIdentifier::kStmtNum},
+    {EntityIdentifier::kAssign,    AttrIdentifier::kStmtNum},
+    {EntityIdentifier::kStmt,      AttrIdentifier::kStmtNum}
+  };
+
+  std::unordered_set<AttrIdentifier> valid_attr_proc({
+    AttrIdentifier::kProcName
+  });
+
+  std::unordered_set<AttrIdentifier> valid_attr_var({
+    AttrIdentifier::kVarName
+  });
+
+  std::unordered_set<AttrIdentifier> valid_attr_const({
+    AttrIdentifier::kValue
+  });
+
+  std::unordered_set<AttrIdentifier> valid_attr_call({
+    AttrIdentifier::kProcName,
+    AttrIdentifier::kStmtNum
+  });
+
+  std::unordered_set<AttrIdentifier> valid_attr_read_print({
+    AttrIdentifier::kVarName,
+    AttrIdentifier::kStmtNum
+  });
+
+  std::unordered_set<AttrIdentifier> valid_attr_stmt({
+    AttrIdentifier::kStmtNum
+  });
+
+  const std::map<EntityIdentifier, std::unordered_set<AttrIdentifier>> validAttrMap{
+    {EntityIdentifier::kProc,     valid_attr_proc},
+    {EntityIdentifier::kVariable, valid_attr_var},
+    {EntityIdentifier::kConstant, valid_attr_const},
+    {EntityIdentifier::kCall,     valid_attr_call},
+    {EntityIdentifier::kRead,     valid_attr_read_print},
+    {EntityIdentifier::kPrint,    valid_attr_read_print},
+    {EntityIdentifier::kWhile,    valid_attr_stmt},
+    {EntityIdentifier::kIf,       valid_attr_stmt},
+    {EntityIdentifier::kAssign,   valid_attr_stmt},
+    {EntityIdentifier::kStmt,     valid_attr_stmt}
+  };
+  
   void Query::SetSemanticallyInvalid() {
     Query::is_semantically_valid = false;
   }
@@ -139,6 +207,10 @@ namespace pql {
   bool Query::SynonymDeclared(const std::string &name) {
     return synonyms.find(name) != synonyms.end();
   }
+  
+  bool Query::IsAttrStringValid(const std::string& attribute) {
+    return attributeMap.find(attribute) != attributeMap.end();
+  }
 
   bool Query::IsAssignSynonym(const std::string &name) {
     return Query::SynonymDeclared(name) && synonyms.at(name).GetDeclaration() == EntityIdentifier::kAssign;
@@ -153,11 +225,24 @@ namespace pql {
       Query::synonyms.insert(std::pair<std::string, pql::Synonym>(name, sm));
     }
   }
-
+  
   void Query::AddResultSynonym(const std::string &name) {
     if (Query::SynonymDeclared(name)) {
       Query::result_synonyms.push_back(Query::synonyms.at(name));
       Query::AddUsedSynonym(name);
+      Query::AddAttrRef(Query::synonyms.at(name));
+    } else {
+      throw ParseException();
+    }
+  }
+
+  // Overloaded method with specified attribute
+  void Query::AddResultSynonym(const std::string& name, const std::string& attribute) {
+    if (Query::SynonymDeclared(name) && IsAttrStringValid(attribute)) {
+      Query::result_synonyms.push_back(Query::synonyms.at(name));
+      Query::AddUsedSynonym(name);
+      AttrIdentifier attr = attributeMap.at(attribute);
+      Query::AddAttrRef(Query::synonyms.at(name), attr);
     } else {
       throw ParseException();
     }
@@ -181,6 +266,22 @@ namespace pql {
       }
     }
     Query::used_synonyms.push_back(Query::synonyms.at(name));
+  }
+  
+  void Query::AddAttrRef(Synonym s) {
+    AttrIdentifier attr = defaultAttrMap.at(s.GetDeclaration()); // Use default attribute 
+    AttrRef *attr_ref = new AttrRef(s, attr);
+    Query::attr_refs.push_back(*attr_ref);
+  }
+
+  // Overloaded method with specified attribute 
+  void Query::AddAttrRef(Synonym s, AttrIdentifier attr) {
+    AttrRef *attr_ref = new AttrRef(s, attr);
+    Query::attr_refs.push_back(*attr_ref);
+  }
+
+  std::vector<pql::AttrRef> Query::GetAttrRef() {
+    return Query::attr_refs;
   }
 
   std::vector<pql::Synonym> Query::GetAllUsedSynonyms() {

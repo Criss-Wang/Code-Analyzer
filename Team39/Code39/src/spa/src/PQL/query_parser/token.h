@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "Utility/entity.h"
+#include "Utility/attr.h"
 
 namespace pql {
   typedef std::string Ref;
@@ -24,6 +25,14 @@ namespace pql {
       EntityIdentifier GetDeclaration();
 
       bool equal(const Synonym &s);
+  };
+  
+  class AttrRef {
+    private:
+      Synonym s;
+      AttrIdentifier attribute;
+    public:
+      AttrRef(Synonym s, AttrIdentifier attribute) : s(std::move(s)), attribute(attribute) {};
   };
 
   struct ParseException : public std::exception {
