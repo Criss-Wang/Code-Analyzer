@@ -2,8 +2,8 @@
 #include <vector>
 
 #include "../../PKB/pkb.h"
-#include "../parser.h"
-#include "../token.h"
+#include "PQL/query_parser/parser.h"
+#include "PQL/query_parser/token.h"
 #include "predicate.h"
 
 namespace pql {

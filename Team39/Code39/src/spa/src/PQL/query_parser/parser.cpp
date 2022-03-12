@@ -24,7 +24,7 @@ namespace pql {
     return synonyms;
   }
 
-  void Parser::Parse() {
+  void Parser::ParseQuery() {
     bool select_clause_parsed = false;
     bool declarations_parsed = false;
     int current_clause = NO_CURRENT_CLAUSE;
@@ -44,9 +44,7 @@ namespace pql {
           Parser::query.AddSynonym(*d, s);
         }
       } else if (keyword == "Select") {
-        ps.EatWhiteSpaces();
-        Parser::query.AddResultSynonym(ps.ParseName());
-        ps.EatWhiteSpaces();
+        Parser::ParseSelect();
         select_clause_parsed = true;
         declarations_parsed = true;
       } else if (keyword == "such" && select_clause_parsed) {
@@ -66,8 +64,6 @@ namespace pql {
           ps.EatWhiteSpaces();
         } else if (current_clause == IS_PATTERN) {
           ps.EatWhiteSpaces();
-          ps.Expect("pattern");
-          ps.EatWhiteSpaces();
           Parser::ParsePattern();
         } else {
           throw ParseException();
@@ -81,8 +77,49 @@ namespace pql {
     }
   }
 
+  void Parser::Parse() {
+    try {
+      Parser::ParseQuery();
+    } catch (SemanticallyInvalidException& e) {
+      Parser::query.SetSemanticallyInvalid();
+    }
+  }
+
   pql::Query Parser::GetQuery() {
     return Parser::query;
+  }
+
+  void Parser::ParseSelect() {
+    ps.EatWhiteSpaces();
+    if (ps.Peek() == '<') {
+      Parser::ParseTuple();
+      Parser::query.SetBoolean(false);
+    } else {
+      std::string name = ps.ParseName();
+      if (name == "BOOLEAN") {
+        if (Parser::query.SynonymDeclared(name)) {
+          Parser::query.AddResultSynonym(name);
+          Parser::query.SetBoolean(false);
+        } else {
+          Parser::query.SetBoolean(true);
+        }
+      } else {
+        Parser::query.AddResultSynonym(name);
+        Parser::query.SetBoolean(false);
+      }
+    }
+    ps.EatWhiteSpaces();
+  }
+
+  void Parser::ParseTuple() {
+    ps.Consume();
+    while (ps.Peek() != '>') {
+      Parser::query.AddResultSynonym(ps.ParseName());
+      if (ps.Peek() != '>') {
+        ps.Expect(",");
+      }
+    }
+    ps.Consume();
   }
 
   void Parser::ParseRelationship() {
@@ -101,7 +138,7 @@ namespace pql {
     ps.Expect(")");
     if (relationship == "Uses" || relationship == "Modifies") {
       if (left == "_") {
-        throw ParseException();
+        throw SemanticallyInvalidException();
       }
       if (Parser::query.IsProcedure(left) || IsIdent(left)) {
         relationship.push_back('P');
@@ -153,7 +190,7 @@ namespace pql {
       }
       Parser::query.AddPattern(assign_synonym, left, expression, exact, is_synonym_left);
     } else {
-      throw ParseException();
+      throw SemanticallyInvalidException();
     }
   }
 

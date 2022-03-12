@@ -56,11 +56,17 @@ namespace pql {
       /*Constructor for Parser*/
       explicit Parser(const std::string& input) : ps(input), query(Query()) {};
 
+      void ParseQuery();
+
       void Parse();
 
       pql::Query GetQuery();
 
       std::vector<std::string> GetSynonyms();
+
+      void ParseSelect();
+
+      void ParseTuple();
 
       void ParseRelationship();
 

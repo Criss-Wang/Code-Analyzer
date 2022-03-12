@@ -97,6 +97,10 @@ namespace pql {
       {kCallsT, procs}
   };
 
+  void Query::SetSemanticallyInvalid() {
+    Query::is_semantically_valid = false;
+  }
+
   bool Query::IsValid(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right) {
     std::unordered_set<EntityIdentifier> left_domains = pql::left_synonym_domains.at(r);
     std::unordered_set<EntityIdentifier> right_domains = pql::right_synonym_domains.at(r);
@@ -152,7 +156,7 @@ namespace pql {
 
   void Query::AddResultSynonym(const std::string &name) {
     if (Query::SynonymDeclared(name)) {
-      Query::result_synonym.push_back(Query::synonyms.at(name));
+      Query::result_synonyms.push_back(Query::synonyms.at(name));
       Query::AddUsedSynonym(name);
     } else {
       throw ParseException();
@@ -160,7 +164,7 @@ namespace pql {
   }
 
   std::vector<pql::Synonym> Query::GetResultSynonym() {
-    return Query::result_synonym;
+    return Query::result_synonyms;
   }
 
   bool Query::IsProcedure(const std::string &name) {
@@ -197,7 +201,7 @@ namespace pql {
       }
       Query::such_that_clauses.emplace_back(r, left, right, is_synonym_left, is_synonym_right);
     } else {
-      throw ParseException();
+      throw SemanticallyInvalidException();
     }
   }
 
@@ -211,5 +215,13 @@ namespace pql {
 
   std::vector<pql::PatternToken> Query::GetPattern() {
     return Query::patterns;
+  }
+
+  void Query::SetBoolean(bool b) {
+    Query::is_boolean = b;
+  }
+
+  bool Query::GetBoolean() {
+    return Query::is_boolean;
   }
 }

@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "../token.h"
+#include "PQL/query_parser/token.h"
 #include "predicate.h"
 #include "../../PKB/pkb.h"
 #include "query_evaluator_exceptions.h"

@@ -29,6 +29,47 @@ void PopulateForP(T1 table_to_refer, T2 table_to_update) {
   }
 }
 
+// Helper
+template<typename T1, typename T2, typename T3>
+T3 DFS(T1 table_to_refer, T2 table_to_update, T3 key) {
+  if (table_to_update->KeyExistsInTable(key)) {
+    return key;
+  }
+
+  vector<T3> children_lst;
+  try {
+    children_lst = table_to_refer->GetValueByKey(key);
+  } catch (InvalidKeyException& e) {
+    return key;
+  }
+
+  vector<T3> ans;
+  for (T3 child_key : children_lst) {
+    string end_val = DFS<T1, T2, string>(table_to_refer, table_to_update, child_key);
+    ans.push_back(end_val);
+    // Add the children of the current key if the key exists
+    if (table_to_update->KeyExistsInTable(end_val)) {
+      // Merge the vectors of children
+      vector<T3> value = table_to_update->GetValueByKey(end_val);
+      ans.insert(ans.end(), value.begin(), value.end());
+    }
+  }
+
+  // Add into "cache" if ans is not empty. That means the current key must have children
+  if (!ans.empty()) {
+    table_to_update->AddKeyValuePair(key, ans);
+  }
+
+  return key;
+}
+
+template<typename T1, typename T2, typename T3>
+void PopulateForC(T1 table_to_refer, T2 table_to_update) {
+  for (const T3 key : table_to_refer->GetKeyLst()) {
+    DFS<T1, T2, string>(table_to_refer, table_to_update, key);
+  }
+}
+
 template<typename T1, typename T2>
 void PopulateForF(T1 table_to_refer, T2 table_to_update) {
   // While the stmt_1 exists in the table, keep adding stmt_2 such that follows*(stmt_1, stmt_2) holds into the vector
@@ -98,6 +139,10 @@ int PopulateNestedRelationships(Pkb& pkb) {
     ChildTable* child_table = pkb.GetChildTable();
     ParentStarTable* parent_star_table = pkb.GetParentStarTable();
     ChildStarTable* child_star_table = pkb.GetChildStarTable();
+    CallsTable* calls_table = pkb.GetCallsTable();
+    CallsStarTable* calls_star_table = pkb.GetCallsStarTable();
+    CalledByTable* called_by_table = pkb.GetCalledByTable();
+    CalledByStarTable* called_by_star_table = pkb.GetCalledByStarTable();
     ModifiesStmtToVariablesTable* modifies_stmt_to_variables_table = pkb.GetModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable* modifies_variable_to_stmts_table = pkb.GetModifiesVariableToStmtsTable();
     UsesStmtToVariablesTable* uses_stmt_to_variables_table = pkb.GetUsesStmtToVariablesTable();
@@ -110,6 +155,10 @@ int PopulateNestedRelationships(Pkb& pkb) {
     // Populate nested parent
     PopulateForP<ParentTable*, ParentStarTable*>(parent_table, parent_star_table);
     PopulateForP<ChildTable*, ChildStarTable*>(child_table, child_star_table);
+
+    // Populate nested calls
+    PopulateForC<CallsTable*, CallsStarTable*, string>(calls_table, calls_star_table);
+    PopulateForC<CalledByTable*, CalledByStarTable*, string>(called_by_table, called_by_star_table);
 
     // Populate modifies
     PopulateNestedModifiesOrUses(*parent_star_table, *child_star_table,  *modifies_stmt_to_variables_table, *modifies_variable_to_stmts_table);
