@@ -182,18 +182,27 @@ class Pkb {
     [[nodiscard]] int GetIndexByProc(const string& proc_name) const;
 
     // Get all the attribute
-    [[nodiscard]] bool IsVar(const string& var_string) const;
+    [[nodiscard]] bool IsVar(int var_idx) const;
 
     [[nodiscard]] bool IsRead(int stmt_no) const;
-    [[nodiscard]] string GetVarFromRead(int stmt_no) const;
-    [[nodiscard]] vector<int> GetReadByVar(const string& var_string) const;
+    [[nodiscard]] int GetVarFromRead(int stmt_no) const;
+    [[nodiscard]] vector<int> GetReadByVar(int var_idx) const;
     
     [[nodiscard]] bool IsPrint(int stmt_no) const;
+    [[nodiscard]] int GetVarFromPrint(int stmt_no) const;
+    [[nodiscard]] vector<int> GetPrintByVar(int var_idx) const;
+
+    [[nodiscard]] bool IsAssign(int stmt_no) const;
+    [[nodiscard]] int GetVarFromAssign(int stmt_no) const;
+    [[nodiscard]] vector<int> GetAssignByVar(int var_idx) const;
+
     [[nodiscard]] bool IsCall(int stmt_no) const;
+    [[nodiscard]] int GetProcFromCall(int stmt_no) const;
+    [[nodiscard]] vector<int> GetCallFromProc(int proc_idx) const;
+
     [[nodiscard]] bool IsIf(int stmt_no) const;
     [[nodiscard]] bool IsWhile(int stmt_no) const;
-    [[nodiscard]] bool IsAssign(int stmt_no) const;
-    [[nodiscard]] bool IsProcedure(const string& proc_name) const;
+    [[nodiscard]] bool IsProcedure(int proc_idx) const;
     [[nodiscard]] bool IsStmt(int stmt_no) const;
     [[nodiscard]] bool IsConstant(int stmt_no) const;
 };

@@ -154,7 +154,12 @@ TEST_CASE("Populating Parent and Child Table") {
 TEST_CASE("Populating Calls Table") {
   // Called by reverse relation is populated behind the scenes
   Pkb pkb = Pkb();
-  bool success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p1", vector<string>{"p4", "p5"});
+  bool success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p1");
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p2") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p3") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p4") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p5") && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p1", vector<string>{"p4", "p5"}) && success;
   success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p2", vector<string>{"p3", "p4"}) && success;
 
   SECTION("Add item into table: string -> vector<string>") {
@@ -170,26 +175,33 @@ TEST_CASE("Populating Calls Table") {
     REQUIRE(!success);
   }
 
+  int p1_idx = pkb.GetIndexByProc("p1");
+  int p2_idx = pkb.GetIndexByProc("p2");
+  int p3_idx = pkb.GetIndexByProc("p3");
+  int p4_idx = pkb.GetIndexByProc("p4");
+  int p5_idx = pkb.GetIndexByProc("p5");
+  const int invalid_idx = 100;
+
   SECTION("Test API for PQL side for Calls Table") {
-    REQUIRE(pkb.IsCalls("p1", "p4"));
-    REQUIRE(pkb.IsCalls("p1", "p5"));
-    REQUIRE(pkb.IsCalls("p2", "p3"));
-    REQUIRE(pkb.IsCalls("p2", "p4"));
-    REQUIRE(!pkb.IsCalls("p1", "p2"));
-    REQUIRE(!pkb.IsCalls("p1", "p100"));
+    REQUIRE(pkb.IsCalls(p1_idx, p4_idx));
+    REQUIRE(pkb.IsCalls(p1_idx, p5_idx));
+    REQUIRE(pkb.IsCalls(p2_idx, p3_idx));
+    REQUIRE(pkb.IsCalls(p2_idx, p4_idx));
+    REQUIRE(!pkb.IsCalls(p1_idx, p2_idx));
+    REQUIRE(!pkb.IsCalls(p1_idx, invalid_idx));
 
-    REQUIRE(pkb.GetCallers("p5") == vector<string>{"p1"});
-    REQUIRE(pkb.GetCallers("p3") == vector<string>{"p2"});
-    REQUIRE(pkb.GetCallers("p4") == vector<string>{"p1", "p2"});
-    REQUIRE(pkb.GetCallers("p5") != vector<string>{"p1", "p2"});
+    REQUIRE(pkb.GetCallers(p5_idx) == vector<int>{p1_idx});
+    REQUIRE(pkb.GetCallers(p3_idx) == vector<int>{p2_idx});
+    REQUIRE(pkb.GetCallers(p4_idx) == vector<int>{p1_idx, p2_idx});
+    REQUIRE(pkb.GetCallers(p5_idx) != vector<int>{p1_idx, p2_idx});
 
-    REQUIRE(pkb.GetCallees("p1") == vector<string>{"p4", "p5"});
-    REQUIRE(pkb.GetCallees("p2") == vector<string>{"p3", "p4"});
-    REQUIRE(pkb.GetCallees("p100").empty());
-    REQUIRE(pkb.GetCallees("p1") != vector<string>{"p4"});
+    REQUIRE(pkb.GetCallees(p1_idx) == vector<int>{p4_idx, p5_idx});
+    REQUIRE(pkb.GetCallees(p2_idx) == vector<int>{p3_idx, p4_idx});
+    REQUIRE(pkb.GetCallees(invalid_idx).empty());
+    REQUIRE(pkb.GetCallees(p1_idx) != vector<int>{p4_idx});
 
-    vector<pair<string, string>> expected_calls_pairs = {make_pair("p1", "p4"), make_pair("p1", "p5"), make_pair("p2", "p3"), make_pair("p2", "p4")};
-    vector<pair<string, string>> calls_pairs = pkb.GetAllCallsPairs();
+    vector<pair<int, int>> expected_calls_pairs = {make_pair(p1_idx, p4_idx), make_pair(p1_idx, p5_idx), make_pair(p2_idx, p3_idx), make_pair(p2_idx, p4_idx)};
+    vector<pair<int, int>> calls_pairs = pkb.GetAllCallsPairs();
     std::sort(calls_pairs.begin(), calls_pairs.end());
     std::sort(expected_calls_pairs.begin(), expected_calls_pairs.end());
     REQUIRE(calls_pairs == expected_calls_pairs);
@@ -358,10 +370,11 @@ TEST_CASE("Entity Attribute Operations") {
     bool res = pkb.IsRead(1);
     REQUIRE(res == true);
 
-    string string_res = pkb.GetVarFromRead(1);
-    REQUIRE(string_res == "x");
+    int x_idx = pkb.GetIndexByVar("x");
+    int var_idx = pkb.GetVarFromRead(1);
+    REQUIRE(var_idx == x_idx);
 
-    vector<int> stmt_res = pkb.GetReadByVar("x");
+    vector<int> stmt_res = pkb.GetReadByVar(x_idx);
     REQUIRE(stmt_res == vector<int>{1, 2});
   }
 
@@ -369,10 +382,10 @@ TEST_CASE("Entity Attribute Operations") {
     bool res = pkb.IsRead(4);
     REQUIRE(res == false);
 
-    string string_res = pkb.GetVarFromRead(4);
-    REQUIRE(string_res == "");
+    int var_idx = pkb.GetVarFromRead(4);
+    REQUIRE(var_idx == -1);
 
-    vector<int> stmt_res = pkb.GetReadByVar("xy");
-    REQUIRE(stmt_res == vector<int>{});
+    vector<int> stmt_res = pkb.GetReadByVar(20);
+    REQUIRE(stmt_res.empty());
   }
 }
