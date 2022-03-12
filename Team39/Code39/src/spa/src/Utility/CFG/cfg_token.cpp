@@ -34,14 +34,23 @@ void CFGToken::print() {
 		case CFGTokenType::kCall:
 			type = "call";
 			break;
-		case CFGTokenType::kIfStart:
-			type = "ifStart";
+		case CFGTokenType::kWhile:
+			type = "while";
 			break;
-		case CFGTokenType::kIfElse:
-			type = "ifElse";
+		case CFGTokenType::kIf:
+			type = "if";
 			break;
-		case CFGTokenType::kIfEnd:
-			type = "ifEnd";
+		case CFGTokenType::kThenStart:
+			type = "thenStart";
+			break;
+		case CFGTokenType::kThenEnd:
+			type = "thenEnd";
+			break;
+		case CFGTokenType::kElseStart:
+			type = "elseStart";
+			break;
+		case CFGTokenType::kElseEnd:
+			type = "elseEnd";
 			break;
 		case CFGTokenType::kWhileStart:
 			type = "whileStart";

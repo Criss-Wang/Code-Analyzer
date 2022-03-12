@@ -293,7 +293,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       if (is_else_stmt) {
         previous.push(previous_stmt_num + 1);
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kIfElse, 0));
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kThenEnd, 0));
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kElseStart, 0));
       } else {
         if (!parent.empty()) {
           // Add parent stmt num and current stmt num to ParentTable
@@ -306,7 +307,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
         if (!end_tokens.empty()) {
           if (end_tokens.top() == "if") {
-            cfg_tokens.push_back(CFGToken(CFGTokenType::kIfEnd, 0));
+            cfg_tokens.push_back(CFGToken(CFGTokenType::kElseEnd, 0));
           } else if (end_tokens.top() == "while") {
             cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileEnd, 0));
           }
@@ -426,7 +427,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       end_stmt_num += 1;
 
-      cfg_tokens.push_back(CFGToken(CFGTokenType::kIfStart, token->stmt_num_));
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kIf, token->stmt_num_));
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kThenStart, 0));
       end_tokens.push("if");
 
     } else if (token->text_ == "while") {
@@ -448,7 +450,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       end_stmt_num += 1;
 
-      cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileStart, token->stmt_num_));
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kWhile, token->stmt_num_));
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileStart, 0));
       end_tokens.push("while");
 
     } else if (token->text_ == "call") {
