@@ -5,21 +5,21 @@
 using namespace std;
 
 GraphNode::GraphNode() {
-	this->type_ = NodeType::DUMMY;
-	this->stmt_num_ = {};
-	this->next_node_ = nullptr;
-	this->alternative_node_ = nullptr;
+  this->type_ = NodeType::DUMMY;
+  this->stmt_num_ = {};
+  this->next_node_ = nullptr;
+  this->alternative_node_ = nullptr;
 }
 
 GraphNode::GraphNode(NodeType type) {
-	this->type_ = type;
-	this->stmt_num_ = {};
-	this->next_node_ = nullptr;
-	this->alternative_node_ = nullptr;
+  this->type_ = type;
+  this->stmt_num_ = {};
+  this->next_node_ = nullptr;
+  this->alternative_node_ = nullptr;
 }
 
 void GraphNode::AddStmtNum(int stmt_num) {
-	this->stmt_num_.push_back(stmt_num);
+  this->stmt_num_.push_back(stmt_num);
 }
 
 void GraphNode::InsertNextNode(GraphNode* node) {
@@ -27,17 +27,17 @@ void GraphNode::InsertNextNode(GraphNode* node) {
 }
 
 void GraphNode::InsertAlternativeNode(GraphNode* node) {
-	this->alternative_node_ = node;
+  this->alternative_node_ = node;
 }
 
 NodeType GraphNode::GetNodeType() {
-	return this->type_;
+  return this->type_;
 }
 
 GraphNode* GraphNode::GetNextNode() {
-	return this->next_node_;
+  return this->next_node_;
 }
 
 GraphNode* GraphNode::GetAlternativeNode() {
-	return this->alternative_node_;
+  return this->alternative_node_;
 }
