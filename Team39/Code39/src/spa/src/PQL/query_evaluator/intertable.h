@@ -4,7 +4,7 @@
 
 
 #include "predicate.h"
-#include "../token.h"
+#include "PQL/query_parser/token.h"
 
 namespace pql_table {
 
