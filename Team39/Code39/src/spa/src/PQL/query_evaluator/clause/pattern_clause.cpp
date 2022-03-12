@@ -1,5 +1,3 @@
-
-
 #include "pattern_clause.h"
 
 namespace pql_clause {

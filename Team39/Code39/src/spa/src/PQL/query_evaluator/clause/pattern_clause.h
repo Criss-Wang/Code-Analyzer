@@ -1,5 +1,3 @@
-
-
 # include "clause.h"
 
 namespace pql_clause {

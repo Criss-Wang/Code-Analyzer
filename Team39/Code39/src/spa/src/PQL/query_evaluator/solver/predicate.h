@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "../../token.h"
+#include "../../query_parser/token.h"
 #include "../../../Utility/entity.h"
 
 namespace pql_table {

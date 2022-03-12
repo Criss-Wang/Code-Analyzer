@@ -7,7 +7,7 @@ file(GLOB srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/clause/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/formatter/*.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/solver/*.cpp")
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/solver/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_parser/*.cpp")
 
 file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
@@ -18,7 +18,7 @@ file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h" "${CMAKE_CURRENT_SOURCE_
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/clause/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/clause/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/solver/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/solver/*.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/formatter/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/formatter/*.hpp")
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/formatter/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/formatter/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_parser/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_parser/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/*.hpp")
 

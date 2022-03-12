@@ -1,6 +1,4 @@
-
 #include "such_that_clause.h"
-#include "../query_evaluator_exceptions.h"
 
 namespace pql_clause {
     template <typename T, typename R>

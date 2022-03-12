@@ -5,6 +5,7 @@
 
 #include "../solver/predicate.h"
 #include "../../../PKB/pkb.h"
+#include "../query_evaluator_exceptions.h"
 
 namespace pql_clause {
   template <typename T>
