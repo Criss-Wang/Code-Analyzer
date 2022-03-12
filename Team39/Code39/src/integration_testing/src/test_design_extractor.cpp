@@ -155,6 +155,93 @@ TEST_CASE("Test Nested Population for Parent") {
   }
 }
 
+TEST_CASE("Test Nested Population for Calls") {
+  Pkb pkb = Pkb();
+  bool success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p1", vector<string>{"p4", "p5"});
+  success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p2", vector<string>{"p4"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p4", vector<string>{"p10"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p10", vector<string>{"p12", "p14", "p18"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p12", vector<string>{"p20"}) && success;
+
+  // Populate nested
+  success = success && PopulateNestedRelationships(pkb);
+
+  SECTION("Check population success") {
+    REQUIRE(success);
+  }
+
+  SECTION("Check PQL queries for nested calls") {
+    REQUIRE(pkb.IsTransitiveCalls("p1", "p4"));
+    REQUIRE(pkb.IsTransitiveCalls("p1", "p10"));
+    REQUIRE(pkb.IsTransitiveCalls("p1", "p12"));
+    REQUIRE(pkb.IsTransitiveCalls("p1", "p20"));
+    REQUIRE(pkb.IsTransitiveCalls("p1", "p5"));
+    REQUIRE(pkb.IsTransitiveCalls("p1", "p18"));
+    REQUIRE(!pkb.IsTransitiveCalls("p1", "p10000"));
+
+    REQUIRE(pkb.IsTransitiveCalls("p12", "p20"));
+    REQUIRE(!pkb.IsTransitiveCalls("p12", "p10"));
+
+    REQUIRE(pkb.IsTransitiveCalls("p4", "p12"));
+    REQUIRE(pkb.IsTransitiveCalls("p4", "p10"));
+    REQUIRE(pkb.IsTransitiveCalls("p4", "p14"));
+    REQUIRE(!pkb.IsTransitiveCalls("p4", "p100"));
+
+    vector<string> expected_all_callers_of_p20 = {"p12", "p10", "p4", "p2", "p1"};
+    vector<string> all_callers_of_p20 = pkb.GetAllCallers("p20");
+    std::sort(expected_all_callers_of_p20.begin(), expected_all_callers_of_p20.end());
+    std::sort(all_callers_of_p20.begin(), all_callers_of_p20.end());
+    REQUIRE(expected_all_callers_of_p20 == all_callers_of_p20);
+
+    vector<string> expected_all_callers_of_p18 = {"p10", "p4", "p2", "p1"};
+    vector<string> all_callers_of_p18 = pkb.GetAllCallers("p18");
+    std::sort(expected_all_callers_of_p18.begin(), expected_all_callers_of_p18.end());
+    std::sort(all_callers_of_p18.begin(), all_callers_of_p18.end());
+    REQUIRE(expected_all_callers_of_p18 == all_callers_of_p18);
+
+    vector<string> expected_all_callers_of_p5 = {"p1"};
+    vector<string> all_callers_of_p5 = pkb.GetAllCallers("p5");
+    std::sort(expected_all_callers_of_p5.begin(), expected_all_callers_of_p5.end());
+    std::sort(all_callers_of_p5.begin(), all_callers_of_p5.end());
+    REQUIRE(expected_all_callers_of_p5 == all_callers_of_p5);
+
+    vector<string> expected_all_callers_of_p1 = {};
+    vector<string> all_callers_of_p1 = pkb.GetAllCallers("p1");
+    REQUIRE(expected_all_callers_of_p1 == all_callers_of_p1);
+
+    vector<string> expected_all_callees_of_p10 = {"p12", "p20", "p14", "p18"};
+    vector<string> all_callees_of_p10 = pkb.GetAllCallees("p10");
+    std::sort(expected_all_callees_of_p10.begin(), expected_all_callees_of_p10.end());
+    std::sort(all_callees_of_p10.begin(), all_callees_of_p10.end());
+    REQUIRE(expected_all_callees_of_p10 == all_callees_of_p10);
+
+    vector<string> expected_all_callees_of_p1 = {"p4", "p10", "p5", "p12", "p20", "p14", "p18"};
+    vector<string> all_callees_of_p1 = pkb.GetAllCallees("p1");
+    std::sort(expected_all_callees_of_p1.begin(), expected_all_callees_of_p1.end());
+    std::sort(all_callees_of_p1.begin(), all_callees_of_p1.end());
+    REQUIRE(expected_all_callees_of_p1 == all_callees_of_p1);
+
+    vector<string> expected_all_callees_of_p2 = {"p4", "p10", "p12", "p20", "p14", "p18"};
+    vector<string> all_callees_of_p2 = pkb.GetAllCallees("p2");
+    std::sort(expected_all_callees_of_p2.begin(), expected_all_callees_of_p2.end());
+    std::sort(all_callees_of_p2.begin(), all_callees_of_p2.end());
+    REQUIRE(expected_all_callees_of_p2 == all_callees_of_p2);
+
+    vector<pair<string, string>> transitive_calls_pairs = pkb.GetAllTransitiveCallsPairs();
+    cout << "this size" << transitive_calls_pairs.size() << endl;
+    vector<pair<string, string>> invalid_pairs = {};
+    vector<pair<string, string>> expected_transitive_calls_pairs = vector<pair<string, string>>{make_pair("p1", "p4"), make_pair("p1", "p10"), make_pair("p1", "p12"),
+      make_pair("p1", "p20"), make_pair("p1", "p14"), make_pair("p1", "p18"), make_pair("p1", "p5"), make_pair("p2", "p4"), make_pair("p2", "p10"),
+      make_pair("p2", "p12"), make_pair("p2", "p20"), make_pair("p2", "p14"), make_pair("p2", "p18"), make_pair("p4", "p10"), make_pair("p4", "p12"),
+      make_pair("p4", "p20"), make_pair("p4", "p14"), make_pair("p4", "p18"), make_pair("p12", "p20"), make_pair("p10", "p12"), make_pair("p10", "p20"),
+      make_pair("p10", "p14"), make_pair("p10", "p18")};
+    std::sort(transitive_calls_pairs.begin(), transitive_calls_pairs.end());
+    std::sort(expected_transitive_calls_pairs.begin(), expected_transitive_calls_pairs.end());
+    REQUIRE(transitive_calls_pairs == expected_transitive_calls_pairs);
+    REQUIRE(transitive_calls_pairs != invalid_pairs);
+  }
+}
+
 TEST_CASE("Test Nested Population for Modifies") {
   Pkb pkb = Pkb();
   // Nested modifies will be populated behind the scenes

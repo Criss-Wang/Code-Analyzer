@@ -35,6 +35,22 @@ ChildStarTable* Pkb::GetChildStarTable() {
   return child_star_table_;
 }
 
+CallsTable* Pkb::GetCallsTable() {
+  return calls_table_;
+}
+
+CallsStarTable* Pkb::GetCallsStarTable() {
+  return calls_star_table_;
+}
+
+CalledByTable* Pkb::GetCalledByTable() {
+  return called_by_table_;
+}
+
+CalledByStarTable* Pkb::GetCalledByStarTable() {
+  return called_by_star_table_;
+}
+
 ModifiesStmtToVariablesTable* Pkb::GetModifiesStmtToVariablesTable() {
   return modifies_stmt_to_variables_table_;
 }
@@ -61,6 +77,15 @@ bool Pkb::IsCalls(const string& proc_1, const string& proc_2) const {
   }
 }
 
+bool Pkb::IsTransitiveCalls(const string& proc_1, const string& proc_2) const {
+  try {
+    vector<string> callees_star = calls_star_table_->GetValueByKey(proc_1);
+    return find(callees_star.begin(), callees_star.end(), proc_2) != callees_star.end();
+  } catch (exception& e) {
+    return false;
+  }
+}
+
 vector<string> Pkb::GetCallers(const string& proc) const {
   try {
     return called_by_table_->GetValueByKey(proc);
@@ -69,9 +94,25 @@ vector<string> Pkb::GetCallers(const string& proc) const {
   }
 }
 
+vector<string> Pkb::GetAllCallers(const string& proc) const {
+  try {
+    return called_by_star_table_->GetValueByKey(proc);
+  } catch (exception& e) {
+    return vector<string>{};
+  }
+}
+
 vector<string> Pkb::GetCallees(const string& proc) const {
   try {
     return calls_table_->GetValueByKey(proc);
+  } catch (exception& e) {
+    return vector<string>{};
+  }
+}
+
+vector<string> Pkb::GetAllCallees(const string& proc) const {
+  try {
+    return calls_star_table_->GetValueByKey(proc);
   } catch (exception& e) {
     return vector<string>{};
   }
@@ -148,6 +189,14 @@ vector<pair<T2, T3>> UnfoldResults(T1 table_to_unfold) {
 vector<pair<string, string>> Pkb::GetAllCallsPairs() const {
   try {
     return UnfoldResults<CallsTable*, string, string>(calls_table_);
+  } catch (exception& e) {
+    return vector<pair<string, string>>{};
+  }
+}
+
+vector<pair<string, string>> Pkb::GetAllTransitiveCallsPairs() const {
+  try {
+    return UnfoldResults<CallsStarTable*, string, string>(calls_star_table_);
   } catch (exception& e) {
     return vector<pair<string, string>>{};
   }

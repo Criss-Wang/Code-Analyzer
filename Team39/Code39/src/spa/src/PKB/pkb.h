@@ -111,6 +111,10 @@ class Pkb {
     ChildTable* GetChildTable();
     ParentStarTable* GetParentStarTable();
     ChildStarTable* GetChildStarTable();
+    CallsTable* GetCallsTable();
+    CallsStarTable* GetCallsStarTable();
+    CalledByTable* GetCalledByTable();
+    CalledByStarTable* GetCalledByStarTable();
     ModifiesStmtToVariablesTable* GetModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable* GetModifiesVariableToStmtsTable();
     UsesStmtToVariablesTable* GetUsesStmtToVariablesTable();
@@ -128,9 +132,13 @@ class Pkb {
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs() const;
 
     [[nodiscard]] bool IsCalls(const string& proc_1, const string& proc_2) const;
+    [[nodiscard]] bool IsTransitiveCalls(const string& proc_1, const string& proc_2) const;
     [[nodiscard]] vector<string> GetCallers(const string& proc) const;
+    [[nodiscard]] vector<string> GetAllCallers(const string& proc) const;
     [[nodiscard]] vector<string> GetCallees(const string& proc) const;
+    [[nodiscard]] vector<string> GetAllCallees(const string& proc) const;
     [[nodiscard]] vector<pair<string, string>> GetAllCallsPairs() const;
+    [[nodiscard]] vector<pair<string, string>> GetAllTransitiveCallsPairs() const;
 
     [[nodiscard]] bool IsFollows(int stmt_1, int stmt_2) const;
     [[nodiscard]] bool IsFollowsExists() const;
