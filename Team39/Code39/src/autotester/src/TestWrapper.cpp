@@ -1,7 +1,7 @@
 #include "TestWrapper.h"
 #include "AbstractWrapper.h"
 #include "SP/parser.h"
-#include "../../spa/src/PQL/parser.h"
+#include "PQL/query_parser/parser.h"
 #include "../../spa/src/PQL/query_evaluator/query_evaluator.h"
 #include "../../spa/src/SP/sp_exceptions.h"
 

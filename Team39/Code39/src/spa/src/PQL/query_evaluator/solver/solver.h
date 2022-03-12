@@ -3,6 +3,8 @@
 #include <unordered_map>
 
 #include "intertable.h"
+#include "predicate.h"
+#include "PQL/query_parser/token.h"
 
 namespace pql_solver {
 
