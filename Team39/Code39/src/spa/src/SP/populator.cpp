@@ -273,7 +273,12 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   vector<string> uses_p = {};
   vector<string> modifies_p = {};
   vector<string> called_procedures = {};
-  
+
+  // Stores vector of CFGTokens
+  vector<CFGToken> cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
+  // Store "if"/"while" to determine which end token to add to cfg_tokens list
+  stack<string> end_tokens;
+
   for (auto token = begin(input_tokens); token != end(input_tokens); ++token) {
     if (token->type_ == RIGHT_CURLY) {
 
@@ -288,6 +293,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       if (is_else_stmt) {
         previous.push(previous_stmt_num + 1);
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kIfElse, 0));
       } else {
         if (!parent.empty()) {
           // Add parent stmt num and current stmt num to ParentTable
@@ -296,6 +302,15 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
           }
           parent.pop();
           children.pop();
+        }
+
+        if (!end_tokens.empty()) {
+          if (end_tokens.top() == "if") {
+            cfg_tokens.push_back(CFGToken(CFGTokenType::kIfEnd, 0));
+          } else if (end_tokens.top() == "while") {
+            cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileEnd, 0));
+          }
+          end_tokens.pop();
         }
       }
 
@@ -315,6 +330,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
 
       end_stmt_num += 1;
+
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kAssign, token->stmt_num_));
 
     } else if (token->text_ == "procedure") {
       vector<Token> tokens;
@@ -336,7 +353,14 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
         // Add procedure name and used variables to UsesProcToVariablesTable
         //pkb.AddInfoToTable(TableIdentifier::KUsesProcToVar, prev_proc, uses_p);
-        
+
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
+        // buildCFG(cfg_tokens);
+        cout << prev_proc << endl;
+        for (CFGToken t : cfg_tokens) {
+          t.print();
+        }
+        cout << endl;
       }
 
       // reset values for next procedure
@@ -345,6 +369,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       called_procedures = {};
       modifies_p = {};
       uses_p = {};
+      cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
 
     } else if (token->text_ == "read") {
       vector<Token> tokens;
@@ -362,6 +387,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       end_stmt_num += 1;
 
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kRead, token->stmt_num_));
+
     } else if (token->text_ == "print") {
       vector<Token> tokens;
       while (token->type_ != SEMICOLON) {
@@ -377,6 +404,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
 
       end_stmt_num += 1;
+
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kPrint, token->stmt_num_));
 
     } else if (token->text_ == "if") {
       vector<Token> tokens;
@@ -397,6 +426,9 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       end_stmt_num += 1;
 
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kIfStart, token->stmt_num_));
+      end_tokens.push("if");
+
     } else if (token->text_ == "while") {
       vector<Token> tokens;
       while (token->type_ != LEFT_CURLY) {
@@ -416,6 +448,9 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       end_stmt_num += 1;
 
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileStart, token->stmt_num_));
+      end_tokens.push("while");
+
     } else if (token->text_ == "call") {
       vector<Token> tokens;
       while (token->type_ != SEMICOLON) {
@@ -434,6 +469,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       }
       end_stmt_num += 1;
       
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kCall, token->stmt_num_));
+
     }
   }
 
@@ -445,12 +482,22 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   pkb.AddInfoToTable(TableIdentifier::kCalls, prev_proc, called_procedures);
   //pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, prev_proc, modifies_p);
   //pkb.AddInfoToTable(TableIdentifier::KUsesProcToVar, prev_proc, uses_p);
+  
+  // Generate CFG for last procedure
+  cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
+  // buildCFG(cfg_tokens);
+  cout << prev_proc << endl;
+  for (CFGToken t : cfg_tokens) {
+    t.print();
+  }
+  cout << endl;
 
   if (PopulateNestedRelationships(pkb) == 0) {
     throw invalid_argument("PKB Population failed");
   }
 }
 
+/*
 vector<CFG> buildCFG(vector<Token> input_tokens) {
   vector<CFG> cfgs = {};
   CFG cfg = CFG();
@@ -590,4 +637,4 @@ vector<CFG> buildCFG(vector<Token> input_tokens) {
 
   return cfgs;
 }
-
+*/

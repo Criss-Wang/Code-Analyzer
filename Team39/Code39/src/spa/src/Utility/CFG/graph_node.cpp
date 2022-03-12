@@ -1,8 +1,5 @@
 #pragma once
 
-#include <typeinfo>
-#include <iostream>
-
 #include "graph_node.h"
 
 using namespace std;

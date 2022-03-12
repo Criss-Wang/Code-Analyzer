@@ -1,4 +1,4 @@
-#include "Utility/control_flow_graph.h"
+#include "Utility/CFG/control_flow_graph.h"
 #include "SP/tokenizer.h"
 #include "SP/populator.h"
 
@@ -6,7 +6,7 @@
 #include "catch.hpp"
 
 using namespace std;
-
+/*
 vector<Token> parse(string path) {
   ifstream input_file(path);
   if (!input_file.is_open()) {
@@ -57,3 +57,4 @@ TEST_CASE("Test CFG for 1 procedure with if statments") {
   }
 
 }
+*/
