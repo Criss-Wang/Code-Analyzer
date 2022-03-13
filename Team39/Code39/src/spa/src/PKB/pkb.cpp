@@ -406,7 +406,7 @@ bool Pkb::AddFollows(const int key, const int value) {
 }
 
 bool Pkb::AddCalls(const string& key, const vector<string>& value) {
-  bool add_success;
+  bool add_success = true;
   if (!proc_index_table_->KeyExistsInTable(key)) {
     add_success = AddEntityToSet(EntityIdentifier::kProc, key);
   }
