@@ -14,12 +14,33 @@
 #include "formatter/formatter.h"
 
 namespace pql {
+<<<<<<< HEAD
   void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& domain, Pkb& pkb) {
     //domain stores <synonym.name, domain> pair.
     for (pql::Synonym& synonym : synonyms) {
       std::unordered_set<int> domain_set = pkb.GetAllEntityInt(synonym.GetDeclaration());
       std::vector<int> domain_list(std::begin(domain_set), std::end(domain_set));
       domain.insert({ synonym.GetName(), domain_list });
+=======
+  std::vector<std::string> empty_res({});
+
+
+  void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& stmt_hashmap, 
+                    std::unordered_map<std::string, std::vector<std::string>>& var_hashmap, Pkb& pkb) {
+    //hashmap stores <synonym.name, domain> pair.
+      for (pql::Synonym& synonym : synonyms) {
+      if (synonym.GetDeclaration() == EntityIdentifier::kVariable
+          || synonym.GetDeclaration() == EntityIdentifier::kProc) {
+        std::unordered_set<std::string> domain_set = pkb.GetAllEntity(synonym.GetDeclaration());
+        std::vector<std::string> domain_list(std::begin(domain_set), std::end(domain_set));
+        var_hashmap.insert({ synonym.GetName(), domain_list });
+      } else {
+        std::unordered_set<int> domain_set = pkb.GetAllEntity(synonym.GetDeclaration());
+        std::vector<int> domain_list(std::begin(domain_set), std::end(domain_set));
+        stmt_hashmap.insert({ synonym.GetName(), domain_list });
+      }
+          
+>>>>>>> PKB_Zhenlin
     }
   }
 

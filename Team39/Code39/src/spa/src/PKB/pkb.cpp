@@ -407,11 +407,11 @@ bool Pkb::AddFollows(const int key, const int value) {
 
 bool Pkb::AddCalls(const string& key, const vector<string>& value) {
   bool add_success;
-  if (procedure_set_.find(key) == procedure_set_.end()) {
+  if (!proc_index_table_->KeyExistsInTable(key)) {
     add_success = AddEntityToSet(EntityIdentifier::kProc, key);
   }
   for (const string proc: value) {
-    if (procedure_set_.find(proc) == procedure_set_.end()) {
+    if (!proc_index_table_->KeyExistsInTable(proc)) {
       add_success = add_success && AddEntityToSet(EntityIdentifier::kProc, proc);
     }
   }
@@ -640,13 +640,13 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const string&
   try {
     switch (entity_identifier) {
       case EntityIdentifier::kVariable: {
-        variable_set_.insert(entity_val);
         UpdateIndexTable(index_var_table_, var_index_table_, entity_val);
+        variable_set_.insert(GetIndexByVar(entity_val));
         return true;
       }
       case EntityIdentifier::kProc: {
-        procedure_set_.insert(entity_val);
         UpdateIndexTable(index_proc_table_, proc_index_table_, entity_val);
+        procedure_set_.insert(GetIndexByProc(entity_val));
         return true;
       }
       default:
@@ -672,7 +672,7 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const set<int
   }
 }
 
-unordered_set<int> Pkb::GetAllEntityInt(const EntityIdentifier entity_identifier) {
+unordered_set<int> Pkb::GetAllEntity(const EntityIdentifier entity_identifier) {
   switch (entity_identifier) {
     case EntityIdentifier::kStmt: return stmt_set_;
     case EntityIdentifier::kAssign: return assign_set_;
@@ -682,6 +682,8 @@ unordered_set<int> Pkb::GetAllEntityInt(const EntityIdentifier entity_identifier
     case EntityIdentifier::kConstant: return constant_set_;
     case EntityIdentifier::kIf: return if_set_;
     case EntityIdentifier::kWhile: return while_set_;
+    case EntityIdentifier::kVariable: return variable_set_;
+    case EntityIdentifier::kProc: return procedure_set_;
     default:
       throw InvalidIdentifierException();
   }
@@ -689,8 +691,7 @@ unordered_set<int> Pkb::GetAllEntityInt(const EntityIdentifier entity_identifier
 
 unordered_set<string> Pkb::GetAllEntityString(const EntityIdentifier entity_identifier) {
   switch (entity_identifier) {
-    case EntityIdentifier::kVariable: return variable_set_;
-    case EntityIdentifier::kProc: return procedure_set_;
+    
     default:
       throw InvalidIdentifierException();
   }
@@ -705,7 +706,7 @@ unordered_set<set<int>, HashFunction> Pkb::GetAllEntityStmtLst(const EntityIdent
 }
 
 bool Pkb::IsVar(const int var_idx) const {
-  return variable_set_.find(GetVarByIndex(var_idx)) != variable_set_.end();
+  return variable_set_.find(var_idx) != variable_set_.end();
 }
 
 bool Pkb::IsRead(const int stmt_no) const {
@@ -798,7 +799,7 @@ bool Pkb::IsConstant(const int stmt_no) const {
 }
 
 bool Pkb::IsProcedure(const int proc_idx) const {
-  return procedure_set_.find(GetProcByIndex(proc_idx)) != procedure_set_.end();
+  return procedure_set_.find(proc_idx) != procedure_set_.end();
 }
 
 vector<pair<int, string>> Pkb::GetAllIndexVarPairs() const {
