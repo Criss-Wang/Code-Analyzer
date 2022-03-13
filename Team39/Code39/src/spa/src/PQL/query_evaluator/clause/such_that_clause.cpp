@@ -155,11 +155,12 @@ namespace pql_clause {
 
     void CallsClause::Evaluate() {
         /*GenericEvaluate(*token_, pkb_, *domain_, predicates_,
-            &Pkb::IsCalls, &Pkb::GetCallees, &Pkb::GetCallers, &Pkb::GetAllCallsPairs);*/
+            &Pkb::IsCalls, &Pkb::GetCallees, &Pkb::GetCallers, &Pkb::GetAllCallsPairs, &Pkb::IsCalls);*/
     }
 
     void CallsTClause::Evaluate() {
-
+        /*GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+           &Pkb::IsTransitiveCalls, &Pkb::GetAllCallees, &Pkb::GetAllCallers, &Pkb::GetAllTransitiveCallsPairs, &Pkb::IsCalls);*/
     }
 
     //This is used when the first argument cannot be wildcard
@@ -200,16 +201,16 @@ namespace pql_clause {
         bool is_right_syn = token_->IsSynonymRight();
 
         if (!is_left_syn && !is_right_syn) {
-            //EvaluateRelExistVar(*token_, pkb_, &Pkb::IsUsesStmt, &Pkb::GetUsesVarByStmt);
+            EvaluateRelExistVar(*token_, pkb_, &Pkb::IsUsesStmt, &Pkb::GetUsesVarByStmt);
         }
         else if (!is_left_syn && is_right_syn) {
-            //EvaluateRelDomainVar(*token_, pkb_, *domain_, &Pkb::GetUsesVarByStmt);
+            EvaluateRelDomainVar(*token_, pkb_, *domain_, &Pkb::GetUsesVarByStmt);
         }
         else if (is_left_syn && !is_right_syn) {
-            //EvaluateInverseRelDomain(*token_, pkb_, *domain_, &Pkb::GetUsesStmtsByVar, &Pkb::GetAllUsesStmtVarPairs);
+            EvaluateInverseRelDomain(*token_, pkb_, *domain_, &Pkb::GetUsesStmtsByVar, &Pkb::GetAllUsesStmtVarPairs);
         }
         else {
-            //EvaluateRelPair(*token_, pkb_, predicates_, &Pkb::GetAllUsesStmtVarPairs);
+            EvaluateRelPair(*token_, pkb_, predicates_, &Pkb::GetAllUsesStmtVarPairs);
         }
     }
 
@@ -218,16 +219,16 @@ namespace pql_clause {
         bool is_right_syn = token_->IsSynonymRight();
 
         if (!is_left_syn && !is_right_syn) {
-            //EvaluateRelExistVar(*token_, pkb_, &Pkb::IsModifiesStmt, &Pkb::GetModifiesVarByStmt);
+            EvaluateRelExistVar(*token_, pkb_, &Pkb::IsModifiesStmt, &Pkb::GetModifiesVarByStmt);
         }
         else if (!is_left_syn && is_right_syn) {
-            //EvaluateRelDomainVar(*token_, pkb_, *domain_, &Pkb::GetModifiesVarByStmt);
+            EvaluateRelDomainVar(*token_, pkb_, *domain_, &Pkb::GetModifiesVarByStmt);
         }
         else if (is_left_syn && !is_right_syn) {
-            //EvaluateInverseRelDomain(*token_, pkb_, *domain_, &Pkb::GetModifiesStmtsByVar, &Pkb::GetAllModifiesStmtVarPairs);
+            EvaluateInverseRelDomain(*token_, pkb_, *domain_, &Pkb::GetModifiesStmtsByVar, &Pkb::GetAllModifiesStmtVarPairs);
         }
         else {
-            //EvaluateRelPair(*token_, pkb_, predicates_, &Pkb::GetAllModifiesStmtVarPairs);
+            EvaluateRelPair(*token_, pkb_, predicates_, &Pkb::GetAllModifiesStmtVarPairs);
         }
     }
 }

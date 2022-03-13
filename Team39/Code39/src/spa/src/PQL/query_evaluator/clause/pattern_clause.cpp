@@ -10,7 +10,9 @@ namespace pql_clause {
     bool is_expr_wildcard = pattern_token.GetExpression() == "_";
 
     if (!is_left_wildcard) {
-        std::vector<int> assign_domain = pkb.GetModifiesStmtsByVar(pattern_token.GetLeft());
+        std::string var_name = pattern_token.GetLeft();
+        int var_index = pkb.GetIndexByVar(var_name);
+        std::vector<int> assign_domain = pkb.GetModifiesStmtsByVar(var_index);
         pql_clause::UpdateHashmap<int>(domain, pattern_token.GetAssignSynonym(), assign_domain);
     }
 

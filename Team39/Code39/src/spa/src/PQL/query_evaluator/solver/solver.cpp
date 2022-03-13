@@ -51,6 +51,7 @@ namespace pql_solver {
   }
 
   std::vector<pql_table::InterTable> Solver::GetReturnTables() {
+    //Remove synonyms that are not returned and return a list of tables with only returned synonyms involved
     std::vector<pql_table::InterTable> new_tables;
 
     for (auto& table : tables_) {

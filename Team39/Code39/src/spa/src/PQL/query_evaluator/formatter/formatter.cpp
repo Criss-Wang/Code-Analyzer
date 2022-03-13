@@ -18,9 +18,10 @@ std::vector<std::string> Formatter::FormatRawInput(pql_table::InterTable& table,
     for (int index = 0; index < table.GetRowNum(); index++) {
       std::string cur_string = "";
 
-      if (syn.GetDeclaration() == EntityIdentifier::kVariable
-        || syn.GetDeclaration() == EntityIdentifier::kProc) {
-        //cur_string = pkb_.getNameByIndex(table_.rows_[index][col_num_in_table]);
+      if (syn.GetDeclaration() == EntityIdentifier::kVariable) {
+        cur_string = pkb_.GetVarByIndex(table.rows_[index][col_num_in_table]);
+      } else if (syn.GetDeclaration() == EntityIdentifier::kProc) {
+        cur_string = pkb_.GetProcByIndex(table.rows_[index][col_num_in_table]);
       } else {
         cur_string = std::to_string(table.rows_[index][col_num_in_table]);
       }

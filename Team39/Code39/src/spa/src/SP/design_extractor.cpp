@@ -63,9 +63,9 @@ T3 Dfs(T1 table_to_refer, T2 table_to_update, T3 key) {
   return key;
 }
 
-template<typename T1, typename T2, typename T3>
+template<typename T1, typename T2>
 void PopulateForC(T1 table_to_refer, T2 table_to_update) {
-  for (const T3 key : table_to_refer->GetKeyLst()) {
+  for (int& key : table_to_refer->GetKeyLst()) {
     Dfs<T1, T2, int>(table_to_refer, table_to_update, key);
   }
 }
@@ -157,8 +157,8 @@ int PopulateNestedRelationships(Pkb& pkb) {
     PopulateForP<ChildTable*, ChildStarTable*>(child_table, child_star_table);
 
     // Populate nested calls
-    PopulateForC<CallsTable*, CallsStarTable*, string>(calls_table, calls_star_table);
-    PopulateForC<CalledByTable*, CalledByStarTable*, string>(called_by_table, called_by_star_table);
+    PopulateForC<CallsTable*, CallsStarTable*>(calls_table, calls_star_table);
+    PopulateForC<CalledByTable*, CalledByStarTable*>(called_by_table, called_by_star_table);
 
     // Populate modifies
     PopulateNestedModifiesOrUses(*parent_star_table, *child_star_table,  *modifies_stmt_to_variables_table, *modifies_variable_to_stmts_table);

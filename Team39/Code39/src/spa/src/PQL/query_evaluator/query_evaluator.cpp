@@ -14,33 +14,12 @@
 #include "formatter/formatter.h"
 
 namespace pql {
-<<<<<<< HEAD
   void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& domain, Pkb& pkb) {
     //domain stores <synonym.name, domain> pair.
     for (pql::Synonym& synonym : synonyms) {
-      std::unordered_set<int> domain_set = pkb.GetAllEntityInt(synonym.GetDeclaration());
+      std::unordered_set<int> domain_set = pkb.GetAllEntity(synonym.GetDeclaration());
       std::vector<int> domain_list(std::begin(domain_set), std::end(domain_set));
       domain.insert({ synonym.GetName(), domain_list });
-=======
-  std::vector<std::string> empty_res({});
-
-
-  void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& stmt_hashmap, 
-                    std::unordered_map<std::string, std::vector<std::string>>& var_hashmap, Pkb& pkb) {
-    //hashmap stores <synonym.name, domain> pair.
-      for (pql::Synonym& synonym : synonyms) {
-      if (synonym.GetDeclaration() == EntityIdentifier::kVariable
-          || synonym.GetDeclaration() == EntityIdentifier::kProc) {
-        std::unordered_set<std::string> domain_set = pkb.GetAllEntity(synonym.GetDeclaration());
-        std::vector<std::string> domain_list(std::begin(domain_set), std::end(domain_set));
-        var_hashmap.insert({ synonym.GetName(), domain_list });
-      } else {
-        std::unordered_set<int> domain_set = pkb.GetAllEntity(synonym.GetDeclaration());
-        std::vector<int> domain_list(std::begin(domain_set), std::end(domain_set));
-        stmt_hashmap.insert({ synonym.GetName(), domain_list });
-      }
-          
->>>>>>> PKB_Zhenlin
     }
   }
 
@@ -78,7 +57,9 @@ namespace pql {
     bool is_expr_wildcard = pattern_token.GetExpression() == "_";
 
     if (!is_left_wildcard) {
-      std::vector<int> assign_domain = pkb.GetModifiesStmtsByVar(pattern_token.GetLeft());
+      std::string var_name = pattern_token.GetLeft();
+      int var_index = pkb.GetIndexByVar(var_name);
+      std::vector<int> assign_domain = pkb.GetModifiesStmtsByVar(var_index);
       pql_clause::UpdateHashmap<int>(domain, pattern_token.GetAssignSynonym(), assign_domain);
     }
 
@@ -108,16 +89,16 @@ namespace pql {
     std::unordered_set<int> assign_set(assign_domain.begin(), assign_domain.end());
 
     for (int& var : var_domain) {
-      //std::vector<int> assign_domain_by_var = pkb.GetModifiesStmtsByVar(var);
+      std::vector<int> assign_domain_by_var = pkb.GetModifiesStmtsByVar(var);
 
-      //for (int& val : assign_domain_by_var) {
-      //  //need to check whether this val is in assign domain as well
-      //  std::unordered_set<int>::iterator iter = assign_set.find(val);
+      for (int& val : assign_domain_by_var) {
+        //need to check whether this val is in assign domain as well
+        std::unordered_set<int>::iterator iter = assign_set.find(val);
 
-      //  if (iter != assign_set.end()) {
-      //    pred_lst.push_back(std::make_pair(val, var));
-      //  }
-      //}
+        if (iter != assign_set.end()) {
+          pred_lst.push_back(std::make_pair(val, var));
+        }
+      }
     }
 
     std::string assign_syn = pattern_token.GetAssignSynonym();
