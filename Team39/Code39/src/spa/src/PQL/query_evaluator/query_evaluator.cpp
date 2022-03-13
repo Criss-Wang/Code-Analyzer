@@ -22,11 +22,11 @@ namespace pql {
       for (pql::Synonym& synonym : synonyms) {
       if (synonym.GetDeclaration() == EntityIdentifier::kVariable
           || synonym.GetDeclaration() == EntityIdentifier::kProc) {
-        std::unordered_set<std::string> domain_set = pkb.GetAllEntityString(synonym.GetDeclaration());
+        std::unordered_set<std::string> domain_set = pkb.GetAllEntity(synonym.GetDeclaration());
         std::vector<std::string> domain_list(std::begin(domain_set), std::end(domain_set));
         var_hashmap.insert({ synonym.GetName(), domain_list });
       } else {
-        std::unordered_set<int> domain_set = pkb.GetAllEntityInt(synonym.GetDeclaration());
+        std::unordered_set<int> domain_set = pkb.GetAllEntity(synonym.GetDeclaration());
         std::vector<int> domain_list(std::begin(domain_set), std::end(domain_set));
         stmt_hashmap.insert({ synonym.GetName(), domain_list });
       }

@@ -70,8 +70,8 @@ class Pkb {
     unordered_set<int> while_set_;
     unordered_set<int> constant_set_;
     // Stores the variable or procedure name into the set
-    unordered_set<string> variable_set_;
-    unordered_set<string> procedure_set_;
+    unordered_set<int> variable_set_;
+    unordered_set<int> procedure_set_;
     unordered_set<set<int>, HashFunction> stmt_list_set_;
 
     // Insert all possible expression patterns for a statement
@@ -166,7 +166,7 @@ class Pkb {
     [[nodiscard]] unordered_set<int> GetStmtsWithExactPattern(const string& pattern) const;
 
     // Get all the items of a certain entity type
-    unordered_set<int> GetAllEntityInt(const EntityIdentifier entity_identifier);
+    unordered_set<int> GetAllEntity(const EntityIdentifier entity_identifier);
     unordered_set<string> GetAllEntityString(const EntityIdentifier entity_identifier);
     unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier entity_identifier);
 

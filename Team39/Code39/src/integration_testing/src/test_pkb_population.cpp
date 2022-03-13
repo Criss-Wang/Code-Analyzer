@@ -30,17 +30,17 @@ TEST_CASE("Read/print statements for Population") {
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_stmt = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     // check relation tables
     ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
@@ -54,17 +54,17 @@ TEST_CASE("Read/print statements for Population") {
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_stmt = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_print = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     // check relation tables
     UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
@@ -78,20 +78,20 @@ TEST_CASE("Read/print statements for Population") {
     populate(input_tokens, pkb);
 
     // check entity tables
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_stmt = { 1, 2, 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1, 2 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -115,20 +115,20 @@ TEST_CASE("Read/print statements for Population") {
     populate(input_tokens, pkb);
 
     // check entity tables
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "yhhs", "x09", "read", "print", "z" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("yhhs"), pkb.GetIndexByVar("x09"), pkb.GetIndexByVar("read"), pkb.GetIndexByVar("print"), pkb.GetIndexByVar("z") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5, 6 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1, 2, 5 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 3, 4, 6 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -161,17 +161,17 @@ TEST_CASE("Read/print/assign statments for Population") {
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y", "z" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_stmt = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_assign = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     // check relation tables
     ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
@@ -189,26 +189,26 @@ TEST_CASE("Read/print/assign statments for Population") {
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y", "z" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
     
     unordered_set<int> expected_constant = { 5 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 2 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -233,26 +233,26 @@ TEST_CASE("Read/print/assign statments for Population") {
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y", "t" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("t") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { 3, 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 2 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -277,26 +277,26 @@ TEST_CASE("Read/print/assign statments for Population") {
     populate(input_tokens, pkb);
 
     // check entity tables
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y", "t", "z" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("t"), pkb.GetIndexByVar("z") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { 1, 3, 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5, 6 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1, 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 2, 5, 6 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -334,29 +334,29 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y", "z" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { 4, 5 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 1, 5 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     unordered_set<int> expected_if = { 2 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kIf) == expected_if);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -388,29 +388,29 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y", "z" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { 4, 1, 5 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     unordered_set<int> expected_while = { 2 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kWhile) == expected_while);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -441,32 +441,32 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y", "t" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("t") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { 9, 10, 0, 3, 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5, 6, 7 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 2, 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 5, 7 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 6 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     unordered_set<int> expected_if = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kIf) == expected_if);
     
     unordered_set<int> expected_while = { 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kWhile) == expected_while);
     
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -502,29 +502,29 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     populate(input_tokens, pkb);
 
     // check entity tables
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y", "t", "z" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("t"), pkb.GetIndexByVar("z") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { 3, 4, 0, 8, 9, 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5, 6, 7, 8 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1, 8 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 3, 7 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 2, 5, 6 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     unordered_set<int> expected_if = { 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kIf) == expected_if);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -567,32 +567,32 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y", "z" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { 5, 4, 0 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 5 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     unordered_set<int> expected_if = { 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kIf) == expected_if);
 
     unordered_set<int> expected_while = { 2 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kWhile) == expected_while);
     
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -625,32 +625,32 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y", "z" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { 4, 1, 5, 188, 0 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 6, 7, 9 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 3, 5, 8, 10 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     unordered_set<int> expected_if = { 2 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kIf) == expected_if);
 
     unordered_set<int> expected_while = { 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kWhile) == expected_while);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -699,32 +699,32 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Population
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "procName" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("procName") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "x", "y", "v", "t"};
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("v"), pkb.GetIndexByVar("t")};
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { 9, 10, 1, 0, 100, 199, 3, 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 2, 7 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 8, 10 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 4, 5, 9 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     unordered_set<int> expected_if = { 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kIf) == expected_if);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kIf) == expected_if);
 
     unordered_set<int> expected_while = { 1, 6 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kWhile) == expected_while);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kWhile) == expected_while);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -773,29 +773,29 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "proc1", "proc2"};
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("proc1"), pkb.GetIndexByProc("proc2") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "print", "x", "proc1", "proc2", "proc3", "t" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("print"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("proc1"), pkb.GetIndexByVar("proc2"), pkb.GetIndexByVar("proc3"), pkb.GetIndexByVar("t") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5, 6 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1, 5 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 6 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 2, 3 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     unordered_set<int> expected_call = { 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kCall) == expected_call);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kCall) == expected_call);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -827,29 +827,29 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "proc1", "proc2", "proc3" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("proc1"), pkb.GetIndexByProc("proc2"), pkb.GetIndexByProc("proc3") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "proc1", "x", "y", "f", "proc3", "procedure", "t" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("proc1"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("f"), pkb.GetIndexByVar("proc3"), pkb.GetIndexByVar("procedure"), pkb.GetIndexByVar("t") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5, 6, 7, 8 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1, 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 5 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 2, 3, 7 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     unordered_set<int> expected_call = { 6, 8 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kCall) == expected_call);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kCall) == expected_call);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();
@@ -886,29 +886,29 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     populate(input_tokens, pkb);
 
     // check entity sets
-    unordered_set<string> expected_proc = { "proc1", "proc2", "procedure"};
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kProc) == expected_proc);
+    unordered_set<int> expected_proc = { pkb.GetIndexByProc("proc1"), pkb.GetIndexByProc("proc2"), pkb.GetIndexByProc("procedure") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kProc) == expected_proc);
 
-    unordered_set<string> expected_variable = { "print", "x", "proc1", "proc2", "procedure", "t" };
-    REQUIRE(pkb.GetAllEntityString(EntityIdentifier::kVariable) == expected_variable);
+    unordered_set<int> expected_variable = { pkb.GetIndexByVar("print"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("proc1"), pkb.GetIndexByVar("proc2"), pkb.GetIndexByVar("procedure"), pkb.GetIndexByVar("t") };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
 
     unordered_set<int> expected_constant = { 1 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kConstant) == expected_constant);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1, 2, 3, 4, 5, 6, 7, 8 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kStmt) == expected_stmt);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
 
     unordered_set<int> expected_read = { 1, 4 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kRead) == expected_read);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     unordered_set<int> expected_print = { 5 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kPrint) == expected_print);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     unordered_set<int> expected_assign = { 2, 3, 7 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kAssign) == expected_assign);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     unordered_set<int> expected_call = { 6, 8 };
-    REQUIRE(pkb.GetAllEntityInt(EntityIdentifier::kCall) == expected_call);
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kCall) == expected_call);
 
     // check relation tables
     FollowsTable follows_table = *pkb.GetFollowsTable();

@@ -299,7 +299,7 @@ TEST_CASE("Add Integer Entity") {
     success = success && pkb.AddEntityToSet(EntityIdentifier::kStmt, 3);
     REQUIRE(success);
 
-    const unordered_set<int> res = pkb.GetAllEntityInt(EntityIdentifier::kStmt);
+    const unordered_set<int> res = pkb.GetAllEntity(EntityIdentifier::kStmt);
     REQUIRE(res.size() == 3);
     REQUIRE(res.find(1) != res.end());
     REQUIRE(res.find(2) != res.end());
@@ -316,11 +316,11 @@ TEST_CASE("Add String Entity") {
     success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "z");
     REQUIRE(success);
 
-    const unordered_set<string> res = pkb.GetAllEntityString(EntityIdentifier::kVariable);
+    const unordered_set<int> res = pkb.GetAllEntity(EntityIdentifier::kVariable);
     REQUIRE(res.size() == 3);
-    REQUIRE(res.find("x") != res.end());
-    REQUIRE(res.find("y") != res.end());
-    REQUIRE(res.find("z") != res.end());
+    REQUIRE(res.find(pkb.GetIndexByVar("x")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByVar("y")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByVar("z")) != res.end());
 
     const vector<pair<int, string>> full_res = pkb.GetAllIndexVarPairs();
     REQUIRE(full_res.size() == 3);
@@ -338,11 +338,11 @@ TEST_CASE("Add String Entity") {
     success = success && pkb.AddEntityToSet(EntityIdentifier::kProc, "z");
     REQUIRE(success);
 
-    const unordered_set<string> res = pkb.GetAllEntityString(EntityIdentifier::kProc);
+    const unordered_set<int> res = pkb.GetAllEntity(EntityIdentifier::kProc);
     REQUIRE(res.size() == 3);
-    REQUIRE(res.find("x") != res.end());
-    REQUIRE(res.find("y") != res.end());
-    REQUIRE(res.find("z") != res.end());
+    REQUIRE(res.find(pkb.GetIndexByProc("x")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByProc("y")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByProc("z")) != res.end());
 
     const vector<pair<int, string>> full_res = pkb.GetAllIndexProcPairs();
     REQUIRE(full_res.size() == 3);
