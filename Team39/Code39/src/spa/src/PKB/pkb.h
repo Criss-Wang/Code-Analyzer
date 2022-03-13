@@ -132,6 +132,7 @@ class Pkb {
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs() const;
 
     [[nodiscard]] bool IsCalls(const int proc_1, const int proc_2) const;
+    [[nodiscard]] bool IsCallsExists() const;
     [[nodiscard]] bool IsTransitiveCalls(const int proc_1, const int proc_2) const;
     [[nodiscard]] vector<int> GetCallers(const int proc) const;
     [[nodiscard]] vector<int> GetAllCallers(const int proc) const;

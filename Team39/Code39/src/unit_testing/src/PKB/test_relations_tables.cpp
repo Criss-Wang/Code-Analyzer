@@ -247,7 +247,7 @@ TEST_CASE("Uses Statement to Variables Table") {
 
   SECTION("Get value from table by key") {
     vector<int> value = uses_stmt_to_variables_table.GetValueByKey(1);
-    vector<int> expected_value = {"x", "y"};
+    vector<int> expected_value = {0, 1};
     REQUIRE(value == expected_value);
   }
 

@@ -77,6 +77,10 @@ bool Pkb::IsCalls(const int proc_1, const int proc_2) const {
   }
 }
 
+bool Pkb::IsCallsExists() const {
+  return calls_table_->GetTableSize() > 0;
+}
+
 bool Pkb::IsTransitiveCalls(const int proc_1, const int proc_2) const {
   try {
     vector<int> callees_star = calls_star_table_->GetValueByKey(proc_1);
