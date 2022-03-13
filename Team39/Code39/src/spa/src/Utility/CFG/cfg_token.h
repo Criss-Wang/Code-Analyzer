@@ -1,7 +1,5 @@
 #pragma once
 
-using namespace std; 
-
 enum class CFGTokenType {
   kStart,
   kAssign,

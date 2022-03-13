@@ -11,10 +11,14 @@ CFG::CFG() {
 
 CFG::CFG(string proc_name) {
   this->proc_name_ = proc_name;
-  this->start_node_ = new GraphNode(NodeType::START);
+  this->start_node_ = &GraphNode(NodeType::START);
 }
 
 
 GraphNode* CFG::GetStartNode() {
   return this->start_node_;
+}
+
+GraphNode* CFG::GenerateCFG(vector<CFGToken> tokens) {
+
 }

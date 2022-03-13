@@ -2,8 +2,7 @@
 
 #include <string>
 #include <vector>
-
-using namespace std;
+#include <unordered_map>
 
 enum class NodeType {
   START,
@@ -37,7 +36,9 @@ class GraphNode {
 
   private:
     NodeType type_;
-    vector<int> stmt_num_;
+    int start_;
+    int end_;
+    std::unordered_map<> stmt_num_;
     GraphNode* next_node_;
     GraphNode* alternative_node_;
 
