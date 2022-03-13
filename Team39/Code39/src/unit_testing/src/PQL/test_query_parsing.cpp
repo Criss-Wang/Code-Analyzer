@@ -4,7 +4,7 @@
 #include <fstream>
 #include "catch.hpp"
 
-void RequireInvalidQuery(std::string path) {
+void RequireSyntaxInvalidQuery(std::string path) {
   std::ifstream input_file(path);
   if (!input_file.is_open()) {
     std::cerr << "Could not open the file " << std::endl;
@@ -12,6 +12,17 @@ void RequireInvalidQuery(std::string path) {
     std::string query = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     pql::Parser parser = pql::Parser(query);
     CHECK_THROWS_AS(parser.Parse(), pql::ParseException);
+  }
+}
+
+void RequireSemanticsInvalidQuery(std::string path) {
+  std::ifstream input_file(path);
+  if (!input_file.is_open()) {
+    std::cerr << "Could not open the file " << std::endl;
+  } else {
+    std::string query = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+    pql::Parser parser = pql::Parser(query);
+    CHECK_THROWS_AS(parser.Parse(), pql::SemanticallyInvalidException);
   }
 }
 
@@ -48,50 +59,51 @@ std::string invalid_queries_dir = "../../../../../../Tests39/pql/invalid_queries
 TEST_CASE("Invalid queries") {
 
   SECTION("With no Select clause") {
-    RequireInvalidQuery(invalid_queries_dir + "1_test1.txt");
-    RequireInvalidQuery(invalid_queries_dir + "1_test2.txt");
-    RequireInvalidQuery(invalid_queries_dir + "1_test3.txt");
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "1_test1.txt");
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "1_test2.txt");
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "1_test3.txt");
   }
 
  
   SECTION("With wrong spelling of keywords") {
-    //RequireInvalidQuery(invalid_queries_dir + "2_test1.txt"); //Declaration keyword spelled wrongly
-    RequireInvalidQuery(invalid_queries_dir + "2_test2.txt"); //First letter of Select keyword not in capital letter
-    RequireInvalidQuery(invalid_queries_dir + "2_test3.txt"); //Missing space between such that
-    RequireInvalidQuery(invalid_queries_dir + "2_test4.txt"); //Misspelled keyword for relationship
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "2_test1.txt"); //Declaration keyword spelled wrongly
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "2_test2.txt"); //First letter of Select keyword not in capital letter
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "2_test3.txt"); //Missing space between such that
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "2_test4.txt"); //Misspelled keyword for relationship
   }
   
   SECTION("Select clause contains synonyms that are not declared") {
-    RequireInvalidQuery(invalid_queries_dir + "3_test1.txt");
-    RequireInvalidQuery(invalid_queries_dir + "3_test2.txt");
+    RequireSemanticsInvalidQuery(invalid_queries_dir + "3_test1.txt");
+    RequireSemanticsInvalidQuery(invalid_queries_dir + "3_test2.txt");
   }
 
   SECTION("With Modifies and Uses such that the first argument is wildcard") {
-    RequireInvalidQuery(invalid_queries_dir + "4_test1.txt"); //Modifies
-    RequireInvalidQuery(invalid_queries_dir + "4_test2.txt"); //Uses
+    RequireSemanticsInvalidQuery(invalid_queries_dir + "4_test1.txt"); //Modifies
+    RequireSemanticsInvalidQuery(invalid_queries_dir + "4_test2.txt"); //Uses
   }
   
   SECTION("With Modifies and Uses such that the second argument is not a variable") {
-    RequireInvalidQuery(invalid_queries_dir + "5_test1.txt"); //Modifies(s, s1)
-    RequireInvalidQuery(invalid_queries_dir + "5_test2.txt"); //Modifies(s, 3)
-    RequireInvalidQuery(invalid_queries_dir + "5_test3.txt"); //Modifies(s, "10")
-    RequireInvalidQuery(invalid_queries_dir + "5_test4.txt"); //Uses(s, s1)
-    RequireInvalidQuery(invalid_queries_dir + "5_test5.txt"); //Uses(s, 3)
-    RequireInvalidQuery(invalid_queries_dir + "5_test6.txt"); //Uses(s, "10")
+    RequireSemanticsInvalidQuery(invalid_queries_dir + "5_test1.txt"); //Modifies(s, s1)
+    RequireSemanticsInvalidQuery(invalid_queries_dir + "5_test2.txt"); //Modifies(s, 3)
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "5_test3.txt"); //Modifies(s, "10")
+    RequireSemanticsInvalidQuery(invalid_queries_dir + "5_test4.txt"); //Uses(s, s1)
+    RequireSemanticsInvalidQuery(invalid_queries_dir + "5_test5.txt"); //Uses(s, 3)
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "5_test6.txt"); //Uses(s, "10")
   }
   
   SECTION("Pattern clause such that the second argument is not a valid expression") {
-    RequireInvalidQuery(invalid_queries_dir + "6_test1.txt"); //pattern a(_, "x +")
-    RequireInvalidQuery(invalid_queries_dir + "6_test2.txt"); //pattern a(_, "x (3 + 3)")
-    RequireInvalidQuery(invalid_queries_dir + "6_test3.txt"); //pattern a(_, "(3 + y / 3")
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "6_test1.txt"); //pattern a(_, "x +")
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "6_test2.txt"); //pattern a(_, "x (3 + 3)")
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "6_test3.txt"); //pattern a(_, "(3 + y / 3")
   }
 
   SECTION("Select clause such that invalid attributes are used") {
-    RequireInvalidQuery(invalid_queries_dir + "7_test1.txt"); //stmt.procName
-    RequireInvalidQuery(invalid_queries_dir + "7_test2.txt"); //proc.Procname
-    RequireInvalidQuery(invalid_queries_dir + "7_test3.txt"); //read.value
-    RequireInvalidQuery(invalid_queries_dir + "7_test4.txt"); //variable.var
-    RequireInvalidQuery(invalid_queries_dir + "7_test5.txt"); //<ifs.stmt#, w.stmt #>
+    RequireSemanticsInvalidQuery(invalid_queries_dir + "7_test1.txt"); //stmt.procName
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "7_test2.txt"); //proc.Procname
+    RequireSemanticsInvalidQuery(invalid_queries_dir + "7_test3.txt"); //read.value
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "7_test4.txt"); //variable.var
+    RequireSemanticsInvalidQuery(invalid_queries_dir + "7_test5.txt"); //<r.varName, r.value>
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "7_test6.txt"); //<ifs.stmt#, w.stmt #>
   }
 
 }

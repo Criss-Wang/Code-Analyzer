@@ -78,11 +78,7 @@ namespace pql {
   }
 
   void Parser::Parse() {
-    try {
-      Parser::ParseQuery();
-    } catch (SemanticallyInvalidException& e) {
-      Parser::query.SetSemanticallyInvalid();
-    }
+    Parser::ParseQuery();
   }
 
   pql::Query Parser::GetQuery() {
