@@ -61,9 +61,29 @@ static pql_table::Predicate empty_predicates(first_syn_name, second_syn_name, em
 
 static vector<vector<int>> table2_filter_rows = { {2, 1}, {2, 5}, {6, 3}, {10, 7}, {8, 9} };
 static pql_table::InterTable table2_filter(table2_header, table2_filter_rows);
+
+// tables with two columns to be merged into table with four columns
+static pql::Synonym table4_first_syn("s", EntityIdentifier::kStmt);
+static pql::Synonym table4_second_syn("s1", EntityIdentifier::kStmt);
+static pql::Synonym table4_third_syn("c", EntityIdentifier::kCall);
+static pql::Synonym table4_fourth_syn("p", EntityIdentifier::kProc);
+
+static vector<string> table2_merge_into_table4_1_header({ table4_first_syn.GetName(), table4_second_syn.GetName() });
+static vector<vector<int>> table2_merge_into_table4_1_rows = { {3, 13}, {19, 14}, {2, 16}, {10, 18}, {9, 5} };
+static pql_table::InterTable table2_merge_into_table4_1(table2_merge_into_table4_1_header, table2_merge_into_table4_1_rows);
+
+static vector<string> table2_merge_into_table4_2_header({ table4_third_syn.GetName(), table4_fourth_syn.GetName() });
+static vector<vector<int>> table2_merge_into_table4_2_rows = { {14, 5}, {2, 14}, {10, 9} };
+static pql_table::InterTable table2_merge_into_table4_2(table2_merge_into_table4_2_header, table2_merge_into_table4_2_rows);
+
 /*-----------------------------------------------------------------------------------------------------------------------------*/
 
-/*------------------------------------------TABLES with three columns ------------------------------------------------------- */
+/*------------------------------------------TABLES with four columns ------------------------------------------------------- */
+static vector<string> table4_header({ table4_first_syn.GetName(), table4_second_syn.GetName(), table4_third_syn.GetName(), table4_fourth_syn.GetName() });
+static vector<vector<int>> table4_rows = { {3, 13, 14, 5}, {3, 13, 2, 14}, {3, 13, 10, 9}, {19, 14, 14, 5}, {19, 14, 2, 14}, {19, 14, 10, 9},
+		{2, 16, 14, 5}, {2, 16, 2, 14}, {2, 16, 10, 9}, {10, 18, 14, 5}, {10, 18, 2, 14}, {10, 18, 10, 9}, {9, 5, 14, 5}, {9, 5, 2, 14}, {9, 5, 10, 9} };
+static pql_table::InterTable table4(table4_header, table4_rows);
+
 
 /*----------------------------------------------------------------------------------------------------------------------------*/
 
@@ -96,10 +116,16 @@ TEST_CASE("Check Deduplicate function of Intertable") {
 
 TEST_CASE("Check merge function of Intertable") {
 	
-	SECTION("Merge two tables with content") {
+	SECTION("Merge two tables of column one") {
 		REQUIRE(!table1_merge1.equal(table2_merge));
 		REQUIRE(!table1_merge2.equal(table2_merge));
 		REQUIRE(table1_merge1.Merge(table1_merge2).equal(table2_merge));
+	}
+
+	SECTION("Merge two tables of column two") {
+	  REQUIRE(!table2_merge_into_table4_1.equal(table4));
+		REQUIRE(!table2_merge_into_table4_2.equal(table4));
+		REQUIRE(table2_merge_into_table4_1.Merge(table2_merge_into_table4_2).equal(table4));
 	}
 }
 
