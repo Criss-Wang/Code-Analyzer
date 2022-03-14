@@ -254,6 +254,10 @@ TEST_CASE("Populating StmtToPatterns Table") {
 TEST_CASE("Sample Tests for Pattern") {
   Pkb pkb = Pkb();
   bool success = pkb.AddInfoToTable(TableIdentifier::kPattern, 2, "v + x * y + z % t");
+  success = pkb.AddInfoToTable(TableIdentifier::kPattern, 11, "lm + n") && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kPattern, 12, "l + mn") && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kPattern, 13, "(s1k + dks)") && success;
+  
   SECTION("Adding patterns") {
     REQUIRE(success);
   }
@@ -273,6 +277,26 @@ TEST_CASE("Sample Tests for Pattern") {
 
     res = pkb.GetAllStmtsWithPattern("v + x * y + z % t");
     REQUIRE(res == unordered_set<int>{2});
+  }
+
+  SECTION("Corner cases") {
+    unordered_set<int> res = pkb.GetAllStmtsWithPattern("(lm+n)");
+    REQUIRE(res == unordered_set<int>{11});
+
+    res = pkb.GetAllStmtsWithPattern("l+mn");
+    REQUIRE(res == unordered_set<int>{12});
+
+    res = pkb.GetAllStmtsWithPattern("((l+((mn))))");
+    REQUIRE(res == unordered_set<int>{12});
+
+    res = pkb.GetStmtsWithExactPattern("l");
+    REQUIRE(res == unordered_set<int>{});
+
+    res = pkb.GetStmtsWithExactPattern("((l+((mn))))");
+    REQUIRE(res == unordered_set<int>{12});
+
+    res = pkb.GetAllStmtsWithPattern("s1k + dks");
+    REQUIRE(res == unordered_set<int>{13}); 
   }
 
   SECTION("Empty result") {
