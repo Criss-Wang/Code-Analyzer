@@ -275,7 +275,7 @@ TEST_CASE("Sample Tests for Pattern") {
     res = pkb.GetAllStmtsWithPattern("v+x*y");
     REQUIRE(res == unordered_set<int>{2});
 
-    res = pkb.GetAllStmtsWithPattern("v + x * y + z % t");
+    res = pkb.GetAllStmtsWithPattern("v + x * y+ z % t");
     REQUIRE(res == unordered_set<int>{2});
   }
 
