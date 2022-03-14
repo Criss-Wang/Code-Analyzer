@@ -1,0 +1,2 @@
+variable v; procedure pr; assign a;
+Select <v.varName, pr.procName> pattern a(_, "x")

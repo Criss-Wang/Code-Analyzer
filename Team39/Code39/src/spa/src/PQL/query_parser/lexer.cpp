@@ -61,6 +61,22 @@ namespace pql {
     for (char next_char = ParserState::Peek();
          pql::IsLetter(next_char) || pql::IsDigit(next_char);
          next_char = ParserState::Peek()) {
+      ssm << ParserState::Next();     
+    }
+    ssm >> sm;
+    ParserState::EatWhiteSpaces();
+    return sm;
+  }
+  
+  std::string ParserState::ParseAttribute() {
+    std::string sm;
+    std::stringstream ssm;
+
+    ParserState::EatWhiteSpaces();
+    ssm << ParserState::ExpectLetter();
+    for (char next_char = ParserState::Peek();
+        IsLetter(next_char) || IsHash(next_char);
+        next_char = ParserState::Peek()) {
       ssm << ParserState::Next();
     }
     ssm >> sm;
