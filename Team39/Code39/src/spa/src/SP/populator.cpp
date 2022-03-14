@@ -26,14 +26,14 @@ void populateReadStmt(vector<Token> tokens, Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
   pkb.AddEntityToSet(EntityIdentifier::kRead, stmt_num);
 
+  // Add read_var to variable_set_
+  pkb.AddEntityToSet(EntityIdentifier::kVariable, read_var);
+
   // Add stmt num and read_var to ReadTable
   pkb.AddInfoToTable(TableIdentifier::kRead, stmt_num, read_var);
 
   // Add stmt num and read_var to Modifies Table
   pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, stmt_num, vector<string>{read_var});
-
-  // Add read_var to variable_set_
-  pkb.AddEntityToSet(EntityIdentifier::kVariable, read_var);
 }
 
 void populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
@@ -44,14 +44,14 @@ void populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
   pkb.AddEntityToSet(EntityIdentifier::kPrint, stmt_num);
 
+  // Add read_var to variable_set_
+  pkb.AddEntityToSet(EntityIdentifier::kVariable, print_var);
+
   // Add stmt num and print_var to PrintTable
   pkb.AddInfoToTable(TableIdentifier::kPrint, stmt_num, print_var);
 
   // Add stmt num and print_var to Uses Table
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vector<string>{ print_var });
-
-  // Add read_var to variable_set_
-  pkb.AddEntityToSet(EntityIdentifier::kVariable, print_var);
 }
 
 void populateAssignStmt(vector<Token> tokens, Pkb& pkb) {

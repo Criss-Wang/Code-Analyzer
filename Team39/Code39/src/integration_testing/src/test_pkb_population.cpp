@@ -748,14 +748,14 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Population
     REQUIRE(modifies_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(7) == vector<int>{pkb.GetIndexByVar("v")});
     REQUIRE(modifies_table.GetValueByKey(9) == vector<int>{pkb.GetIndexByVar("x")});
-    REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("v"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y")});
-    REQUIRE(modifies_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("v"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y")});
+    REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("v")});
+    REQUIRE(modifies_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("v")});
     REQUIRE(modifies_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("v")});
 
     UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 8);
-    REQUIRE(uses_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("v"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y")});
-    REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("v"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y")});
+    REQUIRE(uses_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("v")});
+    REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("v")});
     REQUIRE(uses_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(uses_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("x")});
     REQUIRE(uses_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("v")});
