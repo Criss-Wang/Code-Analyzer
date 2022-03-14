@@ -1,7 +1,7 @@
 #include "relation_tables.h"
 #include "table.h"
 
-// Helper function for populating the reverse relation for uses or modifies i.e. variable -> [line numbers]
+// Helper function for populating the reverse relation for uses or modifies
 bool PopulateReverseRelationship(const vector<int>& keys, const int value_to_update, Table<int, vector<int>>& t) {
   try {
     bool add_success = true;
@@ -25,6 +25,14 @@ bool UsesVariableToStmtsTable::UpdateKeyValuePair(const int value_to_update, con
   return PopulateReverseRelationship(keys, value_to_update, *this);
 }
 
+bool UsesVariableToProcsTable::UpdateKeyValuePair(const int value_to_update, const vector<int>& keys) {
+  return PopulateReverseRelationship(keys, value_to_update, *this);
+}
+
 bool ModifiesVariableToStmtsTable::UpdateKeyValuePair(const int value_to_update, const vector<int>& keys) {
+  return PopulateReverseRelationship(keys, value_to_update, *this);
+}
+
+bool ModifiesVariableToProcsTable::UpdateKeyValuePair(const int value_to_update, const vector<int>& keys) {
   return PopulateReverseRelationship(keys, value_to_update, *this);
 }

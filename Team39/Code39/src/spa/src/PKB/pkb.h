@@ -54,8 +54,12 @@ class Pkb {
 
     UsesStmtToVariablesTable *uses_stmt_to_variables_table_ = new UsesStmtToVariablesTable();
     UsesVariableToStmtsTable *uses_variable_to_stmts_table_ = new UsesVariableToStmtsTable();
+    UsesProcToVariablesTable *uses_proc_to_variables_table_ = new UsesProcToVariablesTable();
+    UsesVariableToProcsTable *uses_variable_to_procs_table_ = new UsesVariableToProcsTable();
     ModifiesStmtToVariablesTable *modifies_stmt_to_variables_table_ = new ModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable *modifies_variable_to_stmts_table_ = new ModifiesVariableToStmtsTable();
+    ModifiesProcToVariablesTable *modifies_proc_to_variables_table_ = new ModifiesProcToVariablesTable();
+    ModifiesVariableToProcsTable *modifies_variable_to_procs_table_ = new ModifiesVariableToProcsTable();
     StmtToPatternsTable *stmt_to_patterns_table_ = new StmtToPatternsTable();
     PatternToStmtsTable *pattern_to_stmts_table_ = new PatternToStmtsTable();
     ExactPatternToStmtTable* exact_pattern_to_stmt_table_ = new ExactPatternToStmtTable();
@@ -81,7 +85,9 @@ class Pkb {
     bool AddCalls(const string& key, const vector<string>& value);
     bool AddNext(int key, int value);
     bool AddModifies(int key, const vector<string>& value);
+    bool AddModifiesP(const string& key, const vector<string>& value);
     bool AddUses(int key, const vector<string>& value);
+    bool AddUsesP(const string& key, const vector<string>& value);
     bool AddPattern(bool& add_success, unordered_set<string> pattern_set, Table<string, unordered_set<int>>* table_to_update, int line_num);
     bool UpdateIndexTable(Table<int, string>* index_to_string_table, Table<string, int>* string_to_int_table, const string& entity_value);
 
@@ -188,7 +194,7 @@ class Pkb {
     [[nodiscard]] bool IsRead(int stmt_no) const;
     [[nodiscard]] int GetVarFromRead(int stmt_no) const;
     [[nodiscard]] vector<int> GetReadByVar(int var_idx) const;
-    
+
     [[nodiscard]] bool IsPrint(int stmt_no) const;
     [[nodiscard]] int GetVarFromPrint(int stmt_no) const;
     [[nodiscard]] vector<int> GetPrintByVar(int var_idx) const;
