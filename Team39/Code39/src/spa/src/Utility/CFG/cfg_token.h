@@ -28,7 +28,7 @@ class CFGToken {
 
     void print();
 
-  private:
+  public:
     CFGTokenType type_;
     int stmt_num_;
 };

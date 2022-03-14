@@ -4,6 +4,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "../entity.h"
+
 enum class NodeType {
   START,
   STMT,
@@ -15,31 +17,20 @@ enum class NodeType {
 
 class GraphNode {
   public:
+    NodeType type_;
+    int start_;
+    int end_;
+    //stmt_type_ stores the entity type of the stmt within this node for Affect/* to quickly check the type
+    std::unordered_map<int, EntityIdentifier> stmt_type_;
+    GraphNode* next_node_;
+    GraphNode* alternative_node_;
 
+  public:
     ~GraphNode() = default;
 
     GraphNode();
 
     GraphNode(NodeType type);
 
-    void AddStmtNum(int stmt_num);
-
-    void InsertNextNode(GraphNode* node);
-
-    void InsertAlternativeNode(GraphNode* node);
-
-    NodeType GetNodeType();
-
-    GraphNode* GetNextNode();
-
-    GraphNode* GetAlternativeNode();
-
-  private:
-    NodeType type_;
-    int start_;
-    int end_;
-    std::unordered_map<> stmt_num_;
-    GraphNode* next_node_;
-    GraphNode* alternative_node_;
-
+    GraphNode(CFGTokenType token_type, int stmt_num);
 };
