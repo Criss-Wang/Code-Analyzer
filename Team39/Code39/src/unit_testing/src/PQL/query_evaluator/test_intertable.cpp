@@ -25,42 +25,28 @@ static pql_table::InterTable table1_int_out_order = pql_table::InterTable(table1
 
 static vector<int> table1_int_duplicate_col({ 1,1,1,2,3,3,4,4,4,4,5 });
 static pql_table::InterTable table1_int_duplicate = pql_table::InterTable(table1_int_syn, table1_int_duplicate_col);
-
-//Table with one column and elements are string
-static vector<string> table1_str_col({ "a","b","c","d","e"});
-static pql::Synonym table1_str_syn("var", EntityIdentifier::kVariable);
-static pql_table::InterTable table1_str = pql_table::InterTable(table1_str_syn, table1_str_col);
-
-static vector<string> table1_str_out_order_col({ "c","b","d","e","a"});
-static pql_table::InterTable table1_str_out_order = pql_table::InterTable(table1_str_syn, table1_str_out_order_col);
-
-static vector<string> table1_str_duplicate_col({ "a","a","a","b","c","c","d","d","d","d","e"});
-static pql_table::InterTable table1_str_duplicate = pql_table::InterTable(table1_str_syn, table1_str_duplicate_col);
-
 /*-----------------------------------------------------------------------------------------------------------*/
 
 /*----------------------------------TABLES with two columns ------------------------------------------------ */ 
 // standard table with 2 columns
-static vector<int> table2_first_col({ 2,4,6,8 });
-static vector<string> table2_second_col({ "a", "b", "c", "d" });
+static vector<int> table2_first_col({ 2, 4, 6, 8, 10 });
+static vector<int> table2_second_col({ 1, 3, 5, 7, 9 });
 static pql::Synonym table2_first_syn("s", EntityIdentifier::kStmt);
+static vector<vector<int>> table2_rows = ({ {2, 1}, {4, 3}, {6, 5}, {8, 7}, {10, 9} });
 static pql::Synonym table2_second_syn("v", EntityIdentifier::kVariable);
 static vector<string> table2_header({ table2_first_syn.GetName(), table2_second_syn.GetName() });
-static vector<vector<pql_table::element>> table2_rows;
 static pql_table::InterTable table2(table2_header, table2_rows);
 
 // table with 2 columns that have duplicate rows
-static vector<int> table2_duplicate_first_col({ 2,2,2,4,6,8,8 });
-static vector<string> table2_duplicate_second_col({ "a","a","a","b","c","d","d"});
-static vector<vector<pql_table::element>> table2_duplicate_rows;
+static vector<vector<int>> table2_duplicate_rows = = ({ {2, 1}, {4, 3}, {6, 5}, {8, 7}, {10, 9}, {2, 1}, {4, 3}, {6, 5}, {8, 7}, {2, 1} });
 static pql_table::InterTable table2_duplicate(table2_header, table2_duplicate_rows);
 
 //tables used for Merge, Filter and mergeAndFilter
 static pql_table::InterTable table1_merge1(table2_first_syn, table2_first_col);
 static pql_table::InterTable table1_merge2(table2_second_syn, table2_second_col);
-static vector<int> table2_merge_first_col({ 2,2,2,2,4,4,4,4,6,6,6,6,8,8,8,8 });
-static vector<string> table2_merge_second_col({ "a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d", "a", "b", "c", "d" });
-static vector<vector<pql_table::element>> table2_merge_rows;
+static vector<vector<int>> table2_merge_rows = ({ {2, 1}, {2, 3}, {2, 5}, {2, 7}, {2, 9}, {4, 1}, {4, 3}, {4, 5}, {4, 7}, {4, 9}, 
+																								  {6, 1}, {6, 3}, {6, 5}, {6, 7}, {6, 9}, {8, 1}, {8, 3}, {8, 5}, {8, 7}, {8, 9}, 
+																								  {10, 1}, {10, 3}, {10, 5}, {10, 7}, {10, 9} });
 static pql_table::InterTable table2_merge(table2_header, table2_merge_rows);
 
 static vector<int> table2_empty_first_col({});
@@ -82,37 +68,35 @@ static vector<vector<pql_table::element>> table2_filter_rows;
 static pql_table::InterTable table2_filter(table2_header, table2_filter_rows);
 /*-----------------------------------------------------------------------------------------------------------*/
 
-static void InitializeList(vector<int>* col1, vector<string>* col2, vector<vector<pql_table::element>>* rows) {
-	(*rows).clear();
-  for (int index = 0; index < col1->size(); index++) {
-		pql_table::element first;
-		pql_table::element second;
-
-		first.val = (*col1)[index];
-		first.name = "";
-		second.val = 0;
-		second.name = (*col2)[index];
-
-		vector<pql_table::element> row({ first, second });
-		(*rows).push_back(row);
-  }
-}
-
-static void Initialize() {
-  InitializeList(&table2_first_col, &table2_second_col, &table2_rows);
-	InitializeList(&table2_duplicate_first_col, &table2_duplicate_second_col, &table2_duplicate_rows);
-	InitializeList(&table2_merge_first_col, &table2_merge_second_col, &table2_merge_rows);
-	InitializeList(&table2_filter_first_col, &table2_filter_second_col, &table2_filter_rows);
-	table2 = pql_table::InterTable(table2_header, table2_rows);
-	table2_duplicate = pql_table::InterTable(table2_header, table2_duplicate_rows);
-	table2_merge = pql_table::InterTable(table2_header, table2_merge_rows);
-	table2_filter = pql_table::InterTable(table2_header, table2_filter_rows);
-}
+//static void InitializeList(vector<int>* col1, vector<string>* col2, vector<vector<pql_table::element>>* rows) {
+//	(*rows).clear();
+//  for (int index = 0; index < col1->size(); index++) {
+//		pql_table::element first;
+//		pql_table::element second;
+//
+//		first.val = (*col1)[index];
+//		first.name = "";
+//		second.val = 0;
+//		second.name = (*col2)[index];
+//
+//		vector<pql_table::element> row({ first, second });
+//		(*rows).push_back(row);
+//  }
+//}
+//
+//static void Initialize() {
+//  InitializeList(&table2_first_col, &table2_second_col, &table2_rows);
+//	InitializeList(&table2_duplicate_first_col, &table2_duplicate_second_col, &table2_duplicate_rows);
+//	InitializeList(&table2_merge_first_col, &table2_merge_second_col, &table2_merge_rows);
+//	InitializeList(&table2_filter_first_col, &table2_filter_second_col, &table2_filter_rows);
+//	table2 = pql_table::InterTable(table2_header, table2_rows);
+//	table2_duplicate = pql_table::InterTable(table2_header, table2_duplicate_rows);
+//	table2_merge = pql_table::InterTable(table2_header, table2_merge_rows);
+//	table2_filter = pql_table::InterTable(table2_header, table2_filter_rows);
+//}
 
 
 TEST_CASE("Check equality of InterTable") {
-	Initialize();
-
 	SECTION("Tables should be equal if the contents are the same, order does not matter") {
 		REQUIRE(table1_int.equal(table1_int_out_order));
 		
