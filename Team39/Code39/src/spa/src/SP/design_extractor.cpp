@@ -31,7 +31,7 @@ void PopulateForP(T1 table_to_refer, T2 table_to_update) {
 
 // Helper
 template<typename T1, typename T2, typename T3>
-T3 DFS(T1 table_to_refer, T2 table_to_update, T3 key) {
+T3 Dfs(T1 table_to_refer, T2 table_to_update, T3 key) {
   if (table_to_update->KeyExistsInTable(key)) {
     return key;
   }
@@ -45,7 +45,7 @@ T3 DFS(T1 table_to_refer, T2 table_to_update, T3 key) {
 
   vector<T3> ans;
   for (T3 child_key : children_lst) {
-    string end_val = DFS<T1, T2, string>(table_to_refer, table_to_update, child_key);
+    int end_val = Dfs<T1, T2, int>(table_to_refer, table_to_update, child_key);
     ans.push_back(end_val);
     // Add the children of the current key if the key exists
     if (table_to_update->KeyExistsInTable(end_val)) {
@@ -63,10 +63,10 @@ T3 DFS(T1 table_to_refer, T2 table_to_update, T3 key) {
   return key;
 }
 
-template<typename T1, typename T2, typename T3>
+template<typename T1, typename T2>
 void PopulateForC(T1 table_to_refer, T2 table_to_update) {
-  for (const T3 key : table_to_refer->GetKeyLst()) {
-    DFS<T1, T2, string>(table_to_refer, table_to_update, key);
+  for (int& key : table_to_refer->GetKeyLst()) {
+    Dfs<T1, T2, int>(table_to_refer, table_to_update, key);
   }
 }
 
@@ -85,19 +85,19 @@ void PopulateForF(T1 table_to_refer, T2 table_to_update) {
   }
 }
 
-void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarTable& child_star_table, Table<int, vector<string>>& t,
-  Table<string, vector<int>>& t2) {
+void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarTable& child_star_table, Table<int, vector<int>>& t,
+  Table<int, vector<int>>& t2) {
   for (const int parent_stmt: parent_star_table.GetKeyLst()) {
-    vector<string> variables_lst;
+    vector<int> variables_lst;
     if (t.KeyExistsInTable(parent_stmt)) {
       variables_lst = t.GetValueByKey(parent_stmt);
     }
-    vector<string> tmp_lst(variables_lst);
+    vector<int> tmp_lst(variables_lst);
 
     for (const int child_stmt: parent_star_table.GetValueByKey(parent_stmt)) {
       if (!t.KeyExistsInTable(child_stmt)) continue;
       // Get the variables associated with the statement number
-      vector<string> variables_lst_of_child_stmt = t.GetValueByKey(child_stmt);
+      vector<int> variables_lst_of_child_stmt = t.GetValueByKey(child_stmt);
 
       // Merge two vectors
       tmp_lst.insert(tmp_lst.end(), variables_lst_of_child_stmt.begin(), variables_lst_of_child_stmt.end());
@@ -111,7 +111,7 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
   }
 
   // Populate the inverse relation
-  for (const string var: t2.GetKeyLst()) {
+  for (const int var: t2.GetKeyLst()) {
     vector<int> stmts_lst = t2.GetValueByKey(var);
     vector<int> tmp_lst(stmts_lst);
     for (const int stmt: stmts_lst) {
@@ -157,8 +157,8 @@ int PopulateNestedRelationships(Pkb& pkb) {
     PopulateForP<ChildTable*, ChildStarTable*>(child_table, child_star_table);
 
     // Populate nested calls
-    PopulateForC<CallsTable*, CallsStarTable*, string>(calls_table, calls_star_table);
-    PopulateForC<CalledByTable*, CalledByStarTable*, string>(called_by_table, called_by_star_table);
+    PopulateForC<CallsTable*, CallsStarTable*>(calls_table, calls_star_table);
+    PopulateForC<CalledByTable*, CalledByStarTable*>(called_by_table, called_by_star_table);
 
     // Populate modifies
     PopulateNestedModifiesOrUses(*parent_star_table, *child_star_table,  *modifies_stmt_to_variables_table, *modifies_variable_to_stmts_table);

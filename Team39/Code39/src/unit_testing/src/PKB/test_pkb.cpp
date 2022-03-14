@@ -136,7 +136,7 @@ TEST_CASE("Populating Parent and Child Table") {
     REQUIRE(!pkb.IsParent(2, 3));
     REQUIRE(!pkb.IsParent(1, 5));
 
-    REQUIRE(pkb.GetParent(1) == vector<int>{});
+    REQUIRE(pkb.GetParent(1).empty());
     REQUIRE(pkb.GetParent(2) == vector<int>{1});
     REQUIRE(pkb.GetParent(5) == vector<int>{4});
     REQUIRE(pkb.GetParent(5) != vector<int>{1});
@@ -146,7 +146,7 @@ TEST_CASE("Populating Parent and Child Table") {
   SECTION("Test API for PQL side for ChildTable") {
     REQUIRE(pkb.GetChild(1) == vector<int>{2, 3, 4});
     REQUIRE(pkb.GetChild(1) != vector<int>{1, 2});
-    REQUIRE(pkb.GetChild(5) == vector<int>{});
+    REQUIRE(pkb.GetChild(5).empty());
     REQUIRE(pkb.GetChild(4) == vector<int>{5, 6});
   }
 }
@@ -154,7 +154,12 @@ TEST_CASE("Populating Parent and Child Table") {
 TEST_CASE("Populating Calls Table") {
   // Called by reverse relation is populated behind the scenes
   Pkb pkb = Pkb();
-  bool success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p1", vector<string>{"p4", "p5"});
+  bool success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p1");
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p2") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p3") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p4") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p5") && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p1", vector<string>{"p4", "p5"}) && success;
   success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p2", vector<string>{"p3", "p4"}) && success;
 
   SECTION("Add item into table: string -> vector<string>") {
@@ -170,26 +175,33 @@ TEST_CASE("Populating Calls Table") {
     REQUIRE(!success);
   }
 
+  int p1_idx = pkb.GetIndexByProc("p1");
+  int p2_idx = pkb.GetIndexByProc("p2");
+  int p3_idx = pkb.GetIndexByProc("p3");
+  int p4_idx = pkb.GetIndexByProc("p4");
+  int p5_idx = pkb.GetIndexByProc("p5");
+  const int invalid_idx = 100;
+
   SECTION("Test API for PQL side for Calls Table") {
-    REQUIRE(pkb.IsCalls("p1", "p4"));
-    REQUIRE(pkb.IsCalls("p1", "p5"));
-    REQUIRE(pkb.IsCalls("p2", "p3"));
-    REQUIRE(pkb.IsCalls("p2", "p4"));
-    REQUIRE(!pkb.IsCalls("p1", "p2"));
-    REQUIRE(!pkb.IsCalls("p1", "p100"));
+    REQUIRE(pkb.IsCalls(p1_idx, p4_idx));
+    REQUIRE(pkb.IsCalls(p1_idx, p5_idx));
+    REQUIRE(pkb.IsCalls(p2_idx, p3_idx));
+    REQUIRE(pkb.IsCalls(p2_idx, p4_idx));
+    REQUIRE(!pkb.IsCalls(p1_idx, p2_idx));
+    REQUIRE(!pkb.IsCalls(p1_idx, invalid_idx));
 
-    REQUIRE(pkb.GetCallers("p5") == vector<string>{"p1"});
-    REQUIRE(pkb.GetCallers("p3") == vector<string>{"p2"});
-    REQUIRE(pkb.GetCallers("p4") == vector<string>{"p1", "p2"});
-    REQUIRE(pkb.GetCallers("p5") != vector<string>{"p1", "p2"});
+    REQUIRE(pkb.GetCallers(p5_idx) == vector<int>{p1_idx});
+    REQUIRE(pkb.GetCallers(p3_idx) == vector<int>{p2_idx});
+    REQUIRE(pkb.GetCallers(p4_idx) == vector<int>{p1_idx, p2_idx});
+    REQUIRE(pkb.GetCallers(p5_idx) != vector<int>{p1_idx, p2_idx});
 
-    REQUIRE(pkb.GetCallees("p1") == vector<string>{"p4", "p5"});
-    REQUIRE(pkb.GetCallees("p2") == vector<string>{"p3", "p4"});
-    REQUIRE(pkb.GetCallees("p100") == vector<string>{});
-    REQUIRE(pkb.GetCallees("p1") != vector<string>{"p4"});
+    REQUIRE(pkb.GetCallees(p1_idx) == vector<int>{p4_idx, p5_idx});
+    REQUIRE(pkb.GetCallees(p2_idx) == vector<int>{p3_idx, p4_idx});
+    REQUIRE(pkb.GetCallees(invalid_idx).empty());
+    REQUIRE(pkb.GetCallees(p1_idx) != vector<int>{p4_idx});
 
-    vector<pair<string, string>> expected_calls_pairs = {make_pair("p1", "p4"), make_pair("p1", "p5"), make_pair("p2", "p3"), make_pair("p2", "p4")};
-    vector<pair<string, string>> calls_pairs = pkb.GetAllCallsPairs();
+    vector<pair<int, int>> expected_calls_pairs = {make_pair(p1_idx, p4_idx), make_pair(p1_idx, p5_idx), make_pair(p2_idx, p3_idx), make_pair(p2_idx, p4_idx)};
+    vector<pair<int, int>> calls_pairs = pkb.GetAllCallsPairs();
     std::sort(calls_pairs.begin(), calls_pairs.end());
     std::sort(expected_calls_pairs.begin(), expected_calls_pairs.end());
     REQUIRE(calls_pairs == expected_calls_pairs);
@@ -287,7 +299,7 @@ TEST_CASE("Add Integer Entity") {
     success = success && pkb.AddEntityToSet(EntityIdentifier::kStmt, 3);
     REQUIRE(success);
 
-    const unordered_set<int> res = pkb.GetAllEntityInt(EntityIdentifier::kStmt);
+    const unordered_set<int> res = pkb.GetAllEntity(EntityIdentifier::kStmt);
     REQUIRE(res.size() == 3);
     REQUIRE(res.find(1) != res.end());
     REQUIRE(res.find(2) != res.end());
@@ -304,10 +316,76 @@ TEST_CASE("Add String Entity") {
     success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "z");
     REQUIRE(success);
 
-    const unordered_set<string> res = pkb.GetAllEntityString(EntityIdentifier::kVariable);
+    const unordered_set<int> res = pkb.GetAllEntity(EntityIdentifier::kVariable);
     REQUIRE(res.size() == 3);
-    REQUIRE(res.find("x") != res.end());
-    REQUIRE(res.find("y") != res.end());
-    REQUIRE(res.find("z") != res.end());
+    REQUIRE(res.find(pkb.GetIndexByVar("x")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByVar("y")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByVar("z")) != res.end());
+
+    const vector<pair<int, string>> full_res = pkb.GetAllIndexVarPairs();
+    REQUIRE(full_res.size() == 3);
+    const vector<pair<string, int>> full_res_2 = pkb.GetAllVarIndexPairs();
+    REQUIRE(full_res_2.size() == 3);
+    const string var_res = pkb.GetVarByIndex(0);
+    REQUIRE(var_res == "x");
+    const int idx_res = pkb.GetIndexByVar("y");
+    REQUIRE(idx_res == 1);
+  }
+
+  SECTION("Adding procedure name") {
+    bool success = pkb.AddEntityToSet(EntityIdentifier::kProc, "x");
+    success = success && pkb.AddEntityToSet(EntityIdentifier::kProc, "y");
+    success = success && pkb.AddEntityToSet(EntityIdentifier::kProc, "z");
+    REQUIRE(success);
+
+    const unordered_set<int> res = pkb.GetAllEntity(EntityIdentifier::kProc);
+    REQUIRE(res.size() == 3);
+    REQUIRE(res.find(pkb.GetIndexByProc("x")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByProc("y")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByProc("z")) != res.end());
+
+    const vector<pair<int, string>> full_res = pkb.GetAllIndexProcPairs();
+    REQUIRE(full_res.size() == 3);
+    const vector<pair<string, int>> full_res_2 = pkb.GetAllProcIndexPairs();
+    REQUIRE(full_res_2.size() == 3);
+    const string proc_res = pkb.GetProcByIndex(0);
+    REQUIRE(proc_res == "x");
+    const int idx_res = pkb.GetIndexByProc("y");
+    REQUIRE(idx_res == 1);
+  }
+}
+
+TEST_CASE("Entity Attribute Operations") {
+  Pkb pkb = Pkb();
+  bool success = pkb.AddInfoToTable(TableIdentifier::kRead, 1, "x");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kRead, 1);
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "x");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kRead, 2, "x");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kRead, 2);
+  success = success && pkb.AddInfoToTable(TableIdentifier::kRead, 3, "y");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kRead, 3);
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "y");
+
+  SECTION("Positive Test Cases") {
+    bool res = pkb.IsRead(1);
+    REQUIRE(res == true);
+
+    int x_idx = pkb.GetIndexByVar("x");
+    int var_idx = pkb.GetVarFromRead(1);
+    REQUIRE(var_idx == x_idx);
+
+    vector<int> stmt_res = pkb.GetReadByVar(x_idx);
+    REQUIRE(stmt_res == vector<int>{1, 2});
+  }
+
+  SECTION("Negative Test Cases") {
+    bool res = pkb.IsRead(4);
+    REQUIRE(res == false);
+
+    int var_idx = pkb.GetVarFromRead(4);
+    REQUIRE(var_idx == -1);
+
+    vector<int> stmt_res = pkb.GetReadByVar(20);
+    REQUIRE(stmt_res.empty());
   }
 }
