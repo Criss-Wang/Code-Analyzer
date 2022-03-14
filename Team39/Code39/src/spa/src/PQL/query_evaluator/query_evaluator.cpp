@@ -39,6 +39,10 @@ namespace pql {
         return std::make_unique<pql_clause::UsesSClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kModifiesS:
         return std::make_unique<pql_clause::ModifiesSClause>(&token, pkb, domain, predicates);
+      case RelationshipTypes::kUsesP:
+          return std::make_unique<pql_clause::UsesPClause>(&token, pkb, domain, predicates);
+      case RelationshipTypes::kModifiesP:
+          return std::make_unique<pql_clause::ModifiesPClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kCalls:
         return std::make_unique<pql_clause::CallsClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kCallsT:

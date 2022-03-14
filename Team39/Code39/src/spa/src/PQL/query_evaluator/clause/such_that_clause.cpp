@@ -188,39 +188,41 @@ namespace pql_clause {
     UpdateHashmap<int>(domain, token.GetRight(), domain_lst);
   }
 
-  void UsesSClause::Evaluate() {
-    bool is_left_syn = token_->IsSynonymLeft();
-    bool is_right_syn = token_->IsSynonymRight();
+  void GenericEvaluateVar(pql::RelationshipToken& token, Pkb& pkb,
+      std::unordered_map<std::string, std::vector<int>>& domain, std::vector<pql_table::Predicate>* predicates,
+      bool(Pkb::* IsRelHolds)(const int, const int) const, std::vector<int>(Pkb::* GetRelDomain)(const int) const,
+      std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const) {
+    bool is_left_syn = token.IsSynonymLeft();
+    bool is_right_syn = token.IsSynonymRight();
 
     if (!is_left_syn && !is_right_syn) {
-      EvaluateRelExistVar(*token_, pkb_, &Pkb::IsUsesStmt, &Pkb::GetUsesVarByStmt);
-    }
-    else if (!is_left_syn && is_right_syn) {
-      EvaluateRelDomainVar(*token_, pkb_, *domain_, &Pkb::GetUsesVarByStmt);
-    }
-    else if (is_left_syn && !is_right_syn) {
-      EvaluateInverseRelDomain(*token_, pkb_, *domain_, &Pkb::GetUsesStmtsByVar, &Pkb::GetAllUsesStmtVarPairs);
-    }
-    else {
-      EvaluateRelPair(*token_, pkb_, predicates_, &Pkb::GetAllUsesStmtVarPairs);
+      EvaluateRelExistVar(token, pkb, IsRelHolds, GetRelDomain);
+    } else if (!is_left_syn && is_right_syn) {
+      EvaluateRelDomainVar(token, pkb, domain, GetRelDomain);
+    } else if (is_left_syn && !is_right_syn) {
+      EvaluateInverseRelDomain(token, pkb, domain, GetInverseRelDomain, GetRelPairs);
+    } else {
+      EvaluateRelPair(token, pkb, predicates, GetRelPairs);
     }
   }
 
-  void ModifiesSClause::Evaluate() {
-    bool is_left_syn = token_->IsSynonymLeft();
-    bool is_right_syn = token_->IsSynonymRight();
+  void UsesSClause::Evaluate() {
+    GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+        &Pkb::IsUsesStmt, &Pkb::GetUsesVarByStmt, &Pkb::GetUsesStmtsByVar, &Pkb::GetAllUsesStmtVarPairs);
+  }
 
-    if (!is_left_syn && !is_right_syn) {
-      EvaluateRelExistVar(*token_, pkb_, &Pkb::IsModifiesStmt, &Pkb::GetModifiesVarByStmt);
-    }
-    else if (!is_left_syn && is_right_syn) {
-      EvaluateRelDomainVar(*token_, pkb_, *domain_, &Pkb::GetModifiesVarByStmt);
-    }
-    else if (is_left_syn && !is_right_syn) {
-      EvaluateInverseRelDomain(*token_, pkb_, *domain_, &Pkb::GetModifiesStmtsByVar, &Pkb::GetAllModifiesStmtVarPairs);
-    }
-    else {
-      EvaluateRelPair(*token_, pkb_, predicates_, &Pkb::GetAllModifiesStmtVarPairs);
-    }
+  void ModifiesSClause::Evaluate() {
+    GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+        &Pkb::IsModifiesStmt, &Pkb::GetModifiesVarByStmt, &Pkb::GetModifiesStmtsByVar, &Pkb::GetAllModifiesStmtVarPairs);
+  }
+
+  void UsesPClause::Evaluate() {
+    /*GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+        &Pkb::IsUsesStmt, &Pkb::GetUsesVarByStmt, &Pkb::GetUsesStmtsByVar, &Pkb::GetAllUsesStmtVarPairs);*/
+  }
+
+  void ModifiesPClause::Evaluate() {
+    /*GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+        &Pkb::IsModifiesStmt, &Pkb::GetModifiesVarByStmt, &Pkb::GetModifiesStmtsByVar, &Pkb::GetAllModifiesStmtVarPairs);*/
   }
 }

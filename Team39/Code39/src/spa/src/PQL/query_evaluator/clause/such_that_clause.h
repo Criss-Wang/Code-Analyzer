@@ -80,6 +80,28 @@ namespace pql_clause {
       void Evaluate() override;
   };
 
+  class UsesPClause : public SuchThatClause {
+  public:
+      UsesPClause(pql::RelationshipToken* token, Pkb& pkb,
+          std::unordered_map<std::string, std::vector<int>>* domain,
+          std::vector<pql_table::Predicate>* predicates) :
+          SuchThatClause(token, pkb, domain, predicates) {}
+
+  public:
+      void Evaluate() override;
+  };
+
+  class ModifiesPClause : public SuchThatClause {
+  public:
+      ModifiesPClause(pql::RelationshipToken* token, Pkb& pkb,
+          std::unordered_map<std::string, std::vector<int>>* domain,
+          std::vector<pql_table::Predicate>* predicates) :
+          SuchThatClause(token, pkb, domain, predicates) {}
+
+  public:
+      void Evaluate() override;
+  };
+
   class CallsClause : public SuchThatClause {
     public:
       CallsClause(pql::RelationshipToken* token, Pkb& pkb,
