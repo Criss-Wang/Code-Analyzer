@@ -31,7 +31,7 @@ GraphNode::GraphNode() {
 
 //This constructor will be called to create Start, Dummy and End node only
 GraphNode::GraphNode(NodeType type) {
-  //prevent NodeType different than Start/End to create a node
+  //prevent NodeType different than Start/Dummy/End to create a node
   if (NodeTypeWithoutStmtNumSet.find(type) == NodeTypeWithoutStmtNumSet.end()) {
     throw exception();
   }
@@ -44,18 +44,25 @@ GraphNode::GraphNode(NodeType type) {
 }
 
 //This constructor will be called to create stmt nodes only
-GraphNode::GraphNode(CFGTokenType token_type, int stmt_num) {
-  if (token_type == CFGTokenType::kIf) {
+GraphNode::GraphNode(CFGToken token) {
+  if (token.type_ == CFGTokenType::kIf) {
     type_ = NodeType::IF;
-  } else if (token_type == CFGTokenType::kWhile) {
+  } else if (token.type_ == CFGTokenType::kWhile) {
     type_ = NodeType::WHILE;
   } else {
     type_ = NodeType::STMT;
   }
 
-  start_ = stmt_num;
-  end_ = stmt_num;
+  start_ = token.stmt_num_;
+  end_ = token.stmt_num_;
   next_node_ = nullptr;
   alternative_node_ = nullptr;
-  stmt_type_[stmt_num] = NodeTypeToEntityIdentifierMap.at(token_type);
+  stmt_type_[token.stmt_num_] = NodeTypeToEntityIdentifierMap.at(token.type_);
+}
+
+//append the token to the curr node
+void GraphNode::append(CFGToken& token) {
+  //Move the end by 1 and add the current statemnt type into stmt_type
+  end_ = token.stmt_num_;
+  stmt_type_[token.stmt_num_] = NodeTypeToEntityIdentifierMap.at(token.type_);
 }
