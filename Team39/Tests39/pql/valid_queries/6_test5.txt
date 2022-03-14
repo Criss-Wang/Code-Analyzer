@@ -1,0 +1,2 @@
+constant c; stmt s;
+Select <c.value, s.stmt#>
