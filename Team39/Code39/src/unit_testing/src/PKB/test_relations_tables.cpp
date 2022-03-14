@@ -340,13 +340,13 @@ TEST_CASE("Modifies Procedure to Variables Table") {
   ModifiesProcToVariablesTable modifies_proc_to_variables_table = ModifiesProcToVariablesTable();
 
   SECTION("Get key list when table is empty") {
-    vector<string> key_lst = modifies_proc_to_variables_table.GetKeyLst();
+    vector<int> key_lst = modifies_proc_to_variables_table.GetKeyLst();
     REQUIRE(key_lst.size() == 0);
     REQUIRE(key_lst.empty());
   }
 
-  bool add_success = modifies_proc_to_variables_table.AddKeyValuePair("p1", vector<string>{"a", "b", "c"});
-  add_success = modifies_proc_to_variables_table.AddKeyValuePair("p2", vector<string>{"c", "y", "z"}) && add_success;
+  bool add_success = modifies_proc_to_variables_table.AddKeyValuePair(0, vector<int>{1, 2, 3});
+  add_success = modifies_proc_to_variables_table.AddKeyValuePair(1, vector<int>{3, 25, 26}) && add_success;
 
   SECTION("Check population success") {
     REQUIRE(modifies_proc_to_variables_table.GetTableSize() == 2);
@@ -354,24 +354,24 @@ TEST_CASE("Modifies Procedure to Variables Table") {
   }
 
   SECTION("Throw custom exception if key already exists in the table") {
-    CHECK_THROWS_AS(modifies_proc_to_variables_table.AddKeyValuePair("p1", vector<string>{"z"}), KeyInUseException);
+    CHECK_THROWS_AS(modifies_proc_to_variables_table.AddKeyValuePair(0, vector<int>{26}), KeyInUseException);
   }
 
   SECTION("Get value from table by key") {
-    vector<string> value = modifies_proc_to_variables_table.GetValueByKey("p1");
-    vector<string> expected_value = {"a", "b", "c"};
+    vector<int> value = modifies_proc_to_variables_table.GetValueByKey(0);
+    vector<int> expected_value = {1, 2, 3};
     std::sort(value.begin(), value.end());
     std::sort(expected_value.begin(), expected_value.end());
     REQUIRE(value == expected_value);
   }
 
   SECTION("Throw custom exception if key does not exist in the table when retrieving value by key") {
-    CHECK_THROWS_AS(modifies_proc_to_variables_table.GetValueByKey("p999"), InvalidKeyException);
+    CHECK_THROWS_AS(modifies_proc_to_variables_table.GetValueByKey(999), InvalidKeyException);
   }
 
   SECTION("Get key list from table") {
-    vector<string> key_lst = modifies_proc_to_variables_table.GetKeyLst();
-    vector<string> expected_key_lst = {"p1", "p2"};
+    vector<int> key_lst = modifies_proc_to_variables_table.GetKeyLst();
+    vector<int> expected_key_lst = {0, 1};
 
     std::sort(key_lst.begin(), key_lst.end());
     std::sort(expected_key_lst.begin(), expected_key_lst.end());
@@ -379,9 +379,9 @@ TEST_CASE("Modifies Procedure to Variables Table") {
   }
 
   SECTION("Get key-value list from table") {
-    vector<pair<string, vector<string>>> key_value_lst = modifies_proc_to_variables_table.GetKeyValueLst();
-    vector<pair<string, vector<string>>> expected_key_value_lst = {make_pair("p1", vector<string>{"a", "b", "c"}),
-      make_pair("p2", vector<string>{"c", "y", "z"})};
+    vector<pair<int, vector<int>>> key_value_lst = modifies_proc_to_variables_table.GetKeyValueLst();
+    vector<pair<int, vector<int>>> expected_key_value_lst = {make_pair(0, vector<int>{1, 2, 3}),
+      make_pair(1, vector<int>{3, 25, 26})};
 
     std::sort(key_value_lst.begin(), key_value_lst.end());
     std::sort(expected_key_value_lst.begin(), expected_key_value_lst.end());
@@ -389,7 +389,7 @@ TEST_CASE("Modifies Procedure to Variables Table") {
   }
 
   SECTION("Update value in table") {
-    modifies_proc_to_variables_table.UpdateKeyWithNewValue("p2", vector<string>{"update"});
-    REQUIRE(modifies_proc_to_variables_table.GetValueByKey("p2") == vector<string>{"update"});
+    modifies_proc_to_variables_table.UpdateKeyWithNewValue(1, vector<int>{999});
+    REQUIRE(modifies_proc_to_variables_table.GetValueByKey(1) == vector<int>{999});
   }
 }
