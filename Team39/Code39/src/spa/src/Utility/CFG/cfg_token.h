@@ -8,11 +8,8 @@ enum class CFGTokenType {
   kCall,
   kWhile,
   kIf,
-  kThenStart,
   kThenEnd,
-  kElseStart,
   kElseEnd,
-  kWhileStart,
   kWhileEnd,
   kEnd
 };

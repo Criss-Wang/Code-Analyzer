@@ -8,7 +8,7 @@ file(GLOB srcs "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/clause/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/formatter/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_evaluator/solver/*.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_parser/*.cpp")
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/PQL/query_parser/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/Utility/CFG/*.cpp")
 file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/PKB/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/src/PKB/*.hpp"

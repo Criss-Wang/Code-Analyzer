@@ -49,6 +49,9 @@ std::shared_ptr<GraphNode> CFG::GenerateCfg(vector<CFGToken>& tokens) {
 
   //stack stores the latest if/while node
   stack<shared_ptr<GraphNode>> stack;
+  if (tokens[1].type_ == CFGTokenType::kWhile || tokens[1].type_ == CFGTokenType::kIf) {
+    stack.push(first_node);
+  }
 
   if (tokens[1].type_ == CFGTokenType::kIf || tokens[1].type_ == CFGTokenType::kWhile) {
     stack.push(curr);
@@ -57,13 +60,6 @@ std::shared_ptr<GraphNode> CFG::GenerateCfg(vector<CFGToken>& tokens) {
   int index = 2;
 
   while (index < tokens.size()) {
-
-    if (tokens[index].type_ == CFGTokenType::kWhileStart
-        || tokens[index].type_ == CFGTokenType::kThenStart
-        || tokens[index].type_ == CFGTokenType::kElseStart) {
-      index++;
-      continue;
-    }
 
     //Need to create a new node when the previous node is If/While Node or
     //The current node is If/While Node
@@ -90,9 +86,26 @@ std::shared_ptr<GraphNode> CFG::GenerateCfg(vector<CFGToken>& tokens) {
     } else if (tokens[index].type_ == CFGTokenType::kWhileEnd) {
       shared_ptr<GraphNode> while_node = stack.top();
       stack.pop();
+
+      shared_ptr<GraphNode> next_node;
+      int next_index = index + 1;
+
+      if (tokens[next_index].type_ == CFGTokenType::kThenEnd
+        || tokens[next_index].type_ == CFGTokenType::kWhileEnd
+        || tokens[next_index].type_ == CFGTokenType::kElseEnd) {
+        next_node = make_shared<GraphNode>(NodeType::DUMMY);
+      } else if (tokens[next_index].type_ == CFGTokenType::kEnd) {
+        next_node = make_shared<GraphNode>(NodeType::END);
+        index++;
+      } else {
+        next_node = make_shared<GraphNode>(tokens[next_index]);
+        index++;
+      }
+
       //points curr to while_node
       Connect(curr, while_node);
-      curr = while_node;
+      Connect(curr, next_node);
+      curr = next_node;
 
     } else if (tokens[index].type_ == CFGTokenType::kElseEnd) {
       shared_ptr<GraphNode> then_node = stack.top();

@@ -40,20 +40,11 @@ void CFGToken::print() {
     case CFGTokenType::kIf:
       type = "if";
       break;
-    case CFGTokenType::kThenStart:
-      type = "thenStart";
-      break;
     case CFGTokenType::kThenEnd:
       type = "thenEnd";
       break;
-    case CFGTokenType::kElseStart:
-      type = "elseStart";
-      break;
     case CFGTokenType::kElseEnd:
       type = "elseEnd";
-      break;
-    case CFGTokenType::kWhileStart:
-      type = "whileStart";
       break;
     case CFGTokenType::kWhileEnd:
       type = "whileEnd";

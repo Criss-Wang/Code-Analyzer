@@ -16,7 +16,7 @@ class CFG {
 
     //CFG(std::vector<CFGToken>& tokens);
 
-    GraphNode* GetStartNode();
+    //GraphNode* GetStartNode();
 
     static std::shared_ptr<GraphNode> GenerateCfg(std::vector<CFGToken>& tokens);
 

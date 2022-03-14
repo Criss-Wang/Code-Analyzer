@@ -6,6 +6,7 @@ using namespace std;
 
 #include "populator.h"
 #include "SP/design_extractor.h"
+#include "Utility/CFG/control_flow_graph.h"
 
 const int kFirstIndex = 0;
 const int kSecondIndex = 1;
@@ -39,6 +40,7 @@ string populateReadStmt(vector<Token> tokens, Pkb& pkb) {
   // Add stmt num and read_var to Modifies Table
   pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, stmt_num, vector<string>{read_var});
 
+  return read_var;
 }
 
 // Returns variable being printed
@@ -59,6 +61,7 @@ string populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
   // Add stmt num and print_var to Uses Table
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vector<string>{ print_var });
   
+  return print_var;
 }
 
 // Returns a pair - first contains variable modified and second contains variables used
@@ -292,7 +295,6 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       if (is_else_stmt) {
         previous.push(previous_stmt_num + 1);
         cfg_tokens.push_back(CFGToken(CFGTokenType::kThenEnd, 0));
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kElseStart, 0));
       } else {
         if (!parent.empty()) {
           // Add parent stmt num and current stmt num to ParentTable
@@ -354,12 +356,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
         //pkb.AddInfoToTable(TableIdentifier::KUsesProcToVar, prev_proc, uses_p);
 
         cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-        // buildCFG(cfg_tokens);
-        cout << prev_proc << endl;
-        for (CFGToken t : cfg_tokens) {
-          t.print();
-        }
-        cout << endl;
+        // CFG::GenerateCfg(cfg_tokens);
       }
 
       // reset values for next procedure
@@ -426,7 +423,6 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       end_stmt_num += 1;
 
       cfg_tokens.push_back(CFGToken(CFGTokenType::kIf, token->stmt_num_));
-      cfg_tokens.push_back(CFGToken(CFGTokenType::kThenStart, 0));
       end_tokens.push("if");
 
     } else if (token->text_ == "while") {
@@ -449,7 +445,6 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       end_stmt_num += 1;
 
       cfg_tokens.push_back(CFGToken(CFGTokenType::kWhile, token->stmt_num_));
-      cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileStart, 0));
       end_tokens.push("while");
 
     } else if (token->text_ == "call") {
@@ -486,156 +481,9 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   
   // Generate CFG for last procedure
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-  // buildCFG(cfg_tokens);
-  cout << prev_proc << endl;
-  for (CFGToken t : cfg_tokens) {
-    t.print();
-  }
-  cout << endl;
+  CFG::GenerateCfg(cfg_tokens);
 
   if (PopulateNestedRelationships(pkb) == 0) {
     throw invalid_argument("PKB Population failed");
   }
 }
-
-/*
-vector<CFG> buildCFG(vector<Token> input_tokens) {
-  vector<CFG> cfgs = {};
-  CFG cfg = CFG();
-  GraphNode* current_node = nullptr;
-  stack<GraphNode*> previous_nodes = {};
-
-  // Keep track of nodes which are waiting for alternative paths to be created
-  stack<GraphNode*> waiting_nodes = {};
-  stack<GraphNode*> waiting_nodes_in_if = {};
-  bool link_two_nodes = false;
-
-  for (auto token = begin(input_tokens); token != end(input_tokens); ++token) {
-
-    if (token->type_ == RIGHT_CURLY) {
-      bool has_two_more_tokens = token != end(input_tokens) - 1 && token != end(input_tokens) - 2;
-      bool is_else_stmt = has_two_more_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == LEFT_CURLY;
-
-      if (previous_nodes.empty()) { // end of procedure
-        current_node->InsertNextNode(new GraphNode(NodeType::END));
-        current_node = current_node->GetNextNode();
-
-        if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::WHILE) {
-          waiting_nodes.top()->InsertAlternativeNode(current_node);
-          waiting_nodes.pop();
-
-        } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::IF) {
-          waiting_nodes.top()->InsertAlternativeNode(current_node);
-          waiting_nodes.pop();
-
-        } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::STMT) {
-          waiting_nodes.top()->InsertNextNode(current_node);
-          waiting_nodes.pop();
-          waiting_nodes_in_if.top()->InsertNextNode(current_node);
-          waiting_nodes_in_if.pop();
-        }
-
-        cfgs.push_back(cfg);
-        cfg = CFG();
-
-      } else if (is_else_stmt) {
-        waiting_nodes.push(waiting_nodes_in_if.top());
-        waiting_nodes_in_if.pop();
-        waiting_nodes_in_if.push(current_node);
-        current_node = new GraphNode(NodeType::DUMMY);
-
-      } else if (previous_nodes.top()->GetNodeType() == NodeType::WHILE) {
-        current_node->InsertNextNode(previous_nodes.top());
-        waiting_nodes.push(previous_nodes.top());
-        previous_nodes.pop();
-        current_node = new GraphNode(NodeType::DUMMY);
-
-      } else if (previous_nodes.top()->GetNodeType() == NodeType::IF) {
-        waiting_nodes.push(current_node);
-        previous_nodes.pop();
-        current_node = new GraphNode(NodeType::DUMMY);
-
-      }
-
-    } else if (next(token, 1)->text_ == "=" || token->text_ == "read" || token->text_ == "print" || token->text_ == "call") {
-      if (current_node->GetNodeType() != NodeType::STMT) {
-        current_node->InsertNextNode(new GraphNode(NodeType::STMT));
-        current_node = current_node->GetNextNode();
-      }
-
-      current_node->AddStmtNum(token->stmt_num_);
-
-      // the stmtLst inside the loop will be set as alternative Node instead of Next
-      if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::WHILE) {
-        waiting_nodes.top()->InsertAlternativeNode(current_node);
-        waiting_nodes.pop();
-
-      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::IF) {
-        waiting_nodes.top()->InsertAlternativeNode(current_node);
-        waiting_nodes.pop();
-
-      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::STMT) {
-        waiting_nodes.top()->InsertNextNode(current_node);
-        waiting_nodes.pop();
-        waiting_nodes_in_if.top()->InsertNextNode(current_node);
-        waiting_nodes_in_if.pop();
-      }
-
-    } else if (token->text_ == "procedure") {
-
-      // Initialize CFG for new procedure
-      cfg = CFG(next(token, 1)->text_);
-      current_node = cfg.GetStartNode();
-
-    } else if (token->text_ == "if") {
-      current_node->InsertNextNode(new GraphNode(NodeType::IF));
-      current_node = current_node->GetNextNode();
-      current_node->AddStmtNum(token->stmt_num_);
-
-      if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::WHILE) {
-        waiting_nodes.top()->InsertAlternativeNode(current_node);
-        waiting_nodes.pop();
-
-      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::IF) {
-        waiting_nodes.top()->InsertAlternativeNode(current_node);
-        waiting_nodes.pop();
-
-      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::STMT) {
-        waiting_nodes.top()->InsertNextNode(current_node);
-        waiting_nodes.pop();
-        waiting_nodes_in_if.top()->InsertNextNode(current_node);
-        waiting_nodes_in_if.pop();
-      }
-
-      waiting_nodes_in_if.push(current_node);
-      previous_nodes.push(current_node);
-
-    } else if (token->text_ == "while") {
-      current_node->InsertNextNode(new GraphNode(NodeType::WHILE));
-      current_node = current_node->GetNextNode();
-      current_node->AddStmtNum(token->stmt_num_);
-
-      if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::WHILE) {
-        waiting_nodes.top()->InsertAlternativeNode(current_node);
-        waiting_nodes.pop();
-
-      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::IF) {
-        waiting_nodes.top()->InsertNextNode(current_node);
-        waiting_nodes.pop();
-
-      } else if (!waiting_nodes.empty() && waiting_nodes.top()->GetNodeType() == NodeType::STMT) {
-        waiting_nodes.top()->InsertNextNode(current_node);
-        waiting_nodes.pop();
-        waiting_nodes_in_if.top()->InsertNextNode(current_node);
-        waiting_nodes_in_if.pop();
-      }
-
-      waiting_nodes_in_if.push(current_node);
-      previous_nodes.push(current_node);
-
-    }
-  }
-
-  return cfgs;
-}
-*/

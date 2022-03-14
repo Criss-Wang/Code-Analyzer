@@ -44,7 +44,7 @@ GraphNode::GraphNode(NodeType type) {
 }
 
 //This constructor will be called to create stmt nodes only
-GraphNode::GraphNode(CFGToken token) {
+GraphNode::GraphNode(CFGToken& token) {
   if (token.type_ == CFGTokenType::kIf) {
     type_ = NodeType::IF;
   } else if (token.type_ == CFGTokenType::kWhile) {

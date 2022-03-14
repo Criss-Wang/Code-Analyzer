@@ -34,7 +34,7 @@ class GraphNode {
 
     GraphNode(NodeType type);
 
-    GraphNode(CFGToken token);
+    GraphNode(CFGToken& token);
 
     void append(CFGToken& token);
 };
