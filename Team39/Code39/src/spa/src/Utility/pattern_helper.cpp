@@ -34,12 +34,15 @@ string PatternHelper::GenerateSubPattern(stack<char>& operators, stack<string>& 
   operands.pop();
   const string op2 = operands.top();
   operands.pop();
-  const string curr_pattern = op2 + op1 + op;
-  operands.push(curr_pattern);
-  return curr_pattern;
+  const string curr_res = op2 + "|" + op1 + op;
+  operands.push(curr_res);
+  return curr_res;
 }
 
 unordered_set<string> PatternHelper::GetPatternSetPostfix(const string& input, const bool is_full) {
+  // single operand, no operator
+  bool has_operator = false;
+
   // stack for operators.
   stack<char> operators;
 
@@ -49,6 +52,7 @@ unordered_set<string> PatternHelper::GetPatternSetPostfix(const string& input, c
   // result set
   unordered_set<string> res;
   string current_token = "";
+  string curr_pattern = "";
 
   for (int i = 0; i < input.length(); i++) {
 
@@ -64,7 +68,7 @@ unordered_set<string> PatternHelper::GetPatternSetPostfix(const string& input, c
     // matching opening bracket is found in operator stack.
     else if (input[i] == ')') {
       while (!operators.empty() && operators.top() != '(') {
-        string curr_pattern = GenerateSubPattern(operators, operands);
+        curr_pattern = GenerateSubPattern(operators, operands);
         if (is_full) res.insert(curr_pattern);
       }
 
@@ -89,8 +93,9 @@ unordered_set<string> PatternHelper::GetPatternSetPostfix(const string& input, c
     // If current character is an operator, then push it into operators stack after popping high priority operators from
     // operators stack and pushing result in operands stack.
     else {
+      has_operator = true;
       while (!operators.empty() && GetPriority(input[i]) <= GetPriority(operators.top())) {
-        string curr_pattern = GenerateSubPattern(operators, operands);
+        curr_pattern = GenerateSubPattern(operators, operands);
         if (is_full) res.insert(curr_pattern);
       }
       operators.push(input[i]);
@@ -98,10 +103,9 @@ unordered_set<string> PatternHelper::GetPatternSetPostfix(const string& input, c
     }
   }
 
-  if (operators.empty()) return { input };
+  if (!has_operator) return { input };
 
   // Pop operators from operators stack until it is empty and add result of each pop operation in operands stack.
-  string curr_pattern;
   while (!operators.empty()) {
     curr_pattern = GenerateSubPattern(operators, operands);
     if (is_full) res.insert(curr_pattern);
