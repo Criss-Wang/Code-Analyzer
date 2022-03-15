@@ -75,6 +75,14 @@ UsesVariableToStmtsTable* Pkb::GetUsesVariableToStmtsTable() {
   return uses_variable_to_stmts_table_;
 }
 
+UsesProcToVariablesTable* Pkb::GetUsesProcToVariablesTable() {
+  return uses_proc_to_variables_table_;
+}
+
+UsesVariableToProcsTable* Pkb::GetUsesVariableToProcsTable() {
+  return uses_variable_to_procs_table_;
+}
+
 // Following are for search handlers
 bool Pkb::IsCalls(const int proc_1, const int proc_2) const {
   try {
@@ -338,6 +346,19 @@ vector<pair<int, int>> Pkb::GetAllUsesStmtVarPairs() const {
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
+}
+
+bool Pkb::IsProcUsesVar(const int proc_idx, const int var_idx) const {
+  try {
+    vector<int> value = uses_proc_to_variables_table_->GetValueByKey(proc_idx);
+    return find(value.begin(), value.end(), var_idx) != value.end();
+  } catch (exception& e) {
+    return false;
+  }
+}
+
+bool Pkb::IsProcUsesVarExists() const {
+  return uses_proc_to_variables_table_->GetTableSize() > 0;
 }
 
 bool Pkb::IsModifiesStmt(const int stmt, const int var_idx) const {

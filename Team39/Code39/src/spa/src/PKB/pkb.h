@@ -127,6 +127,8 @@ class Pkb {
     ModifiesVariableToProcsTable* GetModifiesVariableToProcsTable();
     UsesStmtToVariablesTable* GetUsesStmtToVariablesTable();
     UsesVariableToStmtsTable* GetUsesVariableToStmtsTable();
+    UsesProcToVariablesTable* GetUsesProcToVariablesTable();
+    UsesVariableToProcsTable* GetUsesVariableToProcsTable();
 
     // Relationship utility APIs for PQL
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
@@ -173,6 +175,9 @@ class Pkb {
 
     [[nodiscard]] bool IsProcModifiesVar(int proc_idx, int var_idx) const;
     [[nodiscard]] bool IsProcModifiesVarExists() const;
+
+    [[nodiscard]] bool IsProcUsesVar(int proc_idx, int var_idx) const;
+    [[nodiscard]] bool IsProcUsesVarExists() const;
 
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
     [[nodiscard]] unordered_set<int> GetStmtsWithExactPattern(const string& pattern) const;

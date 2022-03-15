@@ -101,7 +101,7 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
   }
 }
 
-void PopulatedNestedModifiesP(CallsStarTable& calls_star_table, ModifiesProcToVariablesTable& t) {
+void PopulateNestedModifiesPOrUsesP(CallsStarTable& calls_star_table, Table<int, vector<int>>& t) {
   for (const int proc : t.GetKeyLst()) {
     // Get the variables
     vector<int> variables = t.GetValueByKey(proc);
@@ -128,7 +128,7 @@ void PopulatedNestedModifiesP(CallsStarTable& calls_star_table, ModifiesProcToVa
   }
 }
 
-void PopulatedReverseNestedModifiesP(CalledByStarTable& called_by_star_table, ModifiesVariableToProcsTable& t) {
+void PopulateReverseNestedModifiesPOrUsesP(CalledByStarTable& called_by_star_table, Table<int, vector<int>>& t) {
   for (const int var : t.GetKeyLst()) {
     // Get the procedures associated with the variable
     vector<int> procedures = t.GetValueByKey(var);
@@ -178,6 +178,8 @@ int PopulateNestedRelationships(Pkb& pkb) {
     ModifiesVariableToProcsTable* modifies_variable_to_procs_table = pkb.GetModifiesVariableToProcsTable();
     UsesStmtToVariablesTable* uses_stmt_to_variables_table = pkb.GetUsesStmtToVariablesTable();
     UsesVariableToStmtsTable* uses_variable_to_stmts_table = pkb.GetUsesVariableToStmtsTable();
+    UsesProcToVariablesTable* uses_proc_to_variables_table = pkb.GetUsesProcToVariablesTable();
+    UsesVariableToProcsTable* uses_variable_to_procs_table = pkb.GetUsesVariableToProcsTable();
 
     // Populate nested follows
     PopulateForF<FollowsTable*, FollowsStarTable*>(follows_table, follows_star_table);
@@ -198,8 +200,12 @@ int PopulateNestedRelationships(Pkb& pkb) {
     PopulateNestedModifiesOrUses(*parent_star_table, *child_star_table,  *uses_stmt_to_variables_table, *uses_variable_to_stmts_table);
 
     // Populate modifiesP
-    PopulatedNestedModifiesP(*calls_star_table, *modifies_proc_to_variables_table);
-    PopulatedReverseNestedModifiesP(*called_by_star_table, *modifies_variable_to_procs_table);
+    PopulateNestedModifiesPOrUsesP(*calls_star_table, *modifies_proc_to_variables_table);
+    PopulateReverseNestedModifiesPOrUsesP(*called_by_star_table, *modifies_variable_to_procs_table);
+
+    // Populate usesP
+    PopulateNestedModifiesPOrUsesP(*calls_star_table, *uses_proc_to_variables_table);
+    PopulateReverseNestedModifiesPOrUsesP(*called_by_star_table, *uses_variable_to_procs_table);
   } catch (exception& e) {
     return 0;
   }
