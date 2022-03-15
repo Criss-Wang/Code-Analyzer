@@ -3,54 +3,28 @@
 #include "PKB/pkb.h"
 #include "./design_extractor.h"
 
-// TODO(Zhenlin): [Performance] Not optimized with the help of traversal order
-template<typename T1, typename T2>
-void PopulateForP(T1 table_to_refer, T2 table_to_update) {
-  for (const auto key : table_to_refer->GetKeyLst()) {
-    vector<int> current_key_child_lst;
-    queue<int> q;
-    q.push(key);
-    while (!q.empty()) {
-      if (!table_to_refer->KeyExistsInTable(q.front())) {
-        q.pop();
-        continue;
-      }
-      for (auto child_key : table_to_refer->GetValueByKey(q.front())) {
-        current_key_child_lst.push_back(child_key);
-        q.push(child_key);
-      }
-      q.pop();
-    }
-    if (table_to_update->KeyExistsInTable(key)) {
-      table_to_update->UpdateKeyWithNewValue(key, current_key_child_lst);
-    } else {
-      table_to_update->AddKeyValuePair(key, current_key_child_lst);
-    }
-  }
-}
-
 // Helper
-template<typename T1, typename T2, typename T3>
-T3 Dfs(T1 table_to_refer, T2 table_to_update, T3 key) {
+template<typename T1, typename T2>
+int Dfs(T1 table_to_refer, T2 table_to_update, int key) {
   if (table_to_update->KeyExistsInTable(key)) {
     return key;
   }
 
-  vector<T3> children_lst;
+  vector<int> children_lst;
   try {
     children_lst = table_to_refer->GetValueByKey(key);
   } catch (InvalidKeyException& e) {
     return key;
   }
 
-  vector<T3> ans;
-  for (T3 child_key : children_lst) {
-    int end_val = Dfs<T1, T2, int>(table_to_refer, table_to_update, child_key);
+  vector<int> ans;
+  for (int child_key : children_lst) {
+    int end_val = Dfs<T1, T2>(table_to_refer, table_to_update, child_key);
     ans.push_back(end_val);
     // Add the children of the current key if the key exists
     if (table_to_update->KeyExistsInTable(end_val)) {
       // Merge the vectors of children
-      vector<T3> value = table_to_update->GetValueByKey(end_val);
+      vector<int> value = table_to_update->GetValueByKey(end_val);
       ans.insert(ans.end(), value.begin(), value.end());
     }
   }
@@ -64,9 +38,9 @@ T3 Dfs(T1 table_to_refer, T2 table_to_update, T3 key) {
 }
 
 template<typename T1, typename T2>
-void PopulateForC(T1 table_to_refer, T2 table_to_update) {
+void PopulateForPOrC(T1 table_to_refer, T2 table_to_update) {
   for (int& key : table_to_refer->GetKeyLst()) {
-    Dfs<T1, T2, int>(table_to_refer, table_to_update, key);
+    Dfs<T1, T2>(table_to_refer, table_to_update, key);
   }
 }
 
@@ -153,12 +127,12 @@ int PopulateNestedRelationships(Pkb& pkb) {
     PopulateForF<FollowsBeforeTable*, FollowsBeforeStarTable*>(follows_before_table, follows_before_star_table);
 
     // Populate nested parent
-    PopulateForP<ParentTable*, ParentStarTable*>(parent_table, parent_star_table);
-    PopulateForP<ChildTable*, ChildStarTable*>(child_table, child_star_table);
+    PopulateForPOrC<ParentTable*, ParentStarTable*>(parent_table, parent_star_table);
+    PopulateForPOrC<ChildTable*, ChildStarTable*>(child_table, child_star_table);
 
     // Populate nested calls
-    PopulateForC<CallsTable*, CallsStarTable*>(calls_table, calls_star_table);
-    PopulateForC<CalledByTable*, CalledByStarTable*>(called_by_table, called_by_star_table);
+    PopulateForPOrC<CallsTable*, CallsStarTable*>(calls_table, calls_star_table);
+    PopulateForPOrC<CalledByTable*, CalledByStarTable*>(called_by_table, called_by_star_table);
 
     // Populate modifies
     PopulateNestedModifiesOrUses(*parent_star_table, *child_star_table,  *modifies_stmt_to_variables_table, *modifies_variable_to_stmts_table);
