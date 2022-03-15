@@ -123,6 +123,8 @@ class Pkb {
     CalledByStarTable* GetCalledByStarTable();
     ModifiesStmtToVariablesTable* GetModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable* GetModifiesVariableToStmtsTable();
+    ModifiesProcToVariablesTable* GetModifiesProcToVariablesTable();
+    ModifiesVariableToProcsTable* GetModifiesVariableToProcsTable();
     UsesStmtToVariablesTable* GetUsesStmtToVariablesTable();
     UsesVariableToStmtsTable* GetUsesVariableToStmtsTable();
 
@@ -137,13 +139,13 @@ class Pkb {
     [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs() const;
 
-    [[nodiscard]] bool IsCalls(const int proc_1, const int proc_2) const;
+    [[nodiscard]] bool IsCalls(const int proc_1_idx, const int proc_2_idx) const;
     [[nodiscard]] bool IsCallsExists() const;
-    [[nodiscard]] bool IsTransitiveCalls(const int proc_1, const int proc_2) const;
-    [[nodiscard]] vector<int> GetCallers(const int proc) const;
-    [[nodiscard]] vector<int> GetAllCallers(const int proc) const;
-    [[nodiscard]] vector<int> GetCallees(const int proc) const;
-    [[nodiscard]] vector<int> GetAllCallees(const int proc) const;
+    [[nodiscard]] bool IsTransitiveCalls(const int proc_1_idx, const int proc_2_idx) const;
+    [[nodiscard]] vector<int> GetCallers(const int proc_idx) const;
+    [[nodiscard]] vector<int> GetAllCallers(const int proc_idx) const;
+    [[nodiscard]] vector<int> GetCallees(const int proc_idx) const;
+    [[nodiscard]] vector<int> GetAllCallees(const int proc_idx) const;
     [[nodiscard]] vector<pair<int, int>> GetAllCallsPairs() const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveCallsPairs() const;
 
@@ -168,6 +170,9 @@ class Pkb {
     [[nodiscard]] vector<int> GetModifiesStmtsByVar(int var_idx) const;
     [[nodiscard]] vector<int> GetModifiesVarByStmt(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllModifiesStmtVarPairs() const;
+
+    [[nodiscard]] bool IsProcModifiesVar(int proc_idx, int var_idx) const;
+    [[nodiscard]] bool IsProcModifiesVarExists() const;
 
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
     [[nodiscard]] unordered_set<int> GetStmtsWithExactPattern(const string& pattern) const;

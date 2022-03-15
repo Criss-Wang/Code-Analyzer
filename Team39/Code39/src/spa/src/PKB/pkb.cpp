@@ -59,6 +59,14 @@ ModifiesVariableToStmtsTable* Pkb::GetModifiesVariableToStmtsTable() {
   return modifies_variable_to_stmts_table_;
 }
 
+ModifiesProcToVariablesTable* Pkb::GetModifiesProcToVariablesTable() {
+  return modifies_proc_to_variables_table_;
+}
+
+ModifiesVariableToProcsTable* Pkb::GetModifiesVariableToProcsTable() {
+  return modifies_variable_to_procs_table_;
+}
+
 UsesStmtToVariablesTable* Pkb::GetUsesStmtToVariablesTable() {
   return uses_stmt_to_variables_table_;
 }
@@ -367,6 +375,19 @@ vector<pair<int, int>> Pkb::GetAllModifiesStmtVarPairs() const {
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
+}
+
+bool Pkb::IsProcModifiesVar(const int proc_idx, const int var_idx) const {
+  try {
+    vector<int> value = modifies_proc_to_variables_table_->GetValueByKey(proc_idx);
+    return find(value.begin(), value.end(), var_idx) != value.end();
+  } catch (exception& e) {
+    return false;
+  }
+}
+
+bool Pkb::IsProcModifiesVarExists() const {
+  return modifies_proc_to_variables_table_->GetTableSize() > 0;
 }
 
 unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern) const {

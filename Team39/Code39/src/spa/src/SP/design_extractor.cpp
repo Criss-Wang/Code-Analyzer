@@ -1,5 +1,3 @@
-#include <queue>
-
 #include "PKB/pkb.h"
 #include "./design_extractor.h"
 
@@ -103,6 +101,63 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
   }
 }
 
+void PopulatedNestedModifiesP(CallsStarTable& calls_star_table, ModifiesProcToVariablesTable& t) {
+  for (const int proc : t.GetKeyLst()) {
+    // Get the variables
+    vector<int> variables = t.GetValueByKey(proc);
+    // Check what other procedures are called
+    vector<int> called_procedures;
+    try {
+      called_procedures = calls_star_table.GetValueByKey(proc);
+    } catch (InvalidKeyException& e) {
+      // That means this procedure does not call any other procedures
+    }
+    for (const int called_proc : called_procedures) {
+      // Merge the vectors with new values
+      vector<int> new_variables = t.GetValueByKey(called_proc);
+      variables.insert(variables.end(), new_variables.begin(), new_variables.end());
+    }
+    // Remove duplicate elements
+    sort(variables.begin(), variables.end());
+    variables.erase(unique(variables.begin(), variables.end()), variables.end());
+
+    // Update the key with new vector
+    if (called_procedures.size() > 0) {
+      t.UpdateKeyWithNewValue(proc, variables);
+    }
+  }
+}
+
+void PopulatedReverseNestedModifiesP(CalledByStarTable& called_by_star_table, ModifiesVariableToProcsTable& t) {
+  for (const int var : t.GetKeyLst()) {
+    // Get the procedures associated with the variable
+    vector<int> procedures = t.GetValueByKey(var);
+    int initial_procedures_size = procedures.size();
+
+    for (const int proc : procedures) {
+      // Check if the procedure is called by others
+      vector<int> callers;
+      try {
+        callers = called_by_star_table.GetValueByKey(proc);
+      } catch (InvalidKeyException& e) {
+        // That means the procedure is not called by any other procedures
+      }
+
+      // Merge the vectors with new values
+      procedures.insert(procedures.end(), callers.begin(), callers.end());
+    }
+
+    // Remove duplicate elements
+    sort(procedures.begin(), procedures.end());
+    procedures.erase(unique(procedures.begin(), procedures.end()), procedures.end());
+
+    // Update the key with new vector
+    if (initial_procedures_size != procedures.size()) {
+      t.UpdateKeyWithNewValue(var, procedures);
+    }
+  }
+}
+
 int PopulateNestedRelationships(Pkb& pkb) {
   try {
     FollowsTable* follows_table = pkb.GetFollowsTable();
@@ -119,6 +174,8 @@ int PopulateNestedRelationships(Pkb& pkb) {
     CalledByStarTable* called_by_star_table = pkb.GetCalledByStarTable();
     ModifiesStmtToVariablesTable* modifies_stmt_to_variables_table = pkb.GetModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable* modifies_variable_to_stmts_table = pkb.GetModifiesVariableToStmtsTable();
+    ModifiesProcToVariablesTable* modifies_proc_to_variables_table = pkb.GetModifiesProcToVariablesTable();
+    ModifiesVariableToProcsTable* modifies_variable_to_procs_table = pkb.GetModifiesVariableToProcsTable();
     UsesStmtToVariablesTable* uses_stmt_to_variables_table = pkb.GetUsesStmtToVariablesTable();
     UsesVariableToStmtsTable* uses_variable_to_stmts_table = pkb.GetUsesVariableToStmtsTable();
 
@@ -139,6 +196,10 @@ int PopulateNestedRelationships(Pkb& pkb) {
 
     // Populate uses
     PopulateNestedModifiesOrUses(*parent_star_table, *child_star_table,  *uses_stmt_to_variables_table, *uses_variable_to_stmts_table);
+
+    // Populate modifiesP
+    PopulatedNestedModifiesP(*calls_star_table, *modifies_proc_to_variables_table);
+    PopulatedReverseNestedModifiesP(*called_by_star_table, *modifies_variable_to_procs_table);
   } catch (exception& e) {
     return 0;
   }
