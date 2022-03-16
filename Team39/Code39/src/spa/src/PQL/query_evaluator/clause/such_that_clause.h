@@ -16,7 +16,7 @@ namespace pql_clause {
   class FollowsClause : virtual public SuchThatClause {
   public:
       FollowsClause(pql::RelationshipToken* token) :
-          SuchThatClause(token) {}
+          SuchThatClause(token) { type_ = pql::RelationshipTypes::kFollows }
 
     public:
       void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,

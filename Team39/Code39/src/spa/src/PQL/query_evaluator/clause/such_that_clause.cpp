@@ -1,6 +1,67 @@
+#include <map>
+
 #include "such_that_clause.h"
 
 namespace pql_clause {
+  typedef bool (Pkb::* IsRelHolds)(const int, const int) const;
+  typedef std::vector<int>(Pkb::* GetRelDomain)(const int) const;
+  typedef std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const;
+  typedef std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const;
+  typedef bool (Pkb::* DoesRelHolds)() const;
+
+  const map<pql::RelationshipTypes, IsRelHolds> IsRelHoldsMap = {
+    { pql::kFollows, &Pkb::IsFollows },
+    { pql::kFollowsT, &Pkb::IsTransitiveFollows },
+    { pql::kParent, &Pkb::IsParent },
+    { pql::kParentT, &Pkb::IsTransitiveParent },
+    { pql::kModifiesS, &Pkb::IsModifiesStmt },
+    { pql::kUsesS, &Pkb::IsUsesStmt },
+    { pql::kCalls, &Pkb::IsCalls },
+    { pql::kCallsT, &Pkb::IsTransitiveCalls }
+  };
+
+  const map<pql::RelationshipTypes, GetRelDomain> GetRelDomainMap = {
+    { pql::kFollows, &Pkb::GetStmtRightAfter },
+    { pql::kFollowsT, &Pkb::GetStmtsAfter },
+    { pql::kParent, &Pkb::GetChild },
+    { pql::kParentT, &Pkb::GetAllChildren },
+    { pql::kModifiesS, &Pkb::GetModifiesVarByStmt },
+    { pql::kUsesS, &Pkb::GetUsesVarByStmt },
+    { pql::kCalls, &Pkb::GetCallees },
+    { pql::kCallsT, &Pkb::GetAllCallees }
+  };
+
+  const map<pql::RelationshipTypes, GetInverseRelDomain> GetInverseRelDomainMap = {
+    { pql::kFollows, &Pkb::GetStmtRightBefore },
+    { pql::kFollowsT, &Pkb::GetStmtsBefore },
+    { pql::kParent, &Pkb::GetParent },
+    { pql::kParentT, &Pkb::GetAllParents },
+    { pql::kModifiesS, &Pkb::GetModifiesStmtsByVar },
+    { pql::kUsesS, &Pkb::GetUsesStmtsByVar },
+    { pql::kCalls, &Pkb::GetCallers },
+    { pql::kCallsT, &Pkb::GetAllCallers }
+  };
+
+  const map<pql::RelationshipTypes, GetRelPairs> GetRelPairsMap = {
+    { pql::kFollows, &Pkb::GetAllFollowsPairs },
+    { pql::kFollowsT, &Pkb::GetAllTransitiveFollowsPairs },
+    { pql::kParent, &Pkb::GetAllParentPairs },
+    { pql::kParentT, &Pkb::GetAllTransitiveParentPairs },
+    { pql::kModifiesS, &Pkb::GetAllModifiesStmtVarPairs },
+    { pql::kUsesS, &Pkb::GetAllUsesStmtVarPairs },
+    { pql::kCalls, &Pkb::GetAllCallsPairs },
+    { pql::kCallsT, &Pkb::GetAllTransitiveCallsPairs }
+  };
+
+  const map<pql::RelationshipTypes, DoesRelHolds> DoesRelHoldsMap = {
+    { pql::kFollows, &Pkb::IsFollowsExists },
+    { pql::kFollowsT, &Pkb::IsFollowsExists },
+    { pql::kParent, &Pkb::IsParentExists },
+    { pql::kParentT, &Pkb::IsParentExists },
+    { pql::kCalls, &Pkb::IsCallsExists },
+    { pql::kCallsT, &Pkb::IsCallsExists }
+  };
+
   template <typename T, typename R>
   std::vector<T> ExtractFirst(std::vector<std::pair<T, R>>& lst) {
     std::vector<T> res;
@@ -31,6 +92,26 @@ namespace pql_clause {
 
     return res;
   }
+
+  void SuchThatClause::EvaluateWildWild(Pkb& pkb) {
+    DoesRelHolds fn = DoesRelHoldsMap.at(Clause::GetType());
+    bool rel_exist = (pkb.*fn)();
+
+    if (!rel_exist) {
+      throw pql_exceptions::EmptyDomainException();
+    }
+  }
+
+  void SuchThatClause::EvaluateWildEnt(Pkb& pkb) {
+    GetInverseRelDomain fn = GetInverseRelDomainMap.at(Clause::GetType());
+    std::vector<int> domain = (pkb.*fn)(stoi(Clause::GetToken().GetRight()));
+    
+    if (domain.size() == 0) {
+        throw pql_exceptions::EmptyDomainException();
+    }
+  }
+
+  void SuchThatClause::EvaluateWildSyn()
 
   void EvaluateRelExist(pql::RelationshipToken& token, Pkb& pkb,
     bool(Pkb::* IsRelHolds)(const int, const int) const, std::vector<int>(Pkb::* GetRelDomain)(const int) const,
