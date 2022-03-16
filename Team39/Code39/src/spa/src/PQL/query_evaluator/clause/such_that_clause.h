@@ -9,8 +9,8 @@ namespace pql_clause {
       virtual ~SuchThatClause() = default;
 
     public:
-      virtual void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) = 0;
+      virtual void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) = 0;
   };
 
   class FollowsClause : virtual public SuchThatClause {
@@ -19,8 +19,8 @@ namespace pql_clause {
           SuchThatClause(token) {}
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) override;
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) override;
   };
 
   class FollowsTClause : public SuchThatClause {
@@ -29,8 +29,8 @@ namespace pql_clause {
           SuchThatClause(token) {}
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) override;
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) override;
   };
 
   class ParentClause : public SuchThatClause {
@@ -39,8 +39,8 @@ namespace pql_clause {
           SuchThatClause(token) {}
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) override;
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) override;
   };
 
   class ParentTClause : public SuchThatClause {
@@ -49,8 +49,8 @@ namespace pql_clause {
           SuchThatClause(token) {}
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) override;
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) override;
   };
 
   class UsesSClause : public SuchThatClause {
@@ -59,8 +59,8 @@ namespace pql_clause {
           SuchThatClause(token) {}
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) override;
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) override;
   };
 
   class ModifiesSClause : public SuchThatClause {
@@ -69,30 +69,28 @@ namespace pql_clause {
           SuchThatClause(token) {}
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) override;
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) override;
   };
 
   class UsesPClause : public SuchThatClause {
   public:
-      UsesPClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) :
-          SuchThatClause(token, pkb, domain, predicates) {}
+      UsesPClause(pql::RelationshipToken* token) :
+          SuchThatClause(token) {}
 
   public:
-      void Evaluate() override;
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) override;
   };
 
   class ModifiesPClause : public SuchThatClause {
   public:
-      ModifiesPClause(pql::RelationshipToken* token, Pkb& pkb,
-          std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) :
-          SuchThatClause(token, pkb, domain, predicates) {}
+      ModifiesPClause(pql::RelationshipToken* token) :
+          SuchThatClause(token) {}
 
   public:
-      void Evaluate() override;
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) override;
   };
 
   class CallsClause : public SuchThatClause {
@@ -101,8 +99,8 @@ namespace pql_clause {
           SuchThatClause(token) {}
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) override;
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) override;
   };
 
   class CallsTClause : public SuchThatClause {
@@ -111,7 +109,7 @@ namespace pql_clause {
           SuchThatClause(token) {}
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) override;
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) override;
   };
 }

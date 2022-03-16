@@ -3,25 +3,23 @@
 namespace pql_clause {
   class PatternClause : public Clause {
     public:
-      PatternClause(pql::RelationshipToken* token, Pkb& pkb,
-        std::unordered_map<std::string, std::vector<int>>* domain,
-        std::vector<pql_table::Predicate>* predicates) :
-        Clause{ token, pkb, domain, predicates } {}
+      PatternClause(pql::RelationshipToken* token) :
+        Clause{ token } {}
 
      virtual ~PatternClause() = default;
 
     public:
-      virtual void Evaluate() = 0;
+      virtual void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) = 0;
   };
 
   class AssignPatternClause : virtual public PatternClause {
     public:
-      AssignPatternClause(pql::RelationshipToken* token, Pkb& pkb,
-        std::unordered_map<std::string, std::vector<int>>* domain,
-        std::vector<pql_table::Predicate>* predicates) :
-        PatternClause(token, pkb, domain, predicates) {}
+      AssignPatternClause(pql::RelationshipToken* token) :
+        PatternClause(token) {}
 
     public:
-      void Evaluate() override;
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) override;
   };
 }

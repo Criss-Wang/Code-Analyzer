@@ -212,23 +212,27 @@ namespace pql_clause {
     }
   }
 
-  void UsesSClause::Evaluate() {
-    GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+  void UsesSClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    GenericEvaluate(*token_, pkb, domain, predicates,
         &Pkb::IsUsesStmt, &Pkb::GetUsesVarByStmt, &Pkb::GetUsesStmtsByVar, &Pkb::GetAllUsesStmtVarPairs);
   }
 
-  void ModifiesSClause::Evaluate() {
-    GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+  void ModifiesSClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    GenericEvaluate(*token_, pkb, domain, predicates,
         &Pkb::IsModifiesStmt, &Pkb::GetModifiesVarByStmt, &Pkb::GetModifiesStmtsByVar, &Pkb::GetAllModifiesStmtVarPairs);
   }
 
-  void UsesPClause::Evaluate() {
-    /*GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+  void UsesPClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    /*GenericEvaluate(*token_, pkb, domain, predicates,
         &Pkb::IsUsesStmt, &Pkb::GetUsesVarByStmt, &Pkb::GetUsesStmtsByVar, &Pkb::GetAllUsesStmtVarPairs);*/
   }
 
-  void ModifiesPClause::Evaluate() {
-    /*GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+  void ModifiesPClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    /*GenericEvaluate(*token_, pkb, domain, predicates,
         &Pkb::IsModifiesStmt, &Pkb::GetModifiesVarByStmt, &Pkb::GetModifiesStmtsByVar, &Pkb::GetAllModifiesStmtVarPairs);*/
   }
 }

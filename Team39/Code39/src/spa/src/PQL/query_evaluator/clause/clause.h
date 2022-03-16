@@ -49,7 +49,7 @@ namespace pql_clause {
       virtual ~Clause() = default;
 
     public:
-      virtual void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>* domain,
-          std::vector<pql_table::Predicate>* predicates) = 0;
+      virtual void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) = 0;
   };
 }
