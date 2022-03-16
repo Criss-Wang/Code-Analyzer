@@ -357,10 +357,6 @@ bool Pkb::IsProcUsesVar(const int proc_idx, const int var_idx) const {
   }
 }
 
-bool Pkb::IsProcUsesVarExists() const {
-  return uses_proc_to_variables_table_->GetTableSize() > 0;
-}
-
 bool Pkb::IsModifiesStmt(const int stmt, const int var_idx) const {
   try {
     vector<int> value = modifies_stmt_to_variables_table_->GetValueByKey(stmt);
@@ -407,8 +403,28 @@ bool Pkb::IsProcModifiesVar(const int proc_idx, const int var_idx) const {
   }
 }
 
-bool Pkb::IsProcModifiesVarExists() const {
-  return modifies_proc_to_variables_table_->GetTableSize() > 0;
+vector<int> Pkb::GetModifiesProcsByVar(const int var_idx) const {
+  try {
+    return modifies_variable_to_procs_table_->GetValueByKey(var_idx);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+}
+
+vector<int> Pkb::GetModifiesVarsByProc(const int proc_idx) const {
+  try {
+    return modifies_proc_to_variables_table_->GetValueByKey(proc_idx);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+}
+
+vector<pair<int, int>> Pkb::GetAllModifiesProcVarPairs() const {
+  try {
+    return UnfoldResults<ModifiesProcToVariablesTable*>(modifies_proc_to_variables_table_);
+  } catch (exception& e) {
+    return vector<pair<int, int>>{};
+  }
 }
 
 unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern) const {

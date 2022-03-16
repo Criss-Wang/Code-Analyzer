@@ -174,10 +174,11 @@ class Pkb {
     [[nodiscard]] vector<pair<int, int>> GetAllModifiesStmtVarPairs() const;
 
     [[nodiscard]] bool IsProcModifiesVar(int proc_idx, int var_idx) const;
-    [[nodiscard]] bool IsProcModifiesVarExists() const;
+    [[nodiscard]] vector<int> GetModifiesProcsByVar(int var_idx) const;
+    [[nodiscard]] vector<int> GetModifiesVarsByProc(int proc_idx) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllModifiesProcVarPairs() const;
 
     [[nodiscard]] bool IsProcUsesVar(int proc_idx, int var_idx) const;
-    [[nodiscard]] bool IsProcUsesVarExists() const;
 
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
     [[nodiscard]] unordered_set<int> GetStmtsWithExactPattern(const string& pattern) const;
