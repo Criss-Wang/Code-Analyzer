@@ -223,7 +223,6 @@ namespace pql {
   
   void Query::AddResultSynonym(const std::string &name) {
     if (Query::SynonymDeclared(name)) {
-      Query::result_synonyms.push_back(Query::synonyms.at(name));
       Query::AddUsedSynonym(name);
       Query::AddAttrRef(Query::synonyms.at(name));
     } else {
@@ -233,17 +232,12 @@ namespace pql {
 
   void Query::AddResultSynonym(const std::string& name, const std::string& attribute) {
     if (Query::SynonymDeclared(name) && IsAttrStringValid(attribute)) {
-      Query::result_synonyms.push_back(Query::synonyms.at(name));
       Query::AddUsedSynonym(name);
       AttrIdentifier attr = attributeMap.at(attribute);
       Query::AddAttrRef(Query::synonyms.at(name), attr);
     } else {
       throw ParseException();
     }
-  }
-
-  std::vector<pql::Synonym> Query::GetResultSynonym() {
-    return Query::result_synonyms;
   }
 
   bool Query::IsProcedure(const std::string &name) {
