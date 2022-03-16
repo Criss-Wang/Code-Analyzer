@@ -15,12 +15,7 @@ namespace pql_clause {
     return true;
   }
  
-  Clause::Clause(pql::RelationshipToken* token, Pkb& pkb,
-                 std::unordered_map<std::string, std::vector<int>>* domain,
-                 std::vector<pql_table::Predicate>* predicates) {
+  Clause::Clause(pql::RelationshipToken* token) {
     token_ = token;
-    pkb_ = pkb;
-    domain_ = domain;
-    predicates_ = predicates;
   }
 }

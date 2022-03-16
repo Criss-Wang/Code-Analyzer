@@ -98,13 +98,13 @@ namespace pql_clause {
   }
 
   void EvaluateRelPair(pql::RelationshipToken& token, Pkb& pkb,
-    std::vector<pql_table::Predicate>* predicates, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const) {
+    std::vector<pql_table::Predicate>& predicates, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const) {
     std::string left = token.GetLeft();
     std::string right = token.GetRight();
     std::vector<std::pair<int, int>> domain_pair = (pkb.*GetRelPairs)();
     pql_table::Predicate pred(left, right, domain_pair);
 
-    (*predicates).push_back(pred);
+    predicates.push_back(pred);
   }
 
   void GenericEvaluate(pql::RelationshipToken& token, Pkb& pkb,
@@ -126,33 +126,39 @@ namespace pql_clause {
     }
   }
 
-  void FollowsClause::Evaluate() {
-    GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+  void FollowsClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    GenericEvaluate(*token_, pkb, domain, predicates,
         &Pkb::IsFollows, &Pkb::GetStmtRightAfter, &Pkb::GetStmtRightBefore, &Pkb::GetAllFollowsPairs, &Pkb::IsFollowsExists);
   }
 
-  void FollowsTClause::Evaluate() {
-    GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+  void FollowsTClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    GenericEvaluate(*token_, pkb, domain, predicates,
         &Pkb::IsTransitiveFollows, &Pkb::GetStmtsAfter, &Pkb::GetStmtsBefore, &Pkb::GetAllTransitiveFollowsPairs, &Pkb::IsFollowsExists);
   }
 
-  void ParentClause::Evaluate() {
-    GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+  void ParentClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    GenericEvaluate(*token_, pkb, domain, predicates,
         &Pkb::IsParent, &Pkb::GetChild, &Pkb::GetParent, &Pkb::GetAllParentPairs, &Pkb::IsParentExists);
   }
 
-  void ParentTClause::Evaluate() {
-    GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+  void ParentTClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    GenericEvaluate(*token_, pkb, domain, predicates,
         &Pkb::IsTransitiveParent, &Pkb::GetAllChildren, &Pkb::GetAllParents, &Pkb::GetAllTransitiveParentPairs, &Pkb::IsParentExists);
   }
 
-  void CallsClause::Evaluate() {
-    /*GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+  void CallsClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    /*GenericEvaluate(*token_, pkb, domain, predicates,
         &Pkb::IsCalls, &Pkb::GetCallees, &Pkb::GetCallers, &Pkb::GetAllCallsPairs, &Pkb::IsCalls);*/
   }
 
-  void CallsTClause::Evaluate() {
-    /*GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+  void CallsTClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    /*GenericEvaluate(*token_, pkb, domain, predicates,
         &Pkb::IsTransitiveCalls, &Pkb::GetAllCallees, &Pkb::GetAllCallers, &Pkb::GetAllTransitiveCallsPairs, &Pkb::IsCalls);*/
   }
 

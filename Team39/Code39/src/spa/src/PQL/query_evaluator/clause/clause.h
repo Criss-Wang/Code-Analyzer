@@ -42,18 +42,14 @@ namespace pql_clause {
   class Clause {
     public:
       pql::RelationshipToken* token_;
-      Pkb pkb_;
-      std::unordered_map<std::string, std::vector<int>>* domain_;
-      std::vector<pql_table::Predicate>* predicates_;
 
     public:
-      Clause(pql::RelationshipToken* token, Pkb& pkb,
-             std::unordered_map<std::string, std::vector<int>>* domain,
-             std::vector<pql_table::Predicate>* predicates);
+      Clause(pql::RelationshipToken* token);
 
       virtual ~Clause() = default;
 
     public:
-      virtual void Evaluate() = 0;
+      virtual void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>* domain,
+          std::vector<pql_table::Predicate>* predicates) = 0;
   };
 }
