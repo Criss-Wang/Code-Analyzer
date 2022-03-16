@@ -179,6 +179,9 @@ class Pkb {
     [[nodiscard]] vector<pair<int, int>> GetAllModifiesProcVarPairs() const;
 
     [[nodiscard]] bool IsProcUsesVar(int proc_idx, int var_idx) const;
+    [[nodiscard]] vector<int> GetUsesProcsByVar(int var_idx) const;
+    [[nodiscard]] vector<int> GetUsesVarsByProc(int proc_idx) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllUsesProcVarPairs() const;
 
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
     [[nodiscard]] unordered_set<int> GetStmtsWithExactPattern(const string& pattern) const;

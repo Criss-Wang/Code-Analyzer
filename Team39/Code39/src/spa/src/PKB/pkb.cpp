@@ -357,6 +357,30 @@ bool Pkb::IsProcUsesVar(const int proc_idx, const int var_idx) const {
   }
 }
 
+vector<int> Pkb::GetUsesProcsByVar(const int var_idx) const {
+  try {
+    return uses_variable_to_procs_table_->GetValueByKey(var_idx);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+}
+
+vector<int> Pkb::GetUsesVarsByProc(const int proc_idx) const {
+  try {
+    return uses_proc_to_variables_table_->GetValueByKey(proc_idx);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+}
+
+vector<pair<int, int>> Pkb::GetAllUsesProcVarPairs() const {
+  try {
+    return UnfoldResults<UsesProcToVariablesTable*>(uses_proc_to_variables_table_);
+  } catch (exception& e) {
+    return vector<pair<int, int>>{};
+  }
+}
+
 bool Pkb::IsModifiesStmt(const int stmt, const int var_idx) const {
   try {
     vector<int> value = modifies_stmt_to_variables_table_->GetValueByKey(stmt);
