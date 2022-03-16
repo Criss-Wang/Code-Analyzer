@@ -25,7 +25,6 @@ namespace pql {
       std::vector <pql::Synonym> declarations;
       std::map <std::string, pql::Synonym> synonyms;
       std::vector <pql::Synonym> used_synonyms;
-      std::vector <pql::Synonym> result_synonyms;
       std::vector <pql::AttrRef> attr_refs;
       std::vector <RelationshipToken> such_that_clauses;
       std::vector <pql::PatternToken> patterns;
