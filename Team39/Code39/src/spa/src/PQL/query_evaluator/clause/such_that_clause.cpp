@@ -108,7 +108,7 @@ namespace pql_clause {
   }
 
   void GenericEvaluate(pql::RelationshipToken& token, Pkb& pkb,
-    std::unordered_map<std::string, std::vector<int>>& domain, std::vector<pql_table::Predicate>* predicates,
+    std::unordered_map<std::string, std::vector<int>>& domain, std::vector<pql_table::Predicate>& predicates,
     bool(Pkb::* IsRelHolds)(const int, const int) const, std::vector<int>(Pkb::* GetRelDomain)(const int) const,
     std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const,
     bool(Pkb::* DoesRelExist)() const) {
@@ -195,7 +195,7 @@ namespace pql_clause {
   }
 
   void GenericEvaluateVar(pql::RelationshipToken& token, Pkb& pkb,
-      std::unordered_map<std::string, std::vector<int>>& domain, std::vector<pql_table::Predicate>* predicates,
+      std::unordered_map<std::string, std::vector<int>>& domain, std::vector<pql_table::Predicate>& predicates,
       bool(Pkb::* IsRelHolds)(const int, const int) const, std::vector<int>(Pkb::* GetRelDomain)(const int) const,
       std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const, std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const) {
     bool is_left_syn = token.IsSynonymLeft();
@@ -214,13 +214,13 @@ namespace pql_clause {
 
   void UsesSClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    GenericEvaluate(*token_, pkb, domain, predicates,
+    GenericEvaluateVar(*token_, pkb, domain, predicates,
         &Pkb::IsUsesStmt, &Pkb::GetUsesVarByStmt, &Pkb::GetUsesStmtsByVar, &Pkb::GetAllUsesStmtVarPairs);
   }
 
   void ModifiesSClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    GenericEvaluate(*token_, pkb, domain, predicates,
+    GenericEvaluateVar(*token_, pkb, domain, predicates,
         &Pkb::IsModifiesStmt, &Pkb::GetModifiesVarByStmt, &Pkb::GetModifiesStmtsByVar, &Pkb::GetAllModifiesStmtVarPairs);
   }
 
