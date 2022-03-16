@@ -1,56 +1,28 @@
-#include <queue>
-
 #include "PKB/pkb.h"
 #include "./design_extractor.h"
 
-// TODO(Zhenlin): [Performance] Not optimized with the help of traversal order
-template<typename T1, typename T2>
-void PopulateForP(T1 table_to_refer, T2 table_to_update) {
-  for (const auto key : table_to_refer->GetKeyLst()) {
-    vector<int> current_key_child_lst;
-    queue<int> q;
-    q.push(key);
-    while (!q.empty()) {
-      if (!table_to_refer->KeyExistsInTable(q.front())) {
-        q.pop();
-        continue;
-      }
-      for (auto child_key : table_to_refer->GetValueByKey(q.front())) {
-        current_key_child_lst.push_back(child_key);
-        q.push(child_key);
-      }
-      q.pop();
-    }
-    if (table_to_update->KeyExistsInTable(key)) {
-      table_to_update->UpdateKeyWithNewValue(key, current_key_child_lst);
-    } else {
-      table_to_update->AddKeyValuePair(key, current_key_child_lst);
-    }
-  }
-}
-
 // Helper
-template<typename T1, typename T2, typename T3>
-T3 Dfs(T1 table_to_refer, T2 table_to_update, T3 key) {
+template<typename T1, typename T2>
+int Dfs(T1 table_to_refer, T2 table_to_update, int key) {
   if (table_to_update->KeyExistsInTable(key)) {
     return key;
   }
 
-  vector<T3> children_lst;
+  vector<int> children_lst;
   try {
     children_lst = table_to_refer->GetValueByKey(key);
   } catch (InvalidKeyException& e) {
     return key;
   }
 
-  vector<T3> ans;
-  for (T3 child_key : children_lst) {
-    int end_val = Dfs<T1, T2, int>(table_to_refer, table_to_update, child_key);
+  vector<int> ans;
+  for (int child_key : children_lst) {
+    int end_val = Dfs<T1, T2>(table_to_refer, table_to_update, child_key);
     ans.push_back(end_val);
     // Add the children of the current key if the key exists
     if (table_to_update->KeyExistsInTable(end_val)) {
       // Merge the vectors of children
-      vector<T3> value = table_to_update->GetValueByKey(end_val);
+      vector<int> value = table_to_update->GetValueByKey(end_val);
       ans.insert(ans.end(), value.begin(), value.end());
     }
   }
@@ -64,9 +36,9 @@ T3 Dfs(T1 table_to_refer, T2 table_to_update, T3 key) {
 }
 
 template<typename T1, typename T2>
-void PopulateForC(T1 table_to_refer, T2 table_to_update) {
+void PopulateForPOrC(T1 table_to_refer, T2 table_to_update) {
   for (int& key : table_to_refer->GetKeyLst()) {
-    Dfs<T1, T2, int>(table_to_refer, table_to_update, key);
+    Dfs<T1, T2>(table_to_refer, table_to_update, key);
   }
 }
 
@@ -129,6 +101,63 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
   }
 }
 
+void PopulateNestedModifiesPOrUsesP(CallsStarTable& calls_star_table, Table<int, vector<int>>& t) {
+  for (const int proc : t.GetKeyLst()) {
+    // Get the variables
+    vector<int> variables = t.GetValueByKey(proc);
+    // Check what other procedures are called
+    vector<int> called_procedures;
+    try {
+      called_procedures = calls_star_table.GetValueByKey(proc);
+    } catch (InvalidKeyException& e) {
+      // That means this procedure does not call any other procedures
+    }
+    for (const int called_proc : called_procedures) {
+      // Merge the vectors with new values
+      vector<int> new_variables = t.GetValueByKey(called_proc);
+      variables.insert(variables.end(), new_variables.begin(), new_variables.end());
+    }
+    // Remove duplicate elements
+    sort(variables.begin(), variables.end());
+    variables.erase(unique(variables.begin(), variables.end()), variables.end());
+
+    // Update the key with new vector
+    if (called_procedures.size() > 0) {
+      t.UpdateKeyWithNewValue(proc, variables);
+    }
+  }
+}
+
+void PopulateReverseNestedModifiesPOrUsesP(CalledByStarTable& called_by_star_table, Table<int, vector<int>>& t) {
+  for (const int var : t.GetKeyLst()) {
+    // Get the procedures associated with the variable
+    vector<int> procedures = t.GetValueByKey(var);
+    int initial_procedures_size = procedures.size();
+
+    for (const int proc : procedures) {
+      // Check if the procedure is called by others
+      vector<int> callers;
+      try {
+        callers = called_by_star_table.GetValueByKey(proc);
+      } catch (InvalidKeyException& e) {
+        // That means the procedure is not called by any other procedures
+      }
+
+      // Merge the vectors with new values
+      procedures.insert(procedures.end(), callers.begin(), callers.end());
+    }
+
+    // Remove duplicate elements
+    sort(procedures.begin(), procedures.end());
+    procedures.erase(unique(procedures.begin(), procedures.end()), procedures.end());
+
+    // Update the key with new vector
+    if (initial_procedures_size != procedures.size()) {
+      t.UpdateKeyWithNewValue(var, procedures);
+    }
+  }
+}
+
 int PopulateNestedRelationships(Pkb& pkb) {
   try {
     FollowsTable* follows_table = pkb.GetFollowsTable();
@@ -145,26 +174,38 @@ int PopulateNestedRelationships(Pkb& pkb) {
     CalledByStarTable* called_by_star_table = pkb.GetCalledByStarTable();
     ModifiesStmtToVariablesTable* modifies_stmt_to_variables_table = pkb.GetModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable* modifies_variable_to_stmts_table = pkb.GetModifiesVariableToStmtsTable();
+    ModifiesProcToVariablesTable* modifies_proc_to_variables_table = pkb.GetModifiesProcToVariablesTable();
+    ModifiesVariableToProcsTable* modifies_variable_to_procs_table = pkb.GetModifiesVariableToProcsTable();
     UsesStmtToVariablesTable* uses_stmt_to_variables_table = pkb.GetUsesStmtToVariablesTable();
     UsesVariableToStmtsTable* uses_variable_to_stmts_table = pkb.GetUsesVariableToStmtsTable();
+    UsesProcToVariablesTable* uses_proc_to_variables_table = pkb.GetUsesProcToVariablesTable();
+    UsesVariableToProcsTable* uses_variable_to_procs_table = pkb.GetUsesVariableToProcsTable();
 
     // Populate nested follows
     PopulateForF<FollowsTable*, FollowsStarTable*>(follows_table, follows_star_table);
     PopulateForF<FollowsBeforeTable*, FollowsBeforeStarTable*>(follows_before_table, follows_before_star_table);
 
     // Populate nested parent
-    PopulateForP<ParentTable*, ParentStarTable*>(parent_table, parent_star_table);
-    PopulateForP<ChildTable*, ChildStarTable*>(child_table, child_star_table);
+    PopulateForPOrC<ParentTable*, ParentStarTable*>(parent_table, parent_star_table);
+    PopulateForPOrC<ChildTable*, ChildStarTable*>(child_table, child_star_table);
 
     // Populate nested calls
-    PopulateForC<CallsTable*, CallsStarTable*>(calls_table, calls_star_table);
-    PopulateForC<CalledByTable*, CalledByStarTable*>(called_by_table, called_by_star_table);
+    PopulateForPOrC<CallsTable*, CallsStarTable*>(calls_table, calls_star_table);
+    PopulateForPOrC<CalledByTable*, CalledByStarTable*>(called_by_table, called_by_star_table);
 
     // Populate modifies
     PopulateNestedModifiesOrUses(*parent_star_table, *child_star_table,  *modifies_stmt_to_variables_table, *modifies_variable_to_stmts_table);
 
     // Populate uses
     PopulateNestedModifiesOrUses(*parent_star_table, *child_star_table,  *uses_stmt_to_variables_table, *uses_variable_to_stmts_table);
+
+    // Populate modifiesP
+    PopulateNestedModifiesPOrUsesP(*calls_star_table, *modifies_proc_to_variables_table);
+    PopulateReverseNestedModifiesPOrUsesP(*called_by_star_table, *modifies_variable_to_procs_table);
+
+    // Populate usesP
+    PopulateNestedModifiesPOrUsesP(*calls_star_table, *uses_proc_to_variables_table);
+    PopulateReverseNestedModifiesPOrUsesP(*called_by_star_table, *uses_variable_to_procs_table);
   } catch (exception& e) {
     return 0;
   }

@@ -237,7 +237,6 @@ TEST_CASE("Test Nested Population for Calls") {
     REQUIRE(expected_all_callees_of_p2 == all_callees_of_p2);
 
     vector<pair<int, int>> transitive_calls_pairs = pkb.GetAllTransitiveCallsPairs();
-    cout << "this size" << transitive_calls_pairs.size() << endl;
     vector<pair<int, int>> invalid_pairs = {};
     vector<pair<int, int>> expected_transitive_calls_pairs = vector<pair<int, int>>{make_pair(p1_idx, p4_idx), make_pair(p1_idx, p10_idx), make_pair(p1_idx, p12_idx),
       make_pair(p1_idx, p20_idx), make_pair(p1_idx, p14_idx), make_pair(p1_idx, p18_idx), make_pair(p1_idx, p5_idx), make_pair(p2_idx, p4_idx), make_pair(p2_idx, p10_idx),
@@ -432,4 +431,134 @@ TEST_CASE("Test Nested Population for Uses") {
     REQUIRE(stmt_var_pairs == expected_stmt_var_pairs);
     REQUIRE(stmt_var_pairs != invalid_pairs);
   }
+}
+
+TEST_CASE("Test Nested Population for ModifiesP") {
+  Pkb pkb = Pkb();
+  bool success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "y");
+  success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "z") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "a") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "b") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "c") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "d") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "e") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "f") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "g") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p1") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p4") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p6") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p7") && success;
+  success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p8") && success;
+
+  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p1", vector<string>{"y", "z"});
+  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p4", vector<string>{"a", "b"});
+  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p6", vector<string>{"c", "d"});
+  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p7", vector<string>{"g"});
+  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p8", vector<string>{"e", "f"});
+
+  success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p1", vector<string>{"p4"});
+  success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p4", vector<string>{"p6", "p7"});
+  success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p6", vector<string>{"p8"});
+
+  int p1_idx = pkb.GetIndexByProc("p1");
+  int p4_idx = pkb.GetIndexByProc("p4");
+  int p6_idx = pkb.GetIndexByProc("p6");
+  int p7_idx = pkb.GetIndexByProc("p7");
+  int p8_idx = pkb.GetIndexByProc("p8");
+
+  int y_idx = pkb.GetIndexByVar("y");
+  int z_idx = pkb.GetIndexByVar("z");
+  int a_idx = pkb.GetIndexByVar("a");
+  int b_idx = pkb.GetIndexByVar("b");
+  int c_idx = pkb.GetIndexByVar("c");
+  int d_idx = pkb.GetIndexByVar("d");
+  int e_idx = pkb.GetIndexByVar("e");
+  int f_idx = pkb.GetIndexByVar("f");
+  int g_idx = pkb.GetIndexByVar("g");
+
+  // Populate nested
+  success = success && PopulateNestedRelationships(pkb);
+
+  SECTION("Check population success") {
+    REQUIRE(success);
+  }
+
+  SECTION("Check PQL queries for nested modifiesP") {
+    REQUIRE(pkb.IsProcModifiesVar(p1_idx, y_idx));
+    REQUIRE(pkb.IsProcModifiesVar(p1_idx, z_idx));
+    REQUIRE(pkb.IsProcModifiesVar(p1_idx, a_idx));
+    REQUIRE(pkb.IsProcModifiesVar(p1_idx, b_idx));
+    REQUIRE(pkb.IsProcModifiesVar(p1_idx, c_idx));
+    REQUIRE(pkb.IsProcModifiesVar(p1_idx, d_idx));
+    REQUIRE(pkb.IsProcModifiesVar(p1_idx, e_idx));
+    REQUIRE(pkb.IsProcModifiesVar(p1_idx, f_idx));
+    REQUIRE(pkb.IsProcModifiesVar(p1_idx, g_idx));
+    REQUIRE(!pkb.IsProcModifiesVar(p4_idx, y_idx));
+    REQUIRE(!pkb.IsProcModifiesVar(p4_idx, z_idx));
+    REQUIRE(!pkb.IsProcModifiesVar(p6_idx, a_idx));
+    REQUIRE(!pkb.IsProcModifiesVar(p6_idx, b_idx));
+    REQUIRE(!pkb.IsProcModifiesVar(p7_idx, y_idx));
+    REQUIRE(!pkb.IsProcModifiesVar(p8_idx, y_idx));
+
+    vector<int> variables = pkb.GetModifiesVarsByProc(p1_idx);
+    vector<int> expected_variables = {y_idx, z_idx, a_idx, b_idx, c_idx, d_idx, e_idx, f_idx, g_idx};
+    std::sort(variables.begin(), variables.end());
+    std::sort(expected_variables.begin(), expected_variables.end());
+    REQUIRE(variables == expected_variables);
+
+    variables = pkb.GetModifiesVarsByProc(p4_idx);
+    expected_variables = {a_idx, b_idx, c_idx, d_idx, e_idx, f_idx, g_idx};
+    std::sort(variables.begin(), variables.end());
+    std::sort(expected_variables.begin(), expected_variables.end());
+    REQUIRE(variables == expected_variables);
+    REQUIRE(!variables.empty());
+
+    variables = pkb.GetModifiesVarsByProc(p7_idx);
+    expected_variables = {g_idx};
+    REQUIRE(variables == expected_variables);
+
+    variables = pkb.GetModifiesVarsByProc(p8_idx);
+    expected_variables = {e_idx, f_idx};
+    std::sort(variables.begin(), variables.end());
+    std::sort(expected_variables.begin(), expected_variables.end());
+    REQUIRE(variables == expected_variables);
+
+    variables = pkb.GetModifiesProcsByVar(y_idx);
+    expected_variables = {p1_idx};
+    REQUIRE(variables == expected_variables);
+
+    variables = pkb.GetModifiesProcsByVar(z_idx);
+    expected_variables = {p1_idx};
+    REQUIRE(variables == expected_variables);
+
+    variables = pkb.GetModifiesProcsByVar(a_idx);
+    expected_variables = {p4_idx, p1_idx};
+    std::sort(variables.begin(), variables.end());
+    std::sort(expected_variables.begin(), expected_variables.end());
+    REQUIRE(variables == expected_variables);
+
+    variables = pkb.GetModifiesProcsByVar(c_idx);
+    expected_variables = {p6_idx, p4_idx, p1_idx};
+    std::sort(variables.begin(), variables.end());
+    std::sort(expected_variables.begin(), expected_variables.end());
+    REQUIRE(variables == expected_variables);
+
+    variables = pkb.GetModifiesProcsByVar(f_idx);
+    expected_variables = {p8_idx, p6_idx, p4_idx, p1_idx};
+    std::sort(variables.begin(), variables.end());
+    std::sort(expected_variables.begin(), expected_variables.end());
+    REQUIRE(variables == expected_variables);
+
+    vector<pair<int, int>> proc_var_pairs = pkb.GetAllModifiesProcVarPairs();
+    vector<pair<int, int>> expected_proc_var_pairs = vector<pair<int, int>>{make_pair(p1_idx, y_idx), make_pair(p1_idx, z_idx), make_pair(p1_idx, a_idx),
+      make_pair(p1_idx, b_idx), make_pair(p1_idx, c_idx), make_pair(p1_idx, d_idx), make_pair(p1_idx, e_idx), make_pair(p1_idx, f_idx), make_pair(p1_idx, g_idx),
+      make_pair(p4_idx, a_idx), make_pair(p4_idx, b_idx), make_pair(p4_idx, c_idx), make_pair(p4_idx, d_idx), make_pair(p4_idx, e_idx), make_pair(p4_idx, f_idx),
+      make_pair(p4_idx, g_idx), make_pair(p6_idx, c_idx), make_pair(p6_idx, d_idx), make_pair(p6_idx, e_idx), make_pair(p6_idx, f_idx),
+      make_pair(p7_idx, g_idx), make_pair(p8_idx, e_idx), make_pair(p8_idx, f_idx)};
+    vector<pair<int, int>> invalid_pairs = vector<pair<int, int>>{make_pair(1, -1)};
+    std::sort(proc_var_pairs.begin(), proc_var_pairs.end());
+    std::sort(expected_proc_var_pairs.begin(), expected_proc_var_pairs.end());
+    REQUIRE(proc_var_pairs == expected_proc_var_pairs);
+    REQUIRE(proc_var_pairs != invalid_pairs);
+   }
 }
