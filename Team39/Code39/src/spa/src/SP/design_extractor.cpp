@@ -106,17 +106,33 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
 void PopulateNestedModifiesPOrUsesP(CallsStarTable& calls_star_table, Table<int, vector<int>>& t) {
   for (const int proc : t.GetKeyLst()) {
     // Get the variables
-    vector<int> variables = t.GetValueByKey(proc);
+    vector<int> variables = {};
+    try {
+      variables = t.GetValueByKey(proc);
+    } catch (InvalidKeyException& e) {
+      // This procedure does not modify or use any variables
+
+    }
+    int initial_variables_size = variables.size();
+
     // Check what other procedures are called
     vector<int> called_procedures;
     try {
       called_procedures = calls_star_table.GetValueByKey(proc);
     } catch (InvalidKeyException& e) {
       // That means this procedure does not call any other procedures
+      continue;
     }
+
     for (const int called_proc : called_procedures) {
       // Merge the vectors with new values
-      vector<int> new_variables = t.GetValueByKey(called_proc);
+      vector<int> new_variables;
+      try {
+        new_variables = t.GetValueByKey(called_proc);
+      } catch (InvalidKeyException& e) {
+        // Procedure does not modify or use any variables
+        continue;
+      }
       variables.insert(variables.end(), new_variables.begin(), new_variables.end());
     }
     // Remove duplicate elements
@@ -124,7 +140,7 @@ void PopulateNestedModifiesPOrUsesP(CallsStarTable& calls_star_table, Table<int,
     variables.erase(unique(variables.begin(), variables.end()), variables.end());
 
     // Update the key with new vector
-    if (called_procedures.size() > 0) {
+    if (variables.size() > initial_variables_size) {
       t.UpdateKeyWithNewValue(proc, variables);
     }
   }
