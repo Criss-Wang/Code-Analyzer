@@ -257,6 +257,7 @@ TEST_CASE("Sample Tests for Pattern") {
   success = pkb.AddInfoToTable(TableIdentifier::kPattern, 11, "lm + n") && success;
   success = pkb.AddInfoToTable(TableIdentifier::kPattern, 12, "l + mn") && success;
   success = pkb.AddInfoToTable(TableIdentifier::kPattern, 13, "(s1k + dks)") && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kPattern, 14, "((a+(b)))*((c))") && success;
   
   SECTION("Adding patterns") {
     REQUIRE(success);
@@ -290,10 +291,13 @@ TEST_CASE("Sample Tests for Pattern") {
     REQUIRE(res == unordered_set<int>{12});
 
     res = pkb.GetStmtsWithExactPattern("l");
-    REQUIRE(res == unordered_set<int>{});
+    REQUIRE(res.empty());
 
     res = pkb.GetStmtsWithExactPattern("((l+((mn))))");
     REQUIRE(res == unordered_set<int>{12});
+
+    res = pkb.GetStmtsWithExactPattern("(a+b)*c");
+    REQUIRE(res == unordered_set<int>{14});
 
     res = pkb.GetAllStmtsWithPattern("s1k + dks");
     REQUIRE(res == unordered_set<int>{13}); 
