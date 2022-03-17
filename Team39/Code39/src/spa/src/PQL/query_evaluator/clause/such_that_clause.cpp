@@ -8,8 +8,8 @@
 
 namespace pql_clause {
   typedef bool (Pkb::* IsRelHolds)(const int, const int) const;
-  typedef std::vector<int>(Pkb::* GetRelDomain)(const int) const;
-  typedef std::vector<int>(Pkb::* GetInverseRelDomain)(const int) const;
+  typedef std::vector<int> (Pkb::* GetRelDomain)(const int) const;
+  typedef std::vector<int> (Pkb::* GetInverseRelDomain)(const int) const;
   typedef std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const;
   typedef bool (Pkb::* DoesRelHolds)() const;
   typedef void (SuchThatClause::*EvaluateFn)(Pkb&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
@@ -135,7 +135,8 @@ namespace pql_clause {
   void SuchThatClause::EvaluateWildEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetInverseRelDomain fn = GetInverseRelDomainMap.at(type_);
-    std::vector<int> domain_lst = (pkb.*fn)(stoi(token_->GetRight()));
+    std::vector<int> domain_lst = {};
+    domain_lst = (pkb.*fn)(stoi(token_->GetRight()));
     
     if (domain_lst.empty()) {
         throw pql_exceptions::EmptyDomainException();
@@ -155,7 +156,8 @@ namespace pql_clause {
   void SuchThatClause::EvaluateEntWild(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetRelDomain fn = GetRelDomainMap.at(type_);
-    std::vector<int> domain_lst = (pkb.*fn)(stoi(token_->GetLeft()));
+    std::vector<int> domain_lst = {};
+    domain_lst = (pkb.*fn)(stoi(token_->GetLeft()));
 
     if (domain_lst.empty()) {
       throw pql_exceptions::EmptyDomainException();
@@ -175,7 +177,8 @@ namespace pql_clause {
   void SuchThatClause::EvaluateEntSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetRelDomain fn = GetRelDomainMap.at(type_);
-    std::vector<int> domain_lst = (pkb.*fn)(stoi(token_->GetLeft()));
+    std::vector<int> domain_lst = {};
+    domain_lst = (pkb.*fn)(stoi(token_->GetLeft()));
 
     UpdateHashmap<int>(domain, token_->GetRight(), domain_lst);
   }
@@ -193,7 +196,8 @@ namespace pql_clause {
   void SuchThatClause::EvaluateSynEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetInverseRelDomain fn = GetInverseRelDomainMap.at(type_);
-    std::vector<int> domain_lst = (pkb.*fn)(stoi(token_->GetRight()));
+    std::vector<int> domain_lst = {};
+    domain_lst = (pkb.*fn)(stoi(token_->GetRight()));
 
     UpdateHashmap<int>(domain, token_->GetRight(), domain_lst);
   }
