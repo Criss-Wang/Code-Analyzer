@@ -59,12 +59,28 @@ ModifiesVariableToStmtsTable* Pkb::GetModifiesVariableToStmtsTable() {
   return modifies_variable_to_stmts_table_;
 }
 
+ModifiesProcToVariablesTable* Pkb::GetModifiesProcToVariablesTable() {
+  return modifies_proc_to_variables_table_;
+}
+
+ModifiesVariableToProcsTable* Pkb::GetModifiesVariableToProcsTable() {
+  return modifies_variable_to_procs_table_;
+}
+
 UsesStmtToVariablesTable* Pkb::GetUsesStmtToVariablesTable() {
   return uses_stmt_to_variables_table_;
 }
 
 UsesVariableToStmtsTable* Pkb::GetUsesVariableToStmtsTable() {
   return uses_variable_to_stmts_table_;
+}
+
+UsesProcToVariablesTable* Pkb::GetUsesProcToVariablesTable() {
+  return uses_proc_to_variables_table_;
+}
+
+UsesVariableToProcsTable* Pkb::GetUsesVariableToProcsTable() {
+  return uses_variable_to_procs_table_;
 }
 
 // Following are for search handlers
@@ -179,9 +195,9 @@ vector<int> Pkb::GetAllChildren(const int stmt) const {
 }
 
 // Does not work if the table's value is not a vector
-template<typename T1, typename T2, typename T3>
-vector<pair<T2, T3>> UnfoldResults(T1 table_to_unfold) {
-  vector<pair<T2, T3>> result;
+template<typename T1>
+vector<pair<int, int>> UnfoldResults(T1 table_to_unfold) {
+  vector<pair<int, int>> result;
   for (const auto& [key, val_lst] : table_to_unfold->GetKeyValueLst()) {
     for (auto val_item : val_lst) {
       result.emplace_back(make_pair(key, val_item));
@@ -192,7 +208,7 @@ vector<pair<T2, T3>> UnfoldResults(T1 table_to_unfold) {
 
 vector<pair<int, int>> Pkb::GetAllCallsPairs() const {
   try {
-    return UnfoldResults<CallsTable*, int, int>(calls_table_);
+    return UnfoldResults<CallsTable*>(calls_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -200,7 +216,7 @@ vector<pair<int, int>> Pkb::GetAllCallsPairs() const {
 
 vector<pair<int, int>> Pkb::GetAllTransitiveCallsPairs() const {
   try {
-    return UnfoldResults<CallsStarTable*, int, int>(calls_star_table_);
+    return UnfoldResults<CallsStarTable*>(calls_star_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -208,7 +224,7 @@ vector<pair<int, int>> Pkb::GetAllTransitiveCallsPairs() const {
 
 vector<pair<int, int>> Pkb::GetAllParentPairs() const {
   try {
-    return UnfoldResults<ParentTable*, int, int>(parent_table_);
+    return UnfoldResults<ParentTable*>(parent_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -216,7 +232,7 @@ vector<pair<int, int>> Pkb::GetAllParentPairs() const {
 
 vector<pair<int, int>> Pkb::GetAllTransitiveParentPairs() const {
   try {
-    return UnfoldResults<ParentStarTable*, int, int>(parent_star_table_);
+    return UnfoldResults<ParentStarTable*>(parent_star_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -289,7 +305,7 @@ vector<pair<int, int>> Pkb::GetAllFollowsPairs() const {
 
 vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs() const {
   try {
-    return UnfoldResults<FollowsStarTable*, int, int>(follows_star_table_);
+    return UnfoldResults<FollowsStarTable*>(follows_star_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -326,7 +342,40 @@ vector<int> Pkb::GetUsesVarByStmt(const int stmt) const {
 
 vector<pair<int, int>> Pkb::GetAllUsesStmtVarPairs() const {
   try {
-    return UnfoldResults<UsesStmtToVariablesTable*, int, int>(uses_stmt_to_variables_table_);
+    return UnfoldResults<UsesStmtToVariablesTable*>(uses_stmt_to_variables_table_);
+  } catch (exception& e) {
+    return vector<pair<int, int>>{};
+  }
+}
+
+bool Pkb::IsProcUsesVar(const int proc_idx, const int var_idx) const {
+  try {
+    vector<int> value = uses_proc_to_variables_table_->GetValueByKey(proc_idx);
+    return find(value.begin(), value.end(), var_idx) != value.end();
+  } catch (exception& e) {
+    return false;
+  }
+}
+
+vector<int> Pkb::GetUsesProcsByVar(const int var_idx) const {
+  try {
+    return uses_variable_to_procs_table_->GetValueByKey(var_idx);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+}
+
+vector<int> Pkb::GetUsesVarsByProc(const int proc_idx) const {
+  try {
+    return uses_proc_to_variables_table_->GetValueByKey(proc_idx);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+}
+
+vector<pair<int, int>> Pkb::GetAllUsesProcVarPairs() const {
+  try {
+    return UnfoldResults<UsesProcToVariablesTable*>(uses_proc_to_variables_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -363,7 +412,40 @@ vector<int> Pkb::GetModifiesVarByStmt(const int stmt) const {
 
 vector<pair<int, int>> Pkb::GetAllModifiesStmtVarPairs() const {
   try {
-    return UnfoldResults<ModifiesStmtToVariablesTable*, int, int>(modifies_stmt_to_variables_table_);
+    return UnfoldResults<ModifiesStmtToVariablesTable*>(modifies_stmt_to_variables_table_);
+  } catch (exception& e) {
+    return vector<pair<int, int>>{};
+  }
+}
+
+bool Pkb::IsProcModifiesVar(const int proc_idx, const int var_idx) const {
+  try {
+    vector<int> value = modifies_proc_to_variables_table_->GetValueByKey(proc_idx);
+    return find(value.begin(), value.end(), var_idx) != value.end();
+  } catch (exception& e) {
+    return false;
+  }
+}
+
+vector<int> Pkb::GetModifiesProcsByVar(const int var_idx) const {
+  try {
+    return modifies_variable_to_procs_table_->GetValueByKey(var_idx);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+}
+
+vector<int> Pkb::GetModifiesVarsByProc(const int proc_idx) const {
+  try {
+    return modifies_proc_to_variables_table_->GetValueByKey(proc_idx);
+  } catch (exception& e) {
+    return vector<int>{};
+  }
+}
+
+vector<pair<int, int>> Pkb::GetAllModifiesProcVarPairs() const {
+  try {
+    return UnfoldResults<ModifiesProcToVariablesTable*>(modifies_proc_to_variables_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -459,6 +541,24 @@ bool Pkb::AddModifies(const int key, const vector<string>& value) {
   return add_success;
 }
 
+bool Pkb::AddModifiesP(const string& key, const vector<string>& value) {
+  bool add_success = true;
+  if (!proc_index_table_->KeyExistsInTable(key)) {
+    add_success = AddEntityToSet(EntityIdentifier::kProc, key);
+  }
+  int key_idx = GetIndexByProc(key);
+
+  vector<int> value_idx;
+  for (const string var_name: value) {
+    value_idx.push_back(GetIndexByVar(var_name));
+  }
+
+  add_success = add_success && modifies_proc_to_variables_table_->AddKeyValuePair(key_idx, value_idx);
+  // Populate the reverse relation
+  add_success = add_success && modifies_variable_to_procs_table_->UpdateKeyValuePair(key_idx, value_idx);
+  return add_success;
+}
+
 bool Pkb::AddUses(const int key, const vector<string>& value) {
   vector<int> value_idx;
   for (auto var_name : value) {
@@ -467,6 +567,24 @@ bool Pkb::AddUses(const int key, const vector<string>& value) {
   bool add_success = uses_stmt_to_variables_table_->AddKeyValuePair(key, value_idx);
   // Populate the reverse relation
   add_success = add_success && uses_variable_to_stmts_table_->UpdateKeyValuePair(key, value_idx);
+  return add_success;
+}
+
+bool Pkb::AddUsesP(const string& key, const vector<string>& value) {
+  bool add_success = true;
+  if (!proc_index_table_->KeyExistsInTable(key)) {
+    add_success = AddEntityToSet(EntityIdentifier::kProc, key);
+  }
+  int key_idx = GetIndexByProc(key);
+
+  vector<int> value_idx;
+  for (const string var_name: value) {
+    value_idx.push_back(GetIndexByVar(var_name));
+  }
+
+  add_success = add_success && uses_proc_to_variables_table_->AddKeyValuePair(key_idx, value_idx);
+  // Populate the reverse relation
+  add_success = add_success && uses_variable_to_procs_table_->UpdateKeyValuePair(key_idx, value_idx);
   return add_success;
 }
 
@@ -574,6 +692,8 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
     if (value.empty()) throw EmptyValueException();
     switch (table_identifier) {
       case TableIdentifier::kCalls: return AddCalls(key, value);
+      case TableIdentifier::KModifiesProcToVar: return AddModifiesP(key, value);
+      case TableIdentifier::kUsesProcToVar: return AddUsesP(key, value);
       default:
         throw InvalidIdentifierException();
     }
@@ -688,14 +808,6 @@ unordered_set<int> Pkb::GetAllEntity(const EntityIdentifier entity_identifier) {
     case EntityIdentifier::kWhile: return while_set_;
     case EntityIdentifier::kVariable: return variable_set_;
     case EntityIdentifier::kProc: return procedure_set_;
-    default:
-      throw InvalidIdentifierException();
-  }
-}
-
-unordered_set<string> Pkb::GetAllEntityString(const EntityIdentifier entity_identifier) {
-  switch (entity_identifier) {
-    
     default:
       throw InvalidIdentifierException();
   }
