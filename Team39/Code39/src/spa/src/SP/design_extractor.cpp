@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "PKB/pkb.h"
 #include "./design_extractor.h"
 

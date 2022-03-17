@@ -207,12 +207,12 @@ namespace pql_clause {
   }
 
   void UsesSClause::Evaluate() {
-    GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+    GenericEvaluateVar(*token_, pkb_, *domain_, predicates_,
         &Pkb::IsUsesStmt, &Pkb::GetUsesVarByStmt, &Pkb::GetUsesStmtsByVar, &Pkb::GetAllUsesStmtVarPairs);
   }
 
   void ModifiesSClause::Evaluate() {
-    GenericEvaluate(*token_, pkb_, *domain_, predicates_,
+    GenericEvaluateVar(*token_, pkb_, *domain_, predicates_,
         &Pkb::IsModifiesStmt, &Pkb::GetModifiesVarByStmt, &Pkb::GetModifiesStmtsByVar, &Pkb::GetAllModifiesStmtVarPairs);
   }
 

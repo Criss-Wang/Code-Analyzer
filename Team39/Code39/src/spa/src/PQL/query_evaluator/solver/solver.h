@@ -10,13 +10,13 @@ namespace pql_solver {
     public:
       std::vector<pql_table::InterTable> tables_;
       std::vector<pql_table::Predicate>* predicates_;
-      std::vector<pql::Synonym> return_syns_;
+      std::vector<pql::AttrRef> return_syns_;
       bool is_return_boolean_;
       
     public:
       Solver(std::unordered_map<std::string, std::vector<int>>* domain,
              std::vector<pql_table::Predicate>* preds,
-             std::vector<pql::Synonym>& syn_list, std::vector<pql::Synonym> selected_syns,
+             std::vector<pql::Synonym>& syn_list, std::vector<pql::AttrRef>& selected_syns,
              bool is_return_boolean);
      
     public:
