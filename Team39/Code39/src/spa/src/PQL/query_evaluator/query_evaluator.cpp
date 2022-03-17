@@ -23,26 +23,28 @@ namespace pql {
     }
   }
 
-  std::unique_ptr<pql_clause::Clause> GenerateClause(pql::RelationshipToken& token, Pkb& pkb,
-                        std::unordered_map<std::string, std::vector<int>>* domain,
-                        std::vector<pql_table::Predicate>* predicates) {
+  std::unique_ptr<pql_clause::Clause> GenerateClause(pql::RelationshipToken& token) {
     switch (token.GetRelationship()) {
       case RelationshipTypes::kFollows:
-        return std::make_unique<pql_clause::FollowsClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::FollowsClause>(&token);
       case RelationshipTypes::kFollowsT:
-        return std::make_unique<pql_clause::FollowsTClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::FollowsTClause>(&token);
       case RelationshipTypes::kParent:
-        return std::make_unique<pql_clause::ParentClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::ParentClause>(&token);
       case RelationshipTypes::kParentT:
-        return std::make_unique<pql_clause::ParentTClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::ParentTClause>(&token);
       case RelationshipTypes::kUsesS:
-        return std::make_unique<pql_clause::UsesSClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::UsesSClause>(&token);
       case RelationshipTypes::kModifiesS:
-        return std::make_unique<pql_clause::ModifiesSClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::ModifiesSClause>(&token);
+      case RelationshipTypes::kUsesP:
+          return std::make_unique<pql_clause::UsesPClause>(&token);
+      case RelationshipTypes::kModifiesP:
+          return std::make_unique<pql_clause::ModifiesPClause>(&token);
       case RelationshipTypes::kCalls:
-        return std::make_unique<pql_clause::CallsClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::CallsClause>(&token);
       case RelationshipTypes::kCallsT:
-        return std::make_unique<pql_clause::CallsTClause>(&token, pkb, domain, predicates);
+        return std::make_unique<pql_clause::CallsTClause>(&token);
       default: 
         throw pql_exceptions::EmptyDomainException();
     }
@@ -138,8 +140,8 @@ namespace pql {
       }
 
       for (pql::RelationshipToken& such_that_token : such_that_clauses) {
-        std::unique_ptr<pql_clause::Clause> clause = GenerateClause(such_that_token, pkb, &domain, &predicates);
-        clause->Evaluate();
+        std::unique_ptr<pql_clause::Clause> clause = GenerateClause(such_that_token);
+        clause->Evaluate(pkb, domain, predicates);
       }
       
       pql_solver::Solver solver(&domain, &predicates, synonyms, selected_syns, is_return_boolean);
