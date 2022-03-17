@@ -1,0 +1,2 @@
+stmt s; read r;
+Select r.value such that Modifies(s, "x")

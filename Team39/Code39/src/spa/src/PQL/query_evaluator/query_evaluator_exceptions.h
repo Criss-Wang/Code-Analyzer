@@ -6,6 +6,13 @@
 using namespace std;
 
 namespace pql_exceptions {
+  class TrueResultException : public exception {
+    public:
+      const char* what() const throw() {
+        return "The selected boolean value is true";
+      }
+  };
+
   class EmptyResultException : public exception {
     public:
       const char* what() const throw() {

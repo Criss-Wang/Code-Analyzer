@@ -1,0 +1,2 @@
+assign a;
+Select a.stmt# pattern a(_, "x")

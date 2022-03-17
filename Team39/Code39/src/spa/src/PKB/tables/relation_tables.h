@@ -39,13 +39,13 @@ class ParentStarTable : public Table<int, vector<int>> {};
 class ChildStarTable : public Table<int, vector<int>> {};
 
 // Procedure name will be the key mapping to list of procedure names
-class CallsTable : public Table<string, vector<string>> {};
+class CallsTable : public Table<int, vector<int>> {};
 
-class CalledByTable : public Table<string, vector<string>> {};
+class CalledByTable : public Table<int, vector<int>> {};
 
-class CallsStarTable : public Table<string, vector<string>> {};
+class CallsStarTable : public Table<int, vector<int>> {};
 
-class CalledByStarTable : public Table<string, vector<string>> {};
+class CalledByStarTable : public Table<int, vector<int>> {};
 
 // Line number will be the key mapping to another line number which is next in the execution flow
 class NextTable: public Table<int, int> {};
@@ -70,19 +70,33 @@ class PatternToStmtsTable : public Table<string, unordered_set<int>> {};
 class ExactPatternToStmtTable : public Table<string, unordered_set<int>> {};
 
 // Line number will be the key and the list of variables used will be the value
-class UsesStmtToVariablesTable : public Table<int, vector<string>> {};
+class UsesStmtToVariablesTable : public Table<int, vector<int>> {};
 
 // Variables will be the key and the corresponding line number will be the value
-class UsesVariableToStmtsTable : public Table<string, vector<int>> {
+class UsesVariableToStmtsTable : public Table<int, vector<int>> {
   public:
-    bool UpdateKeyValuePair(int value_to_update, const vector<string>& keys);
+    bool UpdateKeyValuePair(int value_to_update, const vector<int>& keys);
+};
+
+class UsesProcToVariablesTable : public Table<int, vector<int>> {};
+
+class UsesVariableToProcsTable : public Table<int, vector<int>> {
+  public:
+    bool UpdateKeyValuePair(int value_to_update, const vector<int>& keys);
 };
 
 // Line number will be the key and the list of variables modified will be the value
-class ModifiesStmtToVariablesTable : public Table<int, vector<string>> {};
+class ModifiesStmtToVariablesTable : public Table<int, vector<int>> {};
 
 // Variables will be the key and the corresponding line number will be the value
-class ModifiesVariableToStmtsTable : public Table<string, vector<int>> {
+class ModifiesVariableToStmtsTable : public Table<int, vector<int>> {
   public:
-    bool UpdateKeyValuePair(int value_to_update, const vector<string>& keys);
+    bool UpdateKeyValuePair(int value_to_update, const vector<int>& keys);
+};
+
+class ModifiesProcToVariablesTable : public Table<int, vector<int>> {};
+
+class ModifiesVariableToProcsTable : public Table<int, vector<int>> {
+  public:
+    bool UpdateKeyValuePair(int value_to_update, const vector<int>& keys);
 };

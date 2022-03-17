@@ -39,6 +39,8 @@ namespace pql {
 
       std::string ParseName();
 
+      std::string ParseAttribute();
+
       std::string ParseInteger();
 
       std::string ParseRef(Query& q);

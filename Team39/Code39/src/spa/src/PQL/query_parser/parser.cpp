@@ -78,11 +78,7 @@ namespace pql {
   }
 
   void Parser::Parse() {
-    try {
-      Parser::ParseQuery();
-    } catch (SemanticallyInvalidException& e) {
-      Parser::query.SetSemanticallyInvalid();
-    }
+    Parser::ParseQuery();
   }
 
   pql::Query Parser::GetQuery() {
@@ -90,20 +86,25 @@ namespace pql {
   }
 
   void Parser::ParseSelect() {
+    bool has_attribute = false;
+    std::string attribute;
     ps.EatWhiteSpaces();
     if (ps.Peek() == '<') {
       Parser::ParseTuple();
       Parser::query.SetBoolean(false);
     } else {
       std::string name = ps.ParseName();
-      if (name == "BOOLEAN") {
-        if (Parser::query.SynonymDeclared(name)) {
-          Parser::query.AddResultSynonym(name);
-          Parser::query.SetBoolean(false);
-        } else {
-          Parser::query.SetBoolean(true);
-        }
-      } else {
+      if (ps.Peek() == '.') {
+        ps.Next(); 
+        attribute = ps.ParseAttribute();
+        has_attribute = true; 
+      }
+      if (name == "BOOLEAN" && !Parser::query.SynonymDeclared(name)) {
+        Parser::query.SetBoolean(true);
+      } else if (Parser::query.SynonymDeclared(name) && has_attribute) {
+        Parser::query.AddResultSynonym(name, attribute);
+        Parser::query.SetBoolean(false);
+      } else if (Parser::query.SynonymDeclared(name) && !has_attribute) {
         Parser::query.AddResultSynonym(name);
         Parser::query.SetBoolean(false);
       }
@@ -114,9 +115,17 @@ namespace pql {
   void Parser::ParseTuple() {
     ps.Consume();
     while (ps.Peek() != '>') {
-      Parser::query.AddResultSynonym(ps.ParseName());
-      if (ps.Peek() != '>') {
-        ps.Expect(",");
+      std::string name = ps.ParseName();
+      if (ps.Peek() == '.') {
+        ps.Next();
+        std::string attr = ps.ParseAttribute();
+        Parser::query.AddResultSynonym(name, attr);
+      } else {
+        Parser::query.AddResultSynonym(name);
+      }
+
+      if (ps.Peek() == ',') {
+        ps.Next();
       }
     }
     ps.Consume();
