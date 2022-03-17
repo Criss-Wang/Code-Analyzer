@@ -39,6 +39,10 @@ namespace pql {
         return std::make_unique<pql_clause::UsesSClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kModifiesS:
         return std::make_unique<pql_clause::ModifiesSClause>(&token, pkb, domain, predicates);
+      case RelationshipTypes::kUsesP:
+          return std::make_unique<pql_clause::UsesPClause>(&token, pkb, domain, predicates);
+      case RelationshipTypes::kModifiesP:
+          return std::make_unique<pql_clause::ModifiesPClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kCalls:
         return std::make_unique<pql_clause::CallsClause>(&token, pkb, domain, predicates);
       case RelationshipTypes::kCallsT:
@@ -127,7 +131,7 @@ namespace pql {
       std::vector<pql::RelationshipToken> such_that_clauses = query.GetSuchThatClause();
       std::vector<pql::PatternToken> pattern_clauses = query.GetPattern();
       std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
-      std::vector<pql::Synonym> selected_syns = query.GetResultSynonym();
+      std::vector<pql::AttrRef> selected_syns = query.GetAttrRef();
       std::vector<pql_table::Predicate> predicates;
       std::unordered_map<std::string, std::vector<int>> domain;
 
