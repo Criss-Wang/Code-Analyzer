@@ -101,7 +101,7 @@ namespace pql {
     Query::is_semantically_valid = false;
   }
 
-  bool Query::IsValid(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right) {
+  bool Query::IsValid(RelationshipTypes r, const std::string& left, const std::string& right) {
     std::unordered_set<EntityIdentifier> left_domains = pql::left_synonym_domains.at(r);
     std::unordered_set<EntityIdentifier> right_domains = pql::right_synonym_domains.at(r);
     if (Query::SynonymDeclared(left)) {
@@ -142,6 +142,14 @@ namespace pql {
 
   bool Query::IsAssignSynonym(const std::string &name) {
     return Query::SynonymDeclared(name) && synonyms.at(name).GetDeclaration() == EntityIdentifier::kAssign;
+  }
+
+  bool Query::IsWhileSynonym(const std::string &name) {
+    return Query::SynonymDeclared(name) && synonyms.at(name).GetDeclaration() == EntityIdentifier::kWhile;
+  }
+
+  bool Query::IsIfSynonym(const std::string &name) {
+    return Query::SynonymDeclared(name) && synonyms.at(name).GetDeclaration() == EntityIdentifier::kIf;
   }
 
   void Query::AddSynonym(EntityIdentifier d, const std::string &name) {
@@ -187,7 +195,7 @@ namespace pql {
     return Query::used_synonyms;
   }
 
-  void Query::AddSuchThatClause(RelationshipTypes r, pql::Ref &left, pql::Ref &right, bool is_synonym_left, bool is_synonym_right) {
+  void Query::AddSuchThatClause(RelationshipTypes r, std::string &left, std::string &right, bool is_synonym_left, bool is_synonym_right) {
     if (Query::IsValid(r, left, right)) {
       if (!is_synonym_left && IsIdent(left)) {
         left.erase(0, 1);
@@ -209,8 +217,20 @@ namespace pql {
     return Query::such_that_clauses;
   }
 
-  void Query::AddPattern(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left) {
-    Query::patterns.emplace_back(PatternToken(std::move(assign_synonym), std::move(left), std::move(expression), exact, is_synonym_left));
+  void Query::AddPattern(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact) {
+    bool is_synonym_left = Query::SynonymDeclared(left);
+    if (is_synonym_left && Query::synonyms.at(left).GetDeclaration() != EntityIdentifier::kVariable) {
+      throw SemanticallyInvalidException();
+    } else {
+      if (IsIdent(left)) {
+        left.erase(0, 1);
+        int left_len = left.length();
+        left.erase(left_len - 1, 1);
+      }
+      Query::patterns.emplace_back(
+          PatternToken(syn_entity, std::move(synonym), std::move(left), std::move(expression), exact,
+                       is_synonym_left));
+    }
   }
 
   std::vector<pql::PatternToken> Query::GetPattern() {

@@ -16,11 +16,11 @@ namespace pql {
     return Synonym::name == s.name && Synonym::declaration == s.declaration;
   }
 
-  pql::Ref RelationshipToken::GetLeft() {
+  std::string RelationshipToken::GetLeft() {
     return RelationshipToken::left;
   }
 
-  pql::Ref RelationshipToken::GetRight() {
+  std::string RelationshipToken::GetRight() {
     return RelationshipToken::right;
   }
 
@@ -36,12 +36,16 @@ namespace pql {
     return RelationshipToken::relationship;
   }
 
-  std::string PatternToken::GetAssignSynonym() {
-    return PatternToken::assign_synonym;
+  std::string PatternToken::GetLeft() {
+    return PatternToken::left;
   }
 
-  pql::Ref PatternToken::GetLeft() {
-    return PatternToken::left;
+  std::string PatternToken::GetSynonym() {
+    return PatternToken::synonym;
+  }
+
+  EntityIdentifier PatternToken::GetSynEntity() {
+    return PatternToken::syn_entity;
   }
 
   std::string PatternToken::GetExpression() {
@@ -71,5 +75,4 @@ namespace pql {
       return std::nullopt;
     }
   }
-
 }

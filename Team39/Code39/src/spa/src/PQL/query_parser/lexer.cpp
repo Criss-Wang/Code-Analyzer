@@ -85,8 +85,8 @@ namespace pql {
     return integer;
   }
 
-  pql::Ref ParserState::ParseRef(Query &q) {
-    pql::Ref ref;
+  std::string ParserState::ParseRef(Query &q) {
+    std::string ref;
     std::stringstream ssm;
     bool is_synonym = false;
     ParserState::EatWhiteSpaces();

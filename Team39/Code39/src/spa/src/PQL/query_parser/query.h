@@ -31,11 +31,15 @@ namespace pql {
   public:
     void SetSemanticallyInvalid();
 
-    bool IsValid(RelationshipTypes relationship, const pql::Ref& left, const pql::Ref& right);
+    bool IsValid(RelationshipTypes relationship, const std::string& left, const std::string& right);
 
     bool SynonymDeclared(const std::string &name);
 
     bool IsAssignSynonym(const std::string &name);
+
+    bool IsWhileSynonym(const std::string &name);
+
+    bool IsIfSynonym(const std::string &name);
 
     void AddSynonym(EntityIdentifier d, const std::string &name);
 
@@ -49,11 +53,11 @@ namespace pql {
 
     bool IsProcedure(const std::string &name);
 
-    void AddSuchThatClause(RelationshipTypes r, pql::Ref &left, pql::Ref &right, bool is_synonym_left, bool is_synonym_right);
+    void AddSuchThatClause(RelationshipTypes r, std::string &left, std::string &right, bool is_synonym_left, bool is_synonym_right);
 
     std::vector<RelationshipToken> GetSuchThatClause();
 
-    void AddPattern(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left);
+    void AddPattern(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact);
 
     std::vector<pql::PatternToken> GetPattern();
 
