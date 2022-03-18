@@ -159,7 +159,7 @@ void PopulateReverseNestedModifiesPOrUsesP(CalledByStarTable& called_by_star_tab
 }
 
 void PopulateNestedModifiesSOrUsesSForCalls(CallerTable caller_table, ChildStarTable& child_star_table,
-  ModifiesProcToVariablesTable modifies_proc_to_variables_table, Table<int, vector<int>>& t, Pkb& pkb) {
+  Table<int, vector<int>> proc_to_variables_table, Table<int, vector<int>>& t, Pkb& pkb) {
   // Get the call statements
   vector<int> call_stmts = caller_table.GetKeyLst();
   // Then loop through and get the specific procedure called at that statement
@@ -169,7 +169,7 @@ void PopulateNestedModifiesSOrUsesSForCalls(CallerTable caller_table, ChildStarT
     // Get the variables used in that procedure
     vector<int> variables_idx;
     try {
-       variables_idx = modifies_proc_to_variables_table.GetValueByKey(proc_idx);
+       variables_idx = proc_to_variables_table.GetValueByKey(proc_idx);
     } catch (InvalidKeyException& e) {
       // No variables used or modified in the procedure
       continue;
@@ -214,7 +214,7 @@ void PopulateNestedModifiesSOrUsesSForCalls(CallerTable caller_table, ChildStarT
 }
 
 void PopulateReverseNestedModifiesSOrUsesSForCalls(CallerTable caller_table, ChildStarTable& child_star_table,
-  ModifiesProcToVariablesTable modifies_proc_to_variables_table, Table<int, vector<int>>& t, Pkb& pkb) {
+  Table<int, vector<int>> proc_to_variables_table, Table<int, vector<int>>& t, Pkb& pkb) {
   // First get the call statements
   vector<int> call_stmts = caller_table.GetKeyLst();
   // Then loop through and get the specific procedure called at that statement
@@ -224,7 +224,7 @@ void PopulateReverseNestedModifiesSOrUsesSForCalls(CallerTable caller_table, Chi
     // Get the variables modified or used in that procedure
     vector<int> variables_idx;
     try {
-       variables_idx = modifies_proc_to_variables_table.GetValueByKey(proc_idx);
+       variables_idx = proc_to_variables_table.GetValueByKey(proc_idx);
     } catch (InvalidKeyException& e) {
       // No variables used or modified in the procedure
       continue;
@@ -322,8 +322,8 @@ int PopulateNestedRelationships(Pkb& pkb) {
     PopulateReverseNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *modifies_proc_to_variables_table, *modifies_variable_to_stmts_table, pkb);
 
     // Populate UsesS with calls
-    PopulateNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *modifies_proc_to_variables_table, *uses_stmt_to_variables_table, pkb);
-    PopulateReverseNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *modifies_proc_to_variables_table, *uses_variable_to_stmts_table, pkb);
+    PopulateNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *uses_proc_to_variables_table, *uses_stmt_to_variables_table, pkb);
+    PopulateReverseNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *uses_proc_to_variables_table, *uses_variable_to_stmts_table, pkb);
   } catch (exception& e) {
     return 0;
   }
