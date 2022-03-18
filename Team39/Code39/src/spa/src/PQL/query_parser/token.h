@@ -64,7 +64,11 @@ namespace pql {
     kModifiesS,
     kModifiesP,
     kCalls,
-    kCallsT
+    kCallsT,
+    kAssignPattern,
+    kIfPattern,
+    kWhilePattern,
+    kWith
   };
 
   const std::map<std::string, EntityIdentifier> declarationMap {
