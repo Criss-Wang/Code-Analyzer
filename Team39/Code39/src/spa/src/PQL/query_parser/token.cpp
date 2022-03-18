@@ -16,6 +16,14 @@ namespace pql {
     return Synonym::name == s.name && Synonym::declaration == s.declaration;
   }
 
+  Synonym AttrRef::GetSynonym() {
+    return s;
+  }
+
+  AttrIdentifier AttrRef::GetAttrIndentifier() {
+    return attribute;
+  }
+
   pql::Ref RelationshipToken::GetLeft() {
     return RelationshipToken::left;
   }

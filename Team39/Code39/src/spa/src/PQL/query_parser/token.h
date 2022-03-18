@@ -33,6 +33,10 @@ namespace pql {
       AttrIdentifier attribute;
     public:
       AttrRef(Synonym s, AttrIdentifier attribute) : s(std::move(s)), attribute(attribute) {};
+
+      Synonym GetSynonym();
+
+      AttrIdentifier GetAttrIndentifier();
   };
 
   struct ParseException : public std::exception {
