@@ -37,6 +37,12 @@ namespace pql_clause {
 
       void EvaluateAttrAttr(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
+
+      void EvaluateAttrAttrVar(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+        std::vector<pql_table::Predicate>& predicates);
+
+      void EvaluateAttrAttrNum(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+        std::vector<pql_table::Predicate>& predicates);
   };
 
 }
