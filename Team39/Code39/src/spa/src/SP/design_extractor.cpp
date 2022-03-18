@@ -213,6 +213,58 @@ void PopulateNestedModifiesSOrUsesSForCalls(CallerTable caller_table, ChildStarT
   }
 }
 
+void PopulateReverseNestedModifiesSOrUsesSForCalls(CallerTable caller_table, ChildStarTable& child_star_table,
+  ModifiesProcToVariablesTable modifies_proc_to_variables_table, ModifiesVariableToStmtsTable& t, Pkb& pkb) {
+  // First get the call statements
+  vector<int> call_stmts = caller_table.GetKeyLst();
+  // Then loop through and get the specific procedure called at that statement
+  for (const int call_stmt : call_stmts) {
+    string proc = caller_table.GetValueByKey(call_stmt);
+    int proc_idx = pkb.GetIndexByProc(proc);
+    // Get the variables modified or used in that procedure
+    vector<int> variables_idx;
+    try {
+       variables_idx = modifies_proc_to_variables_table.GetValueByKey(proc_idx);
+    } catch (InvalidKeyException& e) {
+      // No variables used or modified in the procedure
+      continue;
+    }
+
+    // Loop through the variables
+    for (const int var_idx : variables_idx) {
+      // Get the stmts associated with this variable
+      if (!t.KeyExistsInTable(var_idx)) {
+        continue;
+      }
+
+      // Ensure that duplicates are not added
+      vector<int> stmts_to_update = t.GetValueByKey(var_idx);
+      if (find(stmts_to_update.begin(), stmts_to_update.end(), call_stmt) == stmts_to_update.end()) {
+        stmts_to_update.push_back(call_stmt);
+      }
+
+      t.UpdateKeyWithNewValue(var_idx, stmts_to_update);
+
+      // Get the parents of the current call statement
+      vector<int> parents;
+      try {
+        parents = child_star_table.GetValueByKey(call_stmt);
+      } catch (InvalidKeyException& e) {
+        // This call statement does not have any parents
+        continue;
+      }
+
+      for (const int parent : parents) {
+        if (find(stmts_to_update.begin(), stmts_to_update.end(), parent) == stmts_to_update.end()) {
+          stmts_to_update.push_back(parent);
+        }
+      }
+
+      t.UpdateKeyWithNewValue(var_idx, stmts_to_update);
+    }
+  }
+}
+
 int PopulateNestedRelationships(Pkb& pkb) {
   try {
     FollowsTable* follows_table = pkb.GetFollowsTable();
@@ -267,6 +319,7 @@ int PopulateNestedRelationships(Pkb& pkb) {
 
     // Populate ModifiesS for calls
     PopulateNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *modifies_proc_to_variables_table, *modifies_stmt_to_variables_table, pkb);
+    PopulateReverseNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *modifies_proc_to_variables_table, *modifies_variable_to_stmts_table, pkb);
   } catch (exception& e) {
     return 0;
   }
