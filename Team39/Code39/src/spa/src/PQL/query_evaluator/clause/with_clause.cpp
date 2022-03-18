@@ -7,7 +7,46 @@
 #define ATTR_REF 1
 
 namespace pql_clause {
-  
+  typedef std::vector<int>(Pkb::* GetDomainByAttribute)(const int) const;
+  typedef void (SuchThatClause::* EvaluateFn)(Pkb&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
+
+  const map<AttrIdentifier, GetDomainByAttribute> CallFnMap = {
+    { AttrIdentifier::kProcName, &Pkb::GetCallFromProc }
+  };
+
+  const map<AttrIdentifier, GetDomainByAttribute> ReadFnMap = {
+    { AttrIdentifier::kVarName, &Pkb::GetReadByVar }
+  };
+
+  const map<AttrIdentifier, GetDomainByAttribute> PrintFnMap = {
+    { AttrIdentifier::kVarName, &Pkb::GetPrintByVar }
+  };
+
+  const map<EntityIdentifier, map<AttrIdentifier, GetDomainByAttribute>> GetDomainByAttributeMap = {
+    { EntityIdentifier::kCall, CallFnMap },
+    { EntityIdentifier::kRead, ReadFnMap },
+    { EntityIdentifier::kPrint, PrintFnMap }
+  };
+
+  const map<int, EvaluateFn> EntEvaluateFnMap = {
+    { ENTITY   , &WithClause::EvaluateEntEnt    },
+    { ATTR_REF , &WithClause::EvaluateEntAttr   }
+  };
+
+  const map<int, EvaluateFn> AttrEvaluateFnMap = {
+    { ENTITY   , &WithClause::EvaluateAttrEnt   },
+    { ATTR_REF , &WithClause::EvaluateAttrAttr  }
+  };
+
+  const map<int, map<int, EvaluateFn>> EvaluateFnMap = {
+    { ENTITY, EntEvaluateFnMap },
+    { ATTR_REF,  AttrEvaluateFnMap }
+  };
+
+  int GetArgumentType(bool is_attr_ref) {
+      return is_attr_ref ? ATTR_REF : ENTITY;
+  }
+
   void WithClause::EvaluateEntEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     bool is_equal = left_entity_ == right_entity_;
@@ -42,26 +81,6 @@ namespace pql_clause {
     return stoi(entity);
   }
 
-  typedef std::vector<int>(Pkb::* GetDomainByAttribute)(const int) const;
-
-  const map<AttrIdentifier, GetDomainByAttribute> CallFnMap = {
-    { AttrIdentifier::kProcName, &Pkb::GetCallFromProc }
-  };
-
-  const map<AttrIdentifier, GetDomainByAttribute> ReadFnMap = {
-    { AttrIdentifier::kVarName, &Pkb::GetReadByVar }
-  };
-
-  const map<AttrIdentifier, GetDomainByAttribute> PrintFnMap = {
-    { AttrIdentifier::kVarName, &Pkb::GetPrintByVar }
-  };
-
-  const map<EntityIdentifier, map<AttrIdentifier, GetDomainByAttribute>> GetDomainByAttributeMap = {
-    { EntityIdentifier::kCall, CallFnMap },
-    { EntityIdentifier::kRead, ReadFnMap },
-    { EntityIdentifier::kPrint, PrintFnMap }
-  };
-
   std::vector<int> GetSynDomainByEntity(Pkb& pkb, pql::AttrRef& attr_ref, int entity) {
     //need to do extra work for read.varName, call.procName and print.varName 
     //since we are not directly comparing the value in domain
@@ -93,12 +112,16 @@ namespace pql_clause {
 
   void WithClause::EvaluateAttrAttr(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-
+    
   }
 
   void WithClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    
+    std::vector<pql_table::Predicate>& predicates) {
+    int left_type = GetArgumentType(is_attr_ref_left_);
+    int right_type = GetArgumentType(is_attr_ref_right_);
+
+    EvaluateFn fn = EvaluateFnMap.at(left_type).at(right_type);
+    (this->*fn)(pkb, domain, predicates);
   }
 
 }
