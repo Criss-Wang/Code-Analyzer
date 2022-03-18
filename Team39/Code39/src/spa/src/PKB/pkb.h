@@ -65,9 +65,9 @@ class Pkb {
     ModifiesVariableToProcsTable *modifies_variable_to_procs_table_ = new ModifiesVariableToProcsTable();
 
     // Pattern tables
-    StmtToPatternsTable *stmt_to_patterns_table_ = new StmtToPatternsTable();
-    PatternToStmtsTable *pattern_to_stmts_table_ = new PatternToStmtsTable();
-    ExactPatternToStmtTable* exact_pattern_to_stmt_table_ = new ExactPatternToStmtTable();
+    Table<int, unordered_set<string>>*stmt_to_patterns_table_ = new Table<int, unordered_set<string>>();
+    Table<string, unordered_set<int>>*pattern_to_stmts_table_ = new Table<string, unordered_set<int>>();
+    Table<string, unordered_set<int>>* exact_pattern_to_stmt_table_ = new Table<string, unordered_set<int>>();
 
     // Entity sets - statement numbers
     unordered_set<int> stmt_set_;
