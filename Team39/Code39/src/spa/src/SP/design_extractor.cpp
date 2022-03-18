@@ -159,7 +159,7 @@ void PopulateReverseNestedModifiesPOrUsesP(CalledByStarTable& called_by_star_tab
 }
 
 void PopulateNestedModifiesSOrUsesSForCalls(CallerTable caller_table, ChildStarTable& child_star_table,
-  ModifiesProcToVariablesTable modifies_proc_to_variables_table, ModifiesStmtToVariablesTable& t, Pkb& pkb) {
+  ModifiesProcToVariablesTable modifies_proc_to_variables_table, Table<int, vector<int>>& t, Pkb& pkb) {
   // Get the call statements
   vector<int> call_stmts = caller_table.GetKeyLst();
   // Then loop through and get the specific procedure called at that statement
@@ -214,7 +214,7 @@ void PopulateNestedModifiesSOrUsesSForCalls(CallerTable caller_table, ChildStarT
 }
 
 void PopulateReverseNestedModifiesSOrUsesSForCalls(CallerTable caller_table, ChildStarTable& child_star_table,
-  ModifiesProcToVariablesTable modifies_proc_to_variables_table, ModifiesVariableToStmtsTable& t, Pkb& pkb) {
+  ModifiesProcToVariablesTable modifies_proc_to_variables_table, Table<int, vector<int>>& t, Pkb& pkb) {
   // First get the call statements
   vector<int> call_stmts = caller_table.GetKeyLst();
   // Then loop through and get the specific procedure called at that statement
@@ -317,9 +317,13 @@ int PopulateNestedRelationships(Pkb& pkb) {
     PopulateNestedModifiesPOrUsesP(*calls_star_table, *uses_proc_to_variables_table);
     PopulateReverseNestedModifiesPOrUsesP(*called_by_star_table, *uses_variable_to_procs_table);
 
-    // Populate ModifiesS for calls
+    // Populate ModifiesS with calls
     PopulateNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *modifies_proc_to_variables_table, *modifies_stmt_to_variables_table, pkb);
     PopulateReverseNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *modifies_proc_to_variables_table, *modifies_variable_to_stmts_table, pkb);
+
+    // Populate UsesS with calls
+    PopulateNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *modifies_proc_to_variables_table, *uses_stmt_to_variables_table, pkb);
+    PopulateReverseNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *modifies_proc_to_variables_table, *uses_variable_to_stmts_table, pkb);
   } catch (exception& e) {
     return 0;
   }
