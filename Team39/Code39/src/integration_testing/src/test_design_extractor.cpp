@@ -1043,6 +1043,71 @@ TEST_CASE("Test Nested Population for UsesS with Calls") {
    * 20 -> hello, there
    */
 
+  /*
+   * UsesVarToStmts
+   * a -> 1
+   * b -> 2
+   * first -> 4
+   * c -> 5
+   * second -> 7
+   * d -> 8
+   * e -> 10
+   * f -> 11
+   * x -> 12
+   * y -> 13
+   * z -> 14
+   * w -> 15
+   * v -> 17
+   * third -> 18
+   * awesome -> 19
+   * hmm -> 19
+   * great -> 19
+   * hello -> 20
+   * there -> 20
+   *
+   * UsesVarToStmts with nested but without calls
+   * a -> 1
+   * b -> 2
+   * first -> 4
+   * c -> 5, 4
+   * second -> 7, 4
+   * d -> 8, 7, 4
+   * e -> 10
+   * f -> 11
+   * x -> 12
+   * y -> 13
+   * z -> 14
+   * w -> 15
+   * v -> 17
+   * third -> 18
+   * awesome -> 19, 18
+   * hmm -> 19, 18
+   * great -> 19, 18
+   * hello -> 20, 18
+   * there -> 20, 18
+   *
+   * UsesVarToStmts with nested and calls
+   * a -> 1
+   * b -> 2
+   * first -> 4
+   * c -> 5, 4
+   * second -> 7, 4
+   * d -> 8, 7, 4
+   * e -> 10, 9, 7, 4
+   * f -> 11, 9, 7, 4
+   * x -> 12, 3
+   * y -> 13, 3
+   * z -> 14, 3
+   * w -> 15, 6, 4
+   * v -> 17, 16, 6, 4
+   * third -> 18, 16, 6, 4
+   * awesome -> 19, 18, 16, 6, 4
+   * hmm -> 19, 18, 16, 6, 4
+   * great -> 19, 18, 16, 6, 4
+   * hello -> 20, 18, 16, 6, 4
+   * there -> 20, 18, 16, 6, 4
+   */
+
   bool success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "a");
   success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "b") && success;
   success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "c") && success;
@@ -1202,5 +1267,121 @@ TEST_CASE("Test Nested Population for UsesS with Calls") {
     std::sort(expected_stmt_var_pairs.begin(), expected_stmt_var_pairs.end());
     std::sort(stmt_var_pairs.begin(), stmt_var_pairs.end());
     REQUIRE(stmt_var_pairs == expected_stmt_var_pairs);
+  }
+
+  SECTION("Check reverse UsesS with calls population") {
+    vector<int> expected_stmts = {1};
+    vector<int> stmts = pkb.GetUsesStmtsByVar(a_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {2};
+    stmts = pkb.GetUsesStmtsByVar(b_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {4};
+    stmts = pkb.GetUsesStmtsByVar(first_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {5, 4};
+    stmts = pkb.GetUsesStmtsByVar(c_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {7, 4};
+    stmts = pkb.GetUsesStmtsByVar(second_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {8, 7, 4};
+    stmts = pkb.GetUsesStmtsByVar(d_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {10, 9, 7, 4};
+    stmts = pkb.GetUsesStmtsByVar(e_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {11, 9, 7, 4};
+    stmts = pkb.GetUsesStmtsByVar(f_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {12, 3};
+    stmts = pkb.GetUsesStmtsByVar(x_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {13, 3};
+    stmts = pkb.GetUsesStmtsByVar(y_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {14, 3};
+    stmts = pkb.GetUsesStmtsByVar(z_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {15, 6, 4};
+    stmts = pkb.GetUsesStmtsByVar(w_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {17, 16, 6, 4};
+    stmts = pkb.GetUsesStmtsByVar(v_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {18, 16, 6, 4};
+    stmts = pkb.GetUsesStmtsByVar(third_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {19, 18, 16, 6, 4};
+    stmts = pkb.GetUsesStmtsByVar(awesome_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {19, 18, 16, 6, 4};
+    stmts = pkb.GetUsesStmtsByVar(hmm_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {19, 18, 16, 6, 4};
+    stmts = pkb.GetUsesStmtsByVar(great_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {20, 18, 16, 6, 4};
+    stmts = pkb.GetUsesStmtsByVar(hello_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
+
+    expected_stmts = {20, 18, 16, 6, 4};
+    stmts = pkb.GetUsesStmtsByVar(there_idx);
+    std::sort(stmts.begin(), stmts.end());
+    std::sort(expected_stmts.begin(), expected_stmts.end());
+    REQUIRE(expected_stmts == stmts);
   }
 }
