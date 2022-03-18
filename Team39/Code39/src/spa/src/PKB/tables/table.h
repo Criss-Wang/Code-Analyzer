@@ -84,6 +84,21 @@ class Table {
     }
 };
 
+class RelTable : public Table<int, int> {};
+class RelListTable : public Table<int, vector<int>> {};
+class RelListReverseTable : public Table<int, vector<int>> {
+  public:
+    virtual bool UpdateKeyValuePair(int value_to_update, const vector<int>& keys);
+};
+
+// Tables for Entity Attributes
+class EntityVarsTable : public Table<int, string> {};
+class EntityIntListTable : public Table<int, vector<int>> {};
+class EntityVarsListTable : public Table<int, vector<string>> {};
+class IndexToEntityTable : public Table<int, string> {};
+class EntityToIndexTable : public Table<string, int> {};
+
+
 enum class TableIdentifier {
   kAssign, kRead, kPrint, kConstant, kIf, kWhile, kPattern, kProcedure,
   kFollows, kFollowsStar,

@@ -11,7 +11,7 @@ TEST_CASE("Follows Table") {
 
   SECTION("Get key list when table is empty") {
     vector<int> key_lst = follows_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 
@@ -65,7 +65,7 @@ TEST_CASE("Follows Star Table") {
 
   SECTION("Get key list when table is empty") {
     vector<int> key_lst = follows_star_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 
@@ -120,7 +120,7 @@ TEST_CASE("Statement to Patterns Table") {
 
   SECTION("Get key list when table is empty") {
     vector<int> key_lst = stmt_to_patterns_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 
@@ -174,7 +174,7 @@ TEST_CASE("Pattern to Statements Table") {
 
   SECTION("Get key list when table is empty") {
     vector<string> key_lst = pattern_to_stmts_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 
@@ -229,7 +229,7 @@ TEST_CASE("Uses Statement to Variables Table") {
 
   SECTION("Get key list when table is empty") {
     vector<int> key_lst = uses_stmt_to_variables_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 
@@ -341,7 +341,7 @@ TEST_CASE("Modifies Procedure to Variables Table") {
 
   SECTION("Get key list when table is empty") {
     vector<int> key_lst = modifies_proc_to_variables_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 

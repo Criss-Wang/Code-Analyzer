@@ -30,11 +30,14 @@ class Pkb {
     CallerTable* caller_table_ = new CallerTable();
     IfTable *if_table_ = new IfTable();
     WhileTable *while_table_ = new WhileTable();
-    ProcRangeTable *proc_range_table_ = new ProcRangeTable();
-    VarIndexTable* var_index_table_ = new VarIndexTable();
-    IndexVarTable* index_var_table_ = new IndexVarTable();
-    ProcIndexTable* proc_index_table_ = new ProcIndexTable();
-    IndexProcTable* index_proc_table_ = new IndexProcTable();
+    // Procedure name mapping to a pair of integers - the start and end numbers for that procedure
+    Table<string, pair<int, int>>*proc_range_table_ = new Table<string, pair<int, int>>();
+
+    // Index tables
+    EntityToIndexTable* var_index_table_ = new EntityToIndexTable();
+    IndexToEntityTable* index_var_table_ = new IndexToEntityTable();
+    EntityToIndexTable* proc_index_table_ = new EntityToIndexTable();
+    IndexToEntityTable* index_proc_table_ = new IndexToEntityTable();
 
     // Relation tables
     FollowsTable *follows_table_ = new FollowsTable();
@@ -60,11 +63,13 @@ class Pkb {
     ModifiesVariableToStmtsTable *modifies_variable_to_stmts_table_ = new ModifiesVariableToStmtsTable();
     ModifiesProcToVariablesTable *modifies_proc_to_variables_table_ = new ModifiesProcToVariablesTable();
     ModifiesVariableToProcsTable *modifies_variable_to_procs_table_ = new ModifiesVariableToProcsTable();
+
+    // Pattern tables
     StmtToPatternsTable *stmt_to_patterns_table_ = new StmtToPatternsTable();
     PatternToStmtsTable *pattern_to_stmts_table_ = new PatternToStmtsTable();
     ExactPatternToStmtTable* exact_pattern_to_stmt_table_ = new ExactPatternToStmtTable();
 
-    // Stores the line numbers into a set
+    // Entity sets - statement numbers
     unordered_set<int> stmt_set_;
     unordered_set<int> assign_set_;
     unordered_set<int> read_set_;
@@ -73,7 +78,8 @@ class Pkb {
     unordered_set<int> if_set_;
     unordered_set<int> while_set_;
     unordered_set<int> constant_set_;
-    // Stores the variable or procedure name into the set
+
+    // Entity sets - names and lists
     unordered_set<int> variable_set_;
     unordered_set<int> procedure_set_;
     unordered_set<set<int>, HashFunction> stmt_list_set_;

@@ -209,7 +209,7 @@ int PopulateNestedRelationships(Pkb& pkb) {
     PopulateNestedModifiesPOrUsesP(*calls_star_table, *uses_proc_to_variables_table);
     PopulateReverseNestedModifiesPOrUsesP(*called_by_star_table, *uses_variable_to_procs_table);
   } catch (exception& e) {
-    return 0;
+    throw e;
   }
   return 1;
 }
