@@ -57,8 +57,7 @@ void PopulateForF(T1 table_to_refer, T2 table_to_update) {
   }
 }
 
-void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarTable& child_star_table, Table<int, vector<int>>& t,
-  Table<int, vector<int>>& t2) {
+void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, Table<int, vector<int>>& t) {
   for (const int parent_stmt: parent_star_table.GetKeyLst()) {
     vector<int> variables_lst;
     if (t.KeyExistsInTable(parent_stmt)) {
@@ -81,10 +80,11 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
     if (tmp_lst.empty()) return;
     bool success = t.UpdateKeyWithNewValue(parent_stmt, tmp_lst);
   }
+}
 
-  // Populate the inverse relation
-  for (const int var: t2.GetKeyLst()) {
-    vector<int> stmts_lst = t2.GetValueByKey(var);
+void PopulateReverseNestedModifiesOrUses(ChildStarTable& child_star_table, Table<int, vector<int>>& t) {
+  for (const int var: t.GetKeyLst()) {
+    vector<int> stmts_lst = t.GetValueByKey(var);
     vector<int> tmp_lst(stmts_lst);
     for (const int stmt: stmts_lst) {
       if (!child_star_table.KeyExistsInTable(stmt)) continue;
@@ -97,7 +97,7 @@ void PopulateNestedModifiesOrUses(ParentStarTable& parent_star_table, ChildStarT
     }
 
     if (tmp_lst.empty()) return;
-    bool success = t2.UpdateKeyWithNewValue(var, tmp_lst);
+    bool success = t.UpdateKeyWithNewValue(var, tmp_lst);
   }
 }
 
@@ -158,6 +158,7 @@ void PopulateReverseNestedModifiesPOrUsesP(CalledByStarTable& called_by_star_tab
   }
 }
 
+
 int PopulateNestedRelationships(Pkb& pkb) {
   try {
     FollowsTable* follows_table = pkb.GetFollowsTable();
@@ -194,10 +195,12 @@ int PopulateNestedRelationships(Pkb& pkb) {
     PopulateForPOrC<CalledByTable*, CalledByStarTable*>(called_by_table, called_by_star_table);
 
     // Populate modifies
-    PopulateNestedModifiesOrUses(*parent_star_table, *child_star_table,  *modifies_stmt_to_variables_table, *modifies_variable_to_stmts_table);
+    PopulateNestedModifiesOrUses(*parent_star_table, *modifies_stmt_to_variables_table);
+    PopulateReverseNestedModifiesOrUses(*child_star_table, *modifies_variable_to_stmts_table);
 
     // Populate uses
-    PopulateNestedModifiesOrUses(*parent_star_table, *child_star_table,  *uses_stmt_to_variables_table, *uses_variable_to_stmts_table);
+    PopulateNestedModifiesOrUses(*parent_star_table, *uses_stmt_to_variables_table);
+    PopulateReverseNestedModifiesOrUses(*child_star_table, *uses_variable_to_stmts_table);
 
     // Populate modifiesP
     PopulateNestedModifiesPOrUsesP(*calls_star_table, *modifies_proc_to_variables_table);
