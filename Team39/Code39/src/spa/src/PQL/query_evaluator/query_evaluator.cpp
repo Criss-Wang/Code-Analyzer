@@ -23,7 +23,7 @@ namespace pql {
     }
   }
 
-  std::unique_ptr<pql_clause::Clause> GenerateClause(pql::RelationshipToken& token) {
+  /*std::unique_ptr<pql_clause::Clause> GenerateClause(pql::RelationshipToken& token) {
     switch (token.GetRelationship()) {
       case RelationshipTypes::kFollows:
         return std::make_unique<pql_clause::FollowsClause>(&token);
@@ -48,7 +48,7 @@ namespace pql {
       default: 
         throw pql_exceptions::EmptyDomainException();
     }
-  }
+  }*/
 
   void ConsumePatternWithoutSyn(pql::PatternToken& pattern_token, Pkb& pkb, 
                                 std::unordered_map<std::string, std::vector<int>>& domain) {
@@ -139,10 +139,10 @@ namespace pql {
         ConsumePattern(pattern_token, pkb, domain, predicates);
       }
 
-      for (pql::RelationshipToken& such_that_token : such_that_clauses) {
+      /*for (pql::RelationshipToken& such_that_token : such_that_clauses) {
         std::unique_ptr<pql_clause::Clause> clause = GenerateClause(such_that_token);
         clause->Evaluate(pkb, domain, predicates);
-      }
+      }*/
       
       pql_solver::Solver solver(&domain, &predicates, synonyms, selected_syns, is_return_boolean);
       pql_table::InterTable table = solver.Solve();
