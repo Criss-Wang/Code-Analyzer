@@ -3,8 +3,19 @@
 namespace pql_clause {
   class SuchThatClause : public Clause {
     public:
-      SuchThatClause(pql::RelationshipToken* token) :
-          Clause{ token } {}
+      std::string left_;
+      bool is_synonym_left_;
+      std::string right_;
+      bool is_synonym_right_;
+
+    public:
+      SuchThatClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          Clause{} {
+        left_ = left;
+        is_synonym_left_ = is_synonym_left;
+        right_ = right;
+        is_synonym_right_ = is_synonym_right;
+      }
     
       virtual ~SuchThatClause() = default;
 
@@ -42,8 +53,8 @@ namespace pql_clause {
 
   class FollowsClause : virtual public SuchThatClause {
   public:
-      FollowsClause(pql::RelationshipToken* token) :
-          SuchThatClause(token) {
+      FollowsClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause{ left, is_synonym_left, right, is_synonym_right } {
           type_ = pql::RelationshipTypes::kFollows;
       }
 
@@ -54,8 +65,8 @@ namespace pql_clause {
 
   class FollowsTClause : public SuchThatClause {
     public:
-      FollowsTClause(pql::RelationshipToken* token) :
-          SuchThatClause(token) {
+      FollowsTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
           type_ = pql::RelationshipTypes::kFollowsT;
       }
 
@@ -66,8 +77,8 @@ namespace pql_clause {
 
   class ParentClause : public SuchThatClause {
     public:
-      ParentClause(pql::RelationshipToken* token) :
-          SuchThatClause(token) {
+      ParentClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
           type_ = pql::RelationshipTypes::kParent;
       }
 
@@ -78,8 +89,8 @@ namespace pql_clause {
 
   class ParentTClause : public SuchThatClause {
     public:
-      ParentTClause(pql::RelationshipToken* token) :
-          SuchThatClause(token) {
+      ParentTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
           type_ = pql::RelationshipTypes::kParentT;
       }
 
@@ -90,8 +101,8 @@ namespace pql_clause {
 
   class UsesSClause : public SuchThatClause {
     public:
-      UsesSClause(pql::RelationshipToken* token) :
-          SuchThatClause(token) {
+      UsesSClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
           type_ = pql::RelationshipTypes::kUsesS;
       }
 
@@ -102,8 +113,8 @@ namespace pql_clause {
 
   class ModifiesSClause : public SuchThatClause {
     public:
-      ModifiesSClause(pql::RelationshipToken* token) :
-          SuchThatClause(token) {
+      ModifiesSClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
           type_ = pql::RelationshipTypes::kModifiesS;
       }
 
@@ -114,8 +125,8 @@ namespace pql_clause {
 
   class UsesPClause : public SuchThatClause {
   public:
-      UsesPClause(pql::RelationshipToken* token) :
-          SuchThatClause(token) {
+      UsesPClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
           type_ = pql::RelationshipTypes::kUsesP;
       }
 
@@ -126,8 +137,8 @@ namespace pql_clause {
 
   class ModifiesPClause : public SuchThatClause {
   public:
-      ModifiesPClause(pql::RelationshipToken* token) :
-          SuchThatClause(token) {
+    ModifiesPClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+        SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
           type_ = pql::RelationshipTypes::kModifiesP;
       }
 
@@ -138,8 +149,8 @@ namespace pql_clause {
 
   class CallsClause : public SuchThatClause {
     public:
-      CallsClause(pql::RelationshipToken* token) :
-          SuchThatClause(token) {
+      CallsClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
           type_ = pql::RelationshipTypes::kCalls;
       }
 
@@ -150,8 +161,8 @@ namespace pql_clause {
 
   class CallsTClause : public SuchThatClause {
     public:
-      CallsTClause(pql::RelationshipToken* token) :
-          SuchThatClause(token) {
+      CallsTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
           type_ = pql::RelationshipTypes::kCallsT;
       }
 

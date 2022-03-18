@@ -42,12 +42,9 @@ namespace pql_clause {
 
   class Clause {
     public:
-      pql::RelationshipToken* token_;
       pql::RelationshipTypes type_;
 
     public:
-      Clause(pql::RelationshipToken* token);
-
       virtual ~Clause() = default;
 
     public:

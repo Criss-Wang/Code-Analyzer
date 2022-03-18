@@ -1,7 +1,9 @@
 #include <map>
+#include <set>
 
 #include "such_that_clause.h"
 
+#define INVALID_INDEX -1
 #define WILDCARD 0
 #define ENTITY 1
 #define SYNONYM 2
@@ -122,6 +124,24 @@ namespace pql_clause {
     return res;
   }
 
+  const std::set<pql::RelationshipTypes> LeftProcedureTypeSet { pql::kCalls, pql::kCallsT, pql::kModifiesP, pql::kUsesP };
+  const std::set<pql::RelationshipTypes> RightVariableTypeSet{ pql::kModifiesS, pql::kModifiesP, pql::kUsesS, pql::kUsesP };
+
+  int GetIntArgumentRepresentation(Pkb& pkb, pql::RelationshipTypes type, std::string& name, bool is_left) {
+    //variable argument : ModifiesS/ModifiesP/UsesS/UsesP right argument
+    //procedure argument : Calls/CallsT both argument and ModifiesP/UsesP left argument
+    if (is_left && LeftProcedureTypeSet.find(type) != LeftProcedureTypeSet.end()) {
+      return pkb.GetIndexByProc(name);
+    }
+
+    if (!is_left && RightVariableTypeSet.find(type) != RightVariableTypeSet.end()) {
+      return pkb.GetIndexByVar(name);
+    }
+
+    //at this point, the name would be an integer string
+    return stoi(name); 
+  }
+
   void SuchThatClause::EvaluateWildWild(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     DoesRelHolds fn = DoesRelHoldsMap.at(type_);
@@ -135,8 +155,9 @@ namespace pql_clause {
   void SuchThatClause::EvaluateWildEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetInverseRelDomain fn = GetInverseRelDomainMap.at(type_);
+    int right = GetIntArgumentRepresentation(pkb, type_, right_, false);
     std::vector<int> domain_lst = {};
-    domain_lst = (pkb.*fn)(stoi(token_->GetRight()));
+    domain_lst = (pkb.*fn)(right);
     
     if (domain_lst.empty()) {
         throw pql_exceptions::EmptyDomainException();
@@ -150,14 +171,15 @@ namespace pql_clause {
     std::vector<int> domain_with_duplicates = ExtractSecond<int, int>(domain_pair);
     std::vector<int> domain_lst = RemoveDuplicate<int>(domain_with_duplicates);
 
-    UpdateHashmap<int>(domain, token_->GetRight(), domain_lst);
+    UpdateHashmap<int>(domain, right_, domain_lst);
   }
 
   void SuchThatClause::EvaluateEntWild(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetRelDomain fn = GetRelDomainMap.at(type_);
+    int left = GetIntArgumentRepresentation(pkb, type_, left_, true);
     std::vector<int> domain_lst = {};
-    domain_lst = (pkb.*fn)(stoi(token_->GetLeft()));
+    domain_lst = (pkb.*fn)(left);
 
     if (domain_lst.empty()) {
       throw pql_exceptions::EmptyDomainException();
@@ -167,7 +189,9 @@ namespace pql_clause {
   void SuchThatClause::EvaluateEntEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     IsRelHolds fn = IsRelHoldsMap.at(type_);
-    bool rel_exist = (pkb.*fn)(stoi(token_->GetLeft()), stoi(token_->GetRight()));
+    int left = GetIntArgumentRepresentation(pkb, type_, left_, true);
+    int right = GetIntArgumentRepresentation(pkb, type_, right_, false);
+    bool rel_exist = (pkb.*fn)(left, right);
 
     if (!rel_exist) {
       throw pql_exceptions::FalseRelationException();
@@ -177,10 +201,11 @@ namespace pql_clause {
   void SuchThatClause::EvaluateEntSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetRelDomain fn = GetRelDomainMap.at(type_);
+    int left = GetIntArgumentRepresentation(pkb, type_, left_, true);
     std::vector<int> domain_lst = {};
-    domain_lst = (pkb.*fn)(stoi(token_->GetLeft()));
+    domain_lst = (pkb.*fn)(left);
 
-    UpdateHashmap<int>(domain, token_->GetRight(), domain_lst);
+    UpdateHashmap<int>(domain, right_, domain_lst);
   }
 
   void SuchThatClause::EvaluateSynWild(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
@@ -190,25 +215,24 @@ namespace pql_clause {
     std::vector<int> domain_with_duplicates = ExtractFirst<int, int>(domain_pair);
     std::vector<int> domain_lst = RemoveDuplicate<int>(domain_with_duplicates);
 
-    UpdateHashmap<int>(domain, token_->GetRight(), domain_lst);
+    UpdateHashmap<int>(domain, right_, domain_lst);
   }
 
   void SuchThatClause::EvaluateSynEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetInverseRelDomain fn = GetInverseRelDomainMap.at(type_);
+    int right = GetIntArgumentRepresentation(pkb, type_, right_, false);
     std::vector<int> domain_lst = {};
-    domain_lst = (pkb.*fn)(stoi(token_->GetRight()));
+    domain_lst = (pkb.*fn)(right);
 
-    UpdateHashmap<int>(domain, token_->GetRight(), domain_lst);
+    UpdateHashmap<int>(domain, left_, domain_lst);
   }
 
   void SuchThatClause::EvaluateSynSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetRelPairs fn = GetRelPairsMap.at(type_);
-    std::string left = token_->GetLeft();
-    std::string right = token_->GetRight();
     std::vector<std::pair<int, int>> domain_pair = (pkb.*fn)();
-    pql_table::Predicate pred(left, right, domain_pair);
+    pql_table::Predicate pred(left_, right_, domain_pair);
 
     predicates.push_back(pred);
   }
@@ -223,8 +247,8 @@ namespace pql_clause {
 
   void SuchThatClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int left_type = GetArgumentType(token_->GetLeft(), token_->IsSynonymLeft());
-    int right_type = GetArgumentType(token_->GetRight(), token_->IsSynonymRight());
+    int left_type = GetArgumentType(left_, is_synonym_left_);
+    int right_type = GetArgumentType(right_, is_synonym_left_);
     EvaluateFn fn = EvaluateFnMap.at(left_type).at(right_type);
     (this->*fn)(pkb, domain, predicates);
   }
