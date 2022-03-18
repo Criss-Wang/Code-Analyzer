@@ -130,12 +130,25 @@ namespace pql_clause {
   int GetIntArgumentRepresentation(Pkb& pkb, pql::RelationshipTypes type, std::string& name, bool is_left) {
     //variable argument : ModifiesS/ModifiesP/UsesS/UsesP right argument
     //procedure argument : Calls/CallsT both argument and ModifiesP/UsesP left argument
+
     if (is_left && LeftProcedureTypeSet.find(type) != LeftProcedureTypeSet.end()) {
-      return pkb.GetIndexByProc(name);
+      int proc_index = pkb.GetIndexByProc(name);
+
+      if (proc_index == INVALID_INDEX) {
+        throw pql_exceptions::ProcedureDoesNotExistException();
+      } else {
+        return proc_index;
+      }
     }
 
     if (!is_left && RightVariableTypeSet.find(type) != RightVariableTypeSet.end()) {
-      return pkb.GetIndexByVar(name);
+      int var_index = pkb.GetIndexByVar(name);
+
+      if (var_index == INVALID_INDEX) {
+        throw pql_exceptions::VariableDoesNotExistException();
+      } else {
+        return var_index;
+      }
     }
 
     //at this point, the name would be an integer string

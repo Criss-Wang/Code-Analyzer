@@ -40,4 +40,18 @@ namespace pql_exceptions {
           return "Intermediate table is empty";
       }
   };
+
+  class ProcedureDoesNotExistException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+          return "The procedure entity given does not appear in the program";
+      }
+  };
+
+  class VariableDoesNotExistException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+          return "The variable entity given does not appear in the program";
+      }
+  };
 }
