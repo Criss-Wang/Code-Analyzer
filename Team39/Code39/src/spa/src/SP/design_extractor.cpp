@@ -158,6 +158,60 @@ void PopulateReverseNestedModifiesPOrUsesP(CalledByStarTable& called_by_star_tab
   }
 }
 
+void PopulateNestedModifiesSOrUsesSForCalls(CallerTable caller_table, ChildStarTable& child_star_table,
+  ModifiesProcToVariablesTable modifies_proc_to_variables_table, ModifiesStmtToVariablesTable& t, Pkb& pkb) {
+  // Get the call statements
+  vector<int> call_stmts = caller_table.GetKeyLst();
+  // Then loop through and get the specific procedure called at that statement
+  for (const int call_stmt : call_stmts) {
+    string proc = caller_table.GetValueByKey(call_stmt);
+    int proc_idx = pkb.GetIndexByProc(proc);
+    // Get the variables used in that procedure
+    vector<int> variables_idx;
+    try {
+       variables_idx = modifies_proc_to_variables_table.GetValueByKey(proc_idx);
+    } catch (InvalidKeyException& e) {
+      // No variables used or modified in the procedure
+      continue;
+    }
+
+    // Update the statement to variables table
+    t.AddKeyValuePair(call_stmt, variables_idx);
+
+    // Check the parents and update the relevant statement with the new variables
+    vector<int> parents;
+    try {
+      parents = child_star_table.GetValueByKey(call_stmt);
+    } catch (InvalidKeyException& e) {
+      // Means the current statement does not have a parent
+      continue;
+    }
+
+    for (const int parent : parents) {
+      // Try getting the variables associated with parent
+      try {
+        vector<int> parent_variables_idx;
+        try {
+          parent_variables_idx = t.GetValueByKey(parent);
+        } catch (InvalidKeyException& e) {
+          // Parent container does not use or modify any variables
+          continue;
+        }
+
+        // Otherwise merge the vectors with new values
+        parent_variables_idx.insert(parent_variables_idx.end(), variables_idx.begin(), variables_idx.end());
+        // Remove duplicate elements
+        sort(parent_variables_idx.begin(), parent_variables_idx.end());
+        parent_variables_idx.erase(unique(parent_variables_idx.begin(), parent_variables_idx.end()), parent_variables_idx.end());
+
+        t.UpdateKeyWithNewValue(parent, parent_variables_idx);
+      } catch (InvalidKeyException& e) {
+        // Means that there are no variables associated with parent statement
+        t.AddKeyValuePair(parent, variables_idx);
+      }
+    }
+  }
+}
 
 int PopulateNestedRelationships(Pkb& pkb) {
   try {
@@ -181,6 +235,7 @@ int PopulateNestedRelationships(Pkb& pkb) {
     UsesVariableToStmtsTable* uses_variable_to_stmts_table = pkb.GetUsesVariableToStmtsTable();
     UsesProcToVariablesTable* uses_proc_to_variables_table = pkb.GetUsesProcToVariablesTable();
     UsesVariableToProcsTable* uses_variable_to_procs_table = pkb.GetUsesVariableToProcsTable();
+    CallerTable* caller_table = pkb.GetCallerTable();
 
     // Populate nested follows
     PopulateForF<FollowsTable*, FollowsStarTable*>(follows_table, follows_star_table);
@@ -209,6 +264,9 @@ int PopulateNestedRelationships(Pkb& pkb) {
     // Populate usesP
     PopulateNestedModifiesPOrUsesP(*calls_star_table, *uses_proc_to_variables_table);
     PopulateReverseNestedModifiesPOrUsesP(*called_by_star_table, *uses_variable_to_procs_table);
+
+    // Populate ModifiesS for calls
+    PopulateNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *modifies_proc_to_variables_table, *modifies_stmt_to_variables_table, pkb);
   } catch (exception& e) {
     return 0;
   }
