@@ -1,0 +1,25 @@
+1 - Valid boolean return
+read r;
+Select BOOLEAN such that Modifies(r, "read")
+TRUE
+5000
+2 - Valid boolean return
+assign a;
+Select BOOLEAN pattern a(_, "22")
+FALSE
+5000
+3 - Boolean return for syntactically invalid query
+read r;
+Select Boolean such that Modifies(r, "read")
+
+5000
+4 - Boolean return for semantically invalid query 
+stmt s;
+Select BOOLEAN such that Modifies(r, "read")
+FALSE
+5000
+5 - Synonym that is named BOOLEAN
+print BOOLEAN;
+Select BOOLEAN 
+5, 7, 10
+5000
