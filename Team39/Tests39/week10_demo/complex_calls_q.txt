@@ -1,0 +1,57 @@
+1 - Select all procedures
+procedure p;
+Select p
+p1, p2, p3, p4, p5, p6
+5000
+2 - Select all call statements
+call c;
+Select c
+3, 4, 7, 8, 11, 12, 13, 14, 17, 18, 19, 20, 21
+5000
+3 - Select procedures that directly call p1
+procedure p;
+Select p such that Calls(p, "p1")
+p2, p3, p6
+5000
+4 - Select procedures that indirectly calls p1
+procedure p, q;
+Select p such that Calls(p, q) and Calls*(q, "p1")
+p4
+5000
+5 - Select procedures that directly or indirectly calls p1
+procedure p;
+Select p such that Calls*(p, "p1")
+p2, p3, p4, p6
+5000
+5 - Select procedures that directly or indirectly calls p2
+procedure p;
+Select p such that Calls*(p, "p2")
+p3, p4
+5000
+6 - Select all procedures that are calling another procedure
+procedure p, q;
+Select p such that Calls(p, q)
+p2, p3, p4, p6
+5000
+7 - Synonym p declared twice
+procedure p, p;
+Select BOOLEAN such that Calls*(p, p)
+FALSE
+5000
+8 - Synonym q not declared
+procedure p;
+Select BOOLEAN such that Calls(p, q)
+FALSE
+5000
+9 - Syntax error
+procedure p;
+Select p such that Call(p, "p1")
+
+5000
+10 - BOOLEAN as a procedure synomyn
+procedure BOOLEAN;
+Select BOOLEAN such that Calls(p, "p2")
+p3
+5000
+
+

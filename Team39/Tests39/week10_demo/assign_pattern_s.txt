@@ -1,0 +1,7 @@
+procedure patterns {
+	x = x * y + f + a + assign * g;
+	y = (f * q * e - s * 9) * (g + (10 + a) * y);
+	z = 100 * 9 + a * d / r + (a * (f + (w / t)) - x - 100);
+	q = a * f - 0 + g * i / t + (f + (w / t));
+	q = 1;
+}
