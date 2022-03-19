@@ -232,13 +232,69 @@ TEST_CASE("Populating ModifiesProcToVariables and ModifiesVariableToProcs Table"
   }
 }
 
+TEST_CASE("Populating if and while pattern") {
+  Pkb pkb = Pkb();
+  bool success = pkb.AddInfoToTable(TableIdentifier::kIfPattern, 2, "A < 3");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 3, "A + D + (AB * C) < 3");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 4, "A + D + (AB * C2E) <= 3");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 5, "1 == 3");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 6, "m != (QAQ + 1)");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kWhilePattern, 11, "A2 >= 3 % 11 * EB2E");
+  SECTION("Adding patterns") {
+    REQUIRE(success);
+  }
+
+  SECTION("Test Search by stmt") {
+    unordered_set<string> res = pkb.GetAllPatternVariablesInStmt(2, TableIdentifier::kIfPattern);
+    REQUIRE(res == unordered_set<string>{"A"});
+
+    res = pkb.GetAllPatternVariablesInStmt(3, TableIdentifier::kIfPattern);
+    REQUIRE(res == unordered_set<string>{"A", "D", "AB", "C"});
+
+    res = pkb.GetAllPatternVariablesInStmt(4, TableIdentifier::kIfPattern);
+    REQUIRE(res == unordered_set<string>{"A", "D", "AB", "C2E"});
+
+    res = pkb.GetAllPatternVariablesInStmt(5, TableIdentifier::kIfPattern);
+    REQUIRE(res.empty());
+
+    res = pkb.GetAllPatternVariablesInStmt(6, TableIdentifier::kIfPattern);
+    REQUIRE(res == unordered_set<string>{"m", "QAQ"});
+
+    res = pkb.GetAllPatternVariablesInStmt(10, TableIdentifier::kWhilePattern);
+    REQUIRE(res.empty());
+
+    res = pkb.GetAllPatternVariablesInStmt(11, TableIdentifier::kWhilePattern);
+    REQUIRE(res == unordered_set<string>{"A2", "EB2E"});
+  }
+
+  SECTION("Test Search by variable") {
+    unordered_set<int> res = pkb.GetAllStmtsWithPatternVariable("A", TableIdentifier::kIfPattern);
+    REQUIRE(res == unordered_set<int>{2, 3, 4});
+
+    res = pkb.GetAllStmtsWithPatternVariable("D", TableIdentifier::kIfPattern);
+    REQUIRE(res == unordered_set<int>{3, 4});
+
+    res = pkb.GetAllStmtsWithPatternVariable("A", TableIdentifier::kWhilePattern);
+    REQUIRE(res.empty());
+
+    res = pkb.GetAllStmtsWithPatternVariable("EB2E", TableIdentifier::kWhilePattern);
+    REQUIRE(res == unordered_set<int>{11});
+  }
+
+  SECTION("Test search entire pair") {
+    vector<pair<int, string>> res = pkb.GetContainerStmtVarPair(TableIdentifier::kWhilePattern);
+    vector<pair<int, string>> expected_res = { make_pair(11, "A2"), make_pair(11, "EB2E") };
+    REQUIRE(res == expected_res);
+  }
+}
+
 TEST_CASE("Populating StmtToPatterns Table") {
   // PatternToStmtsTable is populated behind the scenes
   Pkb pkb = Pkb();
-  bool success = pkb.AddInfoToTable(TableIdentifier::kPattern, 2, "A + (Bbs + C) + 2");
-  success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 3, "X + (Bbs + C) * (B + C)");
-  success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 4, "A + Bbs + C + 2");
-  success = success && pkb.AddInfoToTable(TableIdentifier::kPattern, 5, "289 * 444 + (f * cenX)");
+  bool success = pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 2, "A + (Bbs + C) + 2");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 3, "X + (Bbs + C) * (B + C)");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 4, "A + Bbs + C + 2");
+  success = success && pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 5, "289 * 444 + (f * cenX)");
   SECTION("Adding patterns") {
     REQUIRE(success);
   }
@@ -277,11 +333,11 @@ TEST_CASE("Populating StmtToPatterns Table") {
 
 TEST_CASE("Sample Tests for Pattern") {
   Pkb pkb = Pkb();
-  bool success = pkb.AddInfoToTable(TableIdentifier::kPattern, 2, "v + x * y + z % t");
-  success = pkb.AddInfoToTable(TableIdentifier::kPattern, 11, "lm + n") && success;
-  success = pkb.AddInfoToTable(TableIdentifier::kPattern, 12, "l + mn") && success;
-  success = pkb.AddInfoToTable(TableIdentifier::kPattern, 13, "(s1k + dks)") && success;
-  success = pkb.AddInfoToTable(TableIdentifier::kPattern, 14, "((a+(b)))*((c))") && success;
+  bool success = pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 2, "v + x * y + z % t");
+  success = pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 11, "lm + n") && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 12, "l + mn") && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 13, "(s1k + dks)") && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 14, "((a+(b)))*((c))") && success;
   
   SECTION("Adding patterns") {
     REQUIRE(success);

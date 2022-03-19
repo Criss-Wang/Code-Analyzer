@@ -459,8 +459,8 @@ unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern) const {
   if (res.size() != 1) throw BadResultException();
   const string s = *(res.begin());
 
-  if (!pattern_to_stmts_table_->KeyExistsInTable(s)) return empty_set;
-  return pattern_to_stmts_table_->GetValueByKey(s);
+  if (!assign_pattern_to_stmts_table_->KeyExistsInTable(s)) return empty_set;
+  return assign_pattern_to_stmts_table_->GetValueByKey(s);
 }
 
 unordered_set<int> Pkb::GetStmtsWithExactPattern(const string& pattern) const {
@@ -473,6 +473,58 @@ unordered_set<int> Pkb::GetStmtsWithExactPattern(const string& pattern) const {
 
   if (!exact_pattern_to_stmt_table_->KeyExistsInTable(s)) return empty_set;
   return exact_pattern_to_stmt_table_->GetValueByKey(s);
+}
+
+unordered_set<string> Pkb::GetAllPatternVariablesInStmt(const int stmt_no, 
+  const TableIdentifier table_identifier) const {
+  unordered_set<string> empty_set{};
+  Table<int, unordered_set<string>>* search_table;
+  if (table_identifier == TableIdentifier::kIfPattern) {
+    search_table = if_stmt_to_pattern_table_;
+  } else if (table_identifier == TableIdentifier::kWhilePattern) {
+    search_table = while_stmt_to_pattern_table_;
+  } else {
+    throw InvalidIdentifierException();
+  }
+  if (!search_table->KeyExistsInTable(stmt_no)) {
+    return empty_set;
+  }
+  return search_table->GetValueByKey(stmt_no);
+}
+
+unordered_set<int> Pkb::GetAllStmtsWithPatternVariable(const string& pattern_var_string,
+  const TableIdentifier table_identifier) const {
+  unordered_set<int> empty_set{};
+  Table<string, unordered_set<int>>* search_table;
+  if (table_identifier == TableIdentifier::kIfPattern) {
+    search_table = if_pattern_to_stmt_table_;
+  } else if(table_identifier == TableIdentifier::kWhilePattern) {
+    search_table = while_pattern_to_stmt_table_;
+  } else {
+    throw InvalidIdentifierException();
+  }
+  if (!search_table->KeyExistsInTable(pattern_var_string)) {
+    return empty_set;
+  }
+  return search_table->GetValueByKey(pattern_var_string);
+}
+
+vector<pair<int, string>> Pkb::GetContainerStmtVarPair(const TableIdentifier table_identifier) const {
+  vector<pair<int, string>> result;
+  Table<int, unordered_set<string>>* search_table;
+  if (table_identifier == TableIdentifier::kIfPattern) {
+    search_table = if_stmt_to_pattern_table_;
+  } else if (table_identifier == TableIdentifier::kWhilePattern) {
+    search_table = while_stmt_to_pattern_table_;
+  } else {
+    throw InvalidIdentifierException();
+  }
+  for (const auto& [key, val_lst] : search_table->GetKeyValueLst()) {
+    for (auto val_item : val_lst) {
+      result.emplace_back(make_pair(key, val_item));
+    }
+  }
+  return result;
 }
 
 bool Pkb::AddParent(const int key, const vector<int>& value) {
@@ -588,7 +640,7 @@ bool Pkb::AddUsesP(const string& key, const vector<string>& value) {
   return add_success;
 }
 
-bool Pkb::AddPattern(bool& add_success, const unordered_set<string> pattern_set, Table<string, unordered_set<int>>* table_to_update, const int line_num) {
+bool Pkb::AddPatternToTable(bool& add_success, const unordered_set<string> pattern_set, Table<string, unordered_set<int>>* table_to_update, const int line_num) {
   for (auto& p : pattern_set) {
     if (!table_to_update->KeyExistsInTable(p)) {
       add_success = add_success && table_to_update->AddKeyValuePair(p, unordered_set<int>{line_num});
@@ -613,17 +665,35 @@ bool Pkb::UpdateIndexTable(Table<int, string>* index_to_string_table, Table<stri
   }
 }
 
-bool Pkb::AddPattern(const int line_num, const string& input) {
-  // First the SP side should guarantee a valid input is sent
+bool Pkb::AddPattern(const int line_num, const string& input, const TableIdentifier table_identifier) {
+  // First the SP side should guarantee a valid input is sent (valid variable names given)
   // We then proceed to parse the set of valid substring patterns
-  const string clean_input = PatternHelper::PreprocessPattern(input);
-
-  const unordered_set<string> valid_sub_patterns = PatternHelper::GetPatternSetPostfix(clean_input, true);
-  const unordered_set<string> valid_exact_patterns = PatternHelper::GetPatternSetPostfix(clean_input, false);
-  bool add_success = stmt_to_patterns_table_->AddKeyValuePair(line_num, valid_sub_patterns);
-  add_success = AddPattern(add_success, valid_sub_patterns, pattern_to_stmts_table_, line_num);
-  add_success = AddPattern(add_success, valid_exact_patterns, exact_pattern_to_stmt_table_, line_num);
-  return add_success;
+  try {
+    const string clean_input = PatternHelper::PreprocessPattern(input);
+    bool add_success;
+    if (table_identifier == TableIdentifier::kAssignPattern) {
+      const unordered_set<string> valid_sub_patterns = PatternHelper::GetPatternSetPostfix(clean_input, true);
+      const unordered_set<string> valid_exact_patterns = PatternHelper::GetPatternSetPostfix(clean_input, false);
+      add_success = assign_stmt_to_patterns_table_->AddKeyValuePair(line_num, valid_sub_patterns);
+      add_success = AddPatternToTable(add_success, valid_sub_patterns, assign_pattern_to_stmts_table_, line_num);
+      add_success = AddPatternToTable(add_success, valid_exact_patterns, exact_pattern_to_stmt_table_, line_num);
+    } else if (table_identifier == TableIdentifier::kIfPattern) {
+      const unordered_set<string> valid_var_names = PatternHelper::GetContainerPatterns(clean_input);
+      add_success = if_stmt_to_pattern_table_->AddKeyValuePair(line_num, valid_var_names);
+      add_success = AddPatternToTable(add_success, valid_var_names, if_pattern_to_stmt_table_, line_num);
+    } else if (table_identifier == TableIdentifier::kWhilePattern) {
+      const unordered_set<string> valid_var_names = PatternHelper::GetContainerPatterns(clean_input);
+      add_success = while_stmt_to_pattern_table_->AddKeyValuePair(line_num, valid_var_names);
+      add_success = AddPatternToTable(add_success, valid_var_names, while_pattern_to_stmt_table_, line_num);
+    } else {
+      throw InvalidIdentifierException();
+    }
+    return add_success;
+  } catch (exception& e) {
+    return false;
+  }
+  
+  
 }
 
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<int>& value) {
@@ -690,8 +760,12 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         return caller_table_->AddKeyValuePair(key, value);
       case TableIdentifier::kPrint: 
         return print_table_->AddKeyValuePair(key, value);
-      case TableIdentifier::kPattern: 
-        return AddPattern(key, value);
+      case TableIdentifier::kAssignPattern: 
+        return AddPattern(key, value, table_identifier);
+      case TableIdentifier::kIfPattern:
+        return AddPattern(key, value, table_identifier);
+      case TableIdentifier::kWhilePattern:
+        return AddPattern(key, value, table_identifier);
       default:
         throw InvalidIdentifierException();
     }

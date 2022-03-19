@@ -100,7 +100,8 @@ class EntityToIndexTable : public Table<string, int> {};
 
 
 enum class TableIdentifier {
-  kAssign, kRead, kPrint, kConstant, kIf, kWhile, kPattern, kProcedure,
+  kAssign, kRead, kPrint, kConstant, kIf, kWhile, kProcedure,
+  kAssignPattern, kIfPattern, kWhilePattern,
   kFollows, kFollowsStar,
   kParent, kParentStar,
   kUsesStmtToVar, kUsesProcToVar, kModifiesStmtToVar, KModifiesProcToVar,
