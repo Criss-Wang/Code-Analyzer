@@ -40,20 +40,6 @@ namespace pql {
       }
   };
 
-  struct SemanticallyInvalidException : public std::exception {
-  public:
-    [[nodiscard]] const char * what() const noexcept override {
-      return "The query is semantically invalid!";
-    }
-  };
-
-  struct InvalidCallException : public std::exception {
-  public:
-    [[nodiscard]] const char * what() const noexcept override {
-      return "This function should not be called!";
-    }
-  };
-
   enum RelationshipTypes {
     kFollows,
     kFollowsT,

@@ -121,7 +121,7 @@ namespace pql {
     ssm >> ref;
     if (is_synonym) {
       if (!q.SynonymDeclared(ref)) {
-        throw SemanticallyInvalidException();
+        q.SetSemanticallyInvalid();
       }
       q.AddUsedSynonym(ref);
     }

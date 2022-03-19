@@ -1,6 +1,7 @@
 #pragma once
 
 #include "token.h"
+#include "../query_evaluator/clause/clause.h"
 
 namespace pql {
   bool IsLetter(char c);
@@ -19,6 +20,8 @@ namespace pql {
 
   bool IsHash(char c);
 
+  AttrIdentifier GetAttributeByString(const std::string& attr);
+
     
   class Query {
     private:
@@ -28,6 +31,7 @@ namespace pql {
       std::vector <pql::AttrRef> attr_refs;
       std::vector <RelationshipToken> such_that_clauses;
       std::vector <pql::PatternToken> patterns;
+      std::vector <std::unique_ptr<pql_clause::Clause>> clauses;
       bool is_boolean = false;
       bool is_semantically_valid = true;
     public:
@@ -36,6 +40,8 @@ namespace pql {
       bool IsValid(RelationshipTypes relationship, const std::string& left, const std::string& right);
 
       bool SynonymDeclared(const std::string &name);
+
+      Synonym GetSynonymByName(const std::string &name);
 
       bool IsAttrStringValid(const std::string& attribute);
 
@@ -72,6 +78,9 @@ namespace pql {
       void AddPattern(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact);
 
       std::vector<pql::PatternToken> GetPattern();
+
+      void AddWith(std::optional<AttrRef> left_attr, std::optional<std::string> left_entity, bool is_attr_ref_left,
+                   std::optional<AttrRef> right_attr, std::optional<std::string> right_entity, bool is_attr_ref_right);
 
       void SetBoolean(bool b);
 
