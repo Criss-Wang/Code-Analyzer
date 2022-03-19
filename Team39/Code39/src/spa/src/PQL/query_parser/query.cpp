@@ -1,6 +1,7 @@
 #include "query.h"
 #include "../query_evaluator/clause/such_that_clause.h"
 #include "../query_evaluator/clause/with_clause.h"
+#include "../query_evaluator/clause/pattern_clause.h"
 
 #include <algorithm>
 #include <map>
@@ -24,6 +25,9 @@ namespace pql {
   bool IsInteger(const std::string& s) {
     std::stringstream ssm;
     ssm << s;
+    if (s.length() > 1 && ssm.get() == '0') {
+      return false;
+    }
     if (!pql::IsDigit(ssm.get())) {
         return false;
     }
@@ -305,6 +309,10 @@ namespace pql {
     }
     Query::used_synonyms.push_back(Query::synonyms.at(name));
   }
+
+  std::vector<pql::Synonym> Query::GetAllUsedSynonyms() {
+    return Query::used_synonyms;
+  }
   
   void Query::AddAttrRef(Synonym s) {
     AttrIdentifier attr = defaultAttrMap.at(s.GetDeclaration()); 
@@ -328,10 +336,6 @@ namespace pql {
     return Query::attr_refs;
   }
 
-  std::vector<pql::Synonym> Query::GetAllUsedSynonyms() {
-    return Query::used_synonyms;
-  }
-
   void Query::AddSuchThatClause(RelationshipTypes r, std::string &left, std::string &right, bool is_synonym_left, bool is_synonym_right) {
     if (Query::IsValid(r, left, right)) {
       if (!is_synonym_left && IsIdent(left)) {
@@ -344,15 +348,10 @@ namespace pql {
         int right_len = right.length();
         right.erase(right_len - 1, 1);
       }
-      Query::such_that_clauses.emplace_back(r, left, right, is_synonym_left, is_synonym_right);
       Query::clauses.push_back(GenerateClause(r, left, right, is_synonym_left, is_synonym_right));
     } else {
       Query::SetSemanticallyInvalid();
     }
-  }
-
-  std::vector<RelationshipToken> Query::GetSuchThatClause() {
-    return Query::such_that_clauses;
   }
 
   void Query::AddPattern(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact) {
@@ -365,19 +364,25 @@ namespace pql {
         int left_len = left.length();
         left.erase(left_len - 1, 1);
       }
-      Query::patterns.emplace_back(
-          PatternToken(syn_entity, std::move(synonym), std::move(left), std::move(expression), exact,
-                       is_synonym_left));
+      if (syn_entity == EntityIdentifier::kAssign) {
+        Query::clauses.push_back(std::make_unique<pql_clause::AssignPatternClause>(synonym, left, is_synonym_left, expression, exact));
+      } else if (syn_entity == EntityIdentifier::kWhile) {
+        // add WhilePatternClause
+      } else if (syn_entity == EntityIdentifier::kIf) {
+        // add IfPatternClause
+      }
     }
-  }
-
-  std::vector<pql::PatternToken> Query::GetPattern() {
-    return Query::patterns;
   }
 
   void Query::AddWith(std::optional<AttrRef> left_attr, std::optional<std::string> left_entity, bool is_attr_ref_left,
                std::optional<AttrRef> right_attr, std::optional<std::string> right_entity, bool is_attr_ref_right) {
-    // Add WithClause to clauses
+    Query::clauses.push_back(
+        std::make_unique<pql_clause::WithClause>(
+            &(*left_attr), *left_entity, is_attr_ref_left, &(*right_attr), *right_entity, is_attr_ref_right));
+  }
+
+  std::vector <std::unique_ptr<pql_clause::Clause>> Query::GetClauses() {
+    return Query::clauses;
   }
 
   void Query::SetBoolean(bool b) {
