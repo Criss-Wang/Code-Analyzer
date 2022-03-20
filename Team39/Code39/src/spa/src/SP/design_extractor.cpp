@@ -111,10 +111,10 @@ void PopulateNestedModifiesPOrUsesP(CallsStarTable& calls_star_table, Table<int,
       variables = t.GetValueByKey(proc);
     } catch (InvalidKeyException& e) {
       // This procedure does not modify or use any variables
-    
+
     }
     int initial_variables_size = variables.size();
-    
+
     // Check what other procedures are called
     vector<int> called_procedures;
     try {
@@ -123,6 +123,7 @@ void PopulateNestedModifiesPOrUsesP(CallsStarTable& calls_star_table, Table<int,
       // That means this procedure does not call any other procedures
       continue;
     }
+
     for (const int called_proc : called_procedures) {
       // Merge the vectors with new values
     vector<int> new_variables;
