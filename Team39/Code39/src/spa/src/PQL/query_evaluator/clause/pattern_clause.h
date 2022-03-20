@@ -4,11 +4,11 @@ namespace pql_clause {
   class PatternClause : public Clause {
    public:
     std::string pattern_synonym_name_;
-    pql::Ref left_;
+    std::string left_;
     bool is_synonymy_left_;
 
     public:
-      PatternClause(std::string& pattern_synonym_name, pql::Ref left, bool is_synonym_left) :
+      PatternClause(std::string& pattern_synonym_name, std::string left, bool is_synonym_left) :
         Clause{} {
         pattern_synonym_name_ = pattern_synonym_name;
         left_ = left;
@@ -40,7 +40,7 @@ namespace pql_clause {
     bool is_exact_;
 
     public:
-      AssignPatternClause(std::string& pattern_synonym, pql::Ref left, bool is_synonym_left, std::string& expr, bool is_exact) :
+      AssignPatternClause(std::string& pattern_synonym, std::string left, bool is_synonym_left, std::string& expr, bool is_exact) :
           PatternClause{ pattern_synonym, left, is_synonym_left } {
         expression_ = expr;
         is_exact_ = is_exact;

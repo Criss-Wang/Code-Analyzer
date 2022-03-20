@@ -208,6 +208,30 @@ TEST_CASE("Populating Calls Table") {
   }
 }
 
+TEST_CASE("Populating ModifiesProcToVariables and ModifiesVariableToProcs Table") {
+  // ModifiesVariableToProcs table is populated behind the scenes
+  Pkb pkb = Pkb();
+  bool success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p1", vector<string>{"a", "b", "c"});
+  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p2", vector<string>{"c", "y", "z"}) && success;
+
+  SECTION("Add item into table: string -> vector<string>") {
+    REQUIRE(success);
+  }
+
+  SECTION("Add invalid item into table") {
+    success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, 1, 2);
+    REQUIRE(!success);
+
+    string str;
+    success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, 2, str);
+    REQUIRE(!success);
+
+    vector<string> empty_vector = {};
+    success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p4", empty_vector);
+    REQUIRE(!success);
+  }
+}
+
 TEST_CASE("Populating StmtToPatterns Table") {
   // PatternToStmtsTable is populated behind the scenes
   Pkb pkb = Pkb();
