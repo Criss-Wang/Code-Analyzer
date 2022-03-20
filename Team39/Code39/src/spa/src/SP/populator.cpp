@@ -121,6 +121,7 @@ pair<string, vector<string>> populateAssignStmt(vector<Token> tokens, Pkb& pkb, 
 vector<string> populateIfStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   vector<string> vars_in_cond_expr;
   vector<int> constants_in_cond_expr;
+  string cond_expr_pattern = "";
 
   // Add stmt num to stmt_set_ and if_set_
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
@@ -146,6 +147,8 @@ vector<string> populateIfStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
         constants_in_cond_expr.push_back(stoi(token->text_));
       }
     }
+
+    cond_expr_pattern += token->text_;
   }
 
   // Add stmt num and variables in cond expr into If Table
@@ -157,6 +160,9 @@ vector<string> populateIfStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   // Add stmt num and variables in cond expr into Uses Table
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_in_cond_expr);
 
+  // Add stmt num and cond expr into if_pattern_to_stmt Table
+  pkb.AddInfoToTable(TableIdentifier::kIfPattern, stmt_num, cond_expr_pattern);
+
   return vars_in_cond_expr;
 }
 
@@ -164,6 +170,7 @@ vector<string> populateIfStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
 vector<string> populateWhileStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   vector<string> vars_in_cond_expr;
   vector<int> constants_in_cond_expr;
+  string cond_expr_pattern = "";
 
   // Add stmt num to stmt_set_ and while_set_
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num);
@@ -189,6 +196,8 @@ vector<string> populateWhileStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
         constants_in_cond_expr.push_back(stoi(token->text_));
       }
     }
+
+    cond_expr_pattern += token->text_;
   }
 
   // Add stmt num and variables in cond expr into While Table
@@ -199,6 +208,9 @@ vector<string> populateWhileStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
 
   // Add stmt num and variables in cond expr into Uses Table
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_in_cond_expr);
+
+  // Add stmt num and cond expr into while_pattern_to_stmt Table
+  pkb.AddInfoToTable(TableIdentifier::kWhilePattern, stmt_num, cond_expr_pattern);
 
   return vars_in_cond_expr;
 }
@@ -224,6 +236,10 @@ stack<int> populateFollowsRelationship(stack<int> previous, Pkb& pkb, int stmt_n
     } else {
       // Add previous stmt num and current stmt num to FollowsTable
       pkb.AddInfoToTable(TableIdentifier::kFollows, previous.top(), stmt_num);
+
+      // Add previous stmt num and current stmt num to NextTable
+      pkb.AddInfoToTable(TableIdentifier::kNext, previous.top(), stmt_num);
+
       previous.pop();
     }
   }
@@ -239,6 +255,19 @@ stack<vector<int>> populateParentRelationship(stack<int> parent, stack<vector<in
 
   return children;
 }
+
+stack<int> populateNextRelationshipForIf(stack<int> last_stmt_nums_in_if, Pkb& pkb, int stmt_num) {
+  if (!last_stmt_nums_in_if.empty() && last_stmt_nums_in_if.size() % 2 == 0) {
+    // Add the last stmt num in then/else container and current stmt num to Next Table
+    pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), stmt_num);
+    last_stmt_nums_in_if.pop();
+
+    pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), stmt_num);
+    last_stmt_nums_in_if.pop();
+  }
+  return last_stmt_nums_in_if;
+}
+
 
 vector<string> AppendToVector(vector<string> v, vector<string> vars) {
   for (auto var : vars) {
@@ -276,6 +305,10 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   // Store "if"/"while" to determine which end token to add to cfg_tokens list
   stack<string> end_tokens;
 
+  // Stores relevant stmt num for Next relationship
+  stack<int> while_stmt_num;
+  stack<int> last_stmt_nums_in_if;
+
   for (auto token = begin(input_tokens); token != end(input_tokens); ++token) {
     if (token->type_ == TokenType::RIGHT_CURLY) {
 
@@ -291,6 +324,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       if (is_else_stmt) {
         previous.push(previous_stmt_num + 1);
         cfg_tokens.push_back(CFGToken(CFGTokenType::kThenEnd, 0));
+
+        last_stmt_nums_in_if.push(stmt_num - 1);
       } else {
         if (!parent.empty()) {
           // Add parent stmt num and current stmt num to ParentTable
@@ -304,8 +339,14 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
         if (!end_tokens.empty()) {
           if (end_tokens.top() == "if") {
             cfg_tokens.push_back(CFGToken(CFGTokenType::kElseEnd, 0));
+            last_stmt_nums_in_if.push(stmt_num - 1);
+
           } else if (end_tokens.top() == "while") {
             cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileEnd, 0));
+
+            // Add the last stmt num in container and stmt num of while to Next Table
+            pkb.AddInfoToTable(TableIdentifier::kNext, stmt_num - 1, while_stmt_num.top());
+            while_stmt_num.pop();
           }
           end_tokens.pop();
         }
@@ -325,6 +366,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       children = populateParentRelationship(parent, children, stmt_num);
       previous = populateFollowsRelationship(previous, pkb, stmt_num);
+      last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
 
       end_stmt_num += 1;
 
@@ -378,6 +420,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       children = populateParentRelationship(parent, children, stmt_num);
       previous = populateFollowsRelationship(previous, pkb, stmt_num);
+      last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
 
       end_stmt_num += 1;
 
@@ -398,6 +441,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       
       children = populateParentRelationship(parent, children, stmt_num);
       previous = populateFollowsRelationship(previous, pkb, stmt_num);
+      last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
 
       end_stmt_num += 1;
 
@@ -421,11 +465,15 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       parent.push(stmt_num);
       children.push({});
       previous.push(stmt_num + 1);
+      last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
 
       end_stmt_num += 1;
 
       cfg_tokens.push_back(CFGToken(CFGTokenType::kIf, stmt_num));
       end_tokens.push("if");
+
+      // Add the stmt num of if and next stmt num to Next Table
+      pkb.AddInfoToTable(TableIdentifier::kNext, stmt_num, stmt_num + 1);
 
       stmt_num += 1;
 
@@ -445,11 +493,16 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       parent.push(stmt_num);
       children.push({});
       previous.push(stmt_num + 1);
+      last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
 
       end_stmt_num += 1;
 
       cfg_tokens.push_back(CFGToken(CFGTokenType::kWhile, stmt_num));
       end_tokens.push("while");
+
+      while_stmt_num.push(stmt_num);
+      // Add the stmt num of while and next stmt num to Next Table
+      pkb.AddInfoToTable(TableIdentifier::kNext, stmt_num, stmt_num + 1);
 
       stmt_num += 1;
 
@@ -465,6 +518,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
       children = populateParentRelationship(parent, children, stmt_num);
       previous = populateFollowsRelationship(previous, pkb, stmt_num);
+      last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
 
       if (find(begin(called_procedures), end(called_procedures), called_proc) == end(called_procedures)) {
         called_procedures.push_back(called_proc);

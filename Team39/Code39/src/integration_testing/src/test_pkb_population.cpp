@@ -46,6 +46,7 @@ TEST_CASE("Read/print statements for Population") {
     ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 1);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
+
   }
 
   SECTION("1_test2") {
