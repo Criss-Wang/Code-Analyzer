@@ -57,10 +57,12 @@ namespace pql {
       } else if (keyword == "pattern" && select_clause_parsed) {
         ps.EatWhiteSpaces();
         Parser::ParsePattern();
+        ps.EatWhiteSpaces();
         current_clause = IS_PATTERN;
       } else if (keyword == "with" && select_clause_parsed) {
         ps.EatWhiteSpaces();
         Parser::ParseWith();
+        ps.EatWhiteSpaces();
         current_clause = IS_WITH;
       } else if (keyword == "and" && select_clause_parsed) {
         if (current_clause == IS_SUCH_THAT) {
@@ -70,9 +72,11 @@ namespace pql {
         } else if (current_clause == IS_PATTERN) {
           ps.EatWhiteSpaces();
           Parser::ParsePattern();
+          ps.EatWhiteSpaces();
         } else if (current_clause == IS_WITH) {
           ps.EatWhiteSpaces();
           Parser::ParseWith();
+          ps.EatWhiteSpaces();
         } else {
           throw ParseException();
         }
