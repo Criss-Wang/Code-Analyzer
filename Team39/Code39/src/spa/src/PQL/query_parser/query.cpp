@@ -392,4 +392,8 @@ namespace pql {
   bool Query::GetBoolean() {
     return Query::is_boolean;
   }
+
+  bool Query::IsSemanticallyValid() {
+    return Query::is_semantically_valid;
+  }
 }

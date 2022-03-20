@@ -25,6 +25,10 @@ namespace pql {
 
   std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
     try {
+      if (!query.IsSemanticallyValid()) {
+        throw pql_exceptions::SemanticallyInvalidException();
+      }
+
       bool is_return_boolean = query.GetBoolean();
       std::vector<shared_ptr<pql_clause::Clause>> clauses = query.GetClauses();
       std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();

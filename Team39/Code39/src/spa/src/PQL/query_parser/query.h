@@ -80,5 +80,7 @@ namespace pql {
       void SetBoolean(bool b);
 
       bool GetBoolean();
+
+      bool IsSemanticallyValid();
     };
 }
