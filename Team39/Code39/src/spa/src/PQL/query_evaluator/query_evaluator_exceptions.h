@@ -37,7 +37,35 @@ namespace pql_exceptions {
   class EmptyTableException final : public EmptyResultException {
     public:
       const char* what() const throw() {
-          return "Intermediate table is empty";
+        return "Intermediate table is empty";
+      }
+  };
+
+  class ProcedureDoesNotExistException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+        return "The procedure entity given does not appear in the program";
+      }
+  };
+
+  class VariableDoesNotExistException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+        return "The variable entity given does not appear in the program";
+      }
+  };
+
+  class UnequalWithClauseException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+        return "Both side of with clause is unequal";
+      }
+  };
+
+  class SemanticallyInvalidException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+          return "The query is semantically invalid";
       }
   };
 }

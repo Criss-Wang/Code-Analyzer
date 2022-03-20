@@ -8,6 +8,14 @@ bool PatternHelper::IsExprSpec(const char c) {
   return c != ' ';
 }
 
+bool IsNumber(const string& s) {
+  for (char const& ch : s) {
+    if (isdigit(ch) == 0)
+      return false;
+  }
+  return true;
+}
+
 int PatternHelper::GetPriority(const char c) {
   if (c == '-' || c == '+')
     return 1;
@@ -22,6 +30,27 @@ string PatternHelper::PreprocessPattern(const string& pattern) {
     if (IsExprSpec(c)) {
       res += c;
     }
+  }
+  return res;
+}
+
+unordered_set<string> PatternHelper::GetContainerPatterns(const string& input) {
+  unordered_set<string> res = {};
+  string curr;
+  for (auto& c: input) {
+    if (isalnum(c)) {
+      curr += c;
+    } else if (!curr.empty() && !IsNumber(curr)){
+      res.insert(curr);
+      curr = "";
+    } else if (!curr.empty() && IsNumber(curr)) {
+      curr = "";
+    } else {
+      continue;
+    }
+  }
+  if (!curr.empty() && !IsNumber(curr)) {
+    res.insert(curr);
   }
   return res;
 }

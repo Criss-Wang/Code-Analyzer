@@ -23,8 +23,7 @@ string populateProcedure(vector<Token> tokens, Pkb& pkb) {
 }
 
 // Returns variable being read
-string populateReadStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+string populateReadStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   string read_var = tokens.at(kSecondIndex).text_;
 
   // Add stmt num to stmt_set_ and read_set_
@@ -44,8 +43,7 @@ string populateReadStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 // Returns variable being printed
-string populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+string populatePrintStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   string print_var = tokens.at(kSecondIndex).text_;
 
   // Add stmt num to stmt_set_ and print_set_
@@ -65,8 +63,7 @@ string populatePrintStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 // Returns a pair - first contains variable modified and second contains variables used
-pair<string, vector<string>> populateAssignStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+pair<string, vector<string>> populateAssignStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   string lhs_var = tokens.at(kFirstIndex).text_;
   vector<string> rhs_vars;
   vector<int> rhs_constants;
@@ -88,14 +85,14 @@ pair<string, vector<string>> populateAssignStmt(vector<Token> tokens, Pkb& pkb) 
   for (auto token = begin(expr); token != end(expr); ++token) {
     assignment_pattern += token->text_;
 
-    if (token->type_ == LETTER || token->type_ == NAME) {
+    if (token->type_ == TokenType::LETTER || token->type_ == TokenType::NAME) {
       // Add RHS variable to variable_set_
       pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text_);
       if (find(begin(rhs_vars), end(rhs_vars), token->text_) == end(rhs_vars)) {
         rhs_vars.push_back(token->text_);
       }
 
-    } else if (token->type_ == DIGIT || token->type_ == INTEGER) {
+    } else if (token->type_ == TokenType::DIGIT || token->type_ == TokenType::INTEGER) {
       // Add RHS constant to constant_set_
       pkb.AddEntityToSet(EntityIdentifier::kConstant, stoi(token->text_));
       if (find(begin(rhs_constants), end(rhs_constants), stoi(token->text_)) == end(rhs_constants)) {
@@ -106,7 +103,7 @@ pair<string, vector<string>> populateAssignStmt(vector<Token> tokens, Pkb& pkb) 
 
   // Add stmt num and assignment pattern to Assign Table
   pkb.AddInfoToTable(TableIdentifier::kAssign, stmt_num, assignment_pattern);
-  pkb.AddInfoToTable(TableIdentifier::kPattern, stmt_num, assignment_pattern);
+  pkb.AddInfoToTable(TableIdentifier::kAssignPattern, stmt_num, assignment_pattern);
 
   // Add stmt num and rhs constants to Constant Table
   pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, rhs_constants);
@@ -121,8 +118,7 @@ pair<string, vector<string>> populateAssignStmt(vector<Token> tokens, Pkb& pkb) 
 }
 
 // Returns a vector of variables used
-vector<string> populateIfStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+vector<string> populateIfStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   vector<string> vars_in_cond_expr;
   vector<int> constants_in_cond_expr;
 
@@ -136,14 +132,14 @@ vector<string> populateIfStmt(vector<Token> tokens, Pkb& pkb) {
   vector<Token> cond_expr(cond_expr_start, cond_expr_end);
 
   for (auto token = begin(cond_expr); token != end(cond_expr); ++token) {
-    if (token->type_ == LETTER || token->type_ == NAME) {
+    if (token->type_ == TokenType::LETTER || token->type_ == TokenType::NAME) {
       // Add variable to variable_set_
       pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text_);
       if (find(begin(vars_in_cond_expr), end(vars_in_cond_expr), token->text_) == end(vars_in_cond_expr)) {
         vars_in_cond_expr.push_back(token->text_);
       }
 
-    } else if (token->type_ == DIGIT || token->type_ == INTEGER) {
+    } else if (token->type_ == TokenType::DIGIT || token->type_ == TokenType::INTEGER) {
       // Add constant to constant_set_
       pkb.AddEntityToSet(EntityIdentifier::kConstant, stoi(token->text_));
       if (find(begin(constants_in_cond_expr), end(constants_in_cond_expr), stoi(token->text_)) == end(constants_in_cond_expr)) {
@@ -165,8 +161,7 @@ vector<string> populateIfStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 // Returns a vector of variables used
-vector<string> populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+vector<string> populateWhileStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   vector<string> vars_in_cond_expr;
   vector<int> constants_in_cond_expr;
 
@@ -180,14 +175,14 @@ vector<string> populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
   vector<Token> cond_expr(cond_expr_start, cond_expr_end);
 
   for (auto token = begin(cond_expr); token != end(cond_expr); ++token) {
-    if (token->type_ == LETTER || token->type_ == NAME) {
+    if (token->type_ == TokenType::LETTER || token->type_ == TokenType::NAME) {
       // Add variable to variable_set_
       pkb.AddEntityToSet(EntityIdentifier::kVariable, token->text_);
       if (find(begin(vars_in_cond_expr), end(vars_in_cond_expr), token->text_) == end(vars_in_cond_expr)) {
         vars_in_cond_expr.push_back(token->text_);
       }
 
-    } else if (token->type_ == DIGIT || token->type_ == INTEGER) {
+    } else if (token->type_ == TokenType::DIGIT || token->type_ == TokenType::INTEGER) {
       // Add constant to constant_set_
       pkb.AddEntityToSet(EntityIdentifier::kConstant, stoi(token->text_));
       if (find(begin(constants_in_cond_expr), end(constants_in_cond_expr), stoi(token->text_)) == end(constants_in_cond_expr)) {
@@ -209,8 +204,7 @@ vector<string> populateWhileStmt(vector<Token> tokens, Pkb& pkb) {
 }
 
 // Returns the name of procedure called
-string populateCallStmt(vector<Token> tokens, Pkb& pkb) {
-  int stmt_num = tokens.at(kFirstIndex).stmt_num_;
+string populateCallStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   string called_proc = tokens.at(kSecondIndex).text_;
 
   // Add stmt num to stmt_set_ and call_set_
@@ -257,6 +251,8 @@ vector<string> AppendToVector(vector<string> v, vector<string> vars) {
 
 void populate(vector<Token> input_tokens, Pkb& pkb) {
 
+  int stmt_num = 1;
+
   // Stores parent/previous stmt's line number for Parent/Follows relationship
   stack<int> parent;
   stack<vector<int>> children;
@@ -281,7 +277,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   stack<string> end_tokens;
 
   for (auto token = begin(input_tokens); token != end(input_tokens); ++token) {
-    if (token->type_ == RIGHT_CURLY) {
+    if (token->type_ == TokenType::RIGHT_CURLY) {
 
       int previous_stmt_num = 0;
       if (!previous.empty()) {
@@ -290,7 +286,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       }
 
       bool has_two_more_tokens = token != end(input_tokens) - 1 && token != end(input_tokens) - 2;
-      bool is_else_stmt = has_two_more_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == LEFT_CURLY;
+      bool is_else_stmt = has_two_more_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == TokenType::LEFT_CURLY;
 
       if (is_else_stmt) {
         previous.push(previous_stmt_num + 1);
@@ -317,26 +313,28 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
     } else if (next(token, 1)->text_ == "=") {
       vector<Token> tokens;
-      while (token->type_ != SEMICOLON) {
+      while (token->type_ != TokenType::SEMICOLON) {
         tokens.push_back(*token);
         token++;
       }
       tokens.push_back(*token);
-      pair<string, vector<string>> variables = populateAssignStmt(tokens, pkb);
+      pair<string, vector<string>> variables = populateAssignStmt(tokens, pkb, stmt_num);
 
       modifies_p = AppendToVector(modifies_p, { variables.first });
       uses_p = AppendToVector(uses_p, { variables.second });
 
-      children = populateParentRelationship(parent, children, token->stmt_num_);
-      previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
+      children = populateParentRelationship(parent, children, stmt_num);
+      previous = populateFollowsRelationship(previous, pkb, stmt_num);
 
       end_stmt_num += 1;
 
-      cfg_tokens.push_back(CFGToken(CFGTokenType::kAssign, token->stmt_num_));
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kAssign, stmt_num));
+
+      stmt_num += 1;
 
     } else if (token->text_ == "procedure") {
       vector<Token> tokens;
-      while (token->type_ != LEFT_CURLY) {
+      while (token->type_ != TokenType::LEFT_CURLY) {
         tokens.push_back(*token);
         token++;
       }
@@ -369,103 +367,113 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
     } else if (token->text_ == "read") {
       vector<Token> tokens;
-      while (token->type_ != SEMICOLON) {
+      while (token->type_ != TokenType::SEMICOLON) {
         tokens.push_back(*token);
         token++;
       }
       tokens.push_back(*token);
 
-      string read_var = populateReadStmt(tokens, pkb);
+      string read_var = populateReadStmt(tokens, pkb, stmt_num);
       modifies_p = AppendToVector(modifies_p, { read_var });
 
-      children = populateParentRelationship(parent, children, token->stmt_num_);
-      previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
+      children = populateParentRelationship(parent, children, stmt_num);
+      previous = populateFollowsRelationship(previous, pkb, stmt_num);
 
       end_stmt_num += 1;
 
-      cfg_tokens.push_back(CFGToken(CFGTokenType::kRead, token->stmt_num_));
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kRead, stmt_num));
+
+      stmt_num += 1;
 
     } else if (token->text_ == "print") {
       vector<Token> tokens;
-      while (token->type_ != SEMICOLON) {
+      while (token->type_ != TokenType::SEMICOLON) {
         tokens.push_back(*token);
         token++;
       }
       tokens.push_back(*token);
 
-      string print_var = populatePrintStmt(tokens, pkb);
+      string print_var = populatePrintStmt(tokens, pkb, stmt_num);
       uses_p = AppendToVector(uses_p, { print_var });
       
-      children = populateParentRelationship(parent, children, token->stmt_num_);
-      previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
+      children = populateParentRelationship(parent, children, stmt_num);
+      previous = populateFollowsRelationship(previous, pkb, stmt_num);
 
       end_stmt_num += 1;
 
-      cfg_tokens.push_back(CFGToken(CFGTokenType::kPrint, token->stmt_num_));
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kPrint, stmt_num));
+
+      stmt_num += 1;
 
     } else if (token->text_ == "if") {
       vector<Token> tokens;
-      while (token->type_ != LEFT_CURLY) {
+      while (token->type_ != TokenType::LEFT_CURLY) {
         tokens.push_back(*token);
         token++;
       }
       tokens.push_back(*token);
 
-      vector<string> used_vars = populateIfStmt(tokens, pkb);
+      vector<string> used_vars = populateIfStmt(tokens, pkb, stmt_num);
       uses_p = AppendToVector(uses_p, used_vars);
 
-      children = populateParentRelationship(parent, children, token->stmt_num_);
-      previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
-      parent.push(token->stmt_num_);
+      children = populateParentRelationship(parent, children, stmt_num);
+      previous = populateFollowsRelationship(previous, pkb, stmt_num);
+      parent.push(stmt_num);
       children.push({});
-      previous.push(token->stmt_num_ + 1);
+      previous.push(stmt_num + 1);
 
       end_stmt_num += 1;
 
-      cfg_tokens.push_back(CFGToken(CFGTokenType::kIf, token->stmt_num_));
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kIf, stmt_num));
       end_tokens.push("if");
+
+      stmt_num += 1;
 
     } else if (token->text_ == "while") {
       vector<Token> tokens;
-      while (token->type_ != LEFT_CURLY) {
+      while (token->type_ != TokenType::LEFT_CURLY) {
         tokens.push_back(*token);
         token++;
       }
       tokens.push_back(*token);
       
-      vector<string> used_vars = populateWhileStmt(tokens, pkb);
+      vector<string> used_vars = populateWhileStmt(tokens, pkb, stmt_num);
       uses_p = AppendToVector(uses_p, used_vars);
 
-      children = populateParentRelationship(parent, children, token->stmt_num_);
-      previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
-      parent.push(token->stmt_num_);
+      children = populateParentRelationship(parent, children, stmt_num);
+      previous = populateFollowsRelationship(previous, pkb, stmt_num);
+      parent.push(stmt_num);
       children.push({});
-      previous.push(token->stmt_num_ + 1);
+      previous.push(stmt_num + 1);
 
       end_stmt_num += 1;
 
-      cfg_tokens.push_back(CFGToken(CFGTokenType::kWhile, token->stmt_num_));
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kWhile, stmt_num));
       end_tokens.push("while");
+
+      stmt_num += 1;
 
     } else if (token->text_ == "call") {
       vector<Token> tokens;
-      while (token->type_ != SEMICOLON) {
+      while (token->type_ != TokenType::SEMICOLON) {
         tokens.push_back(*token);
         token++;
       }
       tokens.push_back(*token);
 
-      string called_proc = populateCallStmt(tokens, pkb);
+      string called_proc = populateCallStmt(tokens, pkb, stmt_num);
 
-      children = populateParentRelationship(parent, children, token->stmt_num_);
-      previous = populateFollowsRelationship(previous, pkb, token->stmt_num_);
+      children = populateParentRelationship(parent, children, stmt_num);
+      previous = populateFollowsRelationship(previous, pkb, stmt_num);
 
       if (find(begin(called_procedures), end(called_procedures), called_proc) == end(called_procedures)) {
         called_procedures.push_back(called_proc);
       }
       end_stmt_num += 1;
       
-      cfg_tokens.push_back(CFGToken(CFGTokenType::kCall, token->stmt_num_));
+      cfg_tokens.push_back(CFGToken(CFGTokenType::kCall, stmt_num));
+
+      stmt_num += 1;
 
     }
   }
@@ -481,9 +489,11 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   
   // Generate CFG for last procedure
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-  CFG::GenerateCfg(cfg_tokens);
+  //CFG::GenerateCfg(cfg_tokens);
 
-  if (PopulateNestedRelationships(pkb) == 0) {
+  try {
+    PopulateNestedRelationships(pkb);
+  } catch (exception& e) {
     throw invalid_argument("PKB Population failed");
   }
 }

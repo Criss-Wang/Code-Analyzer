@@ -30,11 +30,14 @@ class Pkb {
     CallerTable* caller_table_ = new CallerTable();
     IfTable *if_table_ = new IfTable();
     WhileTable *while_table_ = new WhileTable();
-    ProcRangeTable *proc_range_table_ = new ProcRangeTable();
-    VarIndexTable* var_index_table_ = new VarIndexTable();
-    IndexVarTable* index_var_table_ = new IndexVarTable();
-    ProcIndexTable* proc_index_table_ = new ProcIndexTable();
-    IndexProcTable* index_proc_table_ = new IndexProcTable();
+    // Procedure name mapping to a pair of integers - the start and end numbers for that procedure
+    Table<string, pair<int, int>>*proc_range_table_ = new Table<string, pair<int, int>>();
+
+    // Index tables
+    EntityToIndexTable* var_index_table_ = new EntityToIndexTable();
+    IndexToEntityTable* index_var_table_ = new IndexToEntityTable();
+    EntityToIndexTable* proc_index_table_ = new EntityToIndexTable();
+    IndexToEntityTable* index_proc_table_ = new IndexToEntityTable();
 
     // Relation tables
     FollowsTable *follows_table_ = new FollowsTable();
@@ -60,11 +63,17 @@ class Pkb {
     ModifiesVariableToStmtsTable *modifies_variable_to_stmts_table_ = new ModifiesVariableToStmtsTable();
     ModifiesProcToVariablesTable *modifies_proc_to_variables_table_ = new ModifiesProcToVariablesTable();
     ModifiesVariableToProcsTable *modifies_variable_to_procs_table_ = new ModifiesVariableToProcsTable();
-    StmtToPatternsTable *stmt_to_patterns_table_ = new StmtToPatternsTable();
-    PatternToStmtsTable *pattern_to_stmts_table_ = new PatternToStmtsTable();
-    ExactPatternToStmtTable* exact_pattern_to_stmt_table_ = new ExactPatternToStmtTable();
 
-    // Stores the line numbers into a set
+    // Pattern tables
+    Table<int, unordered_set<string>> *assign_stmt_to_patterns_table_ = new Table<int, unordered_set<string>>();
+    Table<string, unordered_set<int>> *assign_pattern_to_stmts_table_ = new Table<string, unordered_set<int>>();
+    Table<string, unordered_set<int>> *exact_pattern_to_stmt_table_ = new Table<string, unordered_set<int>>();
+    Table<string, unordered_set<int>>* if_pattern_to_stmt_table_ = new Table<string, unordered_set<int>>();
+    Table<int, unordered_set<string>>* if_stmt_to_pattern_table_ = new Table<int, unordered_set<string>>();
+    Table<string, unordered_set<int>>* while_pattern_to_stmt_table_ = new Table<string, unordered_set<int>>();
+    Table<int, unordered_set<string>>* while_stmt_to_pattern_table_ = new Table<int, unordered_set<string>>();
+
+    // Entity sets - statement numbers
     unordered_set<int> stmt_set_;
     unordered_set<int> assign_set_;
     unordered_set<int> read_set_;
@@ -73,13 +82,14 @@ class Pkb {
     unordered_set<int> if_set_;
     unordered_set<int> while_set_;
     unordered_set<int> constant_set_;
-    // Stores the variable or procedure name into the set
+
+    // Entity sets - names and lists
     unordered_set<int> variable_set_;
     unordered_set<int> procedure_set_;
     unordered_set<set<int>, HashFunction> stmt_list_set_;
 
     // Insert all possible expression patterns for a statement
-    bool AddPattern(int line_num, const string& input);
+    bool AddPattern(int line_num, const string& input, TableIdentifier table_identifier);
     bool AddParent(int key, const vector<int>& value);
     bool AddFollows(int key, int value);
     bool AddCalls(const string& key, const vector<string>& value);
@@ -88,7 +98,7 @@ class Pkb {
     bool AddModifiesP(const string& key, const vector<string>& value);
     bool AddUses(int key, const vector<string>& value);
     bool AddUsesP(const string& key, const vector<string>& value);
-    bool AddPattern(bool& add_success, unordered_set<string> pattern_set, Table<string, unordered_set<int>>* table_to_update, int line_num);
+    bool AddPatternToTable(bool& add_success, unordered_set<string> pattern_set, Table<string, unordered_set<int>>* table_to_update, int line_num);
     bool UpdateIndexTable(Table<int, string>* index_to_string_table, Table<string, int>* string_to_int_table, const string& entity_value);
 
   public:
@@ -129,6 +139,7 @@ class Pkb {
     UsesVariableToStmtsTable* GetUsesVariableToStmtsTable();
     UsesProcToVariablesTable* GetUsesProcToVariablesTable();
     UsesVariableToProcsTable* GetUsesVariableToProcsTable();
+    CallerTable* GetCallerTable();
 
     // Relationship utility APIs for PQL
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
@@ -185,6 +196,9 @@ class Pkb {
 
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
     [[nodiscard]] unordered_set<int> GetStmtsWithExactPattern(const string& pattern) const;
+    [[nodiscard]] unordered_set<string> GetAllPatternVariablesInStmt(const int stmt_no, TableIdentifier table_identifier) const;
+    [[nodiscard]] unordered_set<int> GetAllStmtsWithPatternVariable(const string& pattern_var_string, TableIdentifier table_identifier) const;
+    [[nodiscard]] vector<pair<int, string>> GetContainerStmtVarPair(TableIdentifier table_identifier) const;
 
     // Get all the items of a certain entity type
     unordered_set<int> GetAllEntity(const EntityIdentifier entity_identifier);
