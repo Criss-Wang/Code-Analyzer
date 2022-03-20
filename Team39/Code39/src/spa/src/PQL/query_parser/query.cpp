@@ -326,11 +326,14 @@ namespace pql {
     Query::attr_refs.push_back(attr_ref);
   }
 
-  void Query::AddAttrRef(Synonym s, AttrIdentifier attr) {
+  bool Query::IsAttrValidForSyn(Synonym& s, AttrIdentifier attr) {
     EntityIdentifier entity_id = s.GetDeclaration();
     std::unordered_set<AttrIdentifier> expected_attrs = validAttrMap.at(entity_id);
-    bool isAttrExpected = expected_attrs.find(attr) != expected_attrs.end();
-    if (isAttrExpected) {
+    return expected_attrs.find(attr) != expected_attrs.end();
+  }
+
+  void Query::AddAttrRef(Synonym s, AttrIdentifier attr) {
+    if (IsAttrValidForSyn(s, attr)) {
       AttrRef attr_ref = AttrRef(s, attr);
       Query::attr_refs.push_back(attr_ref);
     } else {
@@ -380,11 +383,11 @@ namespace pql {
     }
   }
 
-  void Query::AddWith(std::optional<AttrRef> left_attr, std::optional<std::string> left_entity, bool is_attr_ref_left,
-               std::optional<AttrRef> right_attr, std::optional<std::string> right_entity, bool is_attr_ref_right) {
+  void Query::AddWith(std::shared_ptr<AttrRef> left_attr, std::string left_entity, bool is_attr_ref_left,
+               std::shared_ptr<AttrRef> right_attr, std::string right_entity, bool is_attr_ref_right) {
     Query::clauses.push_back(
-        std::make_shared<pql_clause::WithClause>(
-            &(*left_attr), *left_entity, is_attr_ref_left, &(*right_attr), *right_entity, is_attr_ref_right));
+      std::make_shared<pql_clause::WithClause>(
+          left_attr, left_entity, is_attr_ref_left, right_attr, right_entity, is_attr_ref_right));
   }
 
   std::vector <std::shared_ptr<pql_clause::Clause>> Query::GetClauses() {

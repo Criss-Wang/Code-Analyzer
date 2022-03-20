@@ -296,8 +296,8 @@ namespace pql {
 
   void Parser::ParseWith() {
     std::string left = ps.ParseRef(Parser::query);
-    std::optional<AttrRef> left_attr = std::nullopt;
-    std::optional<std::string> left_entity = std::nullopt;
+    std::shared_ptr<AttrRef> left_attr_ref = nullptr;
+    std::string left_entity = "";
     bool is_attr_ref_left = false;
     bool is_ident_left = false;
     bool is_int_left = false;
@@ -308,7 +308,12 @@ namespace pql {
         throw ParseException();
       }
       Synonym left_synonym = Parser::query.GetSynonymByName(left);
-      left_attr = AttrRef(left_synonym, GetAttributeByString(attr));
+      AttrIdentifier left_attribute = GetAttributeByString(attr);
+      if (!Parser::query.IsAttrValidForSyn(left_synonym, left_attribute)) {
+        Parser::query.SetSemanticallyInvalid();
+      }
+
+      left_attr_ref = std::make_shared<AttrRef>(left_synonym, left_attribute);
       is_attr_ref_left = true;
     } else if (IsIdent(left)){
       left.erase(0, 1);
@@ -326,8 +331,8 @@ namespace pql {
     ps.ExpectChar('=');
     ps.EatWhiteSpaces();
     std::string right = ps.ParseRef(Parser::query);
-    std::optional<AttrRef> right_attr = std::nullopt;
-    std::optional<std::string> right_entity = std::nullopt;
+    std::shared_ptr<AttrRef> right_attr_ref = nullptr;
+    std::string right_entity = "";
     bool is_attr_ref_right = false;
     if (Parser::query.SynonymDeclared(right)) {
       ps.ExpectChar('.');
@@ -336,7 +341,13 @@ namespace pql {
         throw ParseException();
       }
       Synonym right_synonym = Parser::query.GetSynonymByName(right);
-      right_attr = AttrRef(right_synonym, GetAttributeByString(attr));
+      //need to check if the attribute is valid for the synonym
+      AttrIdentifier right_attribute = GetAttributeByString(attr);
+      if (!Parser::query.IsAttrValidForSyn(right_synonym, right_attribute)) {
+        Parser::query.SetSemanticallyInvalid();
+      }
+
+      right_attr_ref = std::make_shared<AttrRef>(right_synonym, right_attribute);
       is_attr_ref_right = true;
     } else if (IsIdent(right)) {
       if (is_int_left) {
@@ -354,7 +365,7 @@ namespace pql {
     } else {
       throw ParseException();
     }
-    Parser::query.AddWith(left_attr, left_entity, is_attr_ref_left, right_attr, right_entity, is_attr_ref_right);
+    Parser::query.AddWith(left_attr_ref, left_entity, is_attr_ref_left, right_attr_ref, right_entity, is_attr_ref_right);
   }
 
 }
