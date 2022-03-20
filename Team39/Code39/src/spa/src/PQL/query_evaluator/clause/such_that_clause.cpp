@@ -261,7 +261,7 @@ namespace pql_clause {
   void SuchThatClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     int left_type = GetArgumentType(left_, is_synonym_left_);
-    int right_type = GetArgumentType(right_, is_synonym_left_);
+    int right_type = GetArgumentType(right_, is_synonym_right_);
     EvaluateFn fn = EvaluateFnMap.at(left_type).at(right_type);
     (this->*fn)(pkb, domain, predicates);
   }
