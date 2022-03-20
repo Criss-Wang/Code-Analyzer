@@ -1,4 +1,7 @@
 #include "query.h"
+#include "../query_evaluator/clause/such_that_clause.h"
+#include "../query_evaluator/clause/with_clause.h"
+#include "../query_evaluator/clause/pattern_clause.h"
 
 #include <algorithm>
 #include <map>
@@ -22,6 +25,9 @@ namespace pql {
   bool IsInteger(const std::string& s) {
     std::stringstream ssm;
     ssm << s;
+    if (s.length() > 1 && ssm.get() == '0') {
+      return false;
+    }
     if (!pql::IsDigit(ssm.get())) {
         return false;
     }
@@ -159,16 +165,52 @@ namespace pql {
     {EntityIdentifier::kAssign,   valid_attr_stmt},
     {EntityIdentifier::kStmt,     valid_attr_stmt}
   };
+
+  AttrIdentifier GetAttributeByString(const std::string& attr) {
+    return attributeMap.at(attr);
+  }
+
+  std::unique_ptr<pql_clause::Clause> GenerateClause(RelationshipTypes relationship,
+                                                     std::string &left, std::string &right, bool is_synonym_left, bool is_synonym_right) {
+    switch (relationship) {
+      case RelationshipTypes::kFollows:
+        return std::make_unique<pql_clause::FollowsClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kFollowsT:
+        return std::make_unique<pql_clause::FollowsTClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kParent:
+        return std::make_unique<pql_clause::ParentClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kParentT:
+        return std::make_unique<pql_clause::ParentTClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kUsesS:
+        return std::make_unique<pql_clause::UsesSClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kModifiesS:
+        return std::make_unique<pql_clause::ModifiesSClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kUsesP:
+        return std::make_unique<pql_clause::UsesPClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kModifiesP:
+        return std::make_unique<pql_clause::ModifiesPClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kCalls:
+        return std::make_unique<pql_clause::CallsClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kCallsT:
+        return std::make_unique<pql_clause::CallsTClause>(left, is_synonym_left, right, is_synonym_right);
+      default:
+        throw pql_exceptions::EmptyDomainException();
+    }
+  }
   
   void Query::SetSemanticallyInvalid() {
     Query::is_semantically_valid = false;
   }
 
-  bool Query::IsValid(RelationshipTypes r, const pql::Ref& left, const pql::Ref& right) {
+  bool Query::IsValid(RelationshipTypes r, const std::string& left, const std::string& right) {
     std::unordered_set<EntityIdentifier> left_domains = pql::left_synonym_domains.at(r);
     std::unordered_set<EntityIdentifier> right_domains = pql::right_synonym_domains.at(r);
     if (Query::SynonymDeclared(left)) {
       if (left_domains.find(Query::synonyms.at(left).GetDeclaration()) == left_domains.end()) {
+        return false;
+      }
+      if ((r == RelationshipTypes::kModifiesS && Query::synonyms.at(left).GetDeclaration() == EntityIdentifier::kPrint) ||
+          (r == RelationshipTypes::kUsesS && Query::synonyms.at(left).GetDeclaration() == EntityIdentifier::kRead)) {
         return false;
       }
     } else {
@@ -202,6 +244,10 @@ namespace pql {
   bool Query::SynonymDeclared(const std::string &name) {
     return synonyms.find(name) != synonyms.end();
   }
+
+  Synonym Query::GetSynonymByName(const std::string &name) {
+    return synonyms.at(name);
+  }
   
   bool Query::IsAttrStringValid(const std::string& attribute) {
     return attributeMap.find(attribute) != attributeMap.end();
@@ -209,6 +255,14 @@ namespace pql {
 
   bool Query::IsAssignSynonym(const std::string &name) {
     return Query::SynonymDeclared(name) && synonyms.at(name).GetDeclaration() == EntityIdentifier::kAssign;
+  }
+
+  bool Query::IsWhileSynonym(const std::string &name) {
+    return Query::SynonymDeclared(name) && synonyms.at(name).GetDeclaration() == EntityIdentifier::kWhile;
+  }
+
+  bool Query::IsIfSynonym(const std::string &name) {
+    return Query::SynonymDeclared(name) && synonyms.at(name).GetDeclaration() == EntityIdentifier::kIf;
   }
 
   void Query::AddSynonym(EntityIdentifier d, const std::string &name) {
@@ -255,6 +309,10 @@ namespace pql {
     }
     Query::used_synonyms.push_back(Query::synonyms.at(name));
   }
+
+  std::vector<pql::Synonym> Query::GetAllUsedSynonyms() {
+    return Query::used_synonyms;
+  }
   
   void Query::AddAttrRef(Synonym s) {
     AttrIdentifier attr = defaultAttrMap.at(s.GetDeclaration()); 
@@ -270,7 +328,7 @@ namespace pql {
       AttrRef attr_ref = AttrRef(s, attr);
       Query::attr_refs.push_back(attr_ref);
     } else {
-      throw SemanticallyInvalidException();
+      Query::SetSemanticallyInvalid();
     }
   }
 
@@ -278,11 +336,7 @@ namespace pql {
     return Query::attr_refs;
   }
 
-  std::vector<pql::Synonym> Query::GetAllUsedSynonyms() {
-    return Query::used_synonyms;
-  }
-
-  void Query::AddSuchThatClause(RelationshipTypes r, pql::Ref &left, pql::Ref &right, bool is_synonym_left, bool is_synonym_right) {
+  void Query::AddSuchThatClause(RelationshipTypes r, std::string &left, std::string &right, bool is_synonym_left, bool is_synonym_right) {
     if (Query::IsValid(r, left, right)) {
       if (!is_synonym_left && IsIdent(left)) {
         left.erase(0, 1);
@@ -294,22 +348,41 @@ namespace pql {
         int right_len = right.length();
         right.erase(right_len - 1, 1);
       }
-      Query::such_that_clauses.emplace_back(r, left, right, is_synonym_left, is_synonym_right);
+      Query::clauses.push_back(GenerateClause(r, left, right, is_synonym_left, is_synonym_right));
     } else {
-      throw SemanticallyInvalidException();
+      Query::SetSemanticallyInvalid();
     }
   }
 
-  std::vector<RelationshipToken> Query::GetSuchThatClause() {
-    return Query::such_that_clauses;
+  void Query::AddPattern(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact) {
+    bool is_synonym_left = Query::SynonymDeclared(left);
+    if (is_synonym_left && Query::synonyms.at(left).GetDeclaration() != EntityIdentifier::kVariable) {
+      Query::SetSemanticallyInvalid();
+    } else {
+      if (IsIdent(left)) {
+        left.erase(0, 1);
+        int left_len = left.length();
+        left.erase(left_len - 1, 1);
+      }
+      if (syn_entity == EntityIdentifier::kAssign) {
+        Query::clauses.push_back(std::make_unique<pql_clause::AssignPatternClause>(synonym, left, is_synonym_left, expression, exact));
+      } else if (syn_entity == EntityIdentifier::kWhile) {
+        // add WhilePatternClause
+      } else if (syn_entity == EntityIdentifier::kIf) {
+        // add IfPatternClause
+      }
+    }
   }
 
-  void Query::AddPattern(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left) {
-    Query::patterns.emplace_back(PatternToken(std::move(assign_synonym), std::move(left), std::move(expression), exact, is_synonym_left));
+  void Query::AddWith(std::optional<AttrRef> left_attr, std::optional<std::string> left_entity, bool is_attr_ref_left,
+               std::optional<AttrRef> right_attr, std::optional<std::string> right_entity, bool is_attr_ref_right) {
+    Query::clauses.push_back(
+        std::make_unique<pql_clause::WithClause>(
+            &(*left_attr), *left_entity, is_attr_ref_left, &(*right_attr), *right_entity, is_attr_ref_right));
   }
 
-  std::vector<pql::PatternToken> Query::GetPattern() {
-    return Query::patterns;
+  std::vector <std::unique_ptr<pql_clause::Clause>> Query::GetClauses() {
+    return Query::clauses;
   }
 
   void Query::SetBoolean(bool b) {

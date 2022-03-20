@@ -24,7 +24,7 @@ namespace pql {
     return synonyms;
   }
 
-  void Parser::ParseQuery() {
+  void Parser::Parse() {
     bool select_clause_parsed = false;
     bool declarations_parsed = false;
     int current_clause = NO_CURRENT_CLAUSE;
@@ -57,6 +57,10 @@ namespace pql {
         ps.EatWhiteSpaces();
         Parser::ParsePattern();
         current_clause = IS_PATTERN;
+      } else if (keyword == "with" && select_clause_parsed) {
+        ps.EatWhiteSpaces();
+        Parser::ParseWith();
+        current_clause = IS_WITH;
       } else if (keyword == "and" && select_clause_parsed) {
         if (current_clause == IS_SUCH_THAT) {
           ps.EatWhiteSpaces();
@@ -65,6 +69,9 @@ namespace pql {
         } else if (current_clause == IS_PATTERN) {
           ps.EatWhiteSpaces();
           Parser::ParsePattern();
+        } else if (current_clause == IS_WITH) {
+          ps.EatWhiteSpaces();
+          Parser::ParseWith();
         } else {
           throw ParseException();
         }
@@ -75,10 +82,6 @@ namespace pql {
     if (!select_clause_parsed) {
       throw ParseException();
     }
-  }
-
-  void Parser::Parse() {
-    Parser::ParseQuery();
   }
 
   pql::Query Parser::GetQuery() {
@@ -140,14 +143,14 @@ namespace pql {
     ssm >> relationship;
     ps.EatWhiteSpaces();
     ps.Expect("(");
-    pql::Ref left = ps.ParseRef(Parser::query);
+    std::string left = ps.ParseRef(Parser::query);
     ps.EatWhiteSpaces();
     ps.Expect(",");
-    pql::Ref right = ps.ParseRef(Parser::query);
+    std::string right = ps.ParseRef(Parser::query);
     ps.Expect(")");
     if (relationship == "Uses" || relationship == "Modifies") {
       if (left == "_") {
-        throw SemanticallyInvalidException();
+        Parser::query.SetSemanticallyInvalid();
       }
       if (Parser::query.IsProcedure(left) || IsIdent(left)) {
         relationship.push_back('P');
@@ -163,44 +166,141 @@ namespace pql {
   }
 
   void Parser::ParsePattern() {
-    std::string assign_synonym = ps.ParseName();
+    std::string synonym = ps.ParseName();
+    if (Parser::query.IsAssignSynonym(synonym)) {
+      Parser::ParseAssignPattern(synonym);
+    } else if (Parser::query.IsWhileSynonym(synonym)) {
+      Parser::ParseWhilePattern(synonym);
+    } else if (Parser::query.IsIfSynonym(synonym)) {
+      Parser::ParseIfPattern(synonym);
+    } else {
+      Parser::query.SetSemanticallyInvalid();
+    }
+  }
+
+  void Parser::ParseAssignPattern(const std::string& synonym) {
     std::string expression;
     bool exact = true;
-    if (Parser::query.IsAssignSynonym(assign_synonym)) {
-      Parser::query.AddUsedSynonym(assign_synonym);
-      ps.EatWhiteSpaces();
-      ps.Expect("(");
-      pql::Ref left = ps.ParseRef(Parser::query);
-      ps.EatWhiteSpaces();
-      ps.Expect(",");
-      ps.EatWhiteSpaces();
-      if (ps.Peek() == '_') {
-        exact = false;
-        ps.Consume();
-      }
-      ps.EatWhiteSpaces();
-      if (!exact && ps.Peek() == ')') {
-        expression = "_";
-      } else if (!exact) {
-        expression = ps.ParseExpression();
-        ps.Expect("\"");
-        ps.Expect("_");
-      } else {
-        expression = ps.ParseExpression();
-        ps.Expect("\"");
-      }
-      ps.EatWhiteSpaces();
-      ps.Expect(")");
-      bool is_synonym_left = Parser::query.SynonymDeclared(left);
-      if (!is_synonym_left && IsIdent(left)) {
-        left.erase(0, 1);
-        int left_len = left.length();
-        left.erase(left_len - 1, 1);
-      }
-      Parser::query.AddPattern(assign_synonym, left, expression, exact, is_synonym_left);
-    } else {
-      throw SemanticallyInvalidException();
+    Parser::query.AddUsedSynonym(synonym);
+    ps.EatWhiteSpaces();
+    ps.Expect("(");
+    std::string left = ps.ParseRef(Parser::query);
+    ps.EatWhiteSpaces();
+    ps.Expect(",");
+    ps.EatWhiteSpaces();
+    if (ps.Peek() == '_') {
+      exact = false;
+      ps.Consume();
     }
+    ps.EatWhiteSpaces();
+    if (!exact && ps.Peek() == ')') {
+      expression = "_";
+    } else if (!exact) {
+      expression = ps.ParseExpression();
+      ps.Expect("\"");
+      ps.Expect("_");
+    } else {
+      expression = ps.ParseExpression();
+      ps.Expect("\"");
+    }
+    ps.EatWhiteSpaces();
+    ps.Expect(")");
+    Parser::query.AddPattern(EntityIdentifier::kAssign, synonym, left, expression, exact);
+  }
+
+  void Parser::ParseWhilePattern(const std::string &synonym) {
+    Parser::query.AddUsedSynonym(synonym);
+    ps.EatWhiteSpaces();
+    ps.Expect("(");
+    std::string left = ps.ParseRef(Parser::query);
+    ps.EatWhiteSpaces();
+    ps.Expect(",");
+    ps.EatWhiteSpaces();
+    ps.Expect("_"),
+    ps.EatWhiteSpaces();
+    ps.Expect(")");
+    Parser::query.AddPattern(EntityIdentifier::kWhile, synonym, left, "", false);
+  }
+
+  void Parser::ParseIfPattern(const std::string &synonym) {
+    Parser::query.AddUsedSynonym(synonym);
+    ps.EatWhiteSpaces();
+    ps.Expect("(");
+    std::string left = ps.ParseRef(Parser::query);
+    ps.EatWhiteSpaces();
+    ps.Expect(",");
+    ps.EatWhiteSpaces();
+    ps.Expect("_"),
+    ps.EatWhiteSpaces();
+    ps.Expect(",");
+    ps.EatWhiteSpaces();
+    ps.Expect("_"),
+    ps.EatWhiteSpaces();
+    ps.Expect(")");
+    Parser::query.AddPattern(EntityIdentifier::kIf, synonym, left, "", false);
+  }
+
+  void Parser::ParseWith() {
+    std::string left = ps.ParseRef(Parser::query);
+    std::optional<AttrRef> left_attr = std::nullopt;
+    std::optional<std::string> left_entity = std::nullopt;
+    bool is_attr_ref_left = false;
+    bool is_ident_left = false;
+    bool is_int_left = false;
+    if (Parser::query.SynonymDeclared(left)) {
+      ps.ExpectChar('.');
+      std::string attr = ps.ParseAttribute();
+      if (!Parser::query.IsAttrStringValid(attr)) {
+        throw ParseException();
+      }
+      Synonym left_synonym = Parser::query.GetSynonymByName(left);
+      left_attr = AttrRef(left_synonym, GetAttributeByString(attr));
+      is_attr_ref_left = true;
+    } else if (IsIdent(left)){
+      left.erase(0, 1);
+      int left_len = left.length();
+      left.erase(left_len - 1, 1);
+      left_entity = left;
+      is_ident_left = true;
+    } else if (IsInteger(left)) {
+      left_entity = left;
+      is_int_left = true;
+    } else {
+      throw ParseException();
+    }
+    ps.EatWhiteSpaces();
+    ps.ExpectChar('=');
+    ps.EatWhiteSpaces();
+    std::string right = ps.ParseRef(Parser::query);
+    std::optional<AttrRef> right_attr = std::nullopt;
+    std::optional<std::string> right_entity = std::nullopt;
+    bool is_attr_ref_right = false;
+    if (Parser::query.SynonymDeclared(right)) {
+      ps.ExpectChar('.');
+      std::string attr = ps.ParseAttribute();
+      if (!Parser::query.IsAttrStringValid(attr)) {
+        throw ParseException();
+      }
+      Synonym right_synonym = Parser::query.GetSynonymByName(right);
+      right_attr = AttrRef(right_synonym, GetAttributeByString(attr));
+      is_attr_ref_right = true;
+    } else if (IsIdent(right)) {
+      if (is_int_left) {
+        Parser::query.SetSemanticallyInvalid();
+      }
+      right.erase(0, 1);
+      int right_len = right.length();
+      right.erase(right_len - 1, 1);
+      right_entity = right;
+    } else if (IsInteger(right)) {
+      if (is_ident_left) {
+        Parser::query.SetSemanticallyInvalid();
+      }
+      right_entity = right;
+    } else {
+      throw ParseException();
+    }
+    Parser::query.AddWith(left_attr, left_entity, is_attr_ref_left, right_attr, right_entity, is_attr_ref_right);
   }
 
 }

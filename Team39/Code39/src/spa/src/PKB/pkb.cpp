@@ -83,6 +83,10 @@ UsesVariableToProcsTable* Pkb::GetUsesVariableToProcsTable() {
   return uses_variable_to_procs_table_;
 }
 
+CallerTable* Pkb::GetCallerTable() {
+  return caller_table_;
+}
+
 // Following are for search handlers
 bool Pkb::IsCalls(const int proc_1_idx, const int proc_2_idx) const {
   try {

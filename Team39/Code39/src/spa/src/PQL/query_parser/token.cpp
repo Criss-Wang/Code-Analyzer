@@ -17,52 +17,56 @@ namespace pql {
   }
 
   Synonym AttrRef::GetSynonym() {
-    return synonym_;
+    return s;
   }
 
-  AttrIdentifier AttrRef::GetAttrIdentifier() {
-    return attribute_;
+  AttrIdentifier AttrRef::GetAttrIndentifier() {
+    return attribute;
   }
 
-  pql::Ref RelationshipToken::GetLeft() {
-    return RelationshipToken::left;
-  }
-
-  pql::Ref RelationshipToken::GetRight() {
-    return RelationshipToken::right;
-  }
-
-  bool RelationshipToken::IsSynonymLeft() const {
-    return RelationshipToken::is_synonym_left;
-  }
-
-  bool RelationshipToken::IsSynonymRight() const {
-    return RelationshipToken::is_synonym_right;
-  }
-
-  pql::RelationshipTypes RelationshipToken::GetRelationship() {
-    return RelationshipToken::relationship;
-  }
-
-  std::string PatternToken::GetAssignSynonym() {
-    return PatternToken::assign_synonym;
-  }
-
-  pql::Ref PatternToken::GetLeft() {
-    return PatternToken::left;
-  }
-
-  std::string PatternToken::GetExpression() {
-    return PatternToken::expression;
-  }
-
-  bool PatternToken::IsSynonymLeft() const {
-    return PatternToken::is_synonym_left;
-  }
-
-  bool PatternToken::IsExact() const {
-    return PatternToken::exact;
-  }
+//  std::string RelationshipToken::GetLeft() {
+//    return RelationshipToken::left;
+//  }
+//
+//  std::string RelationshipToken::GetRight() {
+//    return RelationshipToken::right;
+//  }
+//
+//  bool RelationshipToken::IsSynonymLeft() const {
+//    return RelationshipToken::is_synonym_left;
+//  }
+//
+//  bool RelationshipToken::IsSynonymRight() const {
+//    return RelationshipToken::is_synonym_right;
+//  }
+//
+//  pql::RelationshipTypes RelationshipToken::GetRelationship() {
+//    return RelationshipToken::relationship;
+//  }
+//
+//  std::string PatternToken::GetLeft() {
+//    return PatternToken::left;
+//  }
+//
+//  std::string PatternToken::GetSynonym() {
+//    return PatternToken::synonym;
+//  }
+//
+//  EntityIdentifier PatternToken::GetSynEntity() {
+//    return PatternToken::syn_entity;
+//  }
+//
+//  std::string PatternToken::GetExpression() {
+//    return PatternToken::expression;
+//  }
+//
+//  bool PatternToken::IsSynonymLeft() const {
+//    return PatternToken::is_synonym_left;
+//  }
+//
+//  bool PatternToken::IsExact() const {
+//    return PatternToken::exact;
+//  }
 
   std::optional<EntityIdentifier> GetDeclarationType(const std::string &keyword) {
     if (declarationMap.find(keyword) != declarationMap.end()) {
@@ -79,5 +83,4 @@ namespace pql {
       return std::nullopt;
     }
   }
-
 }
