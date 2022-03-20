@@ -1,7 +1,7 @@
 1 - Select all assign statements
 assign a;
 Select a
-1, 2, 3, 4
+1, 2, 3, 4, 5
 5000
 2 - Select assign statements with x on LHS
 assign a;
@@ -23,14 +23,14 @@ assign a; variable v;
 Select a pattern a(v, _"x"_) pattern a(v, _"y"_)
 1
 5000
-6 - Select assign statements with v on LHS
+6 - Select assign statements with any variable on LHS
 assign a; variable v;
 Select a pattern a(v, _)
-1, 2, 3, 4
+1, 2, 3, 4, 5
 5000
-7 - Select assign statements which modifies v more than once
-assign a, a1; variable v;
-Select a pattern a(v, _) pattern a1(v, _)
+7 - Select assign statements which modifies q
+assign a;
+Select a pattern a("q", _)
 4, 5
 5000
 8 - Select assign statements with q on LHS and f on RHS
@@ -40,7 +40,7 @@ Select a pattern a("q", _" f"_)
 5000
 9 - Select assign statements with 1 on LHS
 assign a;
-Select a pattern a(_, "1   ")
+Select a pattern a(_, "(1)   ")
 5
 5000
 10 - Select assign statements with w / t on LHS
@@ -48,9 +48,9 @@ assign a;
 Select a pattern a(_, _"w /t "_)
 3, 4
 5000
-11 - Select assign statements with f + w / t on LHS
+11 - Select assign statements with (f + w) / t on LHS
 assign a;
-Select a pattern a(_, _"f + w /t "_)
+Select a pattern a(_, _"(f + w) /t "_)
 
 5000
 12 - Select assign statements with 100 * 9 + a * d / r on LHS
@@ -66,7 +66,7 @@ Select a pattern a(_, _"g + 10 + a"_)
 14 - Select assign statements with g + (10 + a) on LHS
 assign a;
 Select a pattern a(_, _"g + (10 + a)"_)
-2
+
 5000
 15 - Select assign statements with (a * f) - 0 on LHS
 assign a;
@@ -88,9 +88,9 @@ assign a;
 Select a pattern a(_, _"a * (f + (w / t)) - x"_)
 3 
 5000
-19 - Select assign statements with a + assign * g on LHS
+19 - Select assign statements with x on both LHS and RHS
 assign a;
-Select a pattern a(_, _"a + assign * g"_)
+Select a pattern a("x", _"x"_)
 1
 5000
 20 - Select assign statements with f + a on LHS
