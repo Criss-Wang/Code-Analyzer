@@ -16,7 +16,7 @@ p2, p3, p6
 4 - Select procedures that indirectly calls p1
 procedure p, q;
 Select p such that Calls(p, q) and Calls*(q, "p1")
-p4
+p3, p4, p6
 5000
 5 - Select procedures that directly or indirectly calls p1
 procedure p;
@@ -26,7 +26,7 @@ p2, p3, p4, p6
 6 - Select procedures that directly or indirectly calls p2
 procedure p;
 Select p such that Calls*(p, "p2")
-p3, p4
+p3, p4, p6
 5000
 7 - Select all procedures that are calling another procedure
 procedure p, q;
@@ -51,7 +51,7 @@ Select p such that Call(p, "p1")
 11 - BOOLEAN as a procedure synomyn
 procedure BOOLEAN;
 Select BOOLEAN such that Calls(BOOLEAN, "p2")
-p3
+p3, p6
 5000
 
 

@@ -47,7 +47,9 @@ namespace pql {
     std::stringstream ssm;
     ssm << s;
     while (ssm.peek() != END_OF_FILE) {
-      if (ss.get() != ssm.get()) {
+      char ss_char = (char) ss.get();
+      char ssm_char = (char)ssm.get();
+      if (ss_char != ssm_char) {
         throw ParseException();
       }
     }

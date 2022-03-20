@@ -211,6 +211,8 @@ namespace pql {
         ps.ParseExpression();
         ps.Expect("\"");
         ps.EatWhiteSpaces();
+        ps.Expect("_");
+        ps.EatWhiteSpaces();
         ps.Expect(")");
       } else if (ps.Peek() == ')') {
         ps.Consume();
@@ -329,7 +331,13 @@ namespace pql {
       left_entity = left;
       is_int_left = true;
     } else {
-      throw ParseException();
+      //If it reaches here means that this is an undeclared synonym with attribute
+      Parser::query.SetSemanticallyInvalid();
+      ps.Expect(".");
+      std::string attr = ps.ParseAttribute();
+      if (!Parser::query.IsAttrStringValid(attr)) {
+          throw ParseException();
+      }
     }
     ps.EatWhiteSpaces();
     ps.ExpectChar('=');
@@ -367,7 +375,12 @@ namespace pql {
       }
       right_entity = right;
     } else {
-      throw ParseException();
+      Parser::query.SetSemanticallyInvalid();
+      ps.Expect(".");
+      std::string attr = ps.ParseAttribute();
+      if (!Parser::query.IsAttrStringValid(attr)) {
+        throw ParseException();
+      }
     }
     Parser::query.AddWith(left_attr_ref, left_entity, is_attr_ref_left, right_attr_ref, right_entity, is_attr_ref_right);
   }

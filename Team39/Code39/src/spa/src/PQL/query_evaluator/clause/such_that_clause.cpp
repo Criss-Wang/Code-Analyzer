@@ -133,13 +133,15 @@ namespace pql_clause {
   }
 
   const std::set<pql::RelationshipTypes> LeftProcedureTypeSet { pql::kCalls, pql::kCallsT, pql::kModifiesP, pql::kUsesP };
+  const std::set<pql::RelationshipTypes> RightProcedureTypeSet{ pql::kCalls, pql::kCallsT };
   const std::set<pql::RelationshipTypes> RightVariableTypeSet{ pql::kModifiesS, pql::kModifiesP, pql::kUsesS, pql::kUsesP };
 
   int GetIntArgumentRepresentation(Pkb& pkb, pql::RelationshipTypes type, std::string& name, bool is_left) {
     //variable argument : ModifiesS/ModifiesP/UsesS/UsesP right argument
     //procedure argument : Calls/CallsT both argument and ModifiesP/UsesP left argument
 
-    if (is_left && LeftProcedureTypeSet.find(type) != LeftProcedureTypeSet.end()) {
+    if ((is_left && LeftProcedureTypeSet.find(type) != LeftProcedureTypeSet.end())
+        || (!is_left && RightProcedureTypeSet.find(type) != RightProcedureTypeSet.end())) {
       int proc_index = pkb.GetIndexByProc(name);
 
       if (proc_index == INVALID_INDEX) {
