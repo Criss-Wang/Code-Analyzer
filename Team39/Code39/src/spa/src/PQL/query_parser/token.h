@@ -11,8 +11,6 @@
 #include "Utility/attr.h"
 
 namespace pql {
-  typedef std::string Ref;
-
   class Synonym {
     private:
       std::string name;
@@ -46,13 +44,6 @@ namespace pql {
       }
   };
 
-  struct SemanticallyInvalidException : public std::exception {
-  public:
-    [[nodiscard]] const char * what() const noexcept override {
-      return "The query is semantically invalid!";
-    }
-  };
-
   enum RelationshipTypes {
     kFollows,
     kFollowsT,
@@ -63,7 +54,11 @@ namespace pql {
     kModifiesS,
     kModifiesP,
     kCalls,
-    kCallsT
+    kCallsT,
+    kAssignPattern,
+    kIfPattern,
+    kWhilePattern,
+    kWith
   };
 
   const std::map<std::string, EntityIdentifier> declarationMap {
@@ -96,48 +91,51 @@ namespace pql {
 
   std::optional<RelationshipTypes> GetRelationshipType(const std::string &relationship);
 
-  class RelationshipToken {
-    private:
-      enum RelationshipTypes relationship;
-      const pql::Ref left;
-      const pql::Ref right;
-      bool is_synonym_left;
-      bool is_synonym_right;
-    public:
-      RelationshipToken(pql::RelationshipTypes relationship, pql::Ref left, pql::Ref right, bool is_synonym_left, bool is_synonym_right) :
-      relationship(relationship), left(std::move(left)), right(std::move(right)), is_synonym_left(is_synonym_left), is_synonym_right(is_synonym_right) {}
-
-      pql::Ref GetLeft();
-
-      pql::Ref GetRight();
-
-      [[nodiscard]] bool IsSynonymLeft() const;
-
-      [[nodiscard]] bool IsSynonymRight() const;
-
-      pql::RelationshipTypes GetRelationship();
-  };
-
-  class PatternToken {
-    private:
-      const std::string assign_synonym;
-      const pql::Ref left;
-      const std::string expression;
-      bool is_synonym_left;
-      bool exact;
-    public:
-      PatternToken(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left) :
-        assign_synonym(std::move(assign_synonym)), left(std::move(left)), expression(std::move(expression)),
-        exact(exact), is_synonym_left(is_synonym_left) {};
-
-      std::string GetAssignSynonym();
-
-      pql::Ref GetLeft();
-
-      std::string GetExpression();
-
-      [[nodiscard]] bool IsSynonymLeft() const;
-
-      [[nodiscard]] bool IsExact() const;
-  };
+//  class RelationshipToken {
+//    private:
+//      enum RelationshipTypes relationship;
+//      const std::string left;
+//      const std::string right;
+//      bool is_synonym_left;
+//      bool is_synonym_right;
+//    public:
+//      RelationshipToken(pql::RelationshipTypes relationship, std::string left, std::string right, bool is_synonym_left, bool is_synonym_right) :
+//      left(std::move(left)), right(std::move(right)), relationship(relationship), is_synonym_left(is_synonym_left), is_synonym_right(is_synonym_right) {}
+//
+//      std::string GetLeft();
+//
+//      std::string GetRight();
+//
+//      [[nodiscard]] bool IsSynonymLeft() const;
+//
+//      [[nodiscard]] bool IsSynonymRight() const;
+//
+//      pql::RelationshipTypes GetRelationship();
+//  };
+//
+//  class PatternToken {
+//    private:
+//      enum EntityIdentifier syn_entity;
+//      const std::string synonym;
+//      const std::string left;
+//      const std::string expression;
+//      bool is_synonym_left;
+//      bool exact;
+//    public:
+//      PatternToken(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact, bool is_synonym_left) :
+//        syn_entity(syn_entity), left(left), synonym(std::move(synonym)), expression(std::move(expression)),
+//        exact(exact), is_synonym_left(is_synonym_left) {};
+//
+//      std::string GetLeft();
+//
+//      std::string GetSynonym();
+//
+//      EntityIdentifier GetSynEntity();
+//
+//      std::string GetExpression();
+//
+//      [[nodiscard]] bool IsSynonymLeft() const;
+//
+//      [[nodiscard]] bool IsExact() const;
+//  };
 }

@@ -129,6 +129,7 @@ class Pkb {
     UsesVariableToStmtsTable* GetUsesVariableToStmtsTable();
     UsesProcToVariablesTable* GetUsesProcToVariablesTable();
     UsesVariableToProcsTable* GetUsesVariableToProcsTable();
+    CallerTable* GetCallerTable();
 
     // Relationship utility APIs for PQL
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
