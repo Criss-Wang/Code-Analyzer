@@ -1,7 +1,7 @@
-#include <algorithm>
-
-#include "PKB/pkb.h"
+#include "../PKB/pkb.h"
 #include "./design_extractor.h"
+
+using namespace std;
 
 // Helper
 template<typename T1, typename T2>
@@ -343,7 +343,7 @@ int PopulateNestedRelationships(Pkb& pkb) {
     PopulateNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *uses_proc_to_variables_table, *uses_stmt_to_variables_table, pkb);
     PopulateReverseNestedModifiesSOrUsesSForCalls(*caller_table, *child_star_table, *uses_proc_to_variables_table, *uses_variable_to_stmts_table, pkb);
   } catch (exception& e) {
-    return 0;
+    throw e;
   }
   return 1;
 }
