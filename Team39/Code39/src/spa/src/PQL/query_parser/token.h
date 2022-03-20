@@ -27,8 +27,8 @@ namespace pql {
   
   class AttrRef {
     private:
-      Synonym s;
-      AttrIdentifier attribute;
+      Synonym synonym_;
+      AttrIdentifier attribute_;
     public:
       AttrRef(Synonym s, AttrIdentifier attribute) : s(std::move(s)), attribute(attribute) {};
 

@@ -12,7 +12,7 @@ namespace pql_solver {
 
   Solver::Solver(std::unordered_map<std::string, std::vector<int>>* domain,
     std::vector<pql_table::Predicate>* preds,
-    std::vector<pql::Synonym>& syn_list, std::vector<pql::Synonym> selected_syns,
+    std::vector<pql::Synonym>& syn_list, std::vector<pql::AttrRef>& selected_syns,
     bool is_return_boolean) {
     
     predicates_ = preds;
@@ -57,8 +57,8 @@ namespace pql_solver {
     for (auto& table : tables_) {
       std::vector<int> return_idxs;
 
-      for (auto& syn : return_syns_) {
-        std::string syn_name = syn.GetName();
+      for (auto& attr_ref : return_syns_) {
+        std::string syn_name = attr_ref.GetSynonym().GetName();
         int cur_idx = table.FindSynCol(syn_name);
         if (cur_idx >= 0) {
           return_idxs.push_back(cur_idx);
