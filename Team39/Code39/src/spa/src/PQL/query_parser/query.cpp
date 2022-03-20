@@ -280,7 +280,7 @@ namespace pql {
       Query::AddUsedSynonym(name);
       Query::AddAttrRef(Query::synonyms.at(name));
     } else {
-      throw ParseException();
+      Query::SetSemanticallyInvalid();
     }
   }
 
@@ -289,8 +289,10 @@ namespace pql {
       Query::AddUsedSynonym(name);
       AttrIdentifier attr = attributeMap.at(attribute);
       Query::AddAttrRef(Query::synonyms.at(name), attr);
-    } else {
+    } else if (!IsAttrStringValid(attribute)) {
       throw ParseException();
+    } else {
+      Query::SetSemanticallyInvalid();
     }
   }
 
