@@ -1,6 +1,7 @@
 #pragma once
 
 #include "token.h"
+#include "../query_evaluator/clause/clause.h"
 
 namespace pql {
   bool IsLetter(char c);
@@ -19,6 +20,8 @@ namespace pql {
 
   bool IsHash(char c);
 
+  AttrIdentifier GetAttributeByString(const std::string& attr);
+
     
   class Query {
     private:
@@ -26,16 +29,17 @@ namespace pql {
       std::map <std::string, pql::Synonym> synonyms;
       std::vector <pql::Synonym> used_synonyms;
       std::vector <pql::AttrRef> attr_refs;
-      std::vector <RelationshipToken> such_that_clauses;
-      std::vector <pql::PatternToken> patterns;
+      std::vector <std::unique_ptr<pql_clause::Clause>> clauses;
       bool is_boolean = false;
       bool is_semantically_valid = true;
     public:
       void SetSemanticallyInvalid();
 
-      bool IsValid(RelationshipTypes relationship, const pql::Ref& left, const pql::Ref& right);
+      bool IsValid(RelationshipTypes relationship, const std::string& left, const std::string& right);
 
       bool SynonymDeclared(const std::string &name);
+
+      Synonym GetSynonymByName(const std::string &name);
 
       bool IsAttrStringValid(const std::string& attribute);
 
@@ -47,9 +51,13 @@ namespace pql {
 
       void AddResultSynonym(const std::string& name, const std::string& attribute);
 
-      std::vector<pql::Synonym> GetResultSynonym();
+      bool IsWhileSynonym(const std::string &name);
+
+      bool IsIfSynonym(const std::string &name);
 
       void AddUsedSynonym(const std::string &name);
+
+      std::vector <pql::Synonym> GetAllUsedSynonyms();
 
       void AddAttrRef(Synonym s);
 
@@ -57,17 +65,16 @@ namespace pql {
 
       std::vector <pql::AttrRef> GetAttrRef();
 
-      std::vector <pql::Synonym> GetAllUsedSynonyms();
-
       bool IsProcedure(const std::string &name);
 
-      void AddSuchThatClause(RelationshipTypes r, pql::Ref &left, pql::Ref &right, bool is_synonym_left, bool is_synonym_right);
+      void AddSuchThatClause(RelationshipTypes r, std::string &left, std::string &right, bool is_synonym_left, bool is_synonym_right);
 
-      std::vector<RelationshipToken> GetSuchThatClause();
+      void AddPattern(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact);
 
-      void AddPattern(std::string assign_synonym, pql::Ref left, std::string expression, bool exact, bool is_synonym_left);
+      void AddWith(std::optional<AttrRef> left_attr, std::optional<std::string> left_entity, bool is_attr_ref_left,
+                   std::optional<AttrRef> right_attr, std::optional<std::string> right_entity, bool is_attr_ref_right);
 
-      std::vector<pql::PatternToken> GetPattern();
+      std::vector <std::unique_ptr<pql_clause::Clause>> GetClauses();
 
       void SetBoolean(bool b);
 
