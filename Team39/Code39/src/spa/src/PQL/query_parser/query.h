@@ -72,8 +72,8 @@ namespace pql {
 
       void AddPattern(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact);
 
-      void AddWith(std::optional<AttrRef> left_attr, std::optional<std::string> left_entity, bool is_attr_ref_left,
-                   std::optional<AttrRef> right_attr, std::optional<std::string> right_entity, bool is_attr_ref_right);
+      void AddWith(std::shared_ptr<AttrRef> left_attr, std::string left_entity, bool is_attr_ref_left,
+                   std::shared_ptr<AttrRef> right_attr, std::string right_entity, bool is_attr_ref_right);
 
       std::vector <std::shared_ptr<pql_clause::Clause>> GetClauses();
 
@@ -82,5 +82,7 @@ namespace pql {
       bool GetBoolean();
 
       bool IsSemanticallyValid();
+
+      bool IsAttrValidForSyn(Synonym& s, AttrIdentifier attr);
     };
 }

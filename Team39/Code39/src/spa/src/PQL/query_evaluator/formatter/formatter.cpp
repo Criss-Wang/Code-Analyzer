@@ -27,15 +27,15 @@ std::vector<std::string> Formatter::FormatRawInput(pql_table::InterTable& table,
         int name_index = table.rows_[index][col_num_in_table];
 
         if (type == EntityIdentifier::kCall) {
-          name_index = pkb_.GetProcFromCall(index);
+          name_index = pkb_.GetProcFromCall(name_index);
         }
 
         if (type == EntityIdentifier::kPrint) {
-          name_index = pkb_.GetVarFromPrint(index);
+          name_index = pkb_.GetVarFromPrint(name_index);
         }
 
         if (type == EntityIdentifier::kRead) {
-          name_index = pkb_.GetVarFromRead(index);
+          name_index = pkb_.GetVarFromRead(name_index);
         }
 
         cur_string = attribute == AttrIdentifier::kProcName 
