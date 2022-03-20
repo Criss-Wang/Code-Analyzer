@@ -483,7 +483,9 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
   CFG::GenerateCfg(cfg_tokens);
 
-  if (PopulateNestedRelationships(pkb) == 0) {
+  try {
+    PopulateNestedRelationships(pkb);
+  } catch (exception& e) {
     throw invalid_argument("PKB Population failed");
   }
 }
