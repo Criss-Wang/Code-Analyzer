@@ -1,7 +1,7 @@
 6 - Valid tuple return using synonym only
 if ifs; assign a; 
 Select <ifs, a> such that Parent(ifs, a)
-2 3, 2 4, 9 11
+2 3, 2 4, 2 14, 9 11
 5000
 7 - Valid tuple return using attributes 
 procedure p; print pn;

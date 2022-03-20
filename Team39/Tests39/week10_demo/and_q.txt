@@ -13,8 +13,8 @@ stmt s;
 Select s such that Uses(s, "while") and such that Uses(s, "z")
  
 5000
-22 - Semantically invalid use of explicit and 
+22 - Semantically invalid use of explicit and
 stmt s;
-Select s and Uses(s, "z")
-
+Select BOOLEAN such that Uses(s, "z") and Modifies(_, "z")
+FALSE
 5000

@@ -15,7 +15,7 @@ Select <a, a1> pattern a ("p", _"cenX"_ ) pattern a1 ("xxxx", _"xy"_)
 5000
 16 - Valid boolean return with multiple such that and assign pattern clauses
 assign a; if ifs1, ifs2; while w;
-Select BOOLEAN such that Parent(ifs1, a) pattern a ("x", _ ) such that Parent(ifs1, ifs2)
+Select BOOLEAN such that Parent(ifs1, a) pattern a ("x", _ ) such that Parent*(ifs1, ifs2)
 TRUE
 5000
 17 - Syntactically invalid use of multi clause
@@ -25,6 +25,6 @@ Select <a, a1> pattern a ("p", _"cenX"_ ) and pattern a1 ("xxxx", _"xy"_)
 5000
 18 - Semantically invalid use of multi clause
 stmt s;
-Select <a, a1> pattern a ("p", _"cenX"_ ) pattern a1 ("xxxx", _"xy"_)
-
+Select BOOLEAN pattern a ("p", _"cenX"_ ) pattern a1 ("xxxx", _"xy"_)
+FALSE
 5000
