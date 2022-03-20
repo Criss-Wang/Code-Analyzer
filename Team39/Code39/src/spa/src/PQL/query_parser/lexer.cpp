@@ -130,9 +130,9 @@ namespace pql {
 
   std::string ParserState::ParseExpression() {
     std::string expression;
-    ParserState::Expect("\"");
     ParserState::EatWhiteSpaces();
     expression = IsValidExpression();
+    ParserState::EatWhiteSpaces();
     return expression;
   }
 

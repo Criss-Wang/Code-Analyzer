@@ -61,4 +61,11 @@ namespace pql_exceptions {
         return "Both side of with clause is unequal";
       }
   };
+
+  class SemanticallyInvalidException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+          return "The query is semantically invalid";
+      }
+  };
 }

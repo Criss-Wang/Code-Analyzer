@@ -15,7 +15,7 @@ procedure
 5000 
 4 - Select LHS variables where RHS has y
 variable v; assign a;
-Select v such that Modifies(a,v) pattern a(v, "y")
+Select v such that Modifies(a,v) pattern a(v, _"y"_)
 xxxx
 5000
 5 - Select print statements

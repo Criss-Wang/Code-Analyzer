@@ -1,0 +1,30 @@
+23 - Valid synonym return with with clause
+stmt s; constant c;
+Select s such that Uses(s, "while") with s.stmt# = c.value
+2, 9
+5000
+24 - Valid tuple return with with clause
+stmt s; constant c;
+Select <s, c> such that Uses(s, "while") with s.stmt# = c.value
+2 2, 9 9
+5000
+25 - Valid boolean return with with clause 
+stmt s; procedure p;
+Select BOOLEAN such that Uses(s, "while") with p.procName = "procedure"
+TRUE
+5000
+26 - Syntactically invalid with clause
+stmt s;
+Select BOOLEAN such that with p.procName = "procedure"
+
+5000
+27 - Semantically invalid with clause 
+stmt s;
+Select BOOLEAN such that Uses(s, "while") with p.procName = s.stmt#
+FALSE
+5000
+28 - Semantically invalid with clause as p is not declared
+stmt s;
+Select BOOLEAN such that Uses(s, "while") with p.procName = "procedure"
+FALSE
+5000
