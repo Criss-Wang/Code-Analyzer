@@ -17,11 +17,11 @@ namespace pql {
   }
 
   Synonym AttrRef::GetSynonym() {
-    return s;
+    return synonym_;
   }
 
-  AttrIdentifier AttrRef::GetAttrIndentifier() {
-    return attribute;
+  AttrIdentifier AttrRef::GetAttrIdentifier() {
+    return attribute_;
   }
 
 //  std::string RelationshipToken::GetLeft() {

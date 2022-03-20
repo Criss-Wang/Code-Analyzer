@@ -481,7 +481,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   
   // Generate CFG for last procedure
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-  CFG::GenerateCfg(cfg_tokens);
+  //CFG::GenerateCfg(cfg_tokens);
 
   try {
     PopulateNestedRelationships(pkb);

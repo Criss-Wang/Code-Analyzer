@@ -1,3 +1,6 @@
+#ifndef CLAUSE_H
+#define CLAUSE_H
+
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -45,10 +48,12 @@ namespace pql_clause {
       pql::RelationshipTypes type_;
 
     public:
-      virtual ~Clause() = default;
+        virtual ~Clause() = default;
 
     public:
       virtual void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates) = 0;
   };
 }
+
+#endif

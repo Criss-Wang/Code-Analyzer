@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 
 #include "token.h"
 #include "../query_evaluator/clause/clause.h"
@@ -29,7 +30,7 @@ namespace pql {
       std::map <std::string, pql::Synonym> synonyms;
       std::vector <pql::Synonym> used_synonyms;
       std::vector <pql::AttrRef> attr_refs;
-      std::vector <std::unique_ptr<pql_clause::Clause>> clauses;
+      std::vector <std::shared_ptr<pql_clause::Clause>> clauses;
       bool is_boolean = false;
       bool is_semantically_valid = true;
     public:
@@ -74,10 +75,12 @@ namespace pql {
       void AddWith(std::optional<AttrRef> left_attr, std::optional<std::string> left_entity, bool is_attr_ref_left,
                    std::optional<AttrRef> right_attr, std::optional<std::string> right_entity, bool is_attr_ref_right);
 
-      std::vector <std::unique_ptr<pql_clause::Clause>> GetClauses();
+      std::vector <std::shared_ptr<pql_clause::Clause>> GetClauses();
 
       void SetBoolean(bool b);
 
       bool GetBoolean();
+
+      bool IsSemanticallyValid();
     };
 }
