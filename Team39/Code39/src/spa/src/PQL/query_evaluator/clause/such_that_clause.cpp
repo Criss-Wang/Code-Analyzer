@@ -228,7 +228,7 @@ namespace pql_clause {
     std::vector<int> domain_with_duplicates = ExtractFirst<int, int>(domain_pair);
     std::vector<int> domain_lst = RemoveDuplicate<int>(domain_with_duplicates);
 
-    UpdateHashmap<int>(domain, right_, domain_lst);
+    UpdateHashmap<int>(domain, left_, domain_lst);
   }
 
   void SuchThatClause::EvaluateSynEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
