@@ -304,6 +304,7 @@ namespace pql_clause {
   void ModifiesSClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     SuchThatClause::Evaluate(pkb, domain, predicates);
+>>>>>>> master
   }
 
   void UsesPClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,

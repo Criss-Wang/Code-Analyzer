@@ -129,7 +129,7 @@ namespace pql {
       std::vector<pql::RelationshipToken> such_that_clauses = query.GetSuchThatClause();
       std::vector<pql::PatternToken> pattern_clauses = query.GetPattern();
       std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
-      std::vector<pql::Synonym> selected_syns = query.GetResultSynonym();
+      std::vector<pql::AttrRef> selected_syns = query.GetAttrRef();
       std::vector<pql_table::Predicate> predicates;
       std::unordered_map<std::string, std::vector<int>> domain;
 
