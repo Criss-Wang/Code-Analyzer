@@ -72,6 +72,8 @@ namespace pql {
 
       void ParsePattern();
 
+      void ParsePatternSyntax();
+
       void ParseAssignPattern(const std::string& synonym);
 
       void ParseWhilePattern(const std::string& synonym);

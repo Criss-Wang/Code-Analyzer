@@ -267,7 +267,7 @@ namespace pql {
 
   void Query::AddSynonym(EntityIdentifier d, const std::string &name) {
     if (Query::SynonymDeclared(name)) {
-      throw ParseException();
+      Query::SetSemanticallyInvalid();
     } else {
       pql::Synonym sm = Synonym(name, d);
       Query::declarations.push_back(sm);
@@ -280,7 +280,7 @@ namespace pql {
       Query::AddUsedSynonym(name);
       Query::AddAttrRef(Query::synonyms.at(name));
     } else {
-      throw ParseException();
+      Query::SetSemanticallyInvalid();
     }
   }
 
@@ -289,8 +289,10 @@ namespace pql {
       Query::AddUsedSynonym(name);
       AttrIdentifier attr = attributeMap.at(attribute);
       Query::AddAttrRef(Query::synonyms.at(name), attr);
-    } else {
+    } else if (!IsAttrStringValid(attribute)) {
       throw ParseException();
+    } else {
+      Query::SetSemanticallyInvalid();
     }
   }
 
@@ -302,9 +304,13 @@ namespace pql {
   }
 
   void Query::AddUsedSynonym(const std::string &name) {
+    if (!Query::SynonymDeclared(name)) {
+      Query::SetSemanticallyInvalid();
+      return;
+    }
     for (pql::Synonym s: Query::used_synonyms) {
       if (s.equal(Query::synonyms.at(name))) {
-        return ;
+        return;
       }
     }
     Query::used_synonyms.push_back(Query::synonyms.at(name));
