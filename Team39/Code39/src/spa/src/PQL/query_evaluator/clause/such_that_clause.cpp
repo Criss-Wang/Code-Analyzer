@@ -47,6 +47,8 @@ namespace pql_clause {
     { pql::kParentT, &Pkb::IsTransitiveParent },
     { pql::kModifiesS, &Pkb::IsModifiesStmt },
     { pql::kUsesS, &Pkb::IsUsesStmt },
+    { pql::kModifiesP, &Pkb::IsProcModifiesVar },
+    { pql::kUsesP, &Pkb::IsProcUsesVar },
     { pql::kCalls, &Pkb::IsCalls },
     { pql::kCallsT, &Pkb::IsTransitiveCalls }
   };
@@ -58,6 +60,8 @@ namespace pql_clause {
     { pql::kParentT, &Pkb::GetAllChildren },
     { pql::kModifiesS, &Pkb::GetModifiesVarByStmt },
     { pql::kUsesS, &Pkb::GetUsesVarByStmt },
+    { pql::kModifiesP, &Pkb::GetModifiesVarsByProc },
+    { pql::kUsesP, &Pkb::GetUsesVarsByProc },
     { pql::kCalls, &Pkb::GetCallees },
     { pql::kCallsT, &Pkb::GetAllCallees }
   };
@@ -69,6 +73,8 @@ namespace pql_clause {
     { pql::kParentT, &Pkb::GetAllParents },
     { pql::kModifiesS, &Pkb::GetModifiesStmtsByVar },
     { pql::kUsesS, &Pkb::GetUsesStmtsByVar },
+    { pql::kModifiesP, &Pkb::GetModifiesProcsByVar },
+    { pql::kUsesP, &Pkb::GetUsesProcsByVar },
     { pql::kCalls, &Pkb::GetCallers },
     { pql::kCallsT, &Pkb::GetAllCallers }
   };
@@ -80,6 +86,8 @@ namespace pql_clause {
     { pql::kParentT, &Pkb::GetAllTransitiveParentPairs },
     { pql::kModifiesS, &Pkb::GetAllModifiesStmtVarPairs },
     { pql::kUsesS, &Pkb::GetAllUsesStmtVarPairs },
+    { pql::kModifiesP, &Pkb::GetAllModifiesProcVarPairs },
+    { pql::kUsesP, &Pkb::GetAllUsesProcVarPairs },
     { pql::kCalls, &Pkb::GetAllCallsPairs },
     { pql::kCallsT, &Pkb::GetAllTransitiveCallsPairs }
   };
@@ -308,11 +316,11 @@ namespace pql_clause {
 
   void UsesPClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    /*SuchThatClause::Evaluate(pkb, domain, predicates);*/
+    SuchThatClause::Evaluate(pkb, domain, predicates);
   }
 
   void ModifiesPClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    /*SuchThatClause::Evaluate(pkb, domain, predicates);*/
+    SuchThatClause::Evaluate(pkb, domain, predicates);
   }
 }
