@@ -15,8 +15,6 @@ namespace pql_clause {
         is_synonymy_left_ = is_synonym_left;
       }
 
-     virtual ~PatternClause() = default;
-
     public:
       virtual void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates) = 0;
