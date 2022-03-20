@@ -31,6 +31,10 @@ class Pkb {
     IfTable *if_table_ = new IfTable();
     WhileTable *while_table_ = new WhileTable();
     ProcRangeTable *proc_range_table_ = new ProcRangeTable();
+    VarIndexTable* var_index_table_ = new VarIndexTable();
+    IndexVarTable* index_var_table_ = new IndexVarTable();
+    ProcIndexTable* proc_index_table_ = new ProcIndexTable();
+    IndexProcTable* index_proc_table_ = new IndexProcTable();
 
     // Relation tables
     FollowsTable *follows_table_ = new FollowsTable();
@@ -50,8 +54,12 @@ class Pkb {
 
     UsesStmtToVariablesTable *uses_stmt_to_variables_table_ = new UsesStmtToVariablesTable();
     UsesVariableToStmtsTable *uses_variable_to_stmts_table_ = new UsesVariableToStmtsTable();
+    UsesProcToVariablesTable *uses_proc_to_variables_table_ = new UsesProcToVariablesTable();
+    UsesVariableToProcsTable *uses_variable_to_procs_table_ = new UsesVariableToProcsTable();
     ModifiesStmtToVariablesTable *modifies_stmt_to_variables_table_ = new ModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable *modifies_variable_to_stmts_table_ = new ModifiesVariableToStmtsTable();
+    ModifiesProcToVariablesTable *modifies_proc_to_variables_table_ = new ModifiesProcToVariablesTable();
+    ModifiesVariableToProcsTable *modifies_variable_to_procs_table_ = new ModifiesVariableToProcsTable();
     StmtToPatternsTable *stmt_to_patterns_table_ = new StmtToPatternsTable();
     PatternToStmtsTable *pattern_to_stmts_table_ = new PatternToStmtsTable();
     ExactPatternToStmtTable* exact_pattern_to_stmt_table_ = new ExactPatternToStmtTable();
@@ -66,8 +74,8 @@ class Pkb {
     unordered_set<int> while_set_;
     unordered_set<int> constant_set_;
     // Stores the variable or procedure name into the set
-    unordered_set<string> variable_set_;
-    unordered_set<string> procedure_set_;
+    unordered_set<int> variable_set_;
+    unordered_set<int> procedure_set_;
     unordered_set<set<int>, HashFunction> stmt_list_set_;
 
     // Insert all possible expression patterns for a statement
@@ -77,8 +85,11 @@ class Pkb {
     bool AddCalls(const string& key, const vector<string>& value);
     bool AddNext(int key, int value);
     bool AddModifies(int key, const vector<string>& value);
+    bool AddModifiesP(const string& key, const vector<string>& value);
     bool AddUses(int key, const vector<string>& value);
+    bool AddUsesP(const string& key, const vector<string>& value);
     bool AddPattern(bool& add_success, unordered_set<string> pattern_set, Table<string, unordered_set<int>>* table_to_update, int line_num);
+    bool UpdateIndexTable(Table<int, string>* index_to_string_table, Table<string, int>* string_to_int_table, const string& entity_value);
 
   public:
     /**
@@ -106,10 +117,19 @@ class Pkb {
     ChildTable* GetChildTable();
     ParentStarTable* GetParentStarTable();
     ChildStarTable* GetChildStarTable();
+    CallsTable* GetCallsTable();
+    CallsStarTable* GetCallsStarTable();
+    CalledByTable* GetCalledByTable();
+    CalledByStarTable* GetCalledByStarTable();
     ModifiesStmtToVariablesTable* GetModifiesStmtToVariablesTable();
     ModifiesVariableToStmtsTable* GetModifiesVariableToStmtsTable();
+    ModifiesProcToVariablesTable* GetModifiesProcToVariablesTable();
+    ModifiesVariableToProcsTable* GetModifiesVariableToProcsTable();
     UsesStmtToVariablesTable* GetUsesStmtToVariablesTable();
     UsesVariableToStmtsTable* GetUsesVariableToStmtsTable();
+    UsesProcToVariablesTable* GetUsesProcToVariablesTable();
+    UsesVariableToProcsTable* GetUsesVariableToProcsTable();
+    CallerTable* GetCallerTable();
 
     // Relationship utility APIs for PQL
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
@@ -122,10 +142,15 @@ class Pkb {
     [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs() const;
 
-    [[nodiscard]] bool IsCalls(const string& proc_1, const string& proc_2) const;
-    [[nodiscard]] vector<string> GetCallers(const string& proc) const;
-    [[nodiscard]] vector<string> GetCallees(const string& proc) const;
-    [[nodiscard]] vector<pair<string, string>> GetAllCallsPairs() const;
+    [[nodiscard]] bool IsCalls(const int proc_1_idx, const int proc_2_idx) const;
+    [[nodiscard]] bool IsCallsExists() const;
+    [[nodiscard]] bool IsTransitiveCalls(const int proc_1_idx, const int proc_2_idx) const;
+    [[nodiscard]] vector<int> GetCallers(const int proc_idx) const;
+    [[nodiscard]] vector<int> GetAllCallers(const int proc_idx) const;
+    [[nodiscard]] vector<int> GetCallees(const int proc_idx) const;
+    [[nodiscard]] vector<int> GetAllCallees(const int proc_idx) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllCallsPairs() const;
+    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveCallsPairs() const;
 
     [[nodiscard]] bool IsFollows(int stmt_1, int stmt_2) const;
     [[nodiscard]] bool IsFollowsExists() const;
@@ -137,25 +162,69 @@ class Pkb {
     [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs() const;
 
-    [[nodiscard]] bool IsUsesStmt(int stmt, const string& var) const;
+    [[nodiscard]] bool IsUsesStmt(int stmt, int var_idx) const;
     [[nodiscard]] bool IsUsesStmtExists() const;
-    [[nodiscard]] vector<int> GetUsesStmtsByVar(const string& var) const;
-    [[nodiscard]] vector<string> GetUsesVarByStmt(int stmt) const;
-    [[nodiscard]] vector<pair<int, string>> GetAllUsesStmtVarPairs() const;
+    [[nodiscard]] vector<int> GetUsesStmtsByVar(int var_idx) const;
+    [[nodiscard]] vector<int> GetUsesVarByStmt(int stmt) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllUsesStmtVarPairs() const;
 
-    [[nodiscard]] bool IsModifiesStmt(int stmt, const string& var) const;
+    [[nodiscard]] bool IsModifiesStmt(int stmt, int var_idx) const;
     [[nodiscard]] bool IsModifiesStmtExists() const;
-    [[nodiscard]] vector<int> GetModifiesStmtsByVar(const string& var) const;
-    [[nodiscard]] vector<string> GetModifiesVarByStmt(int stmt) const;
-    [[nodiscard]] vector<pair<int, string>> GetAllModifiesStmtVarPairs() const;
+    [[nodiscard]] vector<int> GetModifiesStmtsByVar(int var_idx) const;
+    [[nodiscard]] vector<int> GetModifiesVarByStmt(int stmt) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllModifiesStmtVarPairs() const;
+
+    [[nodiscard]] bool IsProcModifiesVar(int proc_idx, int var_idx) const;
+    [[nodiscard]] vector<int> GetModifiesProcsByVar(int var_idx) const;
+    [[nodiscard]] vector<int> GetModifiesVarsByProc(int proc_idx) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllModifiesProcVarPairs() const;
+
+    [[nodiscard]] bool IsProcUsesVar(int proc_idx, int var_idx) const;
+    [[nodiscard]] vector<int> GetUsesProcsByVar(int var_idx) const;
+    [[nodiscard]] vector<int> GetUsesVarsByProc(int proc_idx) const;
+    [[nodiscard]] vector<pair<int, int>> GetAllUsesProcVarPairs() const;
 
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
     [[nodiscard]] unordered_set<int> GetStmtsWithExactPattern(const string& pattern) const;
 
     // Get all the items of a certain entity type
-    unordered_set<int> GetAllEntityInt(const EntityIdentifier entity_identifier);
+    unordered_set<int> GetAllEntity(const EntityIdentifier entity_identifier);
     unordered_set<string> GetAllEntityString(const EntityIdentifier entity_identifier);
     unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier entity_identifier);
 
+    // Get all the index-string relationships
+    [[nodiscard]] vector<pair<int, string>> GetAllIndexVarPairs() const;
+    [[nodiscard]] vector<pair<string, int>> GetAllVarIndexPairs() const;
+    [[nodiscard]] string GetVarByIndex(int idx) const;
+    [[nodiscard]] int GetIndexByVar(const string& var_name) const;
+
+    [[nodiscard]] vector<pair<int, string>> GetAllIndexProcPairs() const;
+    [[nodiscard]] vector<pair<string, int>> GetAllProcIndexPairs() const;
+    [[nodiscard]] string GetProcByIndex(int idx) const;
+    [[nodiscard]] int GetIndexByProc(const string& proc_name) const;
+
     // Get all the attribute
+    [[nodiscard]] bool IsVar(int var_idx) const;
+
+    [[nodiscard]] bool IsRead(int stmt_no) const;
+    [[nodiscard]] int GetVarFromRead(int stmt_no) const;
+    [[nodiscard]] vector<int> GetReadByVar(int var_idx) const;
+
+    [[nodiscard]] bool IsPrint(int stmt_no) const;
+    [[nodiscard]] int GetVarFromPrint(int stmt_no) const;
+    [[nodiscard]] vector<int> GetPrintByVar(int var_idx) const;
+
+    [[nodiscard]] bool IsAssign(int stmt_no) const;
+    [[nodiscard]] int GetVarFromAssign(int stmt_no) const;
+    [[nodiscard]] vector<int> GetAssignByVar(int var_idx) const;
+
+    [[nodiscard]] bool IsCall(int stmt_no) const;
+    [[nodiscard]] int GetProcFromCall(int stmt_no) const;
+    [[nodiscard]] vector<int> GetCallFromProc(int proc_idx) const;
+
+    [[nodiscard]] bool IsIf(int stmt_no) const;
+    [[nodiscard]] bool IsWhile(int stmt_no) const;
+    [[nodiscard]] bool IsProcedure(int proc_idx) const;
+    [[nodiscard]] bool IsStmt(int stmt_no) const;
+    [[nodiscard]] bool IsConstant(int stmt_no) const;
 };

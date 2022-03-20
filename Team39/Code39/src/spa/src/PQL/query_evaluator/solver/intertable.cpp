@@ -6,31 +6,18 @@
 #include <set>
 
 #include "intertable.h"
-#include "query_evaluator_exceptions.h"
+#include "../query_evaluator_exceptions.h"
 
 namespace pql_table {
 
 	InterTable::InterTable(pql::Synonym& synonym, std::vector<int>& int_list) {
 	  header_ = std::vector<std::string>({ synonym.GetName() });
 		for (int val : int_list) {
-			element to_be_insert;
-			to_be_insert.val = val;
-			to_be_insert.name = "";
-			rows_.push_back(std::vector<element>({ to_be_insert }));
+			rows_.push_back(std::vector<int>({ val }));
 		}
 	}
 
-	InterTable::InterTable(pql::Synonym& synonym, std::vector<std::string>& str_list) {
-    header_ = std::vector<std::string>({ synonym.GetName() });
-		for (std::string str : str_list) {
-			element to_be_insert;
-			to_be_insert.val = 0;
-			to_be_insert.name = str;
-			rows_.push_back(std::vector<element>({ to_be_insert }));
-		}
-	}
-
-	InterTable::InterTable(std::vector<std::string>& header, std::vector<std::vector<element>>& rows) {
+	InterTable::InterTable(std::vector<std::string>& header, std::vector<std::vector<int>>& rows) {
 	  header_ = header;
 		rows_ = rows;
 	}
@@ -55,11 +42,11 @@ namespace pql_table {
 
 	InterTable InterTable::GetColsByIndices(std::vector<int>& valid_col_nums) {
 	  std::vector<std::string> new_header;
-		std::vector<std::vector<element>> new_rows;
+		std::vector<std::vector<int>> new_rows;
 
 		//intialize new_rows to have the same size as rows_ with each new_row being an empty vector
 		for (int index = 0; index < rows_.size(); index++) {
-		  new_rows.push_back(std::vector<element>());
+		  new_rows.push_back(std::vector<int>());
 		}
 
 		for (int& col_num : valid_col_nums) {
@@ -73,45 +60,9 @@ namespace pql_table {
 		return InterTable(new_header, new_rows).Deduplicate();
 	}
 
-	std::vector<element> InterTable::GetColByName(std::string& name) {
-	  std::vector<std::string> header({ name });
-		int index = FindSynCol(name);
-		std::vector<std::vector<element>> rows;
-
-		for (auto& row : rows_) {
-		  std::vector<element> row_to_be_insert({ row[index] });
-			rows.push_back(row_to_be_insert);
-		}
-
-		InterTable table(header, rows);
-		table = table.Deduplicate();
-
-		std::vector<element> res;
-
-		for (auto& row : table.rows_) {
-				res.push_back(row[0]);
-		}
-
-		return res;
-	}
-
-	void InterTable::DeleteRow(int row_index) {
-		rows_.erase(rows_.begin() + row_index);
-	}
-
-	void InterTable::DeleteCol(int col_index) {
-		header_.erase(header_.begin() + col_index);
-				
-		std::for_each(rows_.begin(), rows_.end(),
-		  [&](auto& row) {
-			  row.erase(row.begin() + col_index);
-			}
-		);
-	}
-
   InterTable InterTable::Deduplicate() {
-	  std::unordered_set<std::vector<element>, hash_vector_fn> s(rows_.begin(), rows_.end());
-		std::vector<std::vector<element>> new_rows(s.begin(), s.end());
+	  std::unordered_set<std::vector<int>, hash_vector_fn> s(rows_.begin(), rows_.end());
+		std::vector<std::vector<int>> new_rows(s.begin(), s.end());
 		std::vector<std::string> new_header(header_);
 		return InterTable(new_header, new_rows);
 	}
@@ -124,19 +75,19 @@ namespace pql_table {
 		}
 
 		//apply a cross product between current rows and t1 rows
-		std::vector<std::vector<element>> new_rows;
+		std::vector<std::vector<int>> new_rows;
 
 		std::for_each(this->rows_.begin(), this->rows_.end(),
 		  [&](auto& front_row) {
 				std::for_each(t1.rows_.begin(), t1.rows_.end(),
 				  [&](auto& back_row) {
-						std::vector<element> row_to_be_insert;
+						std::vector<int> row_to_be_insert;
 
-						for (element& ele : front_row) {
+						for (int& ele : front_row) {
 						  row_to_be_insert.push_back(ele);
 						}
 
-						for (element& ele : back_row) {
+						for (int& ele : back_row) {
 						  row_to_be_insert.push_back(ele);
 						}
 
@@ -150,15 +101,15 @@ namespace pql_table {
 	
 	InterTable InterTable::Filter(Predicate& pred) {
 		std::vector<std::string> new_header(header_);
-		std::vector<std::vector<element>> new_rows;
+		std::vector<std::vector<int>> new_rows;
 		int first_syn_col_index = FindSynCol(pred.first_syn_);
 		int second_syn_col_index = FindSynCol(pred.second_syn_);
-		std::unordered_set<std::pair<element, element>, hash_pair_fn> 
+		std::unordered_set<std::pair<int, int>, hash_pair_fn> 
 				pair_domain(pred.allowed_pairs_.begin(), pred.allowed_pairs_.end());
 
 		for (int index = 0; index < rows_.size(); index++) {
-			std::pair<element, element> cur_pair(rows_[index][first_syn_col_index], rows_[index][second_syn_col_index]);
-			std::unordered_set<std::pair<element, element>>::iterator iter;
+			std::pair<int, int> cur_pair(rows_[index][first_syn_col_index], rows_[index][second_syn_col_index]);
+			std::unordered_set<std::pair<int, int>>::iterator iter;
 			iter = pair_domain.find(cur_pair);
 
 			if (iter != pair_domain.end()) {
@@ -173,11 +124,11 @@ namespace pql_table {
 		return InterTable(new_header, new_rows);
 	}
 		
-	std::unordered_map<element, std::vector<int>, hash_fn> GenerateIndexMap(std::vector<std::vector<element>>& rows, int col_index) {
-		std::unordered_map<element, std::vector<int>, hash_fn> row_domain;
+	std::unordered_map<int, std::vector<int>> GenerateIndexMap(std::vector<std::vector<int>>& rows, int col_index) {
+		std::unordered_map<int, std::vector<int>> row_domain;
 
 		for (int index = 0; index < rows.size(); index++) {
-		  std::unordered_map<element, std::vector<int>>::iterator iter;
+		  std::unordered_map<int, std::vector<int>>::iterator iter;
 		  iter = row_domain.find(rows[index][col_index]);
 
   		if (iter == row_domain.end()) {
@@ -199,22 +150,22 @@ namespace pql_table {
 			new_header.push_back(syn);
 		}
 
-		std::vector<std::vector<element>> new_rows;
+		std::vector<std::vector<int>> new_rows;
 		int first_syn_col_index = FindSynCol(pred.first_syn_);
 		int second_syn_col_index = t1.FindSynCol(pred.second_syn_);
 
 		//The maps store element to a list of row indices that contain the element
-		std::unordered_map<element, std::vector<int>, hash_fn> first_syn_domain = GenerateIndexMap(rows_, first_syn_col_index);
-		std::unordered_map<element, std::vector<int>, hash_fn> second_syn_domain = GenerateIndexMap(t1.rows_, second_syn_col_index);
+		std::unordered_map<int, std::vector<int>> first_syn_domain = GenerateIndexMap(rows_, first_syn_col_index);
+		std::unordered_map<int, std::vector<int>> second_syn_domain = GenerateIndexMap(t1.rows_, second_syn_col_index);
 
 		for (auto& ele_pair : pred.allowed_pairs_) {
-		  std::unordered_map<element, std::vector<int>>::iterator it1;
+		  std::unordered_map<int, std::vector<int>>::iterator it1;
 		  it1 = first_syn_domain.find(ele_pair.first);
 		  if (it1 == first_syn_domain.end()) {
 				continue;
 		  }
 
-		  std::unordered_map<element, std::vector<int>>::iterator it2;
+		  std::unordered_map<int, std::vector<int>>::iterator it2;
 		  it2 = second_syn_domain.find(ele_pair.second);
 		  if (it2 == second_syn_domain.end()) {
 				continue;
@@ -222,7 +173,7 @@ namespace pql_table {
 
 		  for (int first_index : it1->second) {
 				for (int second_index : it2->second) {
-				  std::vector<element> row_to_be_insert;
+				  std::vector<int> row_to_be_insert;
 						
 				  for (auto& ele : rows_[first_index]) {
 						row_to_be_insert.push_back(ele);
@@ -256,8 +207,8 @@ namespace pql_table {
 			}
 		}
 
-		std::multiset<std::vector<element>> s1(rows_.begin(), rows_.end());
-		std::multiset<std::vector<element>> s2(t.rows_.begin(), t.rows_.end());
+		std::multiset<std::vector<int>> s1(rows_.begin(), rows_.end());
+		std::multiset<std::vector<int>> s2(t.rows_.begin(), t.rows_.end());
 
 		return s1 == s2;
 	}

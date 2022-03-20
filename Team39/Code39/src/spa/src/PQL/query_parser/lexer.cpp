@@ -61,6 +61,22 @@ namespace pql {
     for (char next_char = ParserState::Peek();
          pql::IsLetter(next_char) || pql::IsDigit(next_char);
          next_char = ParserState::Peek()) {
+      ssm << ParserState::Next();     
+    }
+    ssm >> sm;
+    ParserState::EatWhiteSpaces();
+    return sm;
+  }
+  
+  std::string ParserState::ParseAttribute() {
+    std::string sm;
+    std::stringstream ssm;
+
+    ParserState::EatWhiteSpaces();
+    ssm << ParserState::ExpectLetter();
+    for (char next_char = ParserState::Peek();
+        IsLetter(next_char) || IsHash(next_char);
+        next_char = ParserState::Peek()) {
       ssm << ParserState::Next();
     }
     ssm >> sm;
@@ -85,8 +101,8 @@ namespace pql {
     return integer;
   }
 
-  pql::Ref ParserState::ParseRef(Query &q) {
-    pql::Ref ref;
+  std::string ParserState::ParseRef(Query &q) {
+    std::string ref;
     std::stringstream ssm;
     bool is_synonym = false;
     ParserState::EatWhiteSpaces();
@@ -105,7 +121,7 @@ namespace pql {
     ssm >> ref;
     if (is_synonym) {
       if (!q.SynonymDeclared(ref)) {
-        throw ParseException();
+        q.SetSemanticallyInvalid();
       }
       q.AddUsedSynonym(ref);
     }

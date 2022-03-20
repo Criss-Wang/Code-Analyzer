@@ -1,0 +1,2 @@
+stmt p; variable s;
+Select s.var such that Uses(p, s)

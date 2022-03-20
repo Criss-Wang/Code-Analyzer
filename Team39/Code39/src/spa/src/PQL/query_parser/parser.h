@@ -39,9 +39,11 @@ namespace pql {
 
       std::string ParseName();
 
+      std::string ParseAttribute();
+
       std::string ParseInteger();
 
-      pql::Ref ParseRef(Query& q);
+      std::string ParseRef(Query& q);
 
       std::string ParseExpression();
 
@@ -69,6 +71,14 @@ namespace pql {
       void ParseRelationship();
 
       void ParsePattern();
+
+      void ParseAssignPattern(const std::string& synonym);
+
+      void ParseWhilePattern(const std::string& synonym);
+
+      void ParseIfPattern(const std::string& synonym);
+
+      void ParseWith();
   };
 
 }

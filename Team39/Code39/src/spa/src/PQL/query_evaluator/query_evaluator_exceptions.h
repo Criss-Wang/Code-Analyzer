@@ -6,6 +6,13 @@
 using namespace std;
 
 namespace pql_exceptions {
+  class TrueResultException : public exception {
+    public:
+      const char* what() const throw() {
+        return "The selected boolean value is true";
+      }
+  };
+
   class EmptyResultException : public exception {
     public:
       const char* what() const throw() {
@@ -30,7 +37,28 @@ namespace pql_exceptions {
   class EmptyTableException final : public EmptyResultException {
     public:
       const char* what() const throw() {
-          return "Intermediate table is empty";
+        return "Intermediate table is empty";
+      }
+  };
+
+  class ProcedureDoesNotExistException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+        return "The procedure entity given does not appear in the program";
+      }
+  };
+
+  class VariableDoesNotExistException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+        return "The variable entity given does not appear in the program";
+      }
+  };
+
+  class UnequalWithClauseException final : public EmptyResultException {
+    public:
+      const char* what() const throw() {
+        return "Both side of with clause is unequal";
       }
   };
 }
