@@ -1,18 +1,19 @@
 #include "clause.h"
+#include <memory>
 
 namespace pql_clause {
   class WithClause : public Clause {
     public:
-      pql::AttrRef* left_attr_;
+      std::shared_ptr<pql::AttrRef> left_attr_;
       std::string left_entity_;
       bool is_attr_ref_left_;
-      pql::AttrRef* right_attr_;
+      std::shared_ptr<pql::AttrRef> right_attr_;
       std::string right_entity_;
       bool is_attr_ref_right_;
     
     public:
-      WithClause(pql::AttrRef* left_attr, std::string& left_entity, bool is_attr_ref_left, 
-          pql::AttrRef* right_attr, std::string& right_entity, bool is_attr_ref_right) :
+      WithClause(std::shared_ptr<pql::AttrRef> left_attr, std::string& left_entity, bool is_attr_ref_left, 
+          std::shared_ptr<pql::AttrRef> right_attr, std::string& right_entity, bool is_attr_ref_right) :
         Clause{} {
           left_attr_ = left_attr;
           left_entity_ = left_entity;

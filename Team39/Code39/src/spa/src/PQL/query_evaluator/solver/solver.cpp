@@ -53,15 +53,17 @@ namespace pql_solver {
   std::vector<pql_table::InterTable> Solver::GetReturnTables() {
     //Remove synonyms that are not returned and return a list of tables with only returned synonyms involved
     std::vector<pql_table::InterTable> new_tables;
-
+    std::unordered_set<std::string> added_syns;
     for (auto& table : tables_) {
       std::vector<int> return_idxs;
 
       for (auto& attr_ref : return_syns_) {
         std::string syn_name = attr_ref.GetSynonym().GetName();
-        int cur_idx = table.FindSynCol(syn_name);
-        if (cur_idx >= 0) {
-          return_idxs.push_back(cur_idx);
+
+        if (added_syns.find(syn_name) == added_syns.end()
+            && table.FindSynCol(syn_name) >= 0) {
+          return_idxs.push_back(table.FindSynCol(syn_name));
+          added_syns.insert(syn_name);
         }
       }
 
