@@ -12,5 +12,5 @@ class Formatter {
     Formatter(Pkb& pkb);
 
   public:
-    std::vector<std::string> FormatRawInput(pql_table::InterTable& table, std::vector<pql::Synonym>& return_syns);
+    std::vector<std::string> FormatRawInput(pql_table::InterTable& table, std::vector<pql::AttrRef>& return_syns);
 };

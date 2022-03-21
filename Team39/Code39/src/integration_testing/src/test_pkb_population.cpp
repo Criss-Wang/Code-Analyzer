@@ -46,6 +46,7 @@ TEST_CASE("Read/print statements for Population") {
     ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 1);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
+
   }
 
   SECTION("1_test2") {
@@ -806,19 +807,20 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(follows_table.GetValueByKey(5) == 6);
 
     ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
-    //REQUIRE(modifies_table.GetTableSize() == 5);
+    REQUIRE(modifies_table.GetTableSize() == 5);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("print")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("proc2")});
     REQUIRE(modifies_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByVar("x")});
-    //REQUIRE(modifies_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("x")});
+    REQUIRE(modifies_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("x")});
 
     UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
-    //REQUIRE(uses_table.GetTableSize() == 4);
+    REQUIRE(uses_table.GetTableSize() == 4);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("proc1")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("proc3")});
     REQUIRE(uses_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("t")});
-    //REQUIRE(uses_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("t")});
+    REQUIRE(uses_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("t")});
+    
   }
 
   SECTION("6_test2") {
@@ -861,23 +863,24 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(follows_table.GetValueByKey(7) == 8);
 
     ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
-    //REQUIRE(modifies_table.GetTableSize() == 7);
+    REQUIRE(modifies_table.GetTableSize() == 7);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("proc1")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("procedure")});
     REQUIRE(modifies_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(7) == vector<int>{pkb.GetIndexByVar("x")});
-    //REQUIRE(modifies_table.GetValueByKey(6) == vector<string>{"proc1", "x", "procedure"});
-    //REQUIRE(modifies_table.GetValueByKey(8) == vector<string>{"proc1", "x", "procedure"});
+    REQUIRE(modifies_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("proc1"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("procedure")});
+    REQUIRE(modifies_table.GetValueByKey(8) == vector<int>{pkb.GetIndexByVar("proc1"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("procedure")});
 
     UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
-    //REQUIRE(uses_table.GetTableSize() == 6);
+    REQUIRE(uses_table.GetTableSize() == 6);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("f")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("proc3")});
     REQUIRE(uses_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByVar("t")});
     REQUIRE(uses_table.GetValueByKey(7) == vector<int>{pkb.GetIndexByVar("t")});
-    //REQUIRE(uses_table.GetValueByKey(6) == vector<string>{"y", "f", "proc3"});
-    //REQUIRE(uses_table.GetValueByKey(8) == vector<string>{"y", "f", "proc3"});
+    REQUIRE(uses_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("f"), pkb.GetIndexByVar("proc3")});
+    REQUIRE(uses_table.GetValueByKey(8) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("f"), pkb.GetIndexByVar("proc3")});
+
   }
 
   SECTION("6_test3") {
@@ -920,22 +923,23 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(follows_table.GetValueByKey(7) == 8);
 
     ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
-    //REQUIRE(modifies_table.GetTableSize() == 7);
+    REQUIRE(modifies_table.GetTableSize() == 7);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("print")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("proc2")});
     REQUIRE(modifies_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(7) == vector<int>{pkb.GetIndexByVar("t")});
-    //REQUIRE(modifies_table.GetValueByKey(6) == vector<string>{"t", "print", "x", "proc2"});
-    //REQUIRE(modifies_table.GetValueByKey(8) == vector<string>{"print", "x", "proc2"});
+    REQUIRE(modifies_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("print"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("proc2"), pkb.GetIndexByVar("t")});
+    REQUIRE(modifies_table.GetValueByKey(8) == vector<int>{pkb.GetIndexByVar("print"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("proc2")});
 
     UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
-    //REQUIRE(uses_table.GetTableSize() == 6);
+    REQUIRE(uses_table.GetTableSize() == 6);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("proc1")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("procedure")});
     REQUIRE(uses_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByVar("t")});
     REQUIRE(uses_table.GetValueByKey(7) == vector<int>{pkb.GetIndexByVar("x")});
-    //REQUIRE(uses_table.GetValueByKey(6) == vector<string>{"x", "proc1", "procedure"});
-    //REQUIRE(uses_table.GetValueByKey(8) == vector<string>{"proc1", "procedure"});
+    REQUIRE(uses_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("proc1"), pkb.GetIndexByVar("procedure")});
+    REQUIRE(uses_table.GetValueByKey(8) == vector<int>{pkb.GetIndexByVar("proc1"), pkb.GetIndexByVar("procedure")});
+
   }
 }

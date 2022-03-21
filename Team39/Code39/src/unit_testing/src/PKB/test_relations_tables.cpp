@@ -11,7 +11,7 @@ TEST_CASE("Follows Table") {
 
   SECTION("Get key list when table is empty") {
     vector<int> key_lst = follows_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 
@@ -65,7 +65,7 @@ TEST_CASE("Follows Star Table") {
 
   SECTION("Get key list when table is empty") {
     vector<int> key_lst = follows_star_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 
@@ -120,7 +120,7 @@ TEST_CASE("Statement to Patterns Table") {
 
   SECTION("Get key list when table is empty") {
     vector<int> key_lst = stmt_to_patterns_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 
@@ -174,7 +174,7 @@ TEST_CASE("Pattern to Statements Table") {
 
   SECTION("Get key list when table is empty") {
     vector<string> key_lst = pattern_to_stmts_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 
@@ -229,7 +229,7 @@ TEST_CASE("Uses Statement to Variables Table") {
 
   SECTION("Get key list when table is empty") {
     vector<int> key_lst = uses_stmt_to_variables_table.GetKeyLst();
-    REQUIRE(key_lst.size() == 0);
+    REQUIRE(key_lst.empty());
     REQUIRE(key_lst.empty());
   }
 
@@ -332,5 +332,64 @@ TEST_CASE("Uses Variable to Statements Table") {
   SECTION("Update value in table") {
     uses_variable_to_stmts_table.UpdateKeyWithNewValue(0, vector<int>{100, 200});
     REQUIRE(uses_variable_to_stmts_table.GetValueByKey(0) == vector<int>{100, 200});
+  }
+}
+
+// UsesProcToVariables table will not be tested since it is the same type
+TEST_CASE("Modifies Procedure to Variables Table") {
+  ModifiesProcToVariablesTable modifies_proc_to_variables_table = ModifiesProcToVariablesTable();
+
+  SECTION("Get key list when table is empty") {
+    vector<int> key_lst = modifies_proc_to_variables_table.GetKeyLst();
+    REQUIRE(key_lst.empty());
+    REQUIRE(key_lst.empty());
+  }
+
+  bool add_success = modifies_proc_to_variables_table.AddKeyValuePair(0, vector<int>{1, 2, 3});
+  add_success = modifies_proc_to_variables_table.AddKeyValuePair(1, vector<int>{3, 25, 26}) && add_success;
+
+  SECTION("Check population success") {
+    REQUIRE(modifies_proc_to_variables_table.GetTableSize() == 2);
+    REQUIRE(add_success == true);
+  }
+
+  SECTION("Throw custom exception if key already exists in the table") {
+    CHECK_THROWS_AS(modifies_proc_to_variables_table.AddKeyValuePair(0, vector<int>{26}), KeyInUseException);
+  }
+
+  SECTION("Get value from table by key") {
+    vector<int> value = modifies_proc_to_variables_table.GetValueByKey(0);
+    vector<int> expected_value = {1, 2, 3};
+    std::sort(value.begin(), value.end());
+    std::sort(expected_value.begin(), expected_value.end());
+    REQUIRE(value == expected_value);
+  }
+
+  SECTION("Throw custom exception if key does not exist in the table when retrieving value by key") {
+    CHECK_THROWS_AS(modifies_proc_to_variables_table.GetValueByKey(999), InvalidKeyException);
+  }
+
+  SECTION("Get key list from table") {
+    vector<int> key_lst = modifies_proc_to_variables_table.GetKeyLst();
+    vector<int> expected_key_lst = {0, 1};
+
+    std::sort(key_lst.begin(), key_lst.end());
+    std::sort(expected_key_lst.begin(), expected_key_lst.end());
+    REQUIRE(key_lst == expected_key_lst);
+  }
+
+  SECTION("Get key-value list from table") {
+    vector<pair<int, vector<int>>> key_value_lst = modifies_proc_to_variables_table.GetKeyValueLst();
+    vector<pair<int, vector<int>>> expected_key_value_lst = {make_pair(0, vector<int>{1, 2, 3}),
+      make_pair(1, vector<int>{3, 25, 26})};
+
+    std::sort(key_value_lst.begin(), key_value_lst.end());
+    std::sort(expected_key_value_lst.begin(), expected_key_value_lst.end());
+    REQUIRE(key_value_lst == expected_key_value_lst);
+  }
+
+  SECTION("Update value in table") {
+    modifies_proc_to_variables_table.UpdateKeyWithNewValue(1, vector<int>{999});
+    REQUIRE(modifies_proc_to_variables_table.GetValueByKey(1) == vector<int>{999});
   }
 }

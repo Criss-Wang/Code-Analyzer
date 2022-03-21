@@ -1,0 +1,30 @@
+13 - Valid synonym return with multiple such that clauses
+stmt s;
+Select s such that Uses(s, "while") such that Uses(s, "while")
+2, 6, 8, 9 
+5000
+14 - Valid synonym return with multiple such that clauses
+stmt s;
+Select s such that Uses(s, "while") such that Uses(s, "z")
+2, 6, 9
+5000
+15 - Valid tuple return with multiple assign pattern clauses
+assign a, a1;
+Select <a, a1> pattern a ("p", _"cenX"_ ) pattern a1 ("xxxx", _"xy"_)
+11 14
+5000
+16 - Valid boolean return with multiple such that and assign pattern clauses
+assign a; if ifs1, ifs2; while w;
+Select BOOLEAN such that Parent(ifs1, a) pattern a ("x", _ ) such that Parent*(ifs1, ifs2)
+TRUE
+5000
+17 - Syntactically invalid use of multi clause
+assign a, a1;
+Select <a, a1> pattern a ("p", _"cenX"_ ) and pattern a1 ("xxxx", _"xy"_)
+
+5000
+18 - Semantically invalid use of multi clause
+stmt s;
+Select BOOLEAN pattern a ("p", _"cenX"_ ) pattern a1 ("xxxx", _"xy"_)
+FALSE
+5000

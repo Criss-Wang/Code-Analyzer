@@ -47,7 +47,9 @@ namespace pql {
     std::stringstream ssm;
     ssm << s;
     while (ssm.peek() != END_OF_FILE) {
-      if (ss.get() != ssm.get()) {
+      char ss_char = (char) ss.get();
+      char ssm_char = (char)ssm.get();
+      if (ss_char != ssm_char) {
         throw ParseException();
       }
     }
@@ -101,8 +103,8 @@ namespace pql {
     return integer;
   }
 
-  pql::Ref ParserState::ParseRef(Query &q) {
-    pql::Ref ref;
+  std::string ParserState::ParseRef(Query &q) {
+    std::string ref;
     std::stringstream ssm;
     bool is_synonym = false;
     ParserState::EatWhiteSpaces();
@@ -121,7 +123,7 @@ namespace pql {
     ssm >> ref;
     if (is_synonym) {
       if (!q.SynonymDeclared(ref)) {
-        throw SemanticallyInvalidException();
+        q.SetSemanticallyInvalid();
       }
       q.AddUsedSynonym(ref);
     }
@@ -130,9 +132,9 @@ namespace pql {
 
   std::string ParserState::ParseExpression() {
     std::string expression;
-    ParserState::Expect("\"");
     ParserState::EatWhiteSpaces();
     expression = IsValidExpression();
+    ParserState::EatWhiteSpaces();
     return expression;
   }
 

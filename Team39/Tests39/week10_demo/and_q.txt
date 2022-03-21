@@ -1,0 +1,20 @@
+19 - Valid synonym return with such that and explicit and. Similar to 14 
+stmt s;
+Select s such that Uses(s, "while") and Uses(s, "z")
+2, 6, 9 
+5000
+20 - Valid tuple return with pattern and explicit and. Similar to 15
+assign a, a1;
+Select <a, a1> pattern a ("p", _"cenX"_ ) and a1 ("xxxx", _"xy"_)
+11 14
+5000
+21 - Syntactically invalid use of explicit and
+stmt s;
+Select s such that Uses(s, "while") and such that Uses(s, "z")
+
+5000
+22 - Semantically invalid use of explicit and
+stmt s;
+Select BOOLEAN such that Uses(s, "z") and Modifies(_, "z")
+FALSE
+5000

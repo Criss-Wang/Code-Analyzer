@@ -1,3 +1,6 @@
+#ifndef CLAUSE_H
+#define CLAUSE_H
+
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -6,6 +9,7 @@
 #include "../solver/predicate.h"
 #include "../../../PKB/pkb.h"
 #include "../query_evaluator_exceptions.h"
+#include "../../query_parser/token.h"
 
 namespace pql_clause {
   template <typename T>
@@ -41,19 +45,15 @@ namespace pql_clause {
 
   class Clause {
     public:
-      pql::RelationshipToken* token_;
-      Pkb pkb_;
-      std::unordered_map<std::string, std::vector<int>>* domain_;
-      std::vector<pql_table::Predicate>* predicates_;
+      pql::RelationshipTypes type_;
 
     public:
-      Clause(pql::RelationshipToken* token, Pkb& pkb,
-             std::unordered_map<std::string, std::vector<int>>* domain,
-             std::vector<pql_table::Predicate>* predicates);
-
-      virtual ~Clause() = default;
+        virtual ~Clause() = default;
 
     public:
-      virtual void Evaluate() = 0;
+      virtual void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates) = 0;
   };
 }
+
+#endif
