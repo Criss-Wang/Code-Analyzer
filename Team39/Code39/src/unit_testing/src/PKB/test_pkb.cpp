@@ -317,6 +317,15 @@ TEST_CASE("Populating StmtToPatterns Table") {
 
     res = pkb.GetAllStmtsWithPattern("cenX");
     REQUIRE(res == unordered_set<int>{5});
+
+    res = pkb.GetAllStmtsWithPattern("((2))");
+    REQUIRE(res == unordered_set<int>{2, 4});
+
+    res = pkb.GetAllStmtsWithPattern("289");
+    REQUIRE(res == unordered_set<int>{5});
+
+    res = pkb.GetAllStmtsWithPattern("((289 * (444)))");
+    REQUIRE(res == unordered_set<int>{5});
   }
 
   SECTION("Search Exact pattern") {
