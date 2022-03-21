@@ -241,7 +241,7 @@ stack<int> populateFollowsAndNextRelationship(stack<int> previous, Pkb& pkb, int
       if (!is_prev_stmt_if) {
         // Add previous stmt num and current stmt num to NextTable
         pkb.AddInfoToTable(TableIdentifier::kNext, previous.top(), stmt_num);
-        cout << "Next: (" << previous.top() << " ," << stmt_num << ")" << endl;
+        //cout << "Next: (" << previous.top() << " ," << stmt_num << ")" << endl;
       }
 
       previous.pop();
@@ -264,12 +264,12 @@ stack<vector<int>> populateParentRelationship(stack<int> parent, stack<vector<in
 stack<int> populateNextRelationshipForIf(stack<int> last_stmt_nums_in_if, Pkb& pkb, int stmt_num) {
   // Add the last stmt num in then/else container and current stmt num to Next Table
   pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), stmt_num);
-  cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
+  //cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
 
   last_stmt_nums_in_if.pop();
 
   pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), stmt_num);
-  cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
+  //cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
 
   last_stmt_nums_in_if.pop();
 
@@ -337,7 +337,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
         // Add the next stmt num in container and stmt num of if to Next Table
         pkb.AddInfoToTable(TableIdentifier::kNext, if_stmt_num.top(), stmt_num);
-        cout << "Next: (" << if_stmt_num.top() << " ," << stmt_num << ")" << endl;
+        //cout << "Next: (" << if_stmt_num.top() << " ," << stmt_num << ")" << endl;
         if_stmt_num.pop();
 
         last_stmt_nums_in_if.push(previous_stmt_num);
@@ -363,7 +363,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
 
             // Add the last stmt num in container and stmt num of while to Next Table
             pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, while_stmt_num.top());
-            cout << "Next: (" << previous_stmt_num << " ," << while_stmt_num.top() << ")" << endl;
+            //cout << "Next: (" << previous_stmt_num << " ," << while_stmt_num.top() << ")" << endl;
 
             while_stmt_num.pop();
           }
@@ -403,8 +403,8 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
         token++;
       }
       tokens.push_back(*token);
-      cout << endl;
-      cout << tokens.at(1).text_ << endl;
+      //cout << endl;
+      //cout << tokens.at(1).text_ << endl;
       if (prev_proc != "") {
         // Add procedure name and range to ProcRangeTable
         pkb.AddInfoToTable(TableIdentifier::kProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
@@ -507,7 +507,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       if_stmt_num.push(stmt_num);
       // Add the stmt num of if and next stmt num to Next Table
       pkb.AddInfoToTable(TableIdentifier::kNext, stmt_num, stmt_num + 1);
-      cout << "Next: (" << stmt_num << " ," << stmt_num + 1 << ")" << endl;
+      //cout << "Next: (" << stmt_num << " ," << stmt_num + 1 << ")" << endl;
 
       stmt_num += 1;
 
@@ -540,7 +540,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
       while_stmt_num.push(stmt_num);
       // Add the stmt num of while and next stmt num to Next Table
       pkb.AddInfoToTable(TableIdentifier::kNext, stmt_num, stmt_num + 1);
-      cout << "Next: (" << stmt_num << " ," << stmt_num + 1 << ")" << endl;
+      //cout << "Next: (" << stmt_num << " ," << stmt_num + 1 << ")" << endl;
 
       stmt_num += 1;
 
