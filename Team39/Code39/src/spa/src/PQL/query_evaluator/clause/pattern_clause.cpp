@@ -25,8 +25,10 @@ namespace pql_clause {
 
   void PatternClause::EvaluateLeftWildcard(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain, 
       std::vector<pql_table::Predicate>& predicates) {
-    //do nothing if the first argument is wildcard
-    //e.g. pattern a (_, expr), if (_, _, _), while (_, _)
+    //do nothing only if it is of type pattern clause,e.g. pattern a (_, _)  
+    if (type_ != pql::kAssignPattern) {
+      //waiting for pkb to implement the API
+    }
   }
   
   void PatternClause::EvaluateLeftEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
@@ -78,5 +80,15 @@ namespace pql_clause {
       std::vector<pql_table::Predicate>& predicates) {
     PatternClause::EvaluateLeft(pkb, domain, predicates);
     AssignPatternClause::EvaluateExpr(pkb, domain);
+  }
+
+  void IfPatternClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    PatternClause::EvaluateLeft(pkb, domain, predicates);
+  }
+
+  void WhilePatternClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    PatternClause::EvaluateLeft(pkb, domain, predicates);
   }
 }

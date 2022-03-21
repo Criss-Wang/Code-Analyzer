@@ -33,12 +33,12 @@ namespace pql_clause {
   };
 
   class AssignPatternClause : public PatternClause {
-  public:
+    public:
     std::string expression_;
     bool is_exact_;
 
     public:
-      AssignPatternClause(std::string& pattern_synonym, std::string left, bool is_synonym_left, std::string& expr, bool is_exact) :
+      AssignPatternClause(std::string& pattern_synonym, std::string& left, bool is_synonym_left, std::string& expr, bool is_exact) :
           PatternClause{ pattern_synonym, left, is_synonym_left } {
         expression_ = expr;
         is_exact_ = is_exact;
@@ -50,5 +50,29 @@ namespace pql_clause {
           std::vector<pql_table::Predicate>& predicates) override;
 
       void EvaluateExpr(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain);
+  };
+
+  class IfPatternClause : public PatternClause {
+    public:
+      IfPatternClause(std::string& if_synonym, std::string& left, bool is_synonym_left) :
+          PatternClause{ if_synonym, left, is_synonym_left } {
+        type_ = pql::RelationshipTypes::kIfPattern;
+      }
+
+  public:
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates);
+  };
+
+  class WhilePatternClause : public PatternClause {
+    public:
+      WhilePatternClause(std::string& if_synonym, std::string& left, bool is_synonym_left) :
+          PatternClause{ if_synonym, left, is_synonym_left } {
+        type_ = pql::RelationshipTypes::kWhilePattern;
+      }
+
+    public:
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates);
   };
 }
