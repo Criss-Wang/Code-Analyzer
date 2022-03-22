@@ -63,7 +63,7 @@ std::shared_ptr<GraphNode> CFG::GenerateCfg(vector<CFGToken>& tokens) {
 
     } else if (tokens[index].type_ == CFGTokenType::kIf) {
       shared_ptr<GraphNode> if_node = make_shared<GraphNode>(tokens[index]);
-      shared_ptr<GraphNode> next_node = make_shared<GraphNode>(NodeType::IFSTART);
+      shared_ptr<GraphNode> next_node = make_shared<GraphNode>(NodeType::THENSTART);
 
       Connect(curr, if_node);
       Connect(if_node, next_node);
@@ -76,7 +76,11 @@ std::shared_ptr<GraphNode> CFG::GenerateCfg(vector<CFGToken>& tokens) {
       shared_ptr<GraphNode> if_node = stack.top();
       stack.pop();
       stack.push(curr);
-      curr = if_node;
+
+      shared_ptr<GraphNode> next_node = make_shared<GraphNode>(NodeType::ELSESTART);
+
+      Connect(curr, next_node);
+      curr = next_node;
 
     } else if (tokens[index].type_ == CFGTokenType::kWhileEnd) {
       shared_ptr<GraphNode> while_node = stack.top();

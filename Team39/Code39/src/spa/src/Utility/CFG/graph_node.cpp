@@ -10,7 +10,7 @@ using namespace std;
 
 //Set of token type that does not have a statement number
 const unordered_set<NodeType> NodeTypeWithoutStmtNumSet{ NodeType::START, NodeType::END, 
-  NodeType::IFSTART, NodeType::WHILESTART, NodeType::IFEND, NodeType::WHILEEND };
+  NodeType::THENSTART, NodeType::ELSESTART, NodeType::WHILESTART, NodeType::IFEND, NodeType::WHILEEND };
 
 //Map valid statment types to EntityIdentifier
 const unordered_map<CFGTokenType, EntityIdentifier> NodeTypeToEntityIdentifierMap{

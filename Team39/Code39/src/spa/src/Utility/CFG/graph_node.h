@@ -14,7 +14,8 @@ enum class NodeType {
   IF,
   WHILE,
   END,
-  IFSTART,
+  THENSTART,
+  ELSESTART,
   WHILESTART,
   IFEND,
   WHILEEND

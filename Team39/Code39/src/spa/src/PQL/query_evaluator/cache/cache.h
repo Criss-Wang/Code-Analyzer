@@ -24,7 +24,7 @@ namespace pql_cache {
       std::vector<std::pair<int, int>> ComputeAffectsRelationship(GraphNode& head);
 
     public:
-      pair<shared_ptr<GraphNode>, vector<pair<int, int>>> 
-          ComputeStmtAffects(GraphNode& node, unordered_map<int, int>& last_modified_table);
+      void ConstructAssignAffectPair(int assign_stmt,
+         std::unordered_map<int, std::vector<int>>& last_modified_table, vector<pair<int, int>>& affect_lst);
   };
 }
