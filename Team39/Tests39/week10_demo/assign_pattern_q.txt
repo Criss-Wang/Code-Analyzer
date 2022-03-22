@@ -1,120 +1,80 @@
-1 - Select all assign statements
-assign a;
-Select a
-1, 2, 3, 4, 5
-5000
-2 - Select assign statements with x on LHS
-assign a;
-Select a pattern a("x", _)
-1
-5000
-3 - Select assign statements with x on RHS
-assign a;
-Select a pattern a(_, _"x"_)
-1, 3
-5000
-4 - Select assign statements with x and y on RHS using and
-assign a;
-Select a pattern a(_, _"x"_) and a(_, _"y"_)
-1
-5000
-5 - Select assign statements with x and y on RHS using 2 pattern clauses
-assign a; variable v;
-Select a pattern a(v, _"x"_) pattern a(v, _"y"_)
-1
-5000
-6 - Select assign statements with any variable on LHS
-assign a; variable v;
-Select a pattern a(v, _)
-1, 2, 3, 4, 5
-5000
-7 - Select assign statements which modifies q
-assign a;
-Select a pattern a("q", _)
-4, 5
-5000
-8 - Select assign statements with q on LHS and f on RHS
-assign a;
-Select a pattern a("q", _" f"_)
-4
-5000
-9 - Select assign statements with 1 on LHS
-assign a;
-Select a pattern a(_, "(1)   ")
-5
-5000
-10 - Select assign statements with w / t on LHS
-assign a;
-Select a pattern a(_, _"w /t "_)
-3, 4
-5000
-11 - Select assign statements with (f + w) / t on LHS
-assign a;
-Select a pattern a(_, _"(f + w) /t "_)
-
-5000
-12 - Select assign statements with 100 * 9 + a * d / r on LHS
-assign a;
-Select a pattern a(_, _"100*9+a*d/r"_)
-3
-5000
-13 - Select assign statements with g + 10 + a on LHS
-assign a;
-Select a pattern a(_, _"g + 10 + a"_)
-
-5000
-14 - Select assign statements with g + (10 + a) on LHS
-assign a;
-Select a pattern a(_, _"g + (10 + a)"_)
-
-5000
-15 - Select assign statements with (a * f) - 0 on LHS
-assign a;
-Select a pattern a(_, _"(a * f) - 0"_)
-4
-5000
-16 - Select assign statements with a * f + 0 on LHS
-assign a;
-Select a pattern a(_, _"a * f+ 0"_)
-
-5000
-17 - Select assign statements with 0 + g * i / t on LHS
-assign a;
-Select a pattern a(_, _"0 + g * i / t"_)
-
-5000
-18 - Select assign statements with a * (f + (w / t)) - x on LHS
-assign a;
-Select a pattern a(_, _"a * (f + (w / t)) - x"_)
-3 
-5000
-19 - Select assign statements with x on both LHS and RHS
-assign a;
-Select a pattern a("x", _"x"_)
-1
-5000
-20 - Select assign statements with f + a on LHS
-assign a;
-Select a pattern a(_, _"f + a"_)
-
-5000
-21 - Synonym a1 not declared
+1 - Synonym a1 not declared
 assign a;
 Select BOOLEAN pattern a1(_, _"x"_)
 FALSE
 5000
-22 - Synonym a declared twice
-assign a, a;
-Select BOOLEAN pattern a(_, _"x"_)
-FALSE
-5000
-23 - Missing underscore for substring
+2 - Missing underscore for substring
 assign a;
 Select BOOLEAN pattern a(_, "x"_)
 
 5000
-24 - BOOLEAN as an assign synonym
-assign BOOLEAN;
-Select BOOLEAN pattern BOOLEAN (_, _"x"_)
+3 - Semantically invalid expression
+assign a;
+Select BOOLEAN pattern a (_, "+ 100")
+FALSE
+5000
+4 - Select assign statements with x on LHS
+assign a;
+Select a pattern a("x", _)
+1
+5000
+5 - Select assign statements with x on RHS
+assign a;
+Select a pattern a(_, _"x"_)
 1, 3
+5000
+6 - Select assign statements with x and y on RHS using and
+assign a;
+Select a pattern a(_, _"x"_) and a(_, _"y"_)
+1
+5000
+7 - Select assign statements with q on LHS and f on RHS
+assign a;
+Select a pattern a("q", _" f"_)
+4
+5000
+8 - Select assign statements with 1 on LHS
+assign a;
+Select a pattern a(_, "(1)   ")
+5
+5000
+9 - Select assign statements with w / t on LHS
+assign a;
+Select a pattern a(_, _"w /t "_)
+3, 4
+5000
+10 - Select assign statements with (f + w) / t on LHS
+assign a;
+Select BOOLEAN pattern a(_, _"(f + w) /t "_)
+FALSE
+5000
+11 - Select assign statements with 100 * 9 + a * d / r on LHS
+assign a;
+Select BOOLEAN pattern a(_, _"100*9+a*d/r"_)
+TRUE
+5000
+12 - Select assign statements with g + 10 + a on LHS
+assign a;
+Select a pattern a(_, _"g + 10 + a"_)
+
+5000
+13 - Select assign statements with g + (10 + a) on LHS
+assign a;
+Select a pattern a(_, _"g + (10 + a)"_)
+
+5000
+14 - Select assign statements with (a * f) - 0 on LHS
+assign a;
+Select a pattern a(_, _"(a * f) - 0"_)
+4
+5000
+15 - Select assign statements with 0 + g * i / t on LHS
+assign a;
+Select a pattern a(_, _"0 + g * i / t"_)
+
+5000
+16 - Select exact match of RHS x * y + f + a + assign * g
+assign a;
+Select BOOLEAN pattern a(_, "x * y + f + a + assign * g")
+TRUE
 5000
