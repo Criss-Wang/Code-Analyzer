@@ -24,6 +24,8 @@ namespace pql_cache {
       std::vector<std::pair<int, int>> ComputeAffectsRelationship(GraphNode& head);
 
       void ConstructAssignAffectPair(int assign_stmt,
-         std::unordered_map<int, std::vector<int>>& last_modified_table, vector<pair<int, int>>& affect_lst);
+         std::unordered_map<int, std::unordered_set<int>>& last_modified_table, vector<pair<int, int>>& affect_lst);
+      
+      static void MergeTable(unordered_map<int, unordered_set<int>>& dst, unordered_map<int, unordered_set<int>>& src);
   };
 }

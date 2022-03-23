@@ -1,6 +1,7 @@
 #include <memory>
-#include <map>
-#include<stack>
+#include <unordered_map>
+#include <unordered_set>
+#include <stack>
 
 #include "cache.h"
 
@@ -13,25 +14,27 @@ namespace pql_cache {
   }
 
   /*-----------------------------------------Affect-----------------------------------------------------*/
-  vector<pair<int, int>> ConstructAffectPair(vector<int>& lefts, int right) {
-    vector<pair<int, int>> res_lst;
 
-    for (int& left : lefts) {
-      res_lst.push_back(make_pair(left, right));
+  void Cache::MergeTable(unordered_map<int, unordered_set<int>>& dst, unordered_map<int, unordered_set<int>>& src) {
+    //merge from src into dst, will merge the vectors if the keys overlap
+    dst.merge(src);
+
+    for (unordered_map<int, unordered_set<int>>::iterator it = src.begin(); it != src.end(); it++) {
+      int key = it->first;
+      dst[key].merge(src[key]);
     }
-
-    return res_lst;
   }
-  
+
   void Cache::ConstructAssignAffectPair(int assign_stmt,
-      unordered_map<int, vector<int>>& last_modified_table, vector<pair<int, int>>& affect_lst ) {
+      unordered_map<int, unordered_set<int>>& last_modified_table, vector<pair<int, int>>& affect_lst ) {
     vector<int> used_vars = pkb_.GetUsesVarByStmt(assign_stmt);
 
     for (int& used_var : used_vars) {
         //check used_var in LMT
       if (last_modified_table.find(used_var) != last_modified_table.end()) {
-        vector<pair<int, int>> curr_res_lst = ConstructAffectPair(last_modified_table[used_var], assign_stmt);
-        affect_lst.insert(affect_lst.end(), curr_res_lst.begin(), curr_res_lst.end());
+        for (const int left : last_modified_table[used_var]) {
+          affect_lst.push_back(make_pair(left, assign_stmt));
+        }
       }
     }
   }
@@ -40,9 +43,9 @@ namespace pql_cache {
     //LMT maps the variable to the stmt that modifies it  
     //It is mapped to a vector because we could have multiple assign statements modifying same variable
     //e.g. if (1==1) then {a = a + 1;} else {a = a + 1;}
-    unordered_map<int, vector<int>> last_modified_table;
+    unordered_map<int, unordered_set<int>> last_modified_table;
     vector<pair<int, int>> affect_lst;
-    stack<unordered_map<int, vector<int>>> last_modified_stack;
+    stack<unordered_map<int, unordered_set<int>>> last_modified_stack;
     stack<shared_ptr<GraphNode>> ptr_stack;
     
     shared_ptr<GraphNode> curr = head.GetNext();
@@ -60,7 +63,7 @@ namespace pql_cache {
             int modvar = pkb_.GetModifiesVarByStmt(curr_stmt)[0];
             ConstructAssignAffectPair(curr_stmt, last_modified_table, affect_lst);
             //Add LastModified(modvar, curr_stmt)
-            last_modified_table[modvar] = vector<int>{ curr_stmt };
+            last_modified_table[modvar] = unordered_set<int>{ curr_stmt };
           }
 
           if (curr_type == EntityIdentifier::kRead) {
@@ -80,7 +83,7 @@ namespace pql_cache {
 
       } else if (curr->GetNodeType() == NodeType::IF) {
 
-        unordered_map<int, vector<int>> last_modified_table_else = last_modified_table;
+        unordered_map<int, unordered_set<int>> last_modified_table_else = last_modified_table;
         //we push this copy for else branch later
         last_modified_stack.push(last_modified_table_else);
         ptr_stack.push(curr);
@@ -88,14 +91,14 @@ namespace pql_cache {
 
       } else if (curr->GetNodeType() == NodeType::WHILE) {
         //make a copy
-        unordered_map<int, vector<int>> before_last_modified_table = last_modified_table;
+        unordered_map<int, unordered_set<int>> before_last_modified_table = last_modified_table;
         last_modified_stack.push(before_last_modified_table);
         ptr_stack.push(curr);
         curr = curr->GetNext();
 
       } else if (curr->GetNodeType() == NodeType::THENEND) {
 
-        unordered_map<int, vector<int>> last_modified_table_else = move(last_modified_stack.top());
+        unordered_map<int, unordered_set<int>> last_modified_table_else = move(last_modified_stack.top());
         last_modified_stack.pop();
         //store the current LMT to be merge after else branch is finish
         last_modified_stack.push(last_modified_table);
@@ -108,10 +111,9 @@ namespace pql_cache {
 
       } else if (curr->GetNodeType() == NodeType::IFEND) {
         
-        unordered_map<int, vector<int >> last_modified_table_then = move(last_modified_stack.top());
+        unordered_map<int, unordered_set<int >> last_modified_table_then = move(last_modified_stack.top());
         last_modified_stack.pop();
-        //merge the two tables
-
+        MergeTable(last_modified_table, last_modified_table_then);
         curr = curr->GetNext();
 
       } else {
@@ -119,13 +121,13 @@ namespace pql_cache {
 
         shared_ptr<GraphNode> while_node = move(ptr_stack.top());
         ptr_stack.pop();
-        unordered_map<int, vector<int >> before_last_modified_table = move(last_modified_stack.top());
+        unordered_map<int, unordered_set<int >> before_last_modified_table = move(last_modified_stack.top());
         last_modified_stack.pop();
 
         if (last_modified_table == before_last_modified_table) {
           curr = while_node->GetAlternative();
         } else {
-          //merge the two tables
+          MergeTable(last_modified_table, before_last_modified_table);
           curr = while_node;
         }
       }
