@@ -199,7 +199,7 @@ namespace pql {
     ps.EatWhiteSpaces();
     if (ps.Peek() == '\"') {
       ps.Consume();
-      ps.ParseExpression();
+      ps.ParseExpression(Parser::query);
       ps.Expect("\"");
       ps.EatWhiteSpaces();
       ps.Expect(")");
@@ -208,7 +208,7 @@ namespace pql {
       ps.EatWhiteSpaces();
       if (ps.Peek() == '\"') {
         ps.Consume();
-        ps.ParseExpression();
+        ps.ParseExpression(Parser::query);
         ps.Expect("\"");
         ps.EatWhiteSpaces();
         ps.Expect("_");
@@ -248,13 +248,13 @@ namespace pql {
       expression = "_";
     } else if (!exact) {
       ps.Expect("\"");
-      expression = ps.ParseExpression();
+      expression = ps.ParseExpression(Parser::query);
       ps.Expect("\"");
       ps.EatWhiteSpaces();
       ps.Expect("_");
     } else {
       ps.Expect("\"");
-      expression = ps.ParseExpression();
+      expression = ps.ParseExpression(Parser::query);
       ps.Expect("\"");
     }
     ps.EatWhiteSpaces();
