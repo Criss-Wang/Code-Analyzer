@@ -9,8 +9,8 @@
 using namespace std;
 
 //Set of token type that does not have a statement number
-const unordered_set<NodeType> NodeTypeWithoutStmtNumSet{ NodeType::START, NodeType::END, 
-  NodeType::THENSTART, NodeType::ELSESTART, NodeType::WHILESTART, NodeType::IFEND, NodeType::WHILEEND };
+const unordered_set<NodeType> NodeTypeWithoutStmtNumSet 
+ { NodeType::START, NodeType::END, NodeType::IFEND, NodeType::THENEND, NodeType::WHILEEND };
 
 //Map valid statment types to EntityIdentifier
 const unordered_map<CFGTokenType, EntityIdentifier> NodeTypeToEntityIdentifierMap{
@@ -69,6 +69,10 @@ void GraphNode::append(CFGToken& token) {
 
 std::shared_ptr<GraphNode> GraphNode::GetNext() {
   return next_node_;
+}
+
+std::shared_ptr<GraphNode> GraphNode::GetAlternative() {
+  return alternative_node_;
 }
 
 NodeType GraphNode::GetNodeType() {

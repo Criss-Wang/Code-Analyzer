@@ -51,7 +51,7 @@ TEST_CASE("TEST GenerateCfg function") {
     CFGToken(CFGTokenType::kEnd, 0),
   });
 
-  shared_ptr<GraphNode> head = CFG::GenerateCfg(tokens2);
+  shared_ptr<GraphNode> head = CFG::GenerateCfg(tokens1);
 
   REQUIRE(1 == 1);
 }

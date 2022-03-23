@@ -14,9 +14,7 @@ enum class NodeType {
   IF,
   WHILE,
   END,
-  THENSTART,
-  ELSESTART,
-  WHILESTART,
+  THENEND,
   IFEND,
   WHILEEND
 };
@@ -43,6 +41,8 @@ class GraphNode {
     void append(CFGToken& token);
 
     std::shared_ptr<GraphNode> GetNext();
+
+    std::shared_ptr<GraphNode> GetAlternative();
 
     NodeType GetNodeType();
 

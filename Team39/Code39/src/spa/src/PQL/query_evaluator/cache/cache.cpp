@@ -1,5 +1,6 @@
 #include <memory>
 #include <map>
+#include<stack>
 
 #include "cache.h"
 
@@ -41,7 +42,9 @@ namespace pql_cache {
     //e.g. if (1==1) then {a = a + 1;} else {a = a + 1;}
     unordered_map<int, vector<int>> last_modified_table;
     vector<pair<int, int>> affect_lst;
-
+    stack<unordered_map<int, vector<int>>> last_modified_stack;
+    stack<shared_ptr<GraphNode>> ptr_stack;
+    
     shared_ptr<GraphNode> curr = head.GetNext();
 
     while (curr->GetNodeType() != NodeType::END) {
@@ -74,8 +77,57 @@ namespace pql_cache {
         }
 
         curr = curr->GetNext();
-      } else if () {
 
+      } else if (curr->GetNodeType() == NodeType::IF) {
+
+        unordered_map<int, vector<int>> last_modified_table_else = last_modified_table;
+        //we push this copy for else branch later
+        last_modified_stack.push(last_modified_table_else);
+        ptr_stack.push(curr);
+        curr = curr->GetNext();
+
+      } else if (curr->GetNodeType() == NodeType::WHILE) {
+        //make a copy
+        unordered_map<int, vector<int>> before_last_modified_table = last_modified_table;
+        last_modified_stack.push(before_last_modified_table);
+        ptr_stack.push(curr);
+        curr = curr->GetNext();
+
+      } else if (curr->GetNodeType() == NodeType::THENEND) {
+
+        unordered_map<int, vector<int>> last_modified_table_else = move(last_modified_stack.top());
+        last_modified_stack.pop();
+        //store the current LMT to be merge after else branch is finish
+        last_modified_stack.push(last_modified_table);
+        //we do a move here since moving is faster than copying and last_modified_table_else will not be reference anymore
+        last_modified_table = move(last_modified_table_else);
+        
+        shared_ptr<GraphNode> if_node = move(ptr_stack.top());
+        ptr_stack.pop();
+        curr = if_node->GetAlternative();
+
+      } else if (curr->GetNodeType() == NodeType::IFEND) {
+        
+        unordered_map<int, vector<int >> last_modified_table_then = move(last_modified_stack.top());
+        last_modified_stack.pop();
+        //merge the two tables
+
+        curr = curr->GetNext();
+
+      } else {
+        //It will be WhileEnd until this point
+
+        shared_ptr<GraphNode> while_node = move(ptr_stack.top());
+        ptr_stack.pop();
+        unordered_map<int, vector<int >> before_last_modified_table = move(last_modified_stack.top());
+        last_modified_stack.pop();
+
+        if (last_modified_table == before_last_modified_table) {
+          curr = while_node->GetAlternative();
+        } else {
+          //merge the two tables
+          curr = while_node;
+        }
       }
     }
 

@@ -48,39 +48,32 @@ std::shared_ptr<GraphNode> CFG::GenerateCfg(vector<CFGToken>& tokens) {
   stack<shared_ptr<GraphNode>> stack;
 
   for (int index = 1; index < tokens.size(); index++) {
-
-    //Need to create a new node when the previous node is If/While Node or
-    //The current node is If/While Node
     if (tokens[index].type_ == CFGTokenType::kWhile) {
       shared_ptr<GraphNode> while_node = make_shared<GraphNode>(tokens[index]);
-      shared_ptr<GraphNode> next_node = make_shared<GraphNode>(NodeType::WHILESTART);
       
       Connect(curr, while_node);
-      Connect(while_node, next_node);
       stack.push(while_node);
-      
-      curr = next_node;
+      curr = while_node;
 
     } else if (tokens[index].type_ == CFGTokenType::kIf) {
       shared_ptr<GraphNode> if_node = make_shared<GraphNode>(tokens[index]);
-      shared_ptr<GraphNode> next_node = make_shared<GraphNode>(NodeType::THENSTART);
 
       Connect(curr, if_node);
-      Connect(if_node, next_node);
       stack.push(if_node);
 
-      curr = next_node;
+      curr = if_node;
+
     } else if (tokens[index].type_ == CFGTokenType::kThenEnd) {
-      //need to push the curr node to the stack
-      //and move the ptr to the nearest if node
       shared_ptr<GraphNode> if_node = stack.top();
       stack.pop();
-      stack.push(curr);
+      shared_ptr<GraphNode> then_end_node = make_shared<GraphNode>(NodeType::THENEND);
 
-      shared_ptr<GraphNode> next_node = make_shared<GraphNode>(NodeType::ELSESTART);
+      Connect(curr, then_end_node);
+      //The then_end_node is pushed to the stack because will need to connect it with if_end_node when else branch is done
+      stack.push(then_end_node);
 
-      Connect(curr, next_node);
-      curr = next_node;
+      //We move the curr to the nearest if node to start constructing its else branch
+      curr = if_node;
 
     } else if (tokens[index].type_ == CFGTokenType::kWhileEnd) {
       shared_ptr<GraphNode> while_node = stack.top();
@@ -106,6 +99,12 @@ std::shared_ptr<GraphNode> CFG::GenerateCfg(vector<CFGToken>& tokens) {
     } else if (tokens[index].type_ == CFGTokenType::kEnd) {
       shared_ptr<GraphNode> end_node = make_shared<GraphNode>(NodeType::END);
       Connect(curr, end_node);
+    } else if (curr->GetNodeType() == NodeType::WHILE || curr->GetNodeType() == NodeType::IF) {
+      //The token type can only be stmt node up to this point
+      //need to create a new node if the curr is a while/if node
+      shared_ptr<GraphNode> new_node = make_shared<GraphNode>(tokens[index]);
+      Connect(curr, new_node);
+      curr = new_node;
     } else {
       //curr node and the curr node can be join into the same node
       curr->append(tokens[index]);

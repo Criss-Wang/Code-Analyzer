@@ -18,12 +18,11 @@ namespace pql_cache {
         pkb_ = pkb;
       }
 
-    private:
+    public:
       std::vector<std::pair<int, int>> ComputeNextTRelationship(GraphNode& head);
 
       std::vector<std::pair<int, int>> ComputeAffectsRelationship(GraphNode& head);
 
-    public:
       void ConstructAssignAffectPair(int assign_stmt,
          std::unordered_map<int, std::vector<int>>& last_modified_table, vector<pair<int, int>>& affect_lst);
   };
