@@ -3,87 +3,87 @@
 
 #define INVALID_INDEX -1;
 
-FollowsTable* Pkb::GetFollowsTable() {
+shared_ptr<FollowsTable> Pkb::GetFollowsTable() {
   return follows_table_;
 }
 
-FollowsStarTable* Pkb::GetFollowsStarTable() {
+shared_ptr<FollowsStarTable> Pkb::GetFollowsStarTable() {
   return follows_star_table_;
 }
 
-FollowsBeforeTable* Pkb::GetFollowsBeforeTable() {
+shared_ptr<FollowsBeforeTable> Pkb::GetFollowsBeforeTable() {
   return follows_before_table_;
 }
 
-FollowsBeforeStarTable* Pkb::GetFollowsBeforeStarTable() {
+shared_ptr<FollowsBeforeStarTable> Pkb::GetFollowsBeforeStarTable() {
   return follows_before_star_table_;
 }
 
-ParentTable* Pkb::GetParentTable() {
+shared_ptr<ParentTable> Pkb::GetParentTable() {
   return parent_table_;
 }
 
-ChildTable* Pkb::GetChildTable() {
+shared_ptr<ChildTable> Pkb::GetChildTable() {
   return child_table_;
 }
 
-ParentStarTable* Pkb::GetParentStarTable() {
+shared_ptr<ParentStarTable> Pkb::GetParentStarTable() {
   return parent_star_table_;
 }
 
-ChildStarTable* Pkb::GetChildStarTable() {
+shared_ptr<ChildStarTable> Pkb::GetChildStarTable() {
   return child_star_table_;
 }
 
-CallsTable* Pkb::GetCallsTable() {
+shared_ptr<CallsTable> Pkb::GetCallsTable() {
   return calls_table_;
 }
 
-CallsStarTable* Pkb::GetCallsStarTable() {
+shared_ptr<CallsStarTable> Pkb::GetCallsStarTable() {
   return calls_star_table_;
 }
 
-CalledByTable* Pkb::GetCalledByTable() {
+shared_ptr<CalledByTable> Pkb::GetCalledByTable() {
   return called_by_table_;
 }
 
-CalledByStarTable* Pkb::GetCalledByStarTable() {
+shared_ptr<CalledByStarTable> Pkb::GetCalledByStarTable() {
   return called_by_star_table_;
 }
 
-ModifiesStmtToVariablesTable* Pkb::GetModifiesStmtToVariablesTable() {
+shared_ptr<ModifiesStmtToVariablesTable> Pkb::GetModifiesStmtToVariablesTable() {
   return modifies_stmt_to_variables_table_;
 }
 
-ModifiesVariableToStmtsTable* Pkb::GetModifiesVariableToStmtsTable() {
+shared_ptr<ModifiesVariableToStmtsTable> Pkb::GetModifiesVariableToStmtsTable() {
   return modifies_variable_to_stmts_table_;
 }
 
-ModifiesProcToVariablesTable* Pkb::GetModifiesProcToVariablesTable() {
+shared_ptr<ModifiesProcToVariablesTable> Pkb::GetModifiesProcToVariablesTable() {
   return modifies_proc_to_variables_table_;
 }
 
-ModifiesVariableToProcsTable* Pkb::GetModifiesVariableToProcsTable() {
+shared_ptr<ModifiesVariableToProcsTable> Pkb::GetModifiesVariableToProcsTable() {
   return modifies_variable_to_procs_table_;
 }
 
-UsesStmtToVariablesTable* Pkb::GetUsesStmtToVariablesTable() {
+shared_ptr<UsesStmtToVariablesTable> Pkb::GetUsesStmtToVariablesTable() {
   return uses_stmt_to_variables_table_;
 }
 
-UsesVariableToStmtsTable* Pkb::GetUsesVariableToStmtsTable() {
+shared_ptr<UsesVariableToStmtsTable> Pkb::GetUsesVariableToStmtsTable() {
   return uses_variable_to_stmts_table_;
 }
 
-UsesProcToVariablesTable* Pkb::GetUsesProcToVariablesTable() {
+shared_ptr<UsesProcToVariablesTable> Pkb::GetUsesProcToVariablesTable() {
   return uses_proc_to_variables_table_;
 }
 
-UsesVariableToProcsTable* Pkb::GetUsesVariableToProcsTable() {
+shared_ptr<UsesVariableToProcsTable> Pkb::GetUsesVariableToProcsTable() {
   return uses_variable_to_procs_table_;
 }
 
-CallerTable* Pkb::GetCallerTable() {
+shared_ptr<CallerTable> Pkb::GetCallerTable() {
   return caller_table_;
 }
 
@@ -212,7 +212,7 @@ vector<pair<int, int>> UnfoldResults(T1 table_to_unfold) {
 
 vector<pair<int, int>> Pkb::GetAllCallsPairs() const {
   try {
-    return UnfoldResults<CallsTable*>(calls_table_);
+    return UnfoldResults<shared_ptr<CallsTable>>(calls_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -220,7 +220,7 @@ vector<pair<int, int>> Pkb::GetAllCallsPairs() const {
 
 vector<pair<int, int>> Pkb::GetAllTransitiveCallsPairs() const {
   try {
-    return UnfoldResults<CallsStarTable*>(calls_star_table_);
+    return UnfoldResults<shared_ptr<CallsStarTable>>(calls_star_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -228,7 +228,7 @@ vector<pair<int, int>> Pkb::GetAllTransitiveCallsPairs() const {
 
 vector<pair<int, int>> Pkb::GetAllParentPairs() const {
   try {
-    return UnfoldResults<ParentTable*>(parent_table_);
+    return UnfoldResults<shared_ptr<ParentTable>>(parent_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -236,7 +236,7 @@ vector<pair<int, int>> Pkb::GetAllParentPairs() const {
 
 vector<pair<int, int>> Pkb::GetAllTransitiveParentPairs() const {
   try {
-    return UnfoldResults<ParentStarTable*>(parent_star_table_);
+    return UnfoldResults<shared_ptr<ParentStarTable>>(parent_star_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -309,7 +309,7 @@ vector<pair<int, int>> Pkb::GetAllFollowsPairs() const {
 
 vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs() const {
   try {
-    return UnfoldResults<FollowsStarTable*>(follows_star_table_);
+    return UnfoldResults<shared_ptr<FollowsStarTable>>(follows_star_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -346,7 +346,7 @@ vector<int> Pkb::GetUsesVarByStmt(const int stmt) const {
 
 vector<pair<int, int>> Pkb::GetAllUsesStmtVarPairs() const {
   try {
-    return UnfoldResults<UsesStmtToVariablesTable*>(uses_stmt_to_variables_table_);
+    return UnfoldResults<shared_ptr<UsesStmtToVariablesTable>>(uses_stmt_to_variables_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -379,7 +379,7 @@ vector<int> Pkb::GetUsesVarsByProc(const int proc_idx) const {
 
 vector<pair<int, int>> Pkb::GetAllUsesProcVarPairs() const {
   try {
-    return UnfoldResults<UsesProcToVariablesTable*>(uses_proc_to_variables_table_);
+    return UnfoldResults<shared_ptr<UsesProcToVariablesTable>>(uses_proc_to_variables_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -416,7 +416,7 @@ vector<int> Pkb::GetModifiesVarByStmt(const int stmt) const {
 
 vector<pair<int, int>> Pkb::GetAllModifiesStmtVarPairs() const {
   try {
-    return UnfoldResults<ModifiesStmtToVariablesTable*>(modifies_stmt_to_variables_table_);
+    return UnfoldResults<shared_ptr<ModifiesStmtToVariablesTable>>(modifies_stmt_to_variables_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -449,7 +449,7 @@ vector<int> Pkb::GetModifiesVarsByProc(const int proc_idx) const {
 
 vector<pair<int, int>> Pkb::GetAllModifiesProcVarPairs() const {
   try {
-    return UnfoldResults<ModifiesProcToVariablesTable*>(modifies_proc_to_variables_table_);
+    return UnfoldResults<shared_ptr<ModifiesProcToVariablesTable>>(modifies_proc_to_variables_table_);
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -482,7 +482,7 @@ unordered_set<int> Pkb::GetStmtsWithExactPattern(const string& pattern) const {
 unordered_set<string> Pkb::GetAllPatternVariablesInStmt(const int stmt_no, 
   const TableIdentifier table_identifier) const {
   unordered_set<string> empty_set{};
-  Table<int, unordered_set<string>>* search_table;
+  shared_ptr<Table<int, unordered_set<string>>> search_table;
   if (table_identifier == TableIdentifier::kIfPattern) {
     search_table = if_stmt_to_pattern_table_;
   } else if (table_identifier == TableIdentifier::kWhilePattern) {
@@ -499,7 +499,7 @@ unordered_set<string> Pkb::GetAllPatternVariablesInStmt(const int stmt_no,
 unordered_set<int> Pkb::GetAllStmtsWithPatternVariable(const string& pattern_var_string,
   const TableIdentifier table_identifier) const {
   unordered_set<int> empty_set{};
-  Table<string, unordered_set<int>>* search_table;
+  shared_ptr<Table<string, unordered_set<int>>> search_table;
   if (table_identifier == TableIdentifier::kIfPattern) {
     search_table = if_pattern_to_stmt_table_;
   } else if(table_identifier == TableIdentifier::kWhilePattern) {
@@ -515,7 +515,7 @@ unordered_set<int> Pkb::GetAllStmtsWithPatternVariable(const string& pattern_var
 
 vector<pair<int, string>> Pkb::GetContainerStmtVarPair(const TableIdentifier table_identifier) const {
   vector<pair<int, string>> result;
-  Table<int, unordered_set<string>>* search_table;
+  shared_ptr<Table<int, unordered_set<string>>> search_table;
   if (table_identifier == TableIdentifier::kIfPattern) {
     search_table = if_stmt_to_pattern_table_;
   } else if (table_identifier == TableIdentifier::kWhilePattern) {
@@ -644,7 +644,7 @@ bool Pkb::AddUsesP(const string& key, const vector<string>& value) {
   return add_success;
 }
 
-bool Pkb::AddPatternToTable(bool& add_success, const unordered_set<string> pattern_set, Table<string, unordered_set<int>>* table_to_update, const int line_num) {
+bool Pkb::AddPatternToTable(bool& add_success, const unordered_set<string> pattern_set, shared_ptr<Table<string, unordered_set<int>>> table_to_update, const int line_num) {
   for (auto& p : pattern_set) {
     if (!table_to_update->KeyExistsInTable(p)) {
       add_success = add_success && table_to_update->AddKeyValuePair(p, unordered_set<int>{line_num});
@@ -657,7 +657,7 @@ bool Pkb::AddPatternToTable(bool& add_success, const unordered_set<string> patte
   return add_success;
 }
 
-bool Pkb::UpdateIndexTable(Table<int, string>* index_to_string_table, Table<string, int>* string_to_int_table, const string& entity_value) {
+bool Pkb::UpdateIndexTable(shared_ptr<Table<int, string>> index_to_string_table, shared_ptr<Table<string, int>> string_to_int_table, const string& entity_value) {
   try {
     vector<string> curr_string_lst = string_to_int_table->GetKeyLst();
     if (find(curr_string_lst.begin(), curr_string_lst.end(), entity_value) != curr_string_lst.end()) return true;

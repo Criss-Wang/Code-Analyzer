@@ -23,55 +23,55 @@ struct HashFunction {
 class Pkb {
   private:
     // Entity tables
-    AssignTable *assign_table_ = new AssignTable();
-    ReadTable *read_table_ = new ReadTable();
-    PrintTable *print_table_ = new PrintTable();
-    ConstantTable *constant_table_ = new ConstantTable();
-    CallerTable* caller_table_ = new CallerTable();
-    IfTable *if_table_ = new IfTable();
-    WhileTable *while_table_ = new WhileTable();
+    shared_ptr<AssignTable> assign_table_ = make_shared<AssignTable>();
+    shared_ptr<ReadTable> read_table_ = make_shared<ReadTable>();
+    shared_ptr<PrintTable> print_table_ = make_shared<PrintTable>();
+    shared_ptr<ConstantTable> constant_table_ = make_shared<ConstantTable>();
+    shared_ptr<CallerTable> caller_table_ = make_shared<CallerTable>();
+    shared_ptr<IfTable> if_table_ = make_shared<IfTable>();
+    shared_ptr<WhileTable> while_table_ = make_shared<WhileTable>();
     // Procedure name mapping to a pair of integers - the start and end numbers for that procedure
-    Table<string, pair<int, int>>*proc_range_table_ = new Table<string, pair<int, int>>();
+    Table<string, pair<int, int>> *proc_range_table_ = new Table<string, pair<int, int>>();
 
     // Index tables
-    EntityToIndexTable* var_index_table_ = new EntityToIndexTable();
-    IndexToEntityTable* index_var_table_ = new IndexToEntityTable();
-    EntityToIndexTable* proc_index_table_ = new EntityToIndexTable();
-    IndexToEntityTable* index_proc_table_ = new IndexToEntityTable();
+    shared_ptr<EntityToIndexTable> var_index_table_ = make_shared<EntityToIndexTable>();
+    shared_ptr<IndexToEntityTable> index_var_table_ = make_shared<IndexToEntityTable>();
+    shared_ptr<EntityToIndexTable> proc_index_table_ = make_shared<EntityToIndexTable>();
+    shared_ptr<IndexToEntityTable> index_proc_table_ = make_shared<IndexToEntityTable>();
 
     // Relation tables
-    FollowsTable *follows_table_ = new FollowsTable();
-    FollowsBeforeTable *follows_before_table_ = new FollowsBeforeTable();
-    FollowsStarTable *follows_star_table_ = new FollowsStarTable();
-    FollowsBeforeStarTable *follows_before_star_table_ = new FollowsBeforeStarTable();
-    ParentTable *parent_table_ = new ParentTable();
-    ChildTable *child_table_ = new ChildTable();
-    ParentStarTable *parent_star_table_ = new ParentStarTable();
-    ChildStarTable *child_star_table_ = new ChildStarTable();
-    CallsTable *calls_table_ = new CallsTable();
-    CalledByTable *called_by_table_ = new CalledByTable();
-    CallsStarTable *calls_star_table_ = new CallsStarTable();
-    CalledByStarTable *called_by_star_table_ = new CalledByStarTable();
-    NextTable *next_table_ = new NextTable();
-    BeforeTable *before_table_ = new BeforeTable();
+    shared_ptr<FollowsTable> follows_table_ = make_shared<FollowsTable>();
+    shared_ptr<FollowsBeforeTable> follows_before_table_ = make_shared<FollowsBeforeTable>();
+    shared_ptr<FollowsStarTable> follows_star_table_ = make_shared<FollowsStarTable>();
+    shared_ptr<FollowsBeforeStarTable> follows_before_star_table_ = make_shared<FollowsBeforeStarTable>();
+    shared_ptr<ParentTable> parent_table_ = make_shared<ParentTable>();
+    shared_ptr<ChildTable> child_table_ = make_shared<ChildTable>();
+    shared_ptr<ParentStarTable> parent_star_table_ = make_shared<ParentStarTable>();
+    shared_ptr<ChildStarTable> child_star_table_ = make_shared<ChildStarTable>();
+    shared_ptr<CallsTable> calls_table_ = make_shared<CallsTable>();
+    shared_ptr<CalledByTable> called_by_table_ = make_shared<CalledByTable>();
+    shared_ptr<CallsStarTable> calls_star_table_ = make_shared<CallsStarTable>();
+    shared_ptr<CalledByStarTable> called_by_star_table_ = make_shared<CalledByStarTable>();
+    shared_ptr<NextTable> next_table_ = make_shared<NextTable>();
+    shared_ptr<BeforeTable> before_table_ = make_shared<BeforeTable>();
 
-    UsesStmtToVariablesTable *uses_stmt_to_variables_table_ = new UsesStmtToVariablesTable();
-    UsesVariableToStmtsTable *uses_variable_to_stmts_table_ = new UsesVariableToStmtsTable();
-    UsesProcToVariablesTable *uses_proc_to_variables_table_ = new UsesProcToVariablesTable();
-    UsesVariableToProcsTable *uses_variable_to_procs_table_ = new UsesVariableToProcsTable();
-    ModifiesStmtToVariablesTable *modifies_stmt_to_variables_table_ = new ModifiesStmtToVariablesTable();
-    ModifiesVariableToStmtsTable *modifies_variable_to_stmts_table_ = new ModifiesVariableToStmtsTable();
-    ModifiesProcToVariablesTable *modifies_proc_to_variables_table_ = new ModifiesProcToVariablesTable();
-    ModifiesVariableToProcsTable *modifies_variable_to_procs_table_ = new ModifiesVariableToProcsTable();
-
+    shared_ptr<UsesStmtToVariablesTable> uses_stmt_to_variables_table_ = make_shared<UsesStmtToVariablesTable>();
+    shared_ptr<UsesVariableToStmtsTable> uses_variable_to_stmts_table_ = make_shared<UsesVariableToStmtsTable>();
+    shared_ptr<UsesProcToVariablesTable> uses_proc_to_variables_table_ = make_shared<UsesProcToVariablesTable>();
+    shared_ptr<UsesVariableToProcsTable> uses_variable_to_procs_table_ = make_shared<UsesVariableToProcsTable>();
+    shared_ptr<ModifiesStmtToVariablesTable> modifies_stmt_to_variables_table_ = make_shared<ModifiesStmtToVariablesTable>();
+    shared_ptr<ModifiesVariableToStmtsTable> modifies_variable_to_stmts_table_ = make_shared<ModifiesVariableToStmtsTable>();
+    shared_ptr<ModifiesProcToVariablesTable> modifies_proc_to_variables_table_ = make_shared<ModifiesProcToVariablesTable>();
+    shared_ptr<ModifiesVariableToProcsTable> modifies_variable_to_procs_table_ = make_shared<ModifiesVariableToProcsTable>();
+    
     // Pattern tables
-    Table<int, unordered_set<string>> *assign_stmt_to_patterns_table_ = new Table<int, unordered_set<string>>();
-    Table<string, unordered_set<int>> *assign_pattern_to_stmts_table_ = new Table<string, unordered_set<int>>();
-    Table<string, unordered_set<int>> *exact_pattern_to_stmt_table_ = new Table<string, unordered_set<int>>();
-    Table<string, unordered_set<int>>* if_pattern_to_stmt_table_ = new Table<string, unordered_set<int>>();
-    Table<int, unordered_set<string>>* if_stmt_to_pattern_table_ = new Table<int, unordered_set<string>>();
-    Table<string, unordered_set<int>>* while_pattern_to_stmt_table_ = new Table<string, unordered_set<int>>();
-    Table<int, unordered_set<string>>* while_stmt_to_pattern_table_ = new Table<int, unordered_set<string>>();
+    shared_ptr<Table<int, unordered_set<string>>> assign_stmt_to_patterns_table_ = make_shared<Table<int, unordered_set<string>>>();
+    shared_ptr<Table<string, unordered_set<int>>> assign_pattern_to_stmts_table_ = make_shared<Table<string, unordered_set<int>>>();
+    shared_ptr<Table<string, unordered_set<int>>> exact_pattern_to_stmt_table_ = make_shared<Table<string, unordered_set<int>>>();
+    shared_ptr<Table<string, unordered_set<int>>> if_pattern_to_stmt_table_ = make_shared<Table<string, unordered_set<int>>>();
+    shared_ptr<Table<int, unordered_set<string>>> if_stmt_to_pattern_table_ = make_shared<Table<int, unordered_set<string>>>();
+    shared_ptr<Table<string, unordered_set<int>>> while_pattern_to_stmt_table_ = make_shared<Table<string, unordered_set<int>>>();
+    shared_ptr<Table<int, unordered_set<string>>> while_stmt_to_pattern_table_ = make_shared<Table<int, unordered_set<string>>>();
 
     // Entity sets - statement numbers
     unordered_set<int> stmt_set_;
@@ -98,8 +98,8 @@ class Pkb {
     bool AddModifiesP(const string& key, const vector<string>& value);
     bool AddUses(int key, const vector<string>& value);
     bool AddUsesP(const string& key, const vector<string>& value);
-    bool AddPatternToTable(bool& add_success, unordered_set<string> pattern_set, Table<string, unordered_set<int>>* table_to_update, int line_num);
-    bool UpdateIndexTable(Table<int, string>* index_to_string_table, Table<string, int>* string_to_int_table, const string& entity_value);
+    bool AddPatternToTable(bool& add_success, unordered_set<string> pattern_set, shared_ptr<Table<string, unordered_set<int>>> table_to_update, int line_num);
+    bool UpdateIndexTable(shared_ptr<Table<int, string>> index_to_string_table, shared_ptr<Table<string, int>> string_to_int_table, const string& entity_value);
 
   public:
     /**
@@ -119,27 +119,27 @@ class Pkb {
     bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
 
     // Get tables
-    FollowsTable* GetFollowsTable();
-    FollowsStarTable* GetFollowsStarTable();
-    FollowsBeforeTable* GetFollowsBeforeTable();
-    FollowsBeforeStarTable* GetFollowsBeforeStarTable();
-    ParentTable* GetParentTable();
-    ChildTable* GetChildTable();
-    ParentStarTable* GetParentStarTable();
-    ChildStarTable* GetChildStarTable();
-    CallsTable* GetCallsTable();
-    CallsStarTable* GetCallsStarTable();
-    CalledByTable* GetCalledByTable();
-    CalledByStarTable* GetCalledByStarTable();
-    ModifiesStmtToVariablesTable* GetModifiesStmtToVariablesTable();
-    ModifiesVariableToStmtsTable* GetModifiesVariableToStmtsTable();
-    ModifiesProcToVariablesTable* GetModifiesProcToVariablesTable();
-    ModifiesVariableToProcsTable* GetModifiesVariableToProcsTable();
-    UsesStmtToVariablesTable* GetUsesStmtToVariablesTable();
-    UsesVariableToStmtsTable* GetUsesVariableToStmtsTable();
-    UsesProcToVariablesTable* GetUsesProcToVariablesTable();
-    UsesVariableToProcsTable* GetUsesVariableToProcsTable();
-    CallerTable* GetCallerTable();
+    shared_ptr<FollowsTable> GetFollowsTable();
+    shared_ptr<FollowsStarTable> GetFollowsStarTable();
+    shared_ptr<FollowsBeforeTable> GetFollowsBeforeTable();
+    shared_ptr<FollowsBeforeStarTable> GetFollowsBeforeStarTable();
+    shared_ptr<ParentTable> GetParentTable();
+    shared_ptr<ChildTable> GetChildTable();
+    shared_ptr<ParentStarTable> GetParentStarTable();
+    shared_ptr<ChildStarTable> GetChildStarTable();
+    shared_ptr<CallsTable> GetCallsTable();
+    shared_ptr<CallsStarTable> GetCallsStarTable();
+    shared_ptr<CalledByTable> GetCalledByTable();
+    shared_ptr<CalledByStarTable> GetCalledByStarTable();
+    shared_ptr<ModifiesStmtToVariablesTable> GetModifiesStmtToVariablesTable();
+    shared_ptr<ModifiesVariableToStmtsTable> GetModifiesVariableToStmtsTable();
+    shared_ptr<ModifiesProcToVariablesTable> GetModifiesProcToVariablesTable();
+    shared_ptr<ModifiesVariableToProcsTable> GetModifiesVariableToProcsTable();
+    shared_ptr<UsesStmtToVariablesTable> GetUsesStmtToVariablesTable();
+    shared_ptr<UsesVariableToStmtsTable> GetUsesVariableToStmtsTable();
+    shared_ptr<UsesProcToVariablesTable> GetUsesProcToVariablesTable();
+    shared_ptr<UsesVariableToProcsTable> GetUsesVariableToProcsTable();
+    shared_ptr<CallerTable> GetCallerTable();
 
     // Relationship utility APIs for PQL
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;

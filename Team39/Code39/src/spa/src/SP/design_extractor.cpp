@@ -285,39 +285,39 @@ void PopulateReverseNestedModifiesSOrUsesSForCalls(CallerTable caller_table, Chi
 
 int PopulateNestedRelationships(Pkb& pkb) {
   try {
-    FollowsTable* follows_table = pkb.GetFollowsTable();
-    FollowsStarTable* follows_star_table = pkb.GetFollowsStarTable();
-    FollowsBeforeTable* follows_before_table = pkb.GetFollowsBeforeTable();
-    FollowsBeforeStarTable* follows_before_star_table = pkb.GetFollowsBeforeStarTable();
-    ParentTable* parent_table = pkb.GetParentTable();
-    ChildTable* child_table = pkb.GetChildTable();
-    ParentStarTable* parent_star_table = pkb.GetParentStarTable();
-    ChildStarTable* child_star_table = pkb.GetChildStarTable();
-    CallsTable* calls_table = pkb.GetCallsTable();
-    CallsStarTable* calls_star_table = pkb.GetCallsStarTable();
-    CalledByTable* called_by_table = pkb.GetCalledByTable();
-    CalledByStarTable* called_by_star_table = pkb.GetCalledByStarTable();
-    ModifiesStmtToVariablesTable* modifies_stmt_to_variables_table = pkb.GetModifiesStmtToVariablesTable();
-    ModifiesVariableToStmtsTable* modifies_variable_to_stmts_table = pkb.GetModifiesVariableToStmtsTable();
-    ModifiesProcToVariablesTable* modifies_proc_to_variables_table = pkb.GetModifiesProcToVariablesTable();
-    ModifiesVariableToProcsTable* modifies_variable_to_procs_table = pkb.GetModifiesVariableToProcsTable();
-    UsesStmtToVariablesTable* uses_stmt_to_variables_table = pkb.GetUsesStmtToVariablesTable();
-    UsesVariableToStmtsTable* uses_variable_to_stmts_table = pkb.GetUsesVariableToStmtsTable();
-    UsesProcToVariablesTable* uses_proc_to_variables_table = pkb.GetUsesProcToVariablesTable();
-    UsesVariableToProcsTable* uses_variable_to_procs_table = pkb.GetUsesVariableToProcsTable();
-    CallerTable* caller_table = pkb.GetCallerTable();
+    shared_ptr<FollowsTable> follows_table = pkb.GetFollowsTable();
+    shared_ptr<FollowsStarTable> follows_star_table = pkb.GetFollowsStarTable();
+    shared_ptr<FollowsBeforeTable> follows_before_table = pkb.GetFollowsBeforeTable();
+    shared_ptr<FollowsBeforeStarTable> follows_before_star_table = pkb.GetFollowsBeforeStarTable();
+    shared_ptr<ParentTable> parent_table = pkb.GetParentTable();
+    shared_ptr<ChildTable> child_table = pkb.GetChildTable();
+    shared_ptr<ParentStarTable> parent_star_table = pkb.GetParentStarTable();
+    shared_ptr<ChildStarTable> child_star_table = pkb.GetChildStarTable();
+    shared_ptr<CallsTable> calls_table = pkb.GetCallsTable();
+    shared_ptr<CallsStarTable> calls_star_table = pkb.GetCallsStarTable();
+    shared_ptr<CalledByTable> called_by_table = pkb.GetCalledByTable();
+    shared_ptr<CalledByStarTable> called_by_star_table = pkb.GetCalledByStarTable();
+    shared_ptr<ModifiesStmtToVariablesTable> modifies_stmt_to_variables_table = pkb.GetModifiesStmtToVariablesTable();
+    shared_ptr<ModifiesVariableToStmtsTable> modifies_variable_to_stmts_table = pkb.GetModifiesVariableToStmtsTable();
+    shared_ptr<ModifiesProcToVariablesTable> modifies_proc_to_variables_table = pkb.GetModifiesProcToVariablesTable();
+    shared_ptr<ModifiesVariableToProcsTable> modifies_variable_to_procs_table = pkb.GetModifiesVariableToProcsTable();
+    shared_ptr<UsesStmtToVariablesTable> uses_stmt_to_variables_table = pkb.GetUsesStmtToVariablesTable();
+    shared_ptr<UsesVariableToStmtsTable> uses_variable_to_stmts_table = pkb.GetUsesVariableToStmtsTable();
+    shared_ptr<UsesProcToVariablesTable> uses_proc_to_variables_table = pkb.GetUsesProcToVariablesTable();
+    shared_ptr<UsesVariableToProcsTable> uses_variable_to_procs_table = pkb.GetUsesVariableToProcsTable();
+    shared_ptr<CallerTable> caller_table = pkb.GetCallerTable();
 
     // Populate nested follows
-    PopulateForF<FollowsTable*, FollowsStarTable*>(follows_table, follows_star_table);
-    PopulateForF<FollowsBeforeTable*, FollowsBeforeStarTable*>(follows_before_table, follows_before_star_table);
+    PopulateForF<shared_ptr<FollowsTable>, shared_ptr<FollowsStarTable>>(follows_table, follows_star_table);
+    PopulateForF<shared_ptr<FollowsBeforeTable>, shared_ptr<FollowsBeforeStarTable>>(follows_before_table, follows_before_star_table);
 
     // Populate nested parent
-    PopulateForPOrC<ParentTable*, ParentStarTable*>(parent_table, parent_star_table);
-    PopulateForPOrC<ChildTable*, ChildStarTable*>(child_table, child_star_table);
+    PopulateForPOrC<shared_ptr<ParentTable>, shared_ptr<ParentStarTable>>(parent_table, parent_star_table);
+    PopulateForPOrC<shared_ptr<ChildTable>, shared_ptr<ChildStarTable>>(child_table, child_star_table);
 
     // Populate nested calls
-    PopulateForPOrC<CallsTable*, CallsStarTable*>(calls_table, calls_star_table);
-    PopulateForPOrC<CalledByTable*, CalledByStarTable*>(called_by_table, called_by_star_table);
+    PopulateForPOrC<shared_ptr<CallsTable>, shared_ptr<CallsStarTable>>(calls_table, calls_star_table);
+    PopulateForPOrC<shared_ptr<CalledByTable>, shared_ptr<CalledByStarTable>>(called_by_table, called_by_star_table);
 
     // Populate modifies
     PopulateNestedModifiesOrUses(*parent_star_table, *modifies_stmt_to_variables_table);
