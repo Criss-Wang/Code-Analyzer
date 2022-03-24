@@ -12,7 +12,7 @@ namespace pql_clause {
   typedef bool (Pkb::* IsRelHolds)(const pql::RelationshipTypes, const int, const int);
   typedef std::vector<int> (Pkb::* GetRelDomain)(const pql::RelationshipTypes, const int);
   typedef std::vector<int> (Pkb::* GetInverseRelDomain)(const pql::RelationshipTypes, const int);
-  typedef std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)() const;
+  typedef std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)(const pql::RelationshipTypes);
   typedef bool (Pkb::* DoesRelHolds)(const pql::RelationshipTypes);
   typedef void (SuchThatClause::*EvaluateFn)(Pkb&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
 
@@ -80,16 +80,16 @@ namespace pql_clause {
   };
 
   const map<pql::RelationshipTypes, GetRelPairs> GetRelPairsMap = {
-    { pql::kFollows, &Pkb::GetAllFollowsPairs },
-    { pql::kFollowsT, &Pkb::GetAllTransitiveFollowsPairs },
-    { pql::kParent, &Pkb::GetAllParentPairs },
-    { pql::kParentT, &Pkb::GetAllTransitiveParentPairs },
-    { pql::kModifiesS, &Pkb::GetAllModifiesStmtVarPairs },
-    { pql::kUsesS, &Pkb::GetAllUsesStmtVarPairs },
-    { pql::kModifiesP, &Pkb::GetAllModifiesProcVarPairs },
-    { pql::kUsesP, &Pkb::GetAllUsesProcVarPairs },
-    { pql::kCalls, &Pkb::GetAllCallsPairs },
-    { pql::kCallsT, &Pkb::GetAllTransitiveCallsPairs }
+    { pql::kFollows, &Pkb::GetRelArgumentPairs },
+    { pql::kFollowsT, &Pkb::GetRelArgumentPairs },
+    { pql::kParent, &Pkb::GetRelArgumentPairs },
+    { pql::kParentT, &Pkb::GetRelArgumentPairs },
+    { pql::kModifiesS, &Pkb::GetRelArgumentPairs },
+    { pql::kUsesS, &Pkb::GetRelArgumentPairs },
+    { pql::kModifiesP, &Pkb::GetRelArgumentPairs },
+    { pql::kUsesP, &Pkb::GetRelArgumentPairs },
+    { pql::kCalls, &Pkb::GetRelArgumentPairs },
+    { pql::kCallsT, &Pkb::GetRelArgumentPairs }
   };
 
   const map<pql::RelationshipTypes, DoesRelHolds> DoesRelHoldsMap = {
@@ -190,7 +190,7 @@ namespace pql_clause {
   void SuchThatClause::EvaluateWildSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetRelPairs fn = GetRelPairsMap.at(type_);
-    std::vector<std::pair<int, int>> domain_pair = (pkb.*fn)();
+    std::vector<std::pair<int, int>> domain_pair = (pkb.*fn)(type_);
     std::vector<int> domain_with_duplicates = ExtractSecond<int, int>(domain_pair);
     std::vector<int> domain_lst = RemoveDuplicate<int>(domain_with_duplicates);
 
@@ -234,7 +234,7 @@ namespace pql_clause {
   void SuchThatClause::EvaluateSynWild(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetRelPairs fn = GetRelPairsMap.at(type_);
-    std::vector<std::pair<int, int>> domain_pair = (pkb.*fn)();
+    std::vector<std::pair<int, int>> domain_pair = (pkb.*fn)(type_);
     std::vector<int> domain_with_duplicates = ExtractFirst<int, int>(domain_pair);
     std::vector<int> domain_lst = RemoveDuplicate<int>(domain_with_duplicates);
 
@@ -254,7 +254,7 @@ namespace pql_clause {
   void SuchThatClause::EvaluateSynSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetRelPairs fn = GetRelPairsMap.at(type_);
-    std::vector<std::pair<int, int>> domain_pair = (pkb.*fn)();
+    std::vector<std::pair<int, int>> domain_pair = (pkb.*fn)(type_);
     pql_table::Predicate pred(left_, right_, domain_pair);
 
     predicates.push_back(pred);

@@ -56,7 +56,7 @@ TEST_CASE("Test Nested Population for Follows") {
 
     REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kFollowsT, 1) != vector<int>{3, 4});
 
-    vector<pair<int, int>> transitive_follows_pairs = pkb.GetAllTransitiveFollowsPairs();
+    vector<pair<int, int>> transitive_follows_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kFollowsT);
     vector<pair<int, int>> expected_transitive_follows_pairs = vector<pair<int, int>>{make_pair(1, 2), make_pair(1, 3), make_pair(1, 4), make_pair(1, 5),
       make_pair(2, 3), make_pair(2, 4), make_pair(2, 5), make_pair(3, 4), make_pair(3, 5), make_pair(4, 5), make_pair(7, 8), make_pair(7, 9), make_pair(8, 9)};
     vector<pair<int, int>> invalid_first_pair = vector<pair<int, int>>{make_pair(1, 2)};
@@ -134,7 +134,7 @@ TEST_CASE("Test Nested Population for Parent") {
     REQUIRE(children_of_1000 == expected_children);
     REQUIRE(children_of_2 == expected_children);
 
-    vector<pair<int, int>> parent_pairs = pkb.GetAllParentPairs();
+    vector<pair<int, int>> parent_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kParent);
     vector<pair<int, int>> expected_parent_pairs = vector<pair<int, int>>{make_pair(1, 2), make_pair(1, 3), make_pair(1, 6), make_pair(1, 7),
       make_pair(1, 8), make_pair(3, 4), make_pair(3, 5)};
     vector<pair<int, int>> invalid_pairs = vector<pair<int, int>>{make_pair(1, 2)};
@@ -144,7 +144,7 @@ TEST_CASE("Test Nested Population for Parent") {
     REQUIRE(parent_pairs == expected_parent_pairs);
     REQUIRE(parent_pairs != invalid_pairs);
 
-    vector<pair<int, int>> transitive_parent_pairs = pkb.GetAllTransitiveParentPairs();
+    vector<pair<int, int>> transitive_parent_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kParentT);
     vector<pair<int, int>> expected_transitive_parent_pairs = vector<pair<int, int>>{make_pair(1, 2), make_pair(1, 3), make_pair(1, 6), make_pair(1, 7),
       make_pair(1, 8), make_pair(1, 4), make_pair(1, 5), make_pair(3, 4), make_pair(3, 5)};
     // Sort to ensure that ordering of pairs in vector does not matter
@@ -236,7 +236,7 @@ TEST_CASE("Test Nested Population for Calls") {
     std::sort(all_callees_of_p2.begin(), all_callees_of_p2.end());
     REQUIRE(expected_all_callees_of_p2 == all_callees_of_p2);
 
-    vector<pair<int, int>> transitive_calls_pairs = pkb.GetAllTransitiveCallsPairs();
+    vector<pair<int, int>> transitive_calls_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kCallsT);
     vector<pair<int, int>> invalid_pairs = {};
     vector<pair<int, int>> expected_transitive_calls_pairs = vector<pair<int, int>>{make_pair(p1_idx, p4_idx), make_pair(p1_idx, p10_idx), make_pair(p1_idx, p12_idx),
       make_pair(p1_idx, p20_idx), make_pair(p1_idx, p14_idx), make_pair(p1_idx, p18_idx), make_pair(p1_idx, p5_idx), make_pair(p2_idx, p4_idx), make_pair(p2_idx, p10_idx),
@@ -419,7 +419,7 @@ TEST_CASE("Test Nested Population for Uses") {
     REQUIRE(variables == expected_variables);
     REQUIRE(variables != invalid_vector);
 
-    vector<pair<int, int>> stmt_var_pairs = pkb.GetAllUsesStmtVarPairs();
+    vector<pair<int, int>> stmt_var_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kUsesS);
     vector<pair<int, int>> expected_stmt_var_pairs = vector<pair<int, int>>{make_pair(1, c1_idx), make_pair(1, first_idx), make_pair(1, second_idx),
       make_pair(1, third_idx), make_pair(1, fourth_idx), make_pair(1, fifth_idx), make_pair(1, sixth_idx), make_pair(1, c2_idx), make_pair(2, first_idx),
       make_pair(3, second_idx), make_pair(4, c2_idx), make_pair(4, third_idx), make_pair(4, fourth_idx), make_pair(5, third_idx), make_pair(6, fourth_idx),
@@ -549,7 +549,7 @@ TEST_CASE("Test Nested Population for ModifiesP") {
     std::sort(expected_variables.begin(), expected_variables.end());
     REQUIRE(variables == expected_variables);
 
-    vector<pair<int, int>> proc_var_pairs = pkb.GetAllModifiesProcVarPairs();
+    vector<pair<int, int>> proc_var_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kModifiesP);
     vector<pair<int, int>> expected_proc_var_pairs = vector<pair<int, int>>{make_pair(p1_idx, y_idx), make_pair(p1_idx, z_idx), make_pair(p1_idx, a_idx),
       make_pair(p1_idx, b_idx), make_pair(p1_idx, c_idx), make_pair(p1_idx, d_idx), make_pair(p1_idx, e_idx), make_pair(p1_idx, f_idx), make_pair(p1_idx, g_idx),
       make_pair(p4_idx, a_idx), make_pair(p4_idx, b_idx), make_pair(p4_idx, c_idx), make_pair(p4_idx, d_idx), make_pair(p4_idx, e_idx), make_pair(p4_idx, f_idx),
@@ -800,7 +800,7 @@ TEST_CASE("Test Nested Population for ModifiesS with Calls") {
   SECTION("Check calls* population before testing ModifiesS calls") {
     vector<pair<int, int>> expected_transitive_calls_pairs = {make_pair(p1_idx, p4_idx), make_pair(p1_idx, p5_idx), make_pair(p1_idx, p6_idx),
       make_pair(p1_idx, p8_idx), make_pair(p6_idx, p8_idx)};
-    vector<pair<int, int>> transitive_calls_pairs = pkb.GetAllTransitiveCallsPairs();
+    vector<pair<int, int>> transitive_calls_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kCallsT);
     std::sort(expected_transitive_calls_pairs.begin(), expected_transitive_calls_pairs.end());
     std::sort(transitive_calls_pairs.begin(), transitive_calls_pairs.end());
     REQUIRE(transitive_calls_pairs == expected_transitive_calls_pairs);
@@ -809,7 +809,7 @@ TEST_CASE("Test Nested Population for ModifiesS with Calls") {
   SECTION("Check Parent* population before testing ModifiesS calls") {
     vector<pair<int, int>> expected_transitive_parent_pairs = {make_pair(4, 5), make_pair(4, 6), make_pair(4, 7),
       make_pair(4, 8), make_pair(4, 9), make_pair(7, 8), make_pair(7, 9)};
-    vector<pair<int, int>> transitive_parent_pairs = pkb.GetAllTransitiveParentPairs();
+    vector<pair<int, int>> transitive_parent_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kParentT);
     std::sort(expected_transitive_parent_pairs.begin(), expected_transitive_parent_pairs.end());
     std::sort(transitive_parent_pairs.begin(), transitive_parent_pairs.end());
     REQUIRE(transitive_parent_pairs == expected_transitive_parent_pairs);
@@ -820,7 +820,7 @@ TEST_CASE("Test Nested Population for ModifiesS with Calls") {
       make_pair(p1_idx, e_idx), make_pair(p1_idx, f_idx), make_pair(p1_idx, v_idx), make_pair(p1_idx, w_idx), make_pair(p1_idx, x_idx), make_pair(p1_idx, y_idx),
       make_pair(p1_idx, z_idx), make_pair(p5_idx, e_idx), make_pair(p5_idx, f_idx), make_pair(p4_idx, x_idx), make_pair(p4_idx, y_idx),
       make_pair(p4_idx, z_idx), make_pair(p6_idx, v_idx), make_pair(p6_idx, w_idx), make_pair(p8_idx, v_idx)};
-    vector<pair<int, int>> proc_var_pairs = pkb.GetAllModifiesProcVarPairs();
+    vector<pair<int, int>> proc_var_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kModifiesP);
     std::sort(expected_proc_var_pairs.begin(), expected_proc_var_pairs.end());
     std::sort(proc_var_pairs.begin(), proc_var_pairs.end());
     REQUIRE(proc_var_pairs == expected_proc_var_pairs);
@@ -833,7 +833,7 @@ TEST_CASE("Test Nested Population for ModifiesS with Calls") {
       make_pair(9, e_idx), make_pair(9, f_idx), make_pair(10, e_idx), make_pair(11, f_idx), make_pair(12, x_idx), make_pair(13, y_idx), make_pair(14, z_idx),
       make_pair(15, w_idx), make_pair(16, v_idx), make_pair(17, v_idx)
     };
-    vector<pair<int, int>> stmt_var_pairs = pkb.GetAllModifiesStmtVarPairs();
+    vector<pair<int, int>> stmt_var_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kModifiesS);
     std::sort(expected_stmt_var_pairs.begin(), expected_stmt_var_pairs.end());
     std::sort(stmt_var_pairs.begin(), stmt_var_pairs.end());
     REQUIRE(stmt_var_pairs == expected_stmt_var_pairs);
@@ -1210,7 +1210,7 @@ TEST_CASE("Test Nested Population for UsesS with Calls") {
   SECTION("Check calls* population before testing UsesS calls") {
     vector<pair<int, int>> expected_transitive_calls_pairs = {make_pair(p1_idx, p4_idx), make_pair(p1_idx, p5_idx), make_pair(p1_idx, p6_idx),
       make_pair(p1_idx, p8_idx), make_pair(p6_idx, p8_idx)};
-    vector<pair<int, int>> transitive_calls_pairs = pkb.GetAllTransitiveCallsPairs();
+    vector<pair<int, int>> transitive_calls_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kCallsT);
     std::sort(expected_transitive_calls_pairs.begin(), expected_transitive_calls_pairs.end());
     std::sort(transitive_calls_pairs.begin(), transitive_calls_pairs.end());
     REQUIRE(transitive_calls_pairs == expected_transitive_calls_pairs);
@@ -1219,7 +1219,7 @@ TEST_CASE("Test Nested Population for UsesS with Calls") {
   SECTION("Check Parent* population before testing UsesS calls") {
     vector<pair<int, int>> expected_transitive_parent_pairs = {make_pair(4, 5), make_pair(4, 6), make_pair(4, 7),
       make_pair(4, 8), make_pair(4, 9), make_pair(7, 8), make_pair(7, 9), make_pair(18, 19), make_pair(18, 20)};
-    vector<pair<int, int>> transitive_parent_pairs = pkb.GetAllTransitiveParentPairs();
+    vector<pair<int, int>> transitive_parent_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kParentT);
     std::sort(expected_transitive_parent_pairs.begin(), expected_transitive_parent_pairs.end());
     std::sort(transitive_parent_pairs.begin(), transitive_parent_pairs.end());
     REQUIRE(transitive_parent_pairs == expected_transitive_parent_pairs);
@@ -1238,7 +1238,7 @@ TEST_CASE("Test Nested Population for UsesS with Calls") {
       make_pair(p8_idx, v_idx), make_pair(p8_idx, third_idx), make_pair(p8_idx, awesome_idx), make_pair(p8_idx, hmm_idx), make_pair(p8_idx, great_idx),
       make_pair(p8_idx, hello_idx), make_pair(p8_idx, there_idx)
     };
-    vector<pair<int, int>> proc_var_pairs = pkb.GetAllUsesProcVarPairs();
+    vector<pair<int, int>> proc_var_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kUsesP);
     std::sort(expected_proc_var_pairs.begin(), expected_proc_var_pairs.end());
     std::sort(proc_var_pairs.begin(), proc_var_pairs.end());
     REQUIRE(proc_var_pairs == expected_proc_var_pairs);
@@ -1263,7 +1263,7 @@ TEST_CASE("Test Nested Population for UsesS with Calls") {
       make_pair(19, awesome_idx), make_pair(19, hmm_idx), make_pair(19, great_idx),
       make_pair(20, hello_idx), make_pair(20, there_idx)
     };
-    vector<pair<int, int>> stmt_var_pairs = pkb.GetAllUsesStmtVarPairs();
+    vector<pair<int, int>> stmt_var_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kUsesS);
     std::sort(expected_stmt_var_pairs.begin(), expected_stmt_var_pairs.end());
     std::sort(stmt_var_pairs.begin(), stmt_var_pairs.end());
     REQUIRE(stmt_var_pairs == expected_stmt_var_pairs);

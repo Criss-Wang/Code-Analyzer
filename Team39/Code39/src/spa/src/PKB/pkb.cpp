@@ -249,163 +249,105 @@ vector<int> Pkb::GetRelSecondArgument(const pql::RelationshipTypes rel_types, co
   }
 }
 
+vector<pair<int, int>> Pkb::GetRelArgumentPairs(const pql::RelationshipTypes rel_types) {
+  try {
+    if (type_map_.at(rel_types) == TableType::kRelSimple) {
+      vector<pair<int, int>> result;
+      for (const auto& [key, val] : GetFollowsTable()->GetKeyValueLst()) {
+        result.emplace_back(make_pair(key, val));
+      }
+      return result;
+    }
+    const GetTableFn table_getter = list_table_map_.at(rel_types);
+    const shared_ptr<RelListTable> table = (this->*table_getter)();
+    return UnfoldResults<shared_ptr<RelListTable>>(table);
+  } catch (exception& e) {
+    return vector<pair<int, int>>{};
+  }
+}
+
 // Following are for search handlers
 
 // =========================================================
+
 //
-//vector<int> Pkb::GetCallees(const int proc_idx) const {
+//vector<pair<int, int>> Pkb::GetAllCallsPairs() const {
 //  try {
-//    return calls_table_->GetValueByKey(proc_idx);
+//    return UnfoldResults<shared_ptr<CallsTable>>(calls_table_);
 //  } catch (exception& e) {
-//    return vector<int>{};
+//    return vector<pair<int, int>>{};
 //  }
 //}
-//vector<int> Pkb::GetChild(const int stmt) const {
+//vector<pair<int, int>> Pkb::GetAllFollowsPairs() const {
 //  try {
-//    return parent_table_->GetValueByKey(stmt);
+//    vector<pair<int, int>> result;
+//    for (const auto& [key, val] : follows_table_->GetKeyValueLst()) {
+//      result.emplace_back(make_pair(key, val));
+//    }
+//    return result;
 //  } catch (exception& e) {
-//    return vector<int>{};
+//    return vector<pair<int, int>>{};
 //  }
 //}
-//vector<int> Pkb::GetStmtRightAfter(const int stmt) const {
+//vector<pair<int, int>> Pkb::GetAllParentPairs() const {
 //  try {
-//    return { follows_table_->GetValueByKey(stmt) };
+//    return UnfoldResults<shared_ptr<ParentTable>>(parent_table_);
 //  } catch (exception& e) {
-//    return vector<int>{};
+//    return vector<pair<int, int>>{};
+//  }
+//}
+//vector<pair<int, int>> Pkb::GetAllUsesStmtVarPairs() const {
+//  try {
+//    return UnfoldResults<shared_ptr<UsesStmtToVariablesTable>>(uses_stmt_to_variables_table_);
+//  } catch (exception& e) {
+//    return vector<pair<int, int>>{};
+//  }
+//}
+//vector<pair<int, int>> Pkb::GetAllUsesProcVarPairs() const {
+//  try {
+//    return UnfoldResults<shared_ptr<UsesProcToVariablesTable>>(uses_proc_to_variables_table_);
+//  } catch (exception& e) {
+//    return vector<pair<int, int>>{};
+//  }
+//}
+//vector<pair<int, int>> Pkb::GetAllModifiesStmtVarPairs() const {
+//  try {
+//    return UnfoldResults<shared_ptr<ModifiesStmtToVariablesTable>>(modifies_stmt_to_variables_table_);
+//  } catch (exception& e) {
+//    return vector<pair<int, int>>{};
+//  }
+//}
+//vector<pair<int, int>> Pkb::GetAllModifiesProcVarPairs() const {
+//  try {
+//    return UnfoldResults<shared_ptr<ModifiesProcToVariablesTable>>(modifies_proc_to_variables_table_);
+//  } catch (exception& e) {
+//    return vector<pair<int, int>>{};
 //  }
 //}
 //
-//vector<int> Pkb::GetAllCallees(const int proc_idx) const {
+//
+//vector<pair<int, int>> Pkb::GetAllTransitiveCallsPairs() const {
 //  try {
-//    return calls_star_table_->GetValueByKey(proc_idx);
+//    return UnfoldResults<shared_ptr<CallsStarTable>>(calls_star_table_);
 //  } catch (exception& e) {
-//    return vector<int>{};
+//    return vector<pair<int, int>>{};
 //  }
 //}
-//vector<int> Pkb::GetAllChildren(const int stmt) const {
+//vector<pair<int, int>> Pkb::GetAllTransitiveParentPairs() const {
 //  try {
-//    return parent_star_table_->GetValueByKey(stmt);
+//    return UnfoldResults<shared_ptr<ParentStarTable>>(parent_star_table_);
 //  } catch (exception& e) {
-//    return vector<int>{};
+//    return vector<pair<int, int>>{};
 //  }
 //}
-//vector<int> Pkb::GetStmtsAfter(const int stmt) const {
+//vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs() const {
 //  try {
-//    return follows_star_table_->GetValueByKey(stmt);
+//    return UnfoldResults<shared_ptr<FollowsStarTable>>(follows_star_table_);
 //  } catch (exception& e) {
-//    return vector<int>{};
+//    return vector<pair<int, int>>{};
 //  }
 //}
-//vector<int> Pkb::GetUsesVarByStmt(const int stmt) const {
-//  try {
-//    return uses_stmt_to_variables_table_->GetValueByKey(stmt);
-//  } catch (exception& e) {
-//    return vector<int>{};
-//  }
-//}
-//vector<int> Pkb::GetUsesVarsByProc(const int proc_idx) const {
-//  try {
-//    return uses_proc_to_variables_table_->GetValueByKey(proc_idx);
-//  } catch (exception& e) {
-//    return vector<int>{};
-//  }
-//}
-//vector<int> Pkb::GetModifiesVarByStmt(const int stmt) const {
-//  try {
-//    return modifies_stmt_to_variables_table_->GetValueByKey(stmt);
-//  } catch (exception& e) {
-//    return vector<int>{};
-//  }
-//}
-//vector<int> Pkb::GetModifiesVarsByProc(const int proc_idx) const {
-//  try {
-//    return modifies_proc_to_variables_table_->GetValueByKey(proc_idx);
-//  } catch (exception& e) {
-//    return vector<int>{};
-//  }
-//}
-
-
-// =========================================================
-
-
-vector<pair<int, int>> Pkb::GetAllCallsPairs() const {
-  try {
-    return UnfoldResults<shared_ptr<CallsTable>>(calls_table_);
-  } catch (exception& e) {
-    return vector<pair<int, int>>{};
-  }
-}
-vector<pair<int, int>> Pkb::GetAllFollowsPairs() const {
-  try {
-    vector<pair<int, int>> result;
-    for (const auto& [key, val] : follows_table_->GetKeyValueLst()) {
-      result.emplace_back(make_pair(key, val));
-    }
-    return result;
-  } catch (exception& e) {
-    return vector<pair<int, int>>{};
-  }
-}
-vector<pair<int, int>> Pkb::GetAllParentPairs() const {
-  try {
-    return UnfoldResults<shared_ptr<ParentTable>>(parent_table_);
-  } catch (exception& e) {
-    return vector<pair<int, int>>{};
-  }
-}
-vector<pair<int, int>> Pkb::GetAllUsesStmtVarPairs() const {
-  try {
-    return UnfoldResults<shared_ptr<UsesStmtToVariablesTable>>(uses_stmt_to_variables_table_);
-  } catch (exception& e) {
-    return vector<pair<int, int>>{};
-  }
-}
-vector<pair<int, int>> Pkb::GetAllUsesProcVarPairs() const {
-  try {
-    return UnfoldResults<shared_ptr<UsesProcToVariablesTable>>(uses_proc_to_variables_table_);
-  } catch (exception& e) {
-    return vector<pair<int, int>>{};
-  }
-}
-vector<pair<int, int>> Pkb::GetAllModifiesStmtVarPairs() const {
-  try {
-    return UnfoldResults<shared_ptr<ModifiesStmtToVariablesTable>>(modifies_stmt_to_variables_table_);
-  } catch (exception& e) {
-    return vector<pair<int, int>>{};
-  }
-}
-vector<pair<int, int>> Pkb::GetAllModifiesProcVarPairs() const {
-  try {
-    return UnfoldResults<shared_ptr<ModifiesProcToVariablesTable>>(modifies_proc_to_variables_table_);
-  } catch (exception& e) {
-    return vector<pair<int, int>>{};
-  }
-}
-
-
-vector<pair<int, int>> Pkb::GetAllTransitiveCallsPairs() const {
-  try {
-    return UnfoldResults<shared_ptr<CallsStarTable>>(calls_star_table_);
-  } catch (exception& e) {
-    return vector<pair<int, int>>{};
-  }
-}
-vector<pair<int, int>> Pkb::GetAllTransitiveParentPairs() const {
-  try {
-    return UnfoldResults<shared_ptr<ParentStarTable>>(parent_star_table_);
-  } catch (exception& e) {
-    return vector<pair<int, int>>{};
-  }
-}
-vector<pair<int, int>> Pkb::GetAllTransitiveFollowsPairs() const {
-  try {
-    return UnfoldResults<shared_ptr<FollowsStarTable>>(follows_star_table_);
-  } catch (exception& e) {
-    return vector<pair<int, int>>{};
-  }
-}
-
+//
 
 
 

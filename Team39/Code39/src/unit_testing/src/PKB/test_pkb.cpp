@@ -93,7 +93,7 @@ TEST_CASE("Populating Follows and FollowsBefore Table") {
     // Key does not exist so the result should be empty
     REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kFollows, 3000) == vector<int>{});
 
-    vector<pair<int, int>> follows_pairs = pkb.GetAllFollowsPairs();
+    vector<pair<int, int>> follows_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kFollows);
     vector<pair<int, int>> expected_follows_pairs = vector<pair<int, int>>{make_pair(1, 2), make_pair(2, 3)};
     vector<pair<int, int>> invalid_first_pair = vector<pair<int, int>>{make_pair(1, 3)};
     REQUIRE(follows_pairs == expected_follows_pairs);
@@ -201,7 +201,7 @@ TEST_CASE("Populating Calls Table") {
     REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kCalls, p1_idx) != vector<int>{p4_idx});
 
     vector<pair<int, int>> expected_calls_pairs = {make_pair(p1_idx, p4_idx), make_pair(p1_idx, p5_idx), make_pair(p2_idx, p3_idx), make_pair(p2_idx, p4_idx)};
-    vector<pair<int, int>> calls_pairs = pkb.GetAllCallsPairs();
+    vector<pair<int, int>> calls_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kCalls);
     std::sort(calls_pairs.begin(), calls_pairs.end());
     std::sort(expected_calls_pairs.begin(), expected_calls_pairs.end());
     REQUIRE(calls_pairs == expected_calls_pairs);

@@ -163,32 +163,23 @@ class Pkb {
     bool IsRelationshipExists(pql::RelationshipTypes rel_types);
     vector<int> GetRelFirstArgument(pql::RelationshipTypes rel_types, int second_arg_idx);
     vector<int> GetRelSecondArgument(const pql::RelationshipTypes rel_types, const int first_arg_idx);
+    vector<pair<int, int>> GetRelArgumentPairs(const pql::RelationshipTypes rel_types);
 
-    [[nodiscard]] vector<int> GetChild(int stmt) const;
-    [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
     [[nodiscard]] vector<pair<int,int>> GetAllParentPairs() const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs() const;
 
-    [[nodiscard]] vector<int> GetCallees(const int proc_idx) const;
-    [[nodiscard]] vector<int> GetAllCallees(const int proc_idx) const;
     [[nodiscard]] vector<pair<int, int>> GetAllCallsPairs() const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveCallsPairs() const;
 
-    [[nodiscard]] vector<int> GetStmtRightAfter(int stmt) const;
-    [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;
     [[nodiscard]] vector<pair<int,int>> GetAllFollowsPairs() const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs() const;
 
-    [[nodiscard]] vector<int> GetUsesVarByStmt(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllUsesStmtVarPairs() const;
 
-    [[nodiscard]] vector<int> GetModifiesVarByStmt(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllModifiesStmtVarPairs() const;
 
-    [[nodiscard]] vector<int> GetModifiesVarsByProc(int proc_idx) const;
     [[nodiscard]] vector<pair<int, int>> GetAllModifiesProcVarPairs() const;
 
-    [[nodiscard]] vector<int> GetUsesVarsByProc(int proc_idx) const;
     [[nodiscard]] vector<pair<int, int>> GetAllUsesProcVarPairs() const;
 
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;

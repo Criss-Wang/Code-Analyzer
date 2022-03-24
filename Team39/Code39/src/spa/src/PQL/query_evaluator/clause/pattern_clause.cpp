@@ -6,7 +6,7 @@
 
 namespace pql_clause {
   typedef std::vector<int> (Pkb::*GetPatternDomainByVar)(pql::RelationshipTypes, const int);
-  typedef std::vector<std::pair<int, int>>(Pkb::* GetPatternVarPair)() const;
+  typedef std::vector<std::pair<int, int>>(Pkb::* GetPatternVarPair)(pql::RelationshipTypes);
   typedef void (PatternClause::* EvaluateLeftFn)(Pkb&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
 
   const map<pql::RelationshipTypes, GetPatternDomainByVar> GetPatternDomainByVarMap = {
@@ -14,7 +14,7 @@ namespace pql_clause {
   };
 
   const map<pql::RelationshipTypes, GetPatternVarPair> GetPatternVarPairMap = {
-    { pql::kAssignPattern, &Pkb::GetAllModifiesStmtVarPairs }
+    { pql::kAssignPattern, &Pkb::GetRelArgumentPairs }
   };
 
   const map<int, EvaluateLeftFn> EvaluateLeftFnMap = {
@@ -41,7 +41,7 @@ namespace pql_clause {
   void PatternClause::EvaluateLeftSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetPatternVarPair fn = GetPatternVarPairMap.at(type_);
-    std::vector<std::pair<int, int>> domain_pair_lst = (pkb.*fn)();
+    std::vector<std::pair<int, int>> domain_pair_lst = (pkb.*fn)(pql::RelationshipTypes::kCalls);
     pql_table::Predicate pred(pattern_synonym_name_, left_, domain_pair_lst);
 
     predicates.push_back(pred);
