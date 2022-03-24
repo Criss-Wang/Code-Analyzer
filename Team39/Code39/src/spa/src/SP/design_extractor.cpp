@@ -183,7 +183,7 @@ void PopulateNestedModifiesSOrUsesSForCalls(CallerTable caller_table, RelListTab
   // Then loop through and get the specific procedure called at that statement
   for (const int call_stmt : call_stmts) {
     string proc = caller_table.GetValueByKey(call_stmt);
-    int proc_idx = pkb.GetIndexByProc(proc);
+    int proc_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, proc);
     // Get the variables used in that procedure
     vector<int> variables_idx;
     try {
@@ -238,7 +238,7 @@ void PopulateReverseNestedModifiesSOrUsesSForCalls(CallerTable caller_table, Rel
   // Then loop through and get the specific procedure called at that statement
   for (const int call_stmt : call_stmts) {
     string proc = caller_table.GetValueByKey(call_stmt);
-    int proc_idx = pkb.GetIndexByProc(proc);
+    int proc_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, proc);
     // Get the variables modified or used in that procedure
     vector<int> variables_idx;
     try {

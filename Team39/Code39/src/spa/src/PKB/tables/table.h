@@ -105,6 +105,13 @@ enum class TableType {
   kRelListOrReverse
 };
 
+enum class IndexTableType {
+  kVar,
+  kVarIndex,
+  kProc,
+  kProcIndex
+};
+
 enum class TableIdentifier {
   kAssign, kRead, kPrint, kConstant, kIf, kWhile, kProcedure,
   kAssignPattern, kIfPattern, kWhilePattern,

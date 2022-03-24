@@ -161,7 +161,7 @@ vector<string> populateIfStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_in_cond_expr);
 
   // Add stmt num and cond expr into if_pattern_to_stmt Table
-  pkb.AddInfoToTable(TableIdentifier::kIfPattern, stmt_num, cond_expr_pattern);
+  pkb.AddInfoToTable(TableIdentifier::kIfPattern, stmt_num, vars_in_cond_expr);
 
   return vars_in_cond_expr;
 }
@@ -210,7 +210,7 @@ vector<string> populateWhileStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_in_cond_expr);
 
   // Add stmt num and cond expr into while_pattern_to_stmt Table
-  pkb.AddInfoToTable(TableIdentifier::kWhilePattern, stmt_num, cond_expr_pattern);
+  pkb.AddInfoToTable(TableIdentifier::kWhilePattern, stmt_num, vars_in_cond_expr);
 
   return vars_in_cond_expr;
 }

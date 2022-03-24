@@ -142,7 +142,7 @@ namespace pql_clause {
 
     if ((is_left && LeftProcedureTypeSet.find(type) != LeftProcedureTypeSet.end())
         || (!is_left && RightProcedureTypeSet.find(type) != RightProcedureTypeSet.end())) {
-      int proc_index = pkb.GetIndexByProc(name);
+      int proc_index = pkb.GetIndexByString(IndexTableType::kProcIndex, name);
 
       if (proc_index == INVALID_INDEX) {
         throw pql_exceptions::ProcedureDoesNotExistException();
@@ -152,7 +152,7 @@ namespace pql_clause {
     }
 
     if (!is_left && RightVariableTypeSet.find(type) != RightVariableTypeSet.end()) {
-      int var_index = pkb.GetIndexByVar(name);
+      int var_index = pkb.GetIndexByString(IndexTableType::kVarIndex, name);
 
       if (var_index == INVALID_INDEX) {
         throw pql_exceptions::VariableDoesNotExistException();

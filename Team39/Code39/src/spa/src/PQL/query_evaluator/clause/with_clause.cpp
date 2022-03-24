@@ -73,7 +73,7 @@ namespace pql_clause {
 
   int GetIntRepresentation(Pkb& pkb, AttrIdentifier attr_type, std::string& entity) {
     if (attr_type == AttrIdentifier::kProcName) {
-      int proc_index = pkb.GetIndexByProc(entity);
+      int proc_index = pkb.GetIndexByString(IndexTableType::kProcIndex, entity);
 
       if (proc_index == INVALID_INDEX) {
         throw pql_exceptions::ProcedureDoesNotExistException();
@@ -83,7 +83,7 @@ namespace pql_clause {
     }
 
     if (attr_type == AttrIdentifier::kVarName) {
-      int var_index = pkb.GetIndexByVar(entity);
+      int var_index = pkb.GetIndexByString(IndexTableType::kVarIndex, entity);
 
       if (var_index == INVALID_INDEX) {
         throw pql_exceptions::VariableDoesNotExistException();

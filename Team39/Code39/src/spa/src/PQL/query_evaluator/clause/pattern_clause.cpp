@@ -31,7 +31,7 @@ namespace pql_clause {
   
   void PatternClause::EvaluateLeftEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int var_index = pkb.GetIndexByVar(left_);
+    int var_index = pkb.GetIndexByString(IndexTableType::kVarIndex, left_);
     GetPatternDomainByVar fn = GetPatternDomainByVarMap.at(type_);
     std::vector<int> pattern_domain = {};
     pattern_domain = (pkb.*fn)(pql::kModifiesS, var_index);
@@ -67,9 +67,7 @@ namespace pql_clause {
       return;
     }
 
-    std::unordered_set<int> domain_set = is_exact_ 
-                                            ? pkb.GetStmtsWithExactPattern(expression_)
-                                            : pkb.GetAllStmtsWithPattern(expression_);
+    std::unordered_set<int> domain_set = pkb.GetAllStmtsWithPattern(expression_, is_exact_);
     std::vector<int> domain_lst(domain_set.begin(), domain_set.end());
     UpdateHashmap<int>(domain, pattern_synonym_name_, domain_lst);
   }

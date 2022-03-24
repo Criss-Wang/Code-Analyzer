@@ -39,8 +39,8 @@ std::vector<std::string> Formatter::FormatRawInput(pql_table::InterTable& table,
         }
 
         cur_string = attribute == AttrIdentifier::kProcName 
-                               ? pkb_.GetProcByIndex(name_index)
-                               : pkb_.GetVarByIndex(name_index);
+                               ? pkb_.GetStringByIndex(IndexTableType::kProc, name_index)
+                               : pkb_.GetStringByIndex(IndexTableType::kVar, name_index);
       }
 
       if (result_string[index] != "") {

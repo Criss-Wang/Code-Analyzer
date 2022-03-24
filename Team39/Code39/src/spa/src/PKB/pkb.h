@@ -91,7 +91,7 @@ class Pkb {
     //unordered_set<set<int>, HashFunction> stmt_list_set_;
 
     // Insert all possible expression patterns for a statement
-    bool AddPattern(int line_num, const string& input, TableIdentifier table_identifier);
+    bool AddPattern(int line_num, const vector<string>& input_set, const string& input, TableIdentifier table_identifier);
     bool AddParent(int key, const vector<int>& value);
     bool AddFollows(int key, int value);
     bool AddCalls(const string& key, const vector<string>& value);
@@ -165,25 +165,7 @@ class Pkb {
     vector<int> GetRelSecondArgument(const pql::RelationshipTypes rel_types, const int first_arg_idx);
     vector<pair<int, int>> GetRelArgumentPairs(const pql::RelationshipTypes rel_types);
 
-    [[nodiscard]] vector<pair<int,int>> GetAllParentPairs() const;
-    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs() const;
-
-    [[nodiscard]] vector<pair<int, int>> GetAllCallsPairs() const;
-    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveCallsPairs() const;
-
-    [[nodiscard]] vector<pair<int,int>> GetAllFollowsPairs() const;
-    [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs() const;
-
-    [[nodiscard]] vector<pair<int, int>> GetAllUsesStmtVarPairs() const;
-
-    [[nodiscard]] vector<pair<int, int>> GetAllModifiesStmtVarPairs() const;
-
-    [[nodiscard]] vector<pair<int, int>> GetAllModifiesProcVarPairs() const;
-
-    [[nodiscard]] vector<pair<int, int>> GetAllUsesProcVarPairs() const;
-
-    [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern) const;
-    [[nodiscard]] unordered_set<int> GetStmtsWithExactPattern(const string& pattern) const;
+    [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern, bool is_exact) const;
     [[nodiscard]] unordered_set<string> GetAllPatternVariablesInStmt(const int stmt_no, TableIdentifier table_identifier) const;
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPatternVariable(const string& pattern_var_string, TableIdentifier table_identifier) const;
     [[nodiscard]] vector<pair<int, string>> GetContainerStmtVarPair(TableIdentifier table_identifier) const;
@@ -193,6 +175,11 @@ class Pkb {
     //unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier entity_identifier);
 
     // Get all the index-string relationships
+    [[nodiscard]] vector<pair<int, string>> GetAllIndexStringPairs(IndexTableType index_table_type) const;
+    [[nodiscard]] vector<pair<string, int>> GetAllStringIndexPairs(IndexTableType index_table_type) const;
+    [[nodiscard]] string GetStringByIndex(IndexTableType index_table_type, int idx) const;
+    [[nodiscard]] int GetIndexByString(IndexTableType index_table_type, const string& entity_name) const;
+    
     [[nodiscard]] vector<pair<int, string>> GetAllIndexVarPairs() const;
     [[nodiscard]] vector<pair<string, int>> GetAllVarIndexPairs() const;
     [[nodiscard]] string GetVarByIndex(int idx) const;
@@ -218,4 +205,5 @@ class Pkb {
     int GetProcFromCall(int stmt_no);
     vector<int> GetCallFromProc(int proc_idx);
 
+    
 };

@@ -171,15 +171,15 @@ TEST_CASE("Test Nested Population for Calls") {
   }
 
   SECTION("Check PQL queries for nested calls") {
-    int p1_idx = pkb.GetIndexByProc("p1");
-    int p2_idx = pkb.GetIndexByProc("p2");
-    int p4_idx = pkb.GetIndexByProc("p4");
-    int p5_idx = pkb.GetIndexByProc("p5");
-    int p10_idx = pkb.GetIndexByProc("p10");
-    int p12_idx = pkb.GetIndexByProc("p12");
-    int p14_idx = pkb.GetIndexByProc("p14");
-    int p18_idx = pkb.GetIndexByProc("p18");
-    int p20_idx = pkb.GetIndexByProc("p20");
+    int p1_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p1");
+    int p2_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p2");
+    int p4_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p4");
+    int p5_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p5");
+    int p10_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p10");
+    int p12_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p12");
+    int p14_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p14");
+    int p18_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p18");
+    int p20_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p20");
     REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kCallsT, p1_idx, p4_idx));
     REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kCallsT, p1_idx, p10_idx));
     REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kCallsT, p1_idx, p12_idx));
@@ -318,14 +318,14 @@ TEST_CASE("Test Nested Population for Uses") {
 
   // Populate nested
   success = success && PopulateNestedRelationships(pkb);
-  int c1_idx = pkb.GetIndexByVar("c1");
-  int c2_idx = pkb.GetIndexByVar("c2");
-  int first_idx = pkb.GetIndexByVar("first");
-  int second_idx = pkb.GetIndexByVar("second");
-  int third_idx = pkb.GetIndexByVar("third");
-  int fourth_idx = pkb.GetIndexByVar("fourth");
-  int fifth_idx = pkb.GetIndexByVar("fifth");
-  int sixth_idx = pkb.GetIndexByVar("sixth");
+  int c1_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "c1");
+  int c2_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "c2");
+  int first_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "first");
+  int second_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "second");
+  int third_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "third");
+  int fourth_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "fourth");
+  int fifth_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "fifth");
+  int sixth_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "sixth");
 
   SECTION("Check population success") {
     REQUIRE(success);
@@ -460,21 +460,21 @@ TEST_CASE("Test Nested Population for ModifiesP") {
   success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p4", vector<string>{"p6", "p7"});
   success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p6", vector<string>{"p8"});
 
-  int p1_idx = pkb.GetIndexByProc("p1");
-  int p4_idx = pkb.GetIndexByProc("p4");
-  int p6_idx = pkb.GetIndexByProc("p6");
-  int p7_idx = pkb.GetIndexByProc("p7");
-  int p8_idx = pkb.GetIndexByProc("p8");
+  int p1_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p1");
+  int p4_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p4");
+  int p6_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p6");
+  int p7_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p7");
+  int p8_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p8");
 
-  int y_idx = pkb.GetIndexByVar("y");
-  int z_idx = pkb.GetIndexByVar("z");
-  int a_idx = pkb.GetIndexByVar("a");
-  int b_idx = pkb.GetIndexByVar("b");
-  int c_idx = pkb.GetIndexByVar("c");
-  int d_idx = pkb.GetIndexByVar("d");
-  int e_idx = pkb.GetIndexByVar("e");
-  int f_idx = pkb.GetIndexByVar("f");
-  int g_idx = pkb.GetIndexByVar("g");
+  int y_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "y");
+  int z_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "z");
+  int a_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "a");
+  int b_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "b");
+  int c_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "c");
+  int d_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "d");
+  int e_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "e");
+  int f_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "f");
+  int g_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "g");
 
   // Populate nested
   success = success && PopulateNestedRelationships(pkb);
@@ -775,23 +775,23 @@ TEST_CASE("Test Nested Population for ModifiesS with Calls") {
   // Populate nested
   success = success && PopulateNestedRelationships(pkb);
 
-  int a_idx = pkb.GetIndexByVar("a");
-  int b_idx = pkb.GetIndexByVar("b");
-  int c_idx = pkb.GetIndexByVar("c");
-  int d_idx = pkb.GetIndexByVar("d");
-  int e_idx = pkb.GetIndexByVar("e");
-  int f_idx = pkb.GetIndexByVar("f");
-  int v_idx = pkb.GetIndexByVar("v");
-  int w_idx = pkb.GetIndexByVar("w");
-  int x_idx = pkb.GetIndexByVar("x");
-  int y_idx = pkb.GetIndexByVar("y");
-  int z_idx = pkb.GetIndexByVar("z");
+  int a_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "a");
+  int b_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "b");
+  int c_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "c");
+  int d_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "d");
+  int e_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "e");
+  int f_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "f");
+  int v_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "v");
+  int w_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "w");
+  int x_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "x");
+  int y_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "y");
+  int z_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "z");
 
-  int p1_idx = pkb.GetIndexByProc("p1");
-  int p4_idx = pkb.GetIndexByProc("p4");
-  int p5_idx = pkb.GetIndexByProc("p5");
-  int p6_idx = pkb.GetIndexByProc("p6");
-  int p8_idx = pkb.GetIndexByProc("p8");
+  int p1_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p1");
+  int p4_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p4");
+  int p5_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p5");
+  int p6_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p6");
+  int p8_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p8");
 
   SECTION("Check population success") {
     REQUIRE(success);
@@ -1177,31 +1177,31 @@ TEST_CASE("Test Nested Population for UsesS with Calls") {
   // Populate nested
   success = success && PopulateNestedRelationships(pkb);
 
-  int a_idx = pkb.GetIndexByVar("a");
-  int b_idx = pkb.GetIndexByVar("b");
-  int c_idx = pkb.GetIndexByVar("c");
-  int d_idx = pkb.GetIndexByVar("d");
-  int e_idx = pkb.GetIndexByVar("e");
-  int f_idx = pkb.GetIndexByVar("f");
-  int v_idx = pkb.GetIndexByVar("v");
-  int w_idx = pkb.GetIndexByVar("w");
-  int x_idx = pkb.GetIndexByVar("x");
-  int y_idx = pkb.GetIndexByVar("y");
-  int z_idx = pkb.GetIndexByVar("z");
-  int first_idx = pkb.GetIndexByVar("first");
-  int second_idx = pkb.GetIndexByVar("second");
-  int third_idx = pkb.GetIndexByVar("third");
-  int awesome_idx = pkb.GetIndexByVar("awesome");
-  int hmm_idx = pkb.GetIndexByVar("hmm");
-  int great_idx = pkb.GetIndexByVar("great");
-  int hello_idx = pkb.GetIndexByVar("hello");
-  int there_idx = pkb.GetIndexByVar("there");
+  int a_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "a");
+  int b_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "b");
+  int c_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "c");
+  int d_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "d");
+  int e_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "e");
+  int f_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "f");
+  int v_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "v");
+  int w_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "w");
+  int x_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "x");
+  int y_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "y");
+  int z_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "z");
+  int first_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "first");
+  int second_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "second");
+  int third_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "third");
+  int awesome_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "awesome");
+  int hmm_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "hmm");
+  int great_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "great");
+  int hello_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "hello");
+  int there_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "there");
 
-  int p1_idx = pkb.GetIndexByProc("p1");
-  int p4_idx = pkb.GetIndexByProc("p4");
-  int p5_idx = pkb.GetIndexByProc("p5");
-  int p6_idx = pkb.GetIndexByProc("p6");
-  int p8_idx = pkb.GetIndexByProc("p8");
+  int p1_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p1");
+  int p4_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p4");
+  int p5_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p5");
+  int p6_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p6");
+  int p8_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p8");
 
   SECTION("Check population success") {
     REQUIRE(success);
