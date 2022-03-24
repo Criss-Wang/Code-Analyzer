@@ -22,7 +22,7 @@ AssignStmt::AssignStmt(std::vector<Token>& tokens, int stmt_num) {
   vector<Token>::const_iterator pattern_start = tokens.begin() + kIndexTwo;
   vector<Token>::const_iterator pattern_end = tokens.end();
   vector<Token> pattern(pattern_start, pattern_end);
-  rhs_pattern_ = AssignmentPattern(pattern, stmt_num);
+  rhs_pattern_ = AssignmentPattern(pattern);
 }
 
 vector<string> AssignStmt::GetVar() {
@@ -51,7 +51,7 @@ void AssignStmt::PopulateEntities(Pkb& pkb) {
   // Add stmt num and LHS variable to Modifies Table
   pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, stmt_num_, vector<string>{ lhs_var_ });
 
-  rhs_pattern_.PopulateEntities(pkb);
+  rhs_pattern_.PopulateEntities(pkb, stmt_num_);
 }
 
 ReadStmt::ReadStmt(std::vector<Token>& tokens, int stmt_num) {
@@ -125,6 +125,8 @@ void PrintStmt::PopulateEntities(Pkb& pkb) {
 }
 
 IfStmt::IfStmt(std::vector<Token>& tokens, int stmt_num) {
+  stmt_num_ = stmt_num;
+
   int min_stmt_size = 7;
   if (tokens.size() < min_stmt_size) {
     throw InvalidSyntaxException();
@@ -147,7 +149,7 @@ IfStmt::IfStmt(std::vector<Token>& tokens, int stmt_num) {
   vector<Token>::const_iterator last = tokens.begin() + kSecondLastIndex;
   vector<Token> cond_expr(first, last);
 
-  cond_expr_ = ConditionalExpression(cond_expr, stmt_num);
+  cond_expr_ = ConditionalExpression(cond_expr);
 
 }
 
@@ -166,10 +168,12 @@ void IfStmt::PopulateEntities(Pkb& pkb) {
   // Add stmt num and cond expr into if_pattern_to_stmt Table
   //pkb.AddInfoToTable(TableIdentifier::kIfPattern, stmt_num_, cond_expr_.GetVars());
 
-  cond_expr_.PopulateEntities(pkb);
+  cond_expr_.PopulateEntities(pkb, stmt_num_);
 }
 
 WhileStmt::WhileStmt(std::vector<Token>& tokens, int stmt_num) {
+  stmt_num_ = stmt_num;
+
   int min_stmt_size = 6;
   if (tokens.size() < min_stmt_size) {
     throw InvalidSyntaxException();
@@ -192,7 +196,7 @@ WhileStmt::WhileStmt(std::vector<Token>& tokens, int stmt_num) {
 
   vector<Token> cond_expr(cond_expr_start, cond_expr_end);
 
-  cond_expr_ = ConditionalExpression(cond_expr, stmt_num);
+  cond_expr_ = ConditionalExpression(cond_expr);
 
 }
 
@@ -211,7 +215,7 @@ void WhileStmt::PopulateEntities(Pkb& pkb) {
   // Add stmt num and cond expr into while_pattern_to_stmt Table
   //pkb.AddInfoToTable(TableIdentifier::kWhilePattern, stmt_num_, cond_expr_.GetVars());
 
-  cond_expr_.PopulateEntities(pkb);
+  cond_expr_.PopulateEntities(pkb, stmt_num_);
 }
 
 CallStmt::CallStmt(std::vector<Token>& tokens, int stmt_num) {

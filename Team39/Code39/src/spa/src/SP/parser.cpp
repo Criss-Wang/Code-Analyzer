@@ -1,15 +1,65 @@
 #include <vector>
+#include <stack>
 
 #include "parser.h"
 #include "tokens/procedure.h"
 #include "sp_exceptions.h"
 #include "design_extractor.h"
+#include "Utility/CFG/control_flow_graph.h"
 
 #define kIndexZero 0
 #define kIndexOne 1
 #define kIndexTwo 2
 
-Parser::Parser(const std::string& input) {
+
+stack<int> populateFollowsAndNextRelationship(stack<int> previous, Pkb& pkb, int stmt_num, bool is_prev_stmt_if) {
+
+  if (!previous.empty()) {
+    if (stmt_num == previous.top()) {
+      return previous;
+    } else {
+      // Add previous stmt num and current stmt num to FollowsTable
+      pkb.AddInfoToTable(TableIdentifier::kFollows, previous.top(), stmt_num);
+
+      if (!is_prev_stmt_if) {
+        // Add previous stmt num and current stmt num to NextTable
+        pkb.AddInfoToTable(TableIdentifier::kNext, previous.top(), stmt_num);
+        //cout << "Next: (" << previous.top() << " ," << stmt_num << ")" << endl;
+      }
+
+      previous.pop();
+    }
+  }
+
+  previous.push(stmt_num);
+
+  return previous;
+}
+
+stack<vector<int>> populateParentRelationship(stack<int> parent, stack<vector<int>> children, int stmt_num) {
+  if (!parent.empty()) {
+    children.top().push_back(stmt_num);
+  }
+
+  return children;
+}
+
+stack<int> populateNextRelationshipForIf(stack<int> last_stmt_nums_in_if, Pkb& pkb, int stmt_num) {
+  // Add the last stmt num in then/else container and current stmt num to Next Table
+  pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), stmt_num);
+  //cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
+
+  last_stmt_nums_in_if.pop();
+
+  pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), stmt_num);
+  //cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
+
+  last_stmt_nums_in_if.pop();
+
+  return last_stmt_nums_in_if;
+}
+
+Parser::Parser(const std::string& input, Pkb& pkb) {
 
   vector<Token> tokens_lst = tokenizer_.parse(input);
 
@@ -18,10 +68,28 @@ Parser::Parser(const std::string& input) {
 
   int stmt_num = 1;
 
+  // Stores parent/previous stmt's line number for Parent/Follows relationship
+  stack<int> parent;
+  stack<vector<int>> children;
+  children.push({});
+  stack<int> previous;
+
+  // Stores vector of CFGTokens
+  vector<CFGToken> cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
+  // Store "if"/"while" to determine which end token to add to cfg_tokens list
+  stack<string> end_tokens;
+
+  // Stores relevant stmt num for Next relationship
+  stack<int> while_stmt_num;
+  stack<int> if_stmt_num;
+  stack<int> last_stmt_nums_in_if;
+  bool is_prev_stmt_if = false;
+
   // 1st round of sytax validation which involves curly brackets
   int curly_bracket_count = 0;
   int if_else_stmts = 0;
   bool is_new_container = true;
+
 
   for (auto token = begin(tokens_lst); token != end(tokens_lst); ++token) {
     if (token->text_ == "}") {
@@ -30,17 +98,61 @@ Parser::Parser(const std::string& input) {
         throw InvalidSyntaxException();
       }
 
+      int previous_stmt_num = 0;
+      if (!previous.empty()) {
+        previous_stmt_num = previous.top();
+        previous.pop();
+      }
+
       bool has_two_more_tokens = token != end(tokens_lst) - 1 && token != end(tokens_lst) - 2;
-      if (has_two_more_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == TokenType::LEFT_CURLY) {
+      bool is_else_stmt = has_two_more_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == TokenType::LEFT_CURLY;
+      
+      if (is_else_stmt) {
         if_else_stmts -= 1;
         token++;
         token++;
         is_new_container = true;
 
+        previous.push(stmt_num);
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kThenEnd, 0));
+
+        // Add the next stmt num in container and stmt num of if to Next Table
+        pkb.AddInfoToTable(TableIdentifier::kNext, if_stmt_num.top(), stmt_num);
+        //cout << "Next: (" << if_stmt_num.top() << " ," << stmt_num << ")" << endl;
+        if_stmt_num.pop();
+
+        last_stmt_nums_in_if.push(previous_stmt_num);
+
       } else {
         curly_bracket_count -= 1;
-      }
 
+        if (!parent.empty()) {
+          // Add parent stmt num and current stmt num to ParentTable
+          if (!children.top().empty()) {
+            pkb.AddInfoToTable(TableIdentifier::kParent, parent.top(), children.top());
+          }
+          parent.pop();
+          children.pop();
+        }
+
+        if (!end_tokens.empty()) {
+          if (end_tokens.top() == "if") {
+            cfg_tokens.push_back(CFGToken(CFGTokenType::kElseEnd, 0));
+            last_stmt_nums_in_if.push(previous_stmt_num);
+            is_prev_stmt_if = true;
+
+          } else if (end_tokens.top() == "while") {
+            cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileEnd, 0));
+
+            // Add the last stmt num in container and stmt num of while to Next Table
+            pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, while_stmt_num.top());
+            //cout << "Next: (" << previous_stmt_num << " ," << while_stmt_num.top() << ")" << endl;
+
+            while_stmt_num.pop();
+          }
+          end_tokens.pop();
+        }
+      }
     } else if (token != end(tokens_lst) - 1 && (next(token, 1)->text_ == "=" || token->text_ == "read" 
       || token->text_ == "print" || token->text_ == "call")) {
       is_new_container = false;
@@ -50,14 +162,29 @@ Parser::Parser(const std::string& input) {
         token++;
       }
 
+      children = populateParentRelationship(parent, children, stmt_num);
+      previous = populateFollowsAndNextRelationship(previous, pkb, stmt_num, is_prev_stmt_if);
+      if (is_prev_stmt_if) {
+        last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
+        is_prev_stmt_if = false;
+      }
+
       if (tokens.at(kIndexOne).text_ == "=") {
         stmt_lst.push_back(make_shared<AssignStmt>(AssignStmt(tokens, stmt_num)));
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kAssign, stmt_num));
+
       } else if (tokens.at(kIndexZero).text_ == "read") {
         stmt_lst.push_back(make_shared<ReadStmt>(ReadStmt(tokens, stmt_num)));
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kRead, stmt_num));
+
       } else if (tokens.at(kIndexZero).text_ == "print") {
         stmt_lst.push_back(make_shared<PrintStmt>(PrintStmt(tokens, stmt_num)));
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kPrint, stmt_num));
+
       } else {
         stmt_lst.push_back(make_shared<CallStmt>(CallStmt(tokens, stmt_num)));
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kCall, stmt_num));
+
       }
       stmt_num += 1;
 
@@ -73,10 +200,16 @@ Parser::Parser(const std::string& input) {
         proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
         proc_tokens = {};
         stmt_lst = {};
+
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
+        // CFG::GenerateCfg(cfg_tokens);
       }
       
       proc_tokens = tokens;
       curly_bracket_count += 1;
+
+      // reset values for next procedure
+      cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
 
     } else if (token->text_ == "while" || token->text_ == "if") {
       is_new_container = true;
@@ -86,12 +219,36 @@ Parser::Parser(const std::string& input) {
         token++;
       }
 
+      children = populateParentRelationship(parent, children, stmt_num);
+      previous = populateFollowsAndNextRelationship(previous, pkb, stmt_num, is_prev_stmt_if);
+      if (is_prev_stmt_if) {
+        last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
+        is_prev_stmt_if = false;
+      }
+      parent.push(stmt_num);
+      children.push({});
+      previous.push(stmt_num + 1);
+
       if (tokens.at(kIndexZero).text_ == "while") {
         stmt_lst.push_back(make_shared<WhileStmt>(WhileStmt(tokens, stmt_num)));
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kWhile, stmt_num));
+        end_tokens.push("while");
+
+        while_stmt_num.push(stmt_num);
+
       } else {
         stmt_lst.push_back(make_shared<IfStmt>(IfStmt(tokens, stmt_num)));
         if_else_stmts += 1;
+
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kIf, stmt_num));
+        end_tokens.push("if");
+
+        if_stmt_num.push(stmt_num);
       }
+
+      // Add the stmt num of if and next stmt num to Next Table
+      pkb.AddInfoToTable(TableIdentifier::kNext, stmt_num, stmt_num + 1);
+      //cout << "Next: (" << stmt_num << " ," << stmt_num + 1 << ")" << endl;
       stmt_num += 1;
       curly_bracket_count += 1;
 
@@ -101,6 +258,8 @@ Parser::Parser(const std::string& input) {
   }
 
   proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
+  cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
+  // CFG::GenerateCfg(cfg_tokens);
 
   if (curly_bracket_count != 0 || if_else_stmts != 0) {
     throw InvalidSyntaxException();

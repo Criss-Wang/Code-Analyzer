@@ -8,11 +8,11 @@ class ConditionalExpression {
   public:
     ~ConditionalExpression() = default;
     ConditionalExpression() { };
-    ConditionalExpression(std::vector<Token>& tokens, int stmt_num);
+    ConditionalExpression(std::vector<Token>& tokens);
 
     vector<string> GetVars();
 
-    void PopulateEntities(Pkb& pkb);
+    void PopulateEntities(Pkb& pkb, int stmt_num);
 
   private:
     int stmt_num_ = -1;

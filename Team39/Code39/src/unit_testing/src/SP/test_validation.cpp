@@ -1,6 +1,7 @@
 #include "SP/parser.h"
 #include "SP/validator.h"
 #include "SP/sp_exceptions.h"
+#include "PKB/pkb.h"
 
 #include <fstream>
 #include "catch.hpp"
@@ -13,8 +14,9 @@ void RequireValid(string path) {
     cerr << "Could not open the file " << endl;
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-    REQUIRE_NOTHROW(Parser(input));
-    Parser parser(input);
+    Pkb pkb;
+    REQUIRE_NOTHROW(Parser(input, pkb));
+    Parser parser(input, pkb);
     REQUIRE_NOTHROW(parser.Validate());
   }
 }
@@ -26,7 +28,8 @@ void RequireInvalidSyntax(string path) {
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     try {
-      Parser parser(input);
+      Pkb pkb;
+      Parser parser(input, pkb);
       parser.Validate();
       REQUIRE(0 == 1);
     } catch (InvalidSyntaxException) {
@@ -41,8 +44,9 @@ void RequireInvalidSemantic(string path) {
     cerr << "Could not open the file " << endl;
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-    REQUIRE_NOTHROW(Parser(input));
-    Parser parser(input);
+    Pkb pkb;
+    REQUIRE_NOTHROW(Parser(input, pkb));
+    Parser parser(input, pkb);
     REQUIRE_THROWS_AS(parser.Validate(), InvalidSemanticException);
   }
 }

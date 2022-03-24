@@ -8,14 +8,13 @@ class AssignmentPattern {
   public:
     ~AssignmentPattern() = default;
     AssignmentPattern() { };
-    AssignmentPattern(std::vector<Token>& tokens, int stmt_num);
+    AssignmentPattern(std::vector<Token>& tokens);
 
     vector<string> GetVars();
 
-    void PopulateEntities(Pkb& pkb);
+    void PopulateEntities(Pkb& pkb, int stmt_num);
 
   private:
-    int stmt_num_ = -1;
     vector<string> vars_ = {};
     vector<int> constants_ = {};
     string pattern_ = "";

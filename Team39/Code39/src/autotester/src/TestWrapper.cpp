@@ -33,7 +33,7 @@ void TestWrapper::parse(std::string filename) {
   try {
     ifstream input_file(filename);
     std::string input = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-    Parser parser(input);
+    Parser parser(input, pkb);
     parser.Validate();
     parser.Populate(pkb);
   } catch (exception e) {

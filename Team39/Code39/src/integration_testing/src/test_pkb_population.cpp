@@ -14,7 +14,7 @@ Pkb parse(string path) {
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     Pkb pkb;
-    Parser parser(input);
+    Parser parser(input, pkb);
     parser.Populate(pkb);
     return pkb;
   }

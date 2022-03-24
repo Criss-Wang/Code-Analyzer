@@ -63,43 +63,12 @@ void Procedure::Validate() {
   }
 }
 
-stack<int> populateFollowsRelationship(stack<int> previous, Pkb& pkb, int stmt_num) {
-  if (!previous.empty()) {
-    if (stmt_num == previous.top()) {
-      return previous;
-    }
-    // Add previous stmt num and current stmt num to FollowsTable
-    pkb.AddInfoToTable(TableIdentifier::kFollows, previous.top(), stmt_num);
-    previous.pop();
-  }
-  previous.push(stmt_num);
-  return previous;
-}
-
-stack<vector<int>> populateParentRelationship(stack<int> parent, stack<vector<int>> children, int stmt_num) {
-  if (!parent.empty()) {
-    children.top().push_back(stmt_num);
-  }
-
-  return children;
-}
-
-stack<int> populateNextRelationshipForIf(stack<int> last_stmt_nums_in_if, Pkb& pkb, int stmt_num) {
-  // Add the last stmt num in then/else container and current stmt num to Next Table
-  pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), stmt_num);
-  //cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
-
-  last_stmt_nums_in_if.pop();
-
-  pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), stmt_num);
-  //cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
-
-  last_stmt_nums_in_if.pop();
-
-  return last_stmt_nums_in_if;
-}
-
 void Procedure::PopulateEntities(Pkb& pkb) {
+
+  for (shared_ptr<Stmt> stmt : stmt_lst_) {
+    (*stmt).PopulateEntities(pkb);
+  }
+
   // Add procedure name to procedure_set_
   pkb.AddEntityToSet(EntityIdentifier::kProc, proc_name_);
 
@@ -113,28 +82,4 @@ void Procedure::PopulateEntities(Pkb& pkb) {
   pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, proc_name_, modifies_p_);
   pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, proc_name_, uses_p_);
 
-  // Stores parent/previous stmt's line number for Parent/Follows relationship
-  stack<int> parent;
-  stack<vector<int>> children;
-  children.push({});
-  stack<int> previous;
-
-  // USE ANOTHER CLASS VAR FOR CFG TOKENS
-  // Stores vector of CFGTokens
-  vector<CFGToken> cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
-  // Store "if"/"while" to determine which end token to add to cfg_tokens list
-  stack<string> end_tokens;
-  // Stores relevant stmt num for Next relationship
-  stack<int> while_stmt_num;
-  stack<int> if_stmt_num;
-  stack<int> last_stmt_nums_in_if;
-  bool is_prev_stmt_if = false;
-
-  for (shared_ptr<Stmt> stmt : stmt_lst_) {
-    (*stmt).PopulateEntities(pkb);
-
-    children = populateParentRelationship(parent, children, (*stmt).GetStmtNum());
-    previous = populateFollowsRelationship(previous, pkb, (*stmt).GetStmtNum());
-
-  }
 }

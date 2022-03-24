@@ -9,7 +9,7 @@
 
 class Parser {
   public:
-    Parser(const std::string& input);
+    Parser(const std::string& input, Pkb& pkb);
 
     void Validate();
     void Populate(Pkb& pkb);

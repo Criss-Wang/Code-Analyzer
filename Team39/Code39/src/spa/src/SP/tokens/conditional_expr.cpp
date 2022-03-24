@@ -1,9 +1,7 @@
 #include "conditional_expr.h"
 #include "SP/sp_exceptions.h"
 
-ConditionalExpression::ConditionalExpression(std::vector<Token>& tokens, int stmt_num) {
-
-  stmt_num_ = stmt_num;
+ConditionalExpression::ConditionalExpression(std::vector<Token>& tokens) {
 
   vector<TokenType> expected_types = { TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN, TokenType::NOT_OPERATOR };
   vector<string> rel_operators = { ">", "<", "==", "!=", ">=", "<=" };
@@ -86,12 +84,7 @@ vector<string> ConditionalExpression::GetVars() {
   return vars_;
 }
 
-void ConditionalExpression::PopulateEntities(Pkb& pkb) {
-  // Add stmt num and constants in cond expr into Constant Table
-  pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num_, constants_);
-
-  // Add stmt num and variables in cond expr into Uses Table
-  pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num_, vars_);
+void ConditionalExpression::PopulateEntities(Pkb& pkb, int stmt_num) {
 
   // Add variables to variable_set_
   for (string s : vars_) {
@@ -102,4 +95,10 @@ void ConditionalExpression::PopulateEntities(Pkb& pkb) {
   for (int i : constants_) {
     pkb.AddEntityToSet(EntityIdentifier::kConstant, i);
   }
+
+  // Add stmt num and constants in cond expr into Constant Table
+  pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, constants_);
+
+  // Add stmt num and variables in cond expr into Uses Table
+  pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_);
 }

@@ -1,9 +1,7 @@
 #include "assignment_pattern.h"
 #include "SP/sp_exceptions.h"
 
-AssignmentPattern::AssignmentPattern(std::vector<Token>& tokens, int stmt_num) {
-
-  stmt_num_ = stmt_num;
+AssignmentPattern::AssignmentPattern(std::vector<Token>& tokens) {
 
   int paren_count = 0;
 
@@ -76,17 +74,7 @@ vector<string> AssignmentPattern::GetVars() {
   return vars_;
 }
 
-void AssignmentPattern::PopulateEntities(Pkb& pkb) {
-  // Add stmt num and assignment pattern to Assign Table
-  pkb.AddInfoToTable(TableIdentifier::kAssign, stmt_num_, pattern_);
-  pkb.AddInfoToTable(TableIdentifier::kAssignPattern, stmt_num_, pattern_);
-
-  // Add stmt num and rhs constants to Constant Table
-  pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num_, constants_);
-
-  // Add stmt num and vector of rhs variables into Uses Table
-  pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num_, vars_);
-
+void AssignmentPattern::PopulateEntities(Pkb& pkb, int stmt_num) {
   // Add pattern variables to variable_set_
   for (string s : vars_) {
     pkb.AddEntityToSet(EntityIdentifier::kVariable, s);
@@ -96,4 +84,15 @@ void AssignmentPattern::PopulateEntities(Pkb& pkb) {
   for (int i : constants_) {
     pkb.AddEntityToSet(EntityIdentifier::kConstant, i);
   }
+
+  // Add stmt num and assignment pattern to Assign Table
+  pkb.AddInfoToTable(TableIdentifier::kAssign, stmt_num, pattern_);
+  pkb.AddInfoToTable(TableIdentifier::kAssignPattern, stmt_num, pattern_);
+
+  // Add stmt num and rhs constants to Constant Table
+  pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, constants_);
+
+  // Add stmt num and vector of rhs variables into Uses Table
+  pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_);
+
 }
