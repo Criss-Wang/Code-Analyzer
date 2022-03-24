@@ -122,15 +122,6 @@ Pkb InitializePkb1() {
 	return pkb;
 }
 
-struct hash_pair_fn {
-  std::size_t operator() (const std::pair<int, int>& p) const {
-    std::size_t h1 = std::hash<int>{}(p.first);
-    std::size_t h2 = std::hash<int>{}(p.second);
-
-    return h1 ^ h2;
-  }
-};
-
 TEST_CASE("Checks the correctness of constructing Affects relationship") {
   Pkb pkb1 = move(InitializePkb1());
   vector<CFGToken> tokens({
@@ -157,8 +148,8 @@ TEST_CASE("Checks the correctness of constructing Affects relationship") {
   vector<pair<int, int>> ans = { make_pair(1, 4), make_pair(4, 6), make_pair(5, 6), make_pair(6, 7),
       make_pair(1, 7), make_pair(6, 8), make_pair(7, 8), make_pair(6, 5), make_pair(8, 5), make_pair(7, 6), make_pair(8, 6) };
 
-  unordered_set<pair<int,int>, hash_pair_fn> affect_set(affect_lst.begin(), affect_lst.end());
-  unordered_set<pair<int,int>, hash_pair_fn> ans_set(ans.begin(), ans.end());
+  unordered_set<pair<int,int>, pql_cache::hash_pair_fn> affect_set(affect_lst.begin(), affect_lst.end());
+  unordered_set<pair<int,int>, pql_cache::hash_pair_fn> ans_set(ans.begin(), ans.end());
 
   REQUIRE(affect_set == ans_set);
 
