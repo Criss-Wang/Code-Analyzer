@@ -413,7 +413,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
         pkb.AddInfoToTable(TableIdentifier::kCalls, prev_proc, called_procedures);
 
         // Add procedure name and modified variables to ModifiesProcToVariablesTable
-        pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, prev_proc, modifies_p);
+        pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, prev_proc, modifies_p);
 
         // Add procedure name and used variables to UsesProcToVariablesTable
         pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, prev_proc, uses_p);
@@ -579,7 +579,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   // Populate ProcRangeTable, CallsTable, ModifiesProcToVariablesTable, UsesProcToVariablesTable for the last procedure
   pkb.AddInfoToTable(TableIdentifier::kProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
   pkb.AddInfoToTable(TableIdentifier::kCalls, prev_proc, called_procedures);
-  pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, prev_proc, modifies_p);
+  pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, prev_proc, modifies_p);
   pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, prev_proc, uses_p);
   
   // Generate CFG for last procedure

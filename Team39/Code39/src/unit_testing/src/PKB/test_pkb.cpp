@@ -211,23 +211,23 @@ TEST_CASE("Populating Calls Table") {
 TEST_CASE("Populating ModifiesProcToVariables and ModifiesVariableToProcs Table") {
   // ModifiesVariableToProcs table is populated behind the scenes
   Pkb pkb = Pkb();
-  bool success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p1", vector<string>{"a", "b", "c"});
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p2", vector<string>{"c", "y", "z"}) && success;
+  bool success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p1", vector<string>{"a", "b", "c"});
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p2", vector<string>{"c", "y", "z"}) && success;
 
   SECTION("Add item into table: string -> vector<string>") {
     REQUIRE(success);
   }
 
   SECTION("Add invalid item into table") {
-    success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, 1, 2);
+    success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, 1, 2);
     REQUIRE(!success);
 
     string str;
-    success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, 2, str);
+    success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, 2, str);
     REQUIRE(!success);
 
     vector<string> empty_vector = {};
-    success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p4", empty_vector);
+    success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p4", empty_vector);
     REQUIRE(!success);
   }
 }
@@ -484,8 +484,8 @@ TEST_CASE("Entity Attribute Operations") {
   success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "y");
 
   SECTION("Positive Test Cases") {
-    bool res = pkb.IsRead(1);
-    REQUIRE(res == true);
+    //bool res = pkb.IsRead(1);
+    //REQUIRE(res == true);
 
     int x_idx = pkb.GetIndexByVar("x");
     int var_idx = pkb.GetVarFromRead(1);
@@ -496,8 +496,8 @@ TEST_CASE("Entity Attribute Operations") {
   }
 
   SECTION("Negative Test Cases") {
-    bool res = pkb.IsRead(4);
-    REQUIRE(res == false);
+    //bool res = pkb.IsRead(4);
+    //REQUIRE(res == false);
 
     int var_idx = pkb.GetVarFromRead(4);
     REQUIRE(var_idx == -1);

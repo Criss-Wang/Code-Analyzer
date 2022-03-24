@@ -9,9 +9,9 @@
 #define ATTR_REF 1
 
 namespace pql_clause {
-  typedef std::vector<int>(Pkb::* GetDomainByAttribute)(const int) const;
+  typedef std::vector<int>(Pkb::* GetDomainByAttribute)(const int);
   typedef void (WithClause::* EvaluateFn)(Pkb&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
-  typedef int (Pkb::* GetAttrFn)(const int) const;
+  typedef int (Pkb::* GetAttrFn)(const int);
 
   const map<AttrIdentifier, GetDomainByAttribute> CallFnMap = {
     { AttrIdentifier::kProcName, &Pkb::GetCallFromProc }

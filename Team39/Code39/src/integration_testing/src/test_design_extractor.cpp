@@ -450,11 +450,11 @@ TEST_CASE("Test Nested Population for ModifiesP") {
   success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p7") && success;
   success = pkb.AddEntityToSet(EntityIdentifier::kProc, "p8") && success;
 
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p1", vector<string>{"y", "z"});
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p4", vector<string>{"a", "b"});
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p6", vector<string>{"c", "d"});
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p7", vector<string>{"g"});
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p8", vector<string>{"e", "f"});
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p1", vector<string>{"y", "z"});
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p4", vector<string>{"a", "b"});
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p6", vector<string>{"c", "d"});
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p7", vector<string>{"g"});
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p8", vector<string>{"e", "f"});
 
   success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p1", vector<string>{"p4"});
   success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p4", vector<string>{"p6", "p7"});
@@ -758,11 +758,11 @@ TEST_CASE("Test Nested Population for ModifiesS with Calls") {
   success = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 15, vector<string>{"w"}) && success;
   success = pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 17, vector<string>{"v"}) && success;
 
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p1", vector<string>{"a", "b", "c", "d"}) && success;
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p5", vector<string>{"e", "f"}) && success;
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p4", vector<string>{"x", "y", "z"}) && success;
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p6", vector<string>{"w"}) && success;
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p8", vector<string>{"v"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p1", vector<string>{"a", "b", "c", "d"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p5", vector<string>{"e", "f"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p4", vector<string>{"x", "y", "z"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p6", vector<string>{"w"}) && success;
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p8", vector<string>{"v"}) && success;
 
   success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p1", vector<string>{"p4", "p5", "p6"}) && success;
   success = pkb.AddInfoToTable(TableIdentifier::kCalls, "p6", vector<string>{"p8"}) && success;

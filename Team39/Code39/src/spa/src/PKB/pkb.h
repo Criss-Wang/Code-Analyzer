@@ -20,6 +20,7 @@ struct HashFunction {
   }
 };
 
+
 class Pkb {
   private:
     // Entity tables
@@ -86,7 +87,17 @@ class Pkb {
     // Entity sets - names and lists
     unordered_set<int> variable_set_;
     unordered_set<int> procedure_set_;
-    unordered_set<set<int>, HashFunction> stmt_list_set_;
+    //unordered_set<set<int>, HashFunction> stmt_list_set_;
+
+    // Mapping between an identifier and a table
+    unordered_map<TableIdentifier, shared_ptr<RelTable>> rel_map_ = {
+      {TableIdentifier::kCalls, follows_table_},
+      {TableIdentifier::kCalls, follows_table_},
+      {TableIdentifier::kCalls, follows_table_},
+      {TableIdentifier::kCalls, follows_table_},
+    };
+
+    
 
     // Insert all possible expression patterns for a statement
     bool AddPattern(int line_num, const string& input, TableIdentifier table_identifier);
@@ -100,6 +111,8 @@ class Pkb {
     bool AddUsesP(const string& key, const vector<string>& value);
     bool AddPatternToTable(bool& add_success, unordered_set<string> pattern_set, shared_ptr<Table<string, unordered_set<int>>> table_to_update, int line_num);
     bool UpdateIndexTable(shared_ptr<Table<int, string>> index_to_string_table, shared_ptr<Table<string, int>> string_to_int_table, const string& entity_value);
+
+    bool IsEntity(EntityIdentifier entity_identifier, int entity_idx);
 
   public:
     /**
@@ -116,7 +129,7 @@ class Pkb {
     // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
     bool AddEntityToSet(EntityIdentifier entity_identifier, int entity_val);
     bool AddEntityToSet(EntityIdentifier entity_identifier, const string& entity_val);
-    bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
+    //bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
 
     // Get tables
     shared_ptr<FollowsTable> GetFollowsTable();
@@ -141,15 +154,28 @@ class Pkb {
     shared_ptr<UsesVariableToProcsTable> GetUsesVariableToProcsTable();
     shared_ptr<CallerTable> GetCallerTable();
 
+    // Getter for all sets
+    unordered_set<int> GetStmtSet();
+    unordered_set<int> GetAssignSet();
+    unordered_set<int> GetReadSet();
+    unordered_set<int> GetPrintSet();
+    unordered_set<int> GetCallSet();
+    unordered_set<int> GetIfSet();
+    unordered_set<int> GetWhileSet();
+    unordered_set<int> GetVarSet();
+    unordered_set<int> GetProcSet();
+    unordered_set<int> GetConstantSet();
+    
+
     // Relationship utility APIs for PQL
     [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
     [[nodiscard]] bool IsParentExists() const;
     [[nodiscard]] bool IsTransitiveParent(int stmt_1, int stmt_2) const;
     [[nodiscard]] vector<int> GetParent(int stmt) const;
     [[nodiscard]] vector<int> GetAllParents(int stmt) const;
-    [[nodiscard]] vector<pair<int,int>> GetAllParentPairs() const;
     [[nodiscard]] vector<int> GetChild(int stmt) const;
     [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
+    [[nodiscard]] vector<pair<int,int>> GetAllParentPairs() const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs() const;
 
     [[nodiscard]] bool IsCalls(const int proc_1_idx, const int proc_2_idx) const;
@@ -166,10 +192,10 @@ class Pkb {
     [[nodiscard]] bool IsFollowsExists() const;
     [[nodiscard]] bool IsTransitiveFollows(int stmt_1, int stmt_2) const;
     [[nodiscard]] vector<int> GetStmtRightBefore(int stmt) const;
-    [[nodiscard]] vector<pair<int,int>> GetAllFollowsPairs() const;
     [[nodiscard]] vector<int> GetStmtsBefore(int stmt) const;
     [[nodiscard]] vector<int> GetStmtRightAfter(int stmt) const;
     [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;
+    [[nodiscard]] vector<pair<int,int>> GetAllFollowsPairs() const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs() const;
 
     [[nodiscard]] bool IsUsesStmt(int stmt, int var_idx) const;
@@ -217,27 +243,18 @@ class Pkb {
     [[nodiscard]] int GetIndexByProc(const string& proc_name) const;
 
     // Get all the attribute
-    [[nodiscard]] bool IsVar(int var_idx) const;
 
-    [[nodiscard]] bool IsRead(int stmt_no) const;
-    [[nodiscard]] int GetVarFromRead(int stmt_no) const;
-    [[nodiscard]] vector<int> GetReadByVar(int var_idx) const;
+    int GetVarFromRead(int stmt_no);
+    vector<int> GetReadByVar(int var_idx);
 
-    [[nodiscard]] bool IsPrint(int stmt_no) const;
-    [[nodiscard]] int GetVarFromPrint(int stmt_no) const;
-    [[nodiscard]] vector<int> GetPrintByVar(int var_idx) const;
+    int GetVarFromPrint(int stmt_no);
+    vector<int> GetPrintByVar(int var_idx);
 
-    [[nodiscard]] bool IsAssign(int stmt_no) const;
-    [[nodiscard]] int GetVarFromAssign(int stmt_no) const;
-    [[nodiscard]] vector<int> GetAssignByVar(int var_idx) const;
+    //[[nodiscard]] bool IsAssign(int stmt_no) const;
+    //[[nodiscard]] int GetVarFromAssign(int stmt_no) const;
+    //[[nodiscard]] vector<int> GetAssignByVar(int var_idx) const;
 
-    [[nodiscard]] bool IsCall(int stmt_no) const;
-    [[nodiscard]] int GetProcFromCall(int stmt_no) const;
-    [[nodiscard]] vector<int> GetCallFromProc(int proc_idx) const;
+    int GetProcFromCall(int stmt_no);
+    vector<int> GetCallFromProc(int proc_idx);
 
-    [[nodiscard]] bool IsIf(int stmt_no) const;
-    [[nodiscard]] bool IsWhile(int stmt_no) const;
-    [[nodiscard]] bool IsProcedure(int proc_idx) const;
-    [[nodiscard]] bool IsStmt(int stmt_no) const;
-    [[nodiscard]] bool IsConstant(int stmt_no) const;
 };

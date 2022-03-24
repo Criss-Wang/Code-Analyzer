@@ -87,10 +87,51 @@ shared_ptr<CallerTable> Pkb::GetCallerTable() {
   return caller_table_;
 }
 
+unordered_set<int> Pkb::GetStmtSet() {
+  return stmt_set_;
+}
+
+unordered_set<int> Pkb::GetAssignSet() {
+  return assign_set_;
+}
+
+unordered_set<int> Pkb::GetReadSet() {
+  return read_set_;
+}
+
+unordered_set<int> Pkb::GetPrintSet() {
+  return print_set_;
+}
+
+unordered_set<int> Pkb::GetCallSet() {
+  return call_set_;
+}
+
+unordered_set<int> Pkb::GetIfSet() {
+  return if_set_;
+}
+
+unordered_set<int> Pkb::GetWhileSet() {
+  return while_set_;
+}
+
+unordered_set<int> Pkb::GetVarSet() {
+  return variable_set_;
+}
+
+unordered_set<int> Pkb::GetProcSet() {
+  return procedure_set_;
+}
+
+unordered_set<int> Pkb::GetConstantSet() {
+  return constant_set_;
+}
+
 // Following are for search handlers
 bool Pkb::IsCalls(const int proc_1_idx, const int proc_2_idx) const {
   try {
-    vector<int> callees = calls_table_->GetValueByKey(proc_1_idx);
+    const shared_ptr<RelListTable> table = calls_table_;
+    vector<int> callees = table->GetValueByKey(proc_1_idx);
     return find(callees.begin(), callees.end(), proc_2_idx) != callees.end();
   } catch (exception& e) {
     return false;
@@ -784,7 +825,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
     switch (table_identifier) {
       case TableIdentifier::kCalls: 
         return AddCalls(key, value);
-      case TableIdentifier::KModifiesProcToVar: 
+      case TableIdentifier::kModifiesProcToVar: 
         return AddModifiesP(key, value);
       case TableIdentifier::kUsesProcToVar: 
         return AddUsesP(key, value);
@@ -876,20 +917,20 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const string&
   }
 }
 
-bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const set<int>& entity_val) {
-  try {
-    switch (entity_identifier) {
-      case EntityIdentifier::kStmtLst: {
-        stmt_list_set_.insert(entity_val);
-        return true;
-      }
-      default:
-        throw InvalidIdentifierException();
-    }
-  } catch (exception& e) {
-    return false;
-  }
-}
+//bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const set<int>& entity_val) {
+//  try {
+//    switch (entity_identifier) {
+//      case EntityIdentifier::kStmtLst: {
+//        stmt_list_set_.insert(entity_val);
+//        return true;
+//      }
+//      default:
+//        throw InvalidIdentifierException();
+//    }
+//  } catch (exception& e) {
+//    return false;
+//  }
+//}
 
 unordered_set<int> Pkb::GetAllEntity(const EntityIdentifier entity_identifier) {
   switch (entity_identifier) {
@@ -918,34 +959,47 @@ unordered_set<int> Pkb::GetAllEntity(const EntityIdentifier entity_identifier) {
   }
 }
 
-unordered_set<set<int>, HashFunction> Pkb::GetAllEntityStmtLst(const EntityIdentifier entity_identifier) {
-  switch (entity_identifier) {
-    case EntityIdentifier::kStmtLst: 
-      return stmt_list_set_;
-    default:
-      throw InvalidIdentifierException();
-  }
-}
+//unordered_set<set<int>, HashFunction> Pkb::GetAllEntityStmtLst(const EntityIdentifier entity_identifier) {
+//  switch (entity_identifier) {
+//    case EntityIdentifier::kStmtLst: 
+//      return stmt_list_set_;
+//    default:
+//      throw InvalidIdentifierException();
+//  }
+//}
 
-bool Pkb::IsVar(const int var_idx) const {
-  return variable_set_.find(var_idx) != variable_set_.end();
-}
+typedef unordered_set<int>(Pkb::* GetEntityFn)();
 
-bool Pkb::IsRead(const int stmt_no) const {
+const unordered_map<EntityIdentifier, GetEntityFn> entity_map_ = {
+      {EntityIdentifier::kStmt, &Pkb::GetStmtSet},
+      {EntityIdentifier::kAssign, &Pkb::GetAssignSet},
+      {EntityIdentifier::kRead, &Pkb::GetReadSet},
+      {EntityIdentifier::kPrint, &Pkb::GetPrintSet},
+      {EntityIdentifier::kCall, &Pkb::GetCallSet},
+      {EntityIdentifier::kIf, &Pkb::GetIfSet},
+      {EntityIdentifier::kWhile, &Pkb::GetWhileSet},
+      {EntityIdentifier::kVariable, &Pkb::GetVarSet},
+      {EntityIdentifier::kProc, &Pkb::GetProcSet},
+      {EntityIdentifier::kConstant, &Pkb::GetConstantSet},
+};
+
+bool Pkb::IsEntity(const EntityIdentifier entity_identifier, const int entity_idx) {
+  const GetEntityFn get_entity_fn = entity_map_.at(entity_identifier);
+  auto entity_set = (this->*get_entity_fn)();
   // O(1) find for unordered_set
-  return read_set_.find(stmt_no) != read_set_.end();
+  return entity_set.find(entity_idx) != entity_set.end();
 }
 
-int Pkb::GetVarFromRead(const int stmt_no) const {
-  if (!IsRead(stmt_no)) {
+int Pkb::GetVarFromRead(const int stmt_no) {
+  if (!IsEntity(EntityIdentifier::kRead, stmt_no)) {
     return INVALID_INDEX;
   }
   return GetIndexByVar(read_table_->GetValueByKey(stmt_no));
 }
 
-vector<int> Pkb::GetReadByVar(const int var_idx) const {
+vector<int> Pkb::GetReadByVar(const int var_idx) {
   vector<int> res = {};
-  if (!IsVar(var_idx)) {
+  if (!IsEntity(EntityIdentifier::kVariable, var_idx)) {
     return res;
   }
   for (const auto& [key, val] : read_table_->GetKeyValueLst()) {
@@ -956,20 +1010,16 @@ vector<int> Pkb::GetReadByVar(const int var_idx) const {
   return res;
 }
 
-bool Pkb::IsPrint(const int stmt_no) const {
-  return print_set_.find(stmt_no) != print_set_.end();
-}
-
-int Pkb::GetVarFromPrint(const int stmt_no) const {
-  if (!IsPrint(stmt_no)) {
+int Pkb::GetVarFromPrint(const int stmt_no) {
+  if (!IsEntity(EntityIdentifier::kPrint, stmt_no)) {
     return INVALID_INDEX;
   }
   return GetIndexByVar(print_table_->GetValueByKey(stmt_no));
 }
 
-vector<int> Pkb::GetPrintByVar(const int var_idx) const {
+vector<int> Pkb::GetPrintByVar(const int var_idx) {
   vector<int> res = {};
-  if (!IsVar(var_idx)) {
+  if (!IsEntity(EntityIdentifier::kVariable, var_idx)) {
     return res;
   }
   for (const auto& [key, val] : print_table_->GetKeyValueLst()) {
@@ -978,68 +1028,44 @@ vector<int> Pkb::GetPrintByVar(const int var_idx) const {
   return res;
 }
 
-bool Pkb::IsAssign(const int stmt_no) const {
-  return assign_set_.find(stmt_no) != assign_set_.end();
-}
+//bool Pkb::IsAssign(const int stmt_no) const {
+//  return assign_set_.find(stmt_no) != assign_set_.end();
+//}
 
-int Pkb::GetVarFromAssign(const int stmt_no) const {
-  if (!IsAssign(stmt_no)) {
-    return INVALID_INDEX;
-  }
-  return GetIndexByVar(assign_table_->GetValueByKey(stmt_no));
-}
+//int Pkb::GetVarFromAssign(const int stmt_no) const {
+//  if (!IsAssign(stmt_no)) {
+//    return INVALID_INDEX;
+//  }
+//  return GetIndexByVar(assign_table_->GetValueByKey(stmt_no));
+//}
+//
+//vector<int> Pkb::GetAssignByVar(const int var_idx) const {
+//  vector<int> res = {};
+//  if (!IsVar(var_idx)) {
+//    return res;
+//  }
+//  for (const auto& [key, val] : assign_table_->GetKeyValueLst()) {
+//    if (val == GetVarByIndex(var_idx)) res.push_back(key);
+//  }
+//  return res;
+//}
 
-vector<int> Pkb::GetAssignByVar(const int var_idx) const {
-  vector<int> res = {};
-  if (!IsVar(var_idx)) {
-    return res;
-  }
-  for (const auto& [key, val] : assign_table_->GetKeyValueLst()) {
-    if (val == GetVarByIndex(var_idx)) res.push_back(key);
-  }
-  return res;
-}
-
-bool Pkb::IsCall(const int stmt_no) const {
-  return call_set_.find(stmt_no) != call_set_.end();
-}
-
-int Pkb::GetProcFromCall(const int stmt_no) const {
-  if (!IsCall(stmt_no)) {
+int Pkb::GetProcFromCall(const int stmt_no) {
+  if (!IsEntity(EntityIdentifier::kCall, stmt_no)) {
     return INVALID_INDEX;
   } 
   return GetIndexByProc(caller_table_->GetValueByKey(stmt_no));
 }
 
-vector<int> Pkb::GetCallFromProc(const int proc_idx) const {
+vector<int> Pkb::GetCallFromProc(const int proc_idx) {
   vector<int> res = {};
-  if (!IsProcedure(proc_idx)) {
+  if (!IsEntity(EntityIdentifier::kProc, proc_idx)) {
     return res;
   }
   for (const auto& [key, val] : caller_table_->GetKeyValueLst()) {
     if (val == GetProcByIndex(proc_idx)) res.push_back(key);
   }
   return res;
-}
-
-bool Pkb::IsIf(const int stmt_no) const {
-  return if_set_.find(stmt_no) != if_set_.end();
-}
-
-bool Pkb::IsWhile(const int stmt_no) const {
-  return while_set_.find(stmt_no) != while_set_.end();
-}
-
-bool Pkb::IsStmt(const int stmt_no) const {
-  return stmt_set_.find(stmt_no) != stmt_set_.end();
-}
-
-bool Pkb::IsConstant(const int stmt_no) const {
-  return constant_set_.find(stmt_no) != constant_set_.end();
-}
-
-bool Pkb::IsProcedure(const int proc_idx) const {
-  return procedure_set_.find(proc_idx) != procedure_set_.end();
 }
 
 vector<pair<int, string>> Pkb::GetAllIndexVarPairs() const {

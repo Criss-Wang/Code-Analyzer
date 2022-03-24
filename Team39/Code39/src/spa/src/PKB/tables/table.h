@@ -104,7 +104,7 @@ enum class TableIdentifier {
   kAssignPattern, kIfPattern, kWhilePattern,
   kFollows, kFollowsStar,
   kParent, kParentStar,
-  kUsesStmtToVar, kUsesProcToVar, kModifiesStmtToVar, KModifiesProcToVar,
+  kUsesStmtToVar, kUsesProcToVar, kModifiesStmtToVar, kModifiesProcToVar,
   kCaller, kCalls, kCallsStar,
   kNext
 };
