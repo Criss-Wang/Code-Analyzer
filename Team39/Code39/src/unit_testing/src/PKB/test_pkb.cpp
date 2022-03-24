@@ -486,10 +486,10 @@ TEST_CASE("Entity Attribute Operations") {
     //REQUIRE(res == true);
 
     int x_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "x");
-    int var_idx = pkb.GetVarFromRead(1);
+    int var_idx = pkb.GetStringAttribute(EntityIdentifier::kRead, 1);
     REQUIRE(var_idx == x_idx);
 
-    vector<int> stmt_res = pkb.GetReadByVar(x_idx);
+    vector<int> stmt_res = pkb.GetStmtNumByStringAttribute(EntityIdentifier::kRead, x_idx);
     REQUIRE(stmt_res == vector<int>{1, 2});
   }
 
@@ -497,10 +497,10 @@ TEST_CASE("Entity Attribute Operations") {
     //bool res = pkb.IsRead(4);
     //REQUIRE(res == false);
 
-    int var_idx = pkb.GetVarFromRead(4);
+    int var_idx = pkb.GetStringAttribute(EntityIdentifier::kRead, 4);
     REQUIRE(var_idx == -1);
 
-    vector<int> stmt_res = pkb.GetReadByVar(20);
+    vector<int> stmt_res = pkb.GetStmtNumByStringAttribute(EntityIdentifier::kRead, 20);
     REQUIRE(stmt_res.empty());
   }
 }

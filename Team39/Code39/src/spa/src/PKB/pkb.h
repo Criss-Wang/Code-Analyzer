@@ -143,9 +143,13 @@ class Pkb {
     shared_ptr<RelListReverseTable> GetUsesVariableToStmtsTable();
     shared_ptr<RelListTable> GetUsesProcToVariablesTable();
     shared_ptr<RelListReverseTable> GetUsesVariableToProcsTable();
-    shared_ptr<CallerTable> GetCallerTable();
 
-    // Getter for all sets
+    // Getter for all entity attribute tables
+    shared_ptr<EntityVarsTable> GetCallerTable();
+    shared_ptr<EntityVarsTable> GetReadTable();
+    shared_ptr<EntityVarsTable> GetPrintTable();
+
+    // Getter for all entity sets
     unordered_set<int> GetStmtSet();
     unordered_set<int> GetAssignSet();
     unordered_set<int> GetReadSet();
@@ -179,31 +183,18 @@ class Pkb {
     [[nodiscard]] vector<pair<string, int>> GetAllStringIndexPairs(IndexTableType index_table_type) const;
     [[nodiscard]] string GetStringByIndex(IndexTableType index_table_type, int idx) const;
     [[nodiscard]] int GetIndexByString(IndexTableType index_table_type, const string& entity_name) const;
-    
-    [[nodiscard]] vector<pair<int, string>> GetAllIndexVarPairs() const;
-    [[nodiscard]] vector<pair<string, int>> GetAllVarIndexPairs() const;
-    [[nodiscard]] string GetVarByIndex(int idx) const;
-    [[nodiscard]] int GetIndexByVar(const string& var_name) const;
-
-    [[nodiscard]] vector<pair<int, string>> GetAllIndexProcPairs() const;
-    [[nodiscard]] vector<pair<string, int>> GetAllProcIndexPairs() const;
-    [[nodiscard]] string GetProcByIndex(int idx) const;
-    [[nodiscard]] int GetIndexByProc(const string& proc_name) const;
 
     // Get all the attribute
-
+    int GetStringAttribute(EntityIdentifier entity_identifier, const int stmt_no);
+    vector<int> GetStmtNumByStringAttribute(EntityIdentifier entity_identifier, const int string_idx);
     int GetVarFromRead(int stmt_no);
     vector<int> GetReadByVar(int var_idx);
-
     int GetVarFromPrint(int stmt_no);
     vector<int> GetPrintByVar(int var_idx);
-
+    int GetProcFromCall(int stmt_no);
+    vector<int> GetCallFromProc(int proc_idx);
     //[[nodiscard]] bool IsAssign(int stmt_no) const;
     //[[nodiscard]] int GetVarFromAssign(int stmt_no) const;
     //[[nodiscard]] vector<int> GetAssignByVar(int var_idx) const;
-
-    int GetProcFromCall(int stmt_no);
-    vector<int> GetCallFromProc(int proc_idx);
-
-    
+       
 };
