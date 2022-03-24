@@ -187,12 +187,7 @@ class Pkb {
     // Get all the attribute
     int GetStringAttribute(EntityIdentifier entity_identifier, const int stmt_no);
     vector<int> GetStmtNumByStringAttribute(EntityIdentifier entity_identifier, const int string_idx);
-    int GetVarFromRead(int stmt_no);
-    vector<int> GetReadByVar(int var_idx);
-    int GetVarFromPrint(int stmt_no);
-    vector<int> GetPrintByVar(int var_idx);
-    int GetProcFromCall(int stmt_no);
-    vector<int> GetCallFromProc(int proc_idx);
+
     //[[nodiscard]] bool IsAssign(int stmt_no) const;
     //[[nodiscard]] int GetVarFromAssign(int stmt_no) const;
     //[[nodiscard]] vector<int> GetAssignByVar(int var_idx) const;

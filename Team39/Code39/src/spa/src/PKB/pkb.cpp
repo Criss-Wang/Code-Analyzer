@@ -768,25 +768,6 @@ int Pkb::GetStringAttribute(const EntityIdentifier entity_identifier, const int 
   }
 }
 
-//int Pkb::GetVarFromRead(const int stmt_no) {
-//  if (!IsEntity(EntityIdentifier::kRead, stmt_no)) {
-//    return INVALID_INDEX;
-//  }
-//  return GetIndexByString(IndexTableType::kVarIndex, read_table_->GetValueByKey(stmt_no));
-//}
-//int Pkb::GetVarFromPrint(const int stmt_no) {
-//  if (!IsEntity(EntityIdentifier::kPrint, stmt_no)) {
-//    return INVALID_INDEX;
-//  }
-//  return GetIndexByString(IndexTableType::kVarIndex, print_table_->GetValueByKey(stmt_no));
-//}
-//int Pkb::GetProcFromCall(const int stmt_no) {
-//  if (!IsEntity(EntityIdentifier::kCall, stmt_no)) {
-//    return INVALID_INDEX;
-//  }
-//  return GetIndexByString(IndexTableType::kProcIndex, caller_table_->GetValueByKey(stmt_no));
-//}
-
 vector<int> Pkb::GetStmtNumByStringAttribute(const EntityIdentifier entity_identifier, const int string_idx) {
   vector<int> res = {};
   const GetEntityTableFn table_getter = entity_table_map.at(entity_identifier);
@@ -805,40 +786,6 @@ vector<int> Pkb::GetStmtNumByStringAttribute(const EntityIdentifier entity_ident
   }
   return res;
 }
-//
-//vector<int> Pkb::GetReadByVar(const int var_idx) {
-//  vector<int> res = {};
-//  if (!IsEntity(EntityIdentifier::kVariable, var_idx)) {
-//    return res;
-//  }
-//  for (const auto& [key, val] : read_table_->GetKeyValueLst()) {
-//    if (val == GetStringByIndex(IndexTableType::kVar, var_idx)) {
-//      res.push_back(key);
-//    }
-//  }
-//  return res;
-//}
-//vector<int> Pkb::GetPrintByVar(const int var_idx) {
-//  vector<int> res = {};
-//  if (!IsEntity(EntityIdentifier::kVariable, var_idx)) {
-//    return res;
-//  }
-//  for (const auto& [key, val] : print_table_->GetKeyValueLst()) {
-//    if (val == GetStringByIndex(IndexTableType::kVar, var_idx)) res.push_back(key);
-//  }
-//  return res;
-//}
-//vector<int> Pkb::GetCallFromProc(const int proc_idx) {
-//  vector<int> res = {};
-//  if (!IsEntity(EntityIdentifier::kProc, proc_idx)) {
-//    return res;
-//  }
-//  for (const auto& [key, val] : caller_table_->GetKeyValueLst()) {
-//    if (val == GetStringByIndex(IndexTableType::kProc, proc_idx)) res.push_back(key);
-//  }
-//  return res;
-//}
-
 
 
 //bool Pkb::IsAssign(const int stmt_no) const {
