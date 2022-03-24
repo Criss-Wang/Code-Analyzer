@@ -43,7 +43,7 @@ TEST_CASE("Read/print statements for Population") {
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kRead) == expected_read);
 
     // check relation tables
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 1);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
 
@@ -68,7 +68,7 @@ TEST_CASE("Read/print statements for Population") {
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     // check relation tables
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 1);
     REQUIRE(uses_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
   }
@@ -95,17 +95,17 @@ TEST_CASE("Read/print statements for Population") {
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 2);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(2) == 3);
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 2);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("y")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 1);
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("x")});
   }
@@ -132,7 +132,7 @@ TEST_CASE("Read/print statements for Population") {
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kPrint) == expected_print);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 5);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(2) == 3);
@@ -140,13 +140,13 @@ TEST_CASE("Read/print statements for Population") {
     REQUIRE(follows_table.GetValueByKey(4) == 5);
     REQUIRE(follows_table.GetValueByKey(5) == 6);
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 3);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("yhhs")});
     REQUIRE(modifies_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByVar("print")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 3);
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("x09")});
     REQUIRE(uses_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("read")});
@@ -175,11 +175,11 @@ TEST_CASE("Read/print/assign statments for Population") {
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     // check relation tables
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 1);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 1);
     REQUIRE(uses_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z")});
   }
@@ -212,17 +212,17 @@ TEST_CASE("Read/print/assign statments for Population") {
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 2);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(2) == 3);
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 2);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 2);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("x")});
@@ -256,17 +256,17 @@ TEST_CASE("Read/print/assign statments for Population") {
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 2);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(2) == 3);
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 2);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 2);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("t")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("y")});
@@ -300,7 +300,7 @@ TEST_CASE("Read/print/assign statments for Population") {
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kAssign) == expected_assign);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 5);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(2) == 3);
@@ -308,7 +308,7 @@ TEST_CASE("Read/print/assign statments for Population") {
     REQUIRE(follows_table.GetValueByKey(4) == 5);
     REQUIRE(follows_table.GetValueByKey(5) == 6);
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 5);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
@@ -316,7 +316,7 @@ TEST_CASE("Read/print/assign statments for Population") {
     REQUIRE(modifies_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByVar("y")});
     REQUIRE(modifies_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("z")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 4);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("t")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("x")});
@@ -360,23 +360,23 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kIf) == expected_if);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 2);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(3) == 4);
 
-    ParentTable parent_table = *pkb.GetParentTable();
+    RelListTable parent_table = *pkb.GetParentTable();
     REQUIRE(parent_table.GetTableSize() == 1);
     REQUIRE(parent_table.GetValueByKey(2) == vector<int>{ 3, 4, 5 });
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 4);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("z")});
     REQUIRE(modifies_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByVar("y")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 3);
     REQUIRE(uses_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z")});
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
@@ -414,22 +414,22 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kWhile) == expected_while);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 2);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(2) == 4);
 
-    ParentTable parent_table = *pkb.GetParentTable();
+    RelListTable parent_table = *pkb.GetParentTable();
     REQUIRE(parent_table.GetTableSize() == 1);
     REQUIRE(parent_table.GetValueByKey(2) == vector<int>{ 3 });
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 3);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 3);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z")});
@@ -470,25 +470,25 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kWhile) == expected_while);
     
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 3);
     REQUIRE(follows_table.GetValueByKey(1) == 4);
     REQUIRE(follows_table.GetValueByKey(4) == 6);
     REQUIRE(follows_table.GetValueByKey(6) == 7);
 
-    ParentTable parent_table = *pkb.GetParentTable();
+    RelListTable parent_table = *pkb.GetParentTable();
     REQUIRE(parent_table.GetTableSize() == 2);
     REQUIRE(parent_table.GetValueByKey(1) == vector<int>{ 2, 3 });
     REQUIRE(parent_table.GetValueByKey(4) == vector<int>{ 5 });
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 4);
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("y")});
     REQUIRE(modifies_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 5);
     REQUIRE(uses_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(uses_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("y")});
@@ -528,7 +528,7 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kIf) == expected_if);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 5);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(2) == 3);
@@ -536,11 +536,11 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     REQUIRE(follows_table.GetValueByKey(5) == 6);
     REQUIRE(follows_table.GetValueByKey(4) == 8);
 
-    ParentTable parent_table = *pkb.GetParentTable();
+    RelListTable parent_table = *pkb.GetParentTable();
     REQUIRE(parent_table.GetTableSize() == 1);
     REQUIRE(parent_table.GetValueByKey(4) == vector<int>{ 5, 6, 7 });
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 6);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
@@ -549,7 +549,7 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     REQUIRE(modifies_table.GetValueByKey(8) == vector<int>{pkb.GetIndexByVar("y")});
     REQUIRE(modifies_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 6);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("t")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("x")});
@@ -596,23 +596,23 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kWhile) == expected_while);
     
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 1);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
 
-    ParentTable parent_table = *pkb.GetParentTable();
+    RelListTable parent_table = *pkb.GetParentTable();
     REQUIRE(parent_table.GetTableSize() == 2);
     REQUIRE(parent_table.GetValueByKey(2) == vector<int>{ 3 });
     REQUIRE(parent_table.GetValueByKey(3) == vector<int>{ 4, 5 });
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 4);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByVar("y")});
     REQUIRE(modifies_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("y")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("y")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 4);
     REQUIRE(uses_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z")});
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y")});
@@ -654,7 +654,7 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kWhile) == expected_while);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 6);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(2) == 9);
@@ -664,12 +664,12 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
     REQUIRE(follows_table.GetValueByKey(7) == 8);
 
 
-    ParentTable parent_table = *pkb.GetParentTable();
+    RelListTable parent_table = *pkb.GetParentTable();
     REQUIRE(parent_table.GetTableSize() == 2);
     REQUIRE(parent_table.GetValueByKey(2) == vector<int>{ 3, 4, 7, 8 });
     REQUIRE(parent_table.GetValueByKey(4) == vector<int>{ 5, 6 });
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 7);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("x")});
@@ -679,7 +679,7 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
     REQUIRE(modifies_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 8);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("z")});
@@ -728,7 +728,7 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Population
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kWhile) == expected_while);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 5);
     REQUIRE(follows_table.GetValueByKey(1) == 9);
     REQUIRE(follows_table.GetValueByKey(9) == 10);
@@ -736,13 +736,13 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Population
     REQUIRE(follows_table.GetValueByKey(3) == 8);
     REQUIRE(follows_table.GetValueByKey(5) == 6);
 
-    ParentTable parent_table = *pkb.GetParentTable();
+    RelListTable parent_table = *pkb.GetParentTable();
     REQUIRE(parent_table.GetTableSize() == 3);
     REQUIRE(parent_table.GetValueByKey(1) == vector<int>{ 2, 3, 8 });
     REQUIRE(parent_table.GetValueByKey(3) == vector<int>{ 4, 5, 6 });
     REQUIRE(parent_table.GetValueByKey(6) == vector<int>{ 7 });
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 8);
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("y")});
@@ -753,7 +753,7 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Population
     REQUIRE(modifies_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("v")});
     REQUIRE(modifies_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("v")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 8);
     REQUIRE(uses_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("v")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("x"), pkb.GetIndexByVar("y"), pkb.GetIndexByVar("v")});
@@ -799,14 +799,14 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kCall) == expected_call);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 4);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(2) == 3);
     REQUIRE(follows_table.GetValueByKey(3) == 4);
     REQUIRE(follows_table.GetValueByKey(5) == 6);
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 5);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("print")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
@@ -814,7 +814,7 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(modifies_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByVar("x")});
     REQUIRE(modifies_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByVar("x")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 4);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("proc1")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("proc3")});
@@ -854,7 +854,7 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kCall) == expected_call);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 5);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(2) == 3);
@@ -862,7 +862,7 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(follows_table.GetValueByKey(5) == 6);
     REQUIRE(follows_table.GetValueByKey(7) == 8);
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 7);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("proc1")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
@@ -872,7 +872,7 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(modifies_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("proc1"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("procedure")});
     REQUIRE(modifies_table.GetValueByKey(8) == vector<int>{pkb.GetIndexByVar("proc1"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("procedure")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 6);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("y"), pkb.GetIndexByVar("f")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("proc3")});
@@ -914,7 +914,7 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kCall) == expected_call);
 
     // check relation tables
-    FollowsTable follows_table = *pkb.GetFollowsTable();
+    RelTable follows_table = *pkb.GetFollowsTable();
     REQUIRE(follows_table.GetTableSize() == 5);
     REQUIRE(follows_table.GetValueByKey(1) == 2);
     REQUIRE(follows_table.GetValueByKey(2) == 3);
@@ -922,7 +922,7 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(follows_table.GetValueByKey(5) == 6);
     REQUIRE(follows_table.GetValueByKey(7) == 8);
 
-    ModifiesStmtToVariablesTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
+    RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 7);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByVar("print")});
     REQUIRE(modifies_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("x")});
@@ -932,7 +932,7 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(modifies_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByVar("print"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("proc2"), pkb.GetIndexByVar("t")});
     REQUIRE(modifies_table.GetValueByKey(8) == vector<int>{pkb.GetIndexByVar("print"), pkb.GetIndexByVar("x"), pkb.GetIndexByVar("proc2")});
 
-    UsesStmtToVariablesTable uses_table = *pkb.GetUsesStmtToVariablesTable();
+    RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 6);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByVar("proc1")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByVar("procedure")});

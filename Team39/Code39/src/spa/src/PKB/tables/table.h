@@ -98,6 +98,12 @@ class EntityVarsListTable : public Table<int, vector<string>> {};
 class IndexToEntityTable : public Table<int, string> {};
 class EntityToIndexTable : public Table<string, int> {};
 
+enum class TableType {
+  kRelSimple,
+  kRelList,
+  kRelReverse,
+  kRelListOrReverse
+};
 
 enum class TableIdentifier {
   kAssign, kRead, kPrint, kConstant, kIf, kWhile, kProcedure,

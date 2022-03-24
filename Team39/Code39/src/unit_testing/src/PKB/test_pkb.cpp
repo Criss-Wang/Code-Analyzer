@@ -85,13 +85,13 @@ TEST_CASE("Populating Follows and FollowsBefore Table") {
   }
 
   SECTION("Test API for PQL side for FollowsTable") {
-    REQUIRE(pkb.IsFollows(1, 2));
-    REQUIRE(pkb.IsFollows(2, 3));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kFollows, 1, 2));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kFollows, 2, 3));
 
-    REQUIRE(pkb.GetStmtRightAfter(1) == vector<int>{2});
-    REQUIRE(pkb.GetStmtRightAfter(2) == vector<int>{3});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kFollows, 1) == vector<int>{2});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kFollows, 2) == vector<int>{3});
     // Key does not exist so the result should be empty
-    REQUIRE(pkb.GetStmtRightAfter(3000) == vector<int>{});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kFollows, 3000) == vector<int>{});
 
     vector<pair<int, int>> follows_pairs = pkb.GetAllFollowsPairs();
     vector<pair<int, int>> expected_follows_pairs = vector<pair<int, int>>{make_pair(1, 2), make_pair(2, 3)};
@@ -101,9 +101,9 @@ TEST_CASE("Populating Follows and FollowsBefore Table") {
   }
 
   SECTION("Test API for PQL side for FollowsBeforeTable") {
-    REQUIRE(pkb.GetStmtRightBefore(0) == vector<int>{});
-    REQUIRE(pkb.GetStmtRightBefore(2) == vector<int>{1});
-    REQUIRE(pkb.GetStmtRightBefore(3) == vector<int>{2});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kFollows, 0) == vector<int>{});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kFollows, 2) == vector<int>{1});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kFollows, 3) == vector<int>{2});
   }
 }
 
@@ -131,23 +131,23 @@ TEST_CASE("Populating Parent and Child Table") {
   }
 
   SECTION("Test API for PQL side for ParentTable") {
-    REQUIRE(pkb.IsParent(1, 2));
-    REQUIRE(pkb.IsParent(1, 3));
-    REQUIRE(!pkb.IsParent(2, 3));
-    REQUIRE(!pkb.IsParent(1, 5));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kParent, 1, 2));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kParent, 1, 3));
+    REQUIRE(!pkb.IsRelationshipHolds(pql::RelationshipTypes::kParent, 2, 3));
+    REQUIRE(!pkb.IsRelationshipHolds(pql::RelationshipTypes::kParent, 1, 5));
 
-    REQUIRE(pkb.GetParent(1).empty());
-    REQUIRE(pkb.GetParent(2) == vector<int>{1});
-    REQUIRE(pkb.GetParent(5) == vector<int>{4});
-    REQUIRE(pkb.GetParent(5) != vector<int>{1});
-    REQUIRE(pkb.GetParent(6) != vector<int>{1});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kParent, 1).empty());
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kParent, 2) == vector<int>{1});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kParent, 5) == vector<int>{4});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kParent, 5) != vector<int>{1});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kParent, 6) != vector<int>{1});
   }
 
   SECTION("Test API for PQL side for ChildTable") {
-    REQUIRE(pkb.GetChild(1) == vector<int>{2, 3, 4});
-    REQUIRE(pkb.GetChild(1) != vector<int>{1, 2});
-    REQUIRE(pkb.GetChild(5).empty());
-    REQUIRE(pkb.GetChild(4) == vector<int>{5, 6});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kParent, 1) == vector<int>{2, 3, 4});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kParent, 1) != vector<int>{1, 2});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kParent, 5).empty());
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kParent, 4) == vector<int>{5, 6});
   }
 }
 
@@ -183,22 +183,22 @@ TEST_CASE("Populating Calls Table") {
   const int invalid_idx = 100;
 
   SECTION("Test API for PQL side for Calls Table") {
-    REQUIRE(pkb.IsCalls(p1_idx, p4_idx));
-    REQUIRE(pkb.IsCalls(p1_idx, p5_idx));
-    REQUIRE(pkb.IsCalls(p2_idx, p3_idx));
-    REQUIRE(pkb.IsCalls(p2_idx, p4_idx));
-    REQUIRE(!pkb.IsCalls(p1_idx, p2_idx));
-    REQUIRE(!pkb.IsCalls(p1_idx, invalid_idx));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p1_idx, p4_idx));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p1_idx, p5_idx));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p2_idx, p3_idx));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p2_idx, p4_idx));
+    REQUIRE(!pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p1_idx, p2_idx));
+    REQUIRE(!pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p1_idx, invalid_idx));
 
-    REQUIRE(pkb.GetCallers(p5_idx) == vector<int>{p1_idx});
-    REQUIRE(pkb.GetCallers(p3_idx) == vector<int>{p2_idx});
-    REQUIRE(pkb.GetCallers(p4_idx) == vector<int>{p1_idx, p2_idx});
-    REQUIRE(pkb.GetCallers(p5_idx) != vector<int>{p1_idx, p2_idx});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kCalls, p5_idx) == vector<int>{p1_idx});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kCalls, p3_idx) == vector<int>{p2_idx});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kCalls, p4_idx) == vector<int>{p1_idx, p2_idx});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kCalls, p5_idx) != vector<int>{p1_idx, p2_idx});
 
-    REQUIRE(pkb.GetCallees(p1_idx) == vector<int>{p4_idx, p5_idx});
-    REQUIRE(pkb.GetCallees(p2_idx) == vector<int>{p3_idx, p4_idx});
-    REQUIRE(pkb.GetCallees(invalid_idx).empty());
-    REQUIRE(pkb.GetCallees(p1_idx) != vector<int>{p4_idx});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kCalls, p1_idx) == vector<int>{p4_idx, p5_idx});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kCalls, p2_idx) == vector<int>{p3_idx, p4_idx});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kCalls, invalid_idx).empty());
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kCalls, p1_idx) != vector<int>{p4_idx});
 
     vector<pair<int, int>> expected_calls_pairs = {make_pair(p1_idx, p4_idx), make_pair(p1_idx, p5_idx), make_pair(p2_idx, p3_idx), make_pair(p2_idx, p4_idx)};
     vector<pair<int, int>> calls_pairs = pkb.GetAllCallsPairs();

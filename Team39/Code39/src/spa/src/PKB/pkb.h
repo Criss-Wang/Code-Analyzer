@@ -6,6 +6,7 @@
 #include "tables/entity_tables.h"
 #include "tables/relation_tables.h"
 #include "../Utility/entity.h"
+#include "PQL/query_parser/token.h"
 
 // Custom hash function from https://www.geeksforgeeks.org/unordered-set-of-vectors-in-c-with-examples/
 struct HashFunction {
@@ -89,16 +90,6 @@ class Pkb {
     unordered_set<int> procedure_set_;
     //unordered_set<set<int>, HashFunction> stmt_list_set_;
 
-    // Mapping between an identifier and a table
-    unordered_map<TableIdentifier, shared_ptr<RelTable>> rel_map_ = {
-      {TableIdentifier::kCalls, follows_table_},
-      {TableIdentifier::kCalls, follows_table_},
-      {TableIdentifier::kCalls, follows_table_},
-      {TableIdentifier::kCalls, follows_table_},
-    };
-
-    
-
     // Insert all possible expression patterns for a statement
     bool AddPattern(int line_num, const string& input, TableIdentifier table_identifier);
     bool AddParent(int key, const vector<int>& value);
@@ -132,26 +123,26 @@ class Pkb {
     //bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
 
     // Get tables
-    shared_ptr<FollowsTable> GetFollowsTable();
-    shared_ptr<FollowsStarTable> GetFollowsStarTable();
-    shared_ptr<FollowsBeforeTable> GetFollowsBeforeTable();
-    shared_ptr<FollowsBeforeStarTable> GetFollowsBeforeStarTable();
-    shared_ptr<ParentTable> GetParentTable();
-    shared_ptr<ChildTable> GetChildTable();
-    shared_ptr<ParentStarTable> GetParentStarTable();
-    shared_ptr<ChildStarTable> GetChildStarTable();
-    shared_ptr<CallsTable> GetCallsTable();
-    shared_ptr<CallsStarTable> GetCallsStarTable();
-    shared_ptr<CalledByTable> GetCalledByTable();
-    shared_ptr<CalledByStarTable> GetCalledByStarTable();
-    shared_ptr<ModifiesStmtToVariablesTable> GetModifiesStmtToVariablesTable();
-    shared_ptr<ModifiesVariableToStmtsTable> GetModifiesVariableToStmtsTable();
-    shared_ptr<ModifiesProcToVariablesTable> GetModifiesProcToVariablesTable();
-    shared_ptr<ModifiesVariableToProcsTable> GetModifiesVariableToProcsTable();
-    shared_ptr<UsesStmtToVariablesTable> GetUsesStmtToVariablesTable();
-    shared_ptr<UsesVariableToStmtsTable> GetUsesVariableToStmtsTable();
-    shared_ptr<UsesProcToVariablesTable> GetUsesProcToVariablesTable();
-    shared_ptr<UsesVariableToProcsTable> GetUsesVariableToProcsTable();
+    shared_ptr<RelTable> GetFollowsTable();
+    shared_ptr<RelListTable> GetFollowsStarTable();
+    shared_ptr<RelTable> GetFollowsBeforeTable();
+    shared_ptr<RelListTable> GetFollowsBeforeStarTable();
+    shared_ptr<RelListTable> GetParentTable();
+    shared_ptr<RelListTable> GetChildTable();
+    shared_ptr<RelListTable> GetParentStarTable();
+    shared_ptr<RelListTable> GetChildStarTable();
+    shared_ptr<RelListTable> GetCallsTable();
+    shared_ptr<RelListTable> GetCallsStarTable();
+    shared_ptr<RelListTable> GetCalledByTable();
+    shared_ptr<RelListTable> GetCalledByStarTable();
+    shared_ptr<RelListTable> GetModifiesStmtToVariablesTable();
+    shared_ptr<RelListReverseTable> GetModifiesVariableToStmtsTable();
+    shared_ptr<RelListTable> GetModifiesProcToVariablesTable();
+    shared_ptr<RelListReverseTable> GetModifiesVariableToProcsTable();
+    shared_ptr<RelListTable> GetUsesStmtToVariablesTable();
+    shared_ptr<RelListReverseTable> GetUsesVariableToStmtsTable();
+    shared_ptr<RelListTable> GetUsesProcToVariablesTable();
+    shared_ptr<RelListReverseTable> GetUsesVariableToProcsTable();
     shared_ptr<CallerTable> GetCallerTable();
 
     // Getter for all sets
@@ -168,55 +159,35 @@ class Pkb {
     
 
     // Relationship utility APIs for PQL
-    [[nodiscard]] bool IsParent(int stmt_1, int stmt_2) const;
-    [[nodiscard]] bool IsParentExists() const;
-    [[nodiscard]] bool IsTransitiveParent(int stmt_1, int stmt_2) const;
-    [[nodiscard]] vector<int> GetParent(int stmt) const;
-    [[nodiscard]] vector<int> GetAllParents(int stmt) const;
+    bool IsRelationshipHolds(pql::RelationshipTypes rel_types, int key, int value);
+    bool IsRelationshipExists(pql::RelationshipTypes rel_types);
+    vector<int> GetRelFirstArgument(pql::RelationshipTypes rel_types, int second_arg_idx);
+    vector<int> GetRelSecondArgument(const pql::RelationshipTypes rel_types, const int first_arg_idx);
+
     [[nodiscard]] vector<int> GetChild(int stmt) const;
     [[nodiscard]] vector<int> GetAllChildren(int stmt) const;
     [[nodiscard]] vector<pair<int,int>> GetAllParentPairs() const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveParentPairs() const;
 
-    [[nodiscard]] bool IsCalls(const int proc_1_idx, const int proc_2_idx) const;
-    [[nodiscard]] bool IsCallsExists() const;
-    [[nodiscard]] bool IsTransitiveCalls(const int proc_1_idx, const int proc_2_idx) const;
-    [[nodiscard]] vector<int> GetCallers(const int proc_idx) const;
-    [[nodiscard]] vector<int> GetAllCallers(const int proc_idx) const;
     [[nodiscard]] vector<int> GetCallees(const int proc_idx) const;
     [[nodiscard]] vector<int> GetAllCallees(const int proc_idx) const;
     [[nodiscard]] vector<pair<int, int>> GetAllCallsPairs() const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveCallsPairs() const;
 
-    [[nodiscard]] bool IsFollows(int stmt_1, int stmt_2) const;
-    [[nodiscard]] bool IsFollowsExists() const;
-    [[nodiscard]] bool IsTransitiveFollows(int stmt_1, int stmt_2) const;
-    [[nodiscard]] vector<int> GetStmtRightBefore(int stmt) const;
-    [[nodiscard]] vector<int> GetStmtsBefore(int stmt) const;
     [[nodiscard]] vector<int> GetStmtRightAfter(int stmt) const;
     [[nodiscard]] vector<int> GetStmtsAfter(int stmt) const;
     [[nodiscard]] vector<pair<int,int>> GetAllFollowsPairs() const;
     [[nodiscard]] vector<pair<int, int>> GetAllTransitiveFollowsPairs() const;
 
-    [[nodiscard]] bool IsUsesStmt(int stmt, int var_idx) const;
-    [[nodiscard]] bool IsUsesStmtExists() const;
-    [[nodiscard]] vector<int> GetUsesStmtsByVar(int var_idx) const;
     [[nodiscard]] vector<int> GetUsesVarByStmt(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllUsesStmtVarPairs() const;
 
-    [[nodiscard]] bool IsModifiesStmt(int stmt, int var_idx) const;
-    [[nodiscard]] bool IsModifiesStmtExists() const;
-    [[nodiscard]] vector<int> GetModifiesStmtsByVar(int var_idx) const;
     [[nodiscard]] vector<int> GetModifiesVarByStmt(int stmt) const;
     [[nodiscard]] vector<pair<int, int>> GetAllModifiesStmtVarPairs() const;
 
-    [[nodiscard]] bool IsProcModifiesVar(int proc_idx, int var_idx) const;
-    [[nodiscard]] vector<int> GetModifiesProcsByVar(int var_idx) const;
     [[nodiscard]] vector<int> GetModifiesVarsByProc(int proc_idx) const;
     [[nodiscard]] vector<pair<int, int>> GetAllModifiesProcVarPairs() const;
 
-    [[nodiscard]] bool IsProcUsesVar(int proc_idx, int var_idx) const;
-    [[nodiscard]] vector<int> GetUsesProcsByVar(int var_idx) const;
     [[nodiscard]] vector<int> GetUsesVarsByProc(int proc_idx) const;
     [[nodiscard]] vector<pair<int, int>> GetAllUsesProcVarPairs() const;
 
@@ -228,8 +199,7 @@ class Pkb {
 
     // Get all the items of a certain entity type
     unordered_set<int> GetAllEntity(const EntityIdentifier entity_identifier);
-    unordered_set<string> GetAllEntityString(const EntityIdentifier entity_identifier);
-    unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier entity_identifier);
+    //unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier entity_identifier);
 
     // Get all the index-string relationships
     [[nodiscard]] vector<pair<int, string>> GetAllIndexVarPairs() const;

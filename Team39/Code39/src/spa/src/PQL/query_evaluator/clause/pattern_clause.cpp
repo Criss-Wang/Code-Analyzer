@@ -5,12 +5,12 @@
 #define SYNONYM 2
 
 namespace pql_clause {
-  typedef std::vector<int> (Pkb::*GetPatternDomainByVar)(const int) const;
+  typedef std::vector<int> (Pkb::*GetPatternDomainByVar)(pql::RelationshipTypes, const int);
   typedef std::vector<std::pair<int, int>>(Pkb::* GetPatternVarPair)() const;
   typedef void (PatternClause::* EvaluateLeftFn)(Pkb&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
 
   const map<pql::RelationshipTypes, GetPatternDomainByVar> GetPatternDomainByVarMap = {
-    { pql::kAssignPattern, &Pkb::GetModifiesStmtsByVar }
+    { pql::kAssignPattern, &Pkb::GetRelFirstArgument }
   };
 
   const map<pql::RelationshipTypes, GetPatternVarPair> GetPatternVarPairMap = {
@@ -34,7 +34,7 @@ namespace pql_clause {
     int var_index = pkb.GetIndexByVar(left_);
     GetPatternDomainByVar fn = GetPatternDomainByVarMap.at(type_);
     std::vector<int> pattern_domain = {};
-    pattern_domain = (pkb.*fn)(var_index);
+    pattern_domain = (pkb.*fn)(pql::kModifiesS, var_index);
     UpdateHashmap<int>(domain, pattern_synonym_name_, pattern_domain);
   }
 
