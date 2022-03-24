@@ -133,8 +133,8 @@ namespace pql_cache {
 
   /*---------------------------------------------------------Affect--------------------------------------------------------------*/
   void Cache::GenerateAffectsRelDomain(pql::RelationshipTypes type) {
-    if (!pair_cache_boolean_[pql::kAffects]) {
-      GenerateAffectsPairDomain();
+    if (!pair_cache_boolean_[type]) {
+      GenerateAffectsPairDomain(type);
     }
 
     unordered_map<int, vector<int>> rel_table;
@@ -152,8 +152,8 @@ namespace pql_cache {
   }
 
   void Cache::GenerateAffectsInverseRelDomain(pql::RelationshipTypes type) {
-    if (!pair_cache_boolean_[pql::kAffects]) {
-      GenerateAffectsPairDomain();
+    if (!pair_cache_boolean_[type]) {
+      GenerateAffectsPairDomain(type);
     }
 
     unordered_map<int, vector<int>> inverse_rel_table;
@@ -172,7 +172,7 @@ namespace pql_cache {
 
   void Cache::GenerateAffectsPairDomain(pql::RelationshipTypes type) {
     //need to get all cfg then compute affects relationship
-    pair_cache_boolean_[pql::kAffects] = true;
+    pair_cache_boolean_[type] = true;
   }
 
   void Cache::MergeTable(unordered_map<int, unordered_set<int>>& dst, unordered_map<int, unordered_set<int>>& src) {
