@@ -19,6 +19,13 @@ class InvalidKeyException final : public exception {
     }
 };
 
+class UpdateKeyException final : public exception {
+  public:
+    const char* what() const throw() {
+      return "Could not update key with new value in table";
+    }
+};
+
 class EmptyValueException final : public exception {
   public:
     const char* what() const throw() {
