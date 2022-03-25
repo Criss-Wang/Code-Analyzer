@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "table.h"
 
 // Helper function for populating the reverse relation for uses or modifies

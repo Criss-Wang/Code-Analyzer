@@ -1,5 +1,5 @@
 procedure procedure {
-      read read; 
+      read z; 
 	if ((read == 0) || (print ==0) ) then { 
 	      x  = 10000; 
 		y = x * z * t + (5 + 4); 
@@ -17,7 +17,7 @@ procedure procedure {
 			}
 		}
 		xxxx = xy + (99 * (((4) + y) * 9));
-		call Procedure;
+		call k;
 	} 
 }
 
@@ -29,4 +29,5 @@ procedure k {
 
 procedure Procedure {
 	print z; 
+	read procedure;
 }
