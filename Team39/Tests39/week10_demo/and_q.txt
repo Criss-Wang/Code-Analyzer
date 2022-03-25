@@ -11,7 +11,7 @@ Select <a, a1> pattern a ("p", _"cenX"_ ) and a1 ("xxxx", _"xy"_)
 21 - Syntactically invalid use of explicit and
 stmt s;
 Select s such that Uses(s, "while") and such that Uses(s, "z")
- 
+
 5000
 22 - Semantically invalid use of explicit and
 stmt s;

@@ -47,7 +47,9 @@ namespace pql {
     std::stringstream ssm;
     ssm << s;
     while (ssm.peek() != END_OF_FILE) {
-      if (ss.get() != ssm.get()) {
+      char ss_char = (char) ss.get();
+      char ssm_char = (char)ssm.get();
+      if (ss_char != ssm_char) {
         throw ParseException();
       }
     }
@@ -128,15 +130,15 @@ namespace pql {
     return ref;
   }
 
-  std::string ParserState::ParseExpression() {
+  std::string ParserState::ParseExpression(Query& q) {
     std::string expression;
     ParserState::EatWhiteSpaces();
-    expression = IsValidExpression();
+    expression = IsValidExpression(q);
     ParserState::EatWhiteSpaces();
     return expression;
   }
 
-  std::string ParserState::IsValidExpression() {
+  std::string ParserState::IsValidExpression(Query& q) {
     std::stringstream s;
     std::string expression;
     int bracket_count = 0;
@@ -165,7 +167,8 @@ namespace pql {
         s << ParserState::Next();
         bracket_count--;
       } else {
-        throw ParseException();
+        q.SetSemanticallyInvalid();
+        break;
       }
 
       // Set expected_next bool
@@ -183,7 +186,8 @@ namespace pql {
       } else if (IsCloseBracket(curr_char)) {
         expected_next = IsOperator(next_char) || IsCloseBracket(next_char);
       } else {
-        throw ParseException();
+        q.SetSemanticallyInvalid();
+        break;
       }
     }
 
@@ -191,8 +195,14 @@ namespace pql {
       s >> expression;
       return expression;
     } else {
-      throw ParseException();
+      q.SetSemanticallyInvalid();
     }
+
+    while (ParserState::Peek() != '\\') {
+      ParserState::Next();
+    }
+
+    return "";
   }
 
 

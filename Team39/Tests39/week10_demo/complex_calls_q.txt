@@ -1,57 +1,60 @@
-1 - Select all procedures
-procedure p;
-Select p
-p1, p2, p3, p4, p5, p6
-5000
-2 - Select all call statements
-call c;
-Select c
-3, 4, 7, 8, 9, 12, 13, 14, 15, 18, 19, 20, 21, 22
-5000
-3 - Select procedures that directly call p1
-procedure p;
-Select p such that Calls(p, "p1")
-p2, p3, p6
-5000
-4 - Select procedures that indirectly calls p1
-procedure p, q;
-Select p such that Calls(p, q) and Calls*(q, "p1")
-p4
-5000
-5 - Select procedures that directly or indirectly calls p1
-procedure p;
-Select p such that Calls*(p, "p1")
-p2, p3, p4, p6
-5000
-6 - Select procedures that directly or indirectly calls p2
-procedure p;
-Select p such that Calls*(p, "p2")
-p3, p4
-5000
-7 - Select all procedures that are calling another procedure
-procedure p, q;
-Select p such that Calls(p, q)
-p2, p3, p4, p6
-5000
-8 - Synonym p declared twice
+1 - Synonym p declared twice
 procedure p, p;
 Select BOOLEAN such that Calls*(p, p)
 FALSE
 5000
-9 - Synonym q not declared
+2 - Synonym q not declared
 procedure p;
 Select BOOLEAN such that Calls(p, q)
 FALSE
 5000
-10 - Syntax error
+3 - Syntax error, Call spelled incorrectly
 procedure p;
 Select p such that Call(p, "p1")
 
 5000
-11 - BOOLEAN as a procedure synomyn
+4 - Select all procedures
+procedure p;
+Select p
+p1, p2, p3, p4, p5, p6
+5000
+5 - Select all call statements
+call c;
+Select c
+3, 4, 7, 8, 9, 12, 13, 14, 15, 18, 19, 20, 21, 22
+5000
+6 - Select procedures that directly call p1
+procedure p;
+Select p such that Calls(p, "p1")
+p2, p3, p6
+5000
+7 - Select procedures that indirectly calls p1
+procedure p, q;
+Select p such that Calls(p, q) and Calls*(q, "p1")
+p3, p4, p6
+5000
+8 - Select procedures are called by p4
+procedure p;
+Select p such that Calls*("p4", p)
+p1, p2, p3, p5
+5000
+9 - Select all procedures that are calling another procedure
+procedure p, q;
+Select <p, q.procName> such that Calls(p, q)
+p2 p1, p3 p2, p3 p1, p4 p3, p4 p5, p6 p1, p6 p2, p6 p3, p6 p4, p6 p5
+5000
+10 - BOOLEAN as a procedure synomyn
 procedure BOOLEAN;
 Select BOOLEAN such that Calls(BOOLEAN, "p2")
-p3
+p3, p6
 5000
-
-
+11 - Show all variables modified by p6 (nested call)
+variable v; 
+Select v such that Modifies("p6", v)
+p1, p2, p3, p4, p5, p6
+5000
+12 - Show all procedure name called by each call statement
+call c;
+Select <c.stmt#, c.procName>
+3 p1, 4 p1, 7 p2, 8 p1, 9 p2, 12 p3, 13 p5, 14 p3, 15 p3, 18 p1, 19 p2, 20 p3, 21 p4, 22 p5
+5000

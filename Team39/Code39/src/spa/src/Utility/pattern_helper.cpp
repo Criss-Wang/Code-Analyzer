@@ -132,7 +132,13 @@ unordered_set<string> PatternHelper::GetPatternSetPostfix(const string& input, c
     }
   }
 
-  if (!has_operator) return { input };
+  if (!has_operator) {
+    if (operands.empty()) {
+      return unordered_set<string>{};
+    } else {
+      return { operands.top() };
+    }
+  }
 
   // Pop operators from operators stack until it is empty and add result of each pop operation in operands stack.
   while (!operators.empty()) {
