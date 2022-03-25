@@ -1,11 +1,6 @@
 #include "stmt.h"
 #include "SP/sp_exceptions.h"
 
-#define kIndexZero 0
-#define kIndexOne 1
-#define kIndexTwo 2
-#define kIndexThree 3
-
 int Stmt::GetStmtNum() {
   return stmt_num_;
 }
@@ -17,9 +12,12 @@ AssignStmt::AssignStmt(std::vector<Token>& tokens, int stmt_num) {
   }
 
   stmt_num_ = stmt_num;
-  lhs_var_ = tokens.at(kIndexZero).text_;
 
-  vector<Token>::const_iterator pattern_start = tokens.begin() + kIndexTwo;
+  const int kIndexOfLhsVar = 0;
+  const int kIndexOfFirstRhsVar = 2;
+  lhs_var_ = tokens.at(kIndexOfLhsVar).text_;
+
+  vector<Token>::const_iterator pattern_start = tokens.begin() + kIndexOfFirstRhsVar;
   vector<Token>::const_iterator pattern_end = tokens.end();
   vector<Token> pattern(pattern_start, pattern_end);
   rhs_pattern_ = AssignmentPattern(pattern);
@@ -60,7 +58,8 @@ ReadStmt::ReadStmt(std::vector<Token>& tokens, int stmt_num) {
     throw InvalidSyntaxException();
   }
   stmt_num_ = stmt_num;
-  read_var_ = tokens.at(kIndexOne).text_;
+  const int kIndexOfVar = 1;
+  read_var_ = tokens.at(kIndexOfVar).text_;
 }
 
 vector<string> ReadStmt::GetVar() {
@@ -95,7 +94,8 @@ PrintStmt::PrintStmt(std::vector<Token>& tokens, int stmt_num) {
     throw InvalidSyntaxException();
   }
   stmt_num_ = stmt_num;
-  print_var_ = tokens.at(kIndexOne).text_;
+  const int kIndexOfVar = 1;
+  print_var_ = tokens.at(kIndexOfVar).text_;
 }
 
 vector<string> PrintStmt::GetVar() {
@@ -132,12 +132,14 @@ IfStmt::IfStmt(std::vector<Token>& tokens, int stmt_num) {
     throw InvalidSyntaxException();
   }
 
-  const int kLastIndex = tokens.size() - 1;
-  const int kSecondLastIndex = kLastIndex - 1;
+  const int kIndexOfLeftParen = 1;
+  const int kIndexOfFirstVar = 2;
+  const int kIndexOfThen = tokens.size() - 1;
+  const int kIndexOfRightParen = kIndexOfThen - 1;
 
-  bool check_left_paren = tokens.at(kIndexOne).type_ == TokenType::LEFT_PAREN;
-  bool check_right_paren = tokens.at(kSecondLastIndex).type_ == TokenType::RIGHT_PAREN;
-  bool check_then_keyword = tokens.at(kLastIndex).type_ == TokenType::NAME && tokens.at(kLastIndex).text_ == "then";
+  bool check_left_paren = tokens.at(kIndexOfLeftParen).type_ == TokenType::LEFT_PAREN;
+  bool check_right_paren = tokens.at(kIndexOfRightParen).type_ == TokenType::RIGHT_PAREN;
+  bool check_then_keyword = tokens.at(kIndexOfThen).type_ == TokenType::NAME && tokens.at(kIndexOfThen).text_ == "then";
 
   bool is_valid = check_left_paren && check_right_paren && check_then_keyword;
 
@@ -145,8 +147,8 @@ IfStmt::IfStmt(std::vector<Token>& tokens, int stmt_num) {
     throw InvalidSyntaxException();
   }
 
-  vector<Token>::const_iterator first = tokens.begin() + kIndexTwo;
-  vector<Token>::const_iterator last = tokens.begin() + kSecondLastIndex;
+  vector<Token>::const_iterator first = tokens.begin() + kIndexOfFirstVar;
+  vector<Token>::const_iterator last = tokens.begin() + kIndexOfRightParen;
   vector<Token> cond_expr(first, last);
 
   cond_expr_ = ConditionalExpression(cond_expr);
@@ -179,11 +181,12 @@ WhileStmt::WhileStmt(std::vector<Token>& tokens, int stmt_num) {
     throw InvalidSyntaxException();
   }
 
-  bool check_left_paren = tokens.at(kIndexOne).type_ == TokenType::LEFT_PAREN;
+  const int kIndexOfLeftParen = 1;
+  const int kIndexOfFirstVar = 2;
+  const int kIndexOfRightParen = tokens.size() - 1;
 
-  const int kLastIndex = tokens.size() - 1;
-
-  bool check_right_paren = tokens.at(kLastIndex).type_ == TokenType::RIGHT_PAREN;
+  bool check_left_paren = tokens.at(kIndexOfLeftParen).type_ == TokenType::LEFT_PAREN;
+  bool check_right_paren = tokens.at(kIndexOfRightParen).type_ == TokenType::RIGHT_PAREN;
 
   bool is_valid = check_left_paren && check_right_paren;
 
@@ -191,8 +194,8 @@ WhileStmt::WhileStmt(std::vector<Token>& tokens, int stmt_num) {
     throw InvalidSyntaxException();
   }
 
-  vector<Token>::const_iterator cond_expr_start = tokens.begin() + kIndexTwo;
-  vector<Token>::const_iterator cond_expr_end = tokens.begin() + kLastIndex;
+  vector<Token>::const_iterator cond_expr_start = tokens.begin() + kIndexOfFirstVar;
+  vector<Token>::const_iterator cond_expr_end = tokens.begin() + kIndexOfRightParen;
 
   vector<Token> cond_expr(cond_expr_start, cond_expr_end);
 
@@ -224,7 +227,8 @@ CallStmt::CallStmt(std::vector<Token>& tokens, int stmt_num) {
     throw InvalidSyntaxException();
   }
   stmt_num_ = stmt_num;
-  called_proc_ = tokens.at(kIndexOne).text_;
+  const int kIndexOfCalledProc = 1;
+  called_proc_ = tokens.at(kIndexOfCalledProc).text_;
 }
 
 vector<string> CallStmt::GetVar() {
