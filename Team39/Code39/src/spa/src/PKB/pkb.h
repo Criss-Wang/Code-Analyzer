@@ -126,7 +126,7 @@ class Pkb {
     bool AddEntityToSet(EntityIdentifier entity_identifier, const string& entity_val);
     //bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
 
-    bool AddCfgList(vector<shared_ptr<CFG>> cfg_list);
+    bool AddCfg(shared_ptr<CFG> cfg);
 
     // Get tables
     shared_ptr<RelTable> GetFollowsTable();

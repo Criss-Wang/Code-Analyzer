@@ -698,9 +698,9 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const string&
   }
 }
 
-bool Pkb::AddCfgList(vector<shared_ptr<CFG>> cfg_list) {
+bool Pkb::AddCfg(shared_ptr<CFG> cfg) {
   try {
-    this->cfg_list_ = cfg_list;
+    this->cfg_list_.push_back(cfg);
     return true;
   } catch (exception& e) {
     throw e;
