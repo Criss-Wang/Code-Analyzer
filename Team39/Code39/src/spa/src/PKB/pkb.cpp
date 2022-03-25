@@ -68,6 +68,10 @@ shared_ptr<RelListTable> Pkb::GetCalledByStarTable() {
   return called_by_star_table_;
 }
 
+shared_ptr<RelTable> Pkb::GetNextTable() {
+  return next_table_;
+}
+
 shared_ptr<RelListTable> Pkb::GetModifiesStmtToVariablesTable() {
   return modifies_stmt_to_variables_table_;
 }
@@ -198,8 +202,7 @@ const unordered_map<pql::RelationshipTypes, TableType> type_map_ = {
   {pql::RelationshipTypes::kModifiesP, TableType::kRelListOrReverse},
 };
 
-// Relationshiips APIs
-
+// Relationships APIs
 bool Pkb::IsRelationshipHolds(const pql::RelationshipTypes rel_types, const int key, const int value) {
   try {
     if (type_map_.at(rel_types) == TableType::kRelSimple) {
@@ -277,7 +280,6 @@ vector<pair<int, int>> Pkb::GetRelArgumentPairs(const pql::RelationshipTypes rel
 }
 
 // Pattern Searches APIs
-
 unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern, const bool is_exact) const {
   const string usable_pattern = PatternHelper::PreprocessPattern(pattern);
   constexpr bool is_full = false;
@@ -296,7 +298,6 @@ unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern, const bool
   if (!table->KeyExistsInTable(s)) return empty_set;
   return table->GetValueByKey(s);
 }
-
 
 unordered_set<string> Pkb::GetAllPatternVariablesInStmt(const int stmt_no,
   const TableIdentifier table_identifier) const {
@@ -516,12 +517,9 @@ bool Pkb::AddPattern(const int line_num, const vector<string>& input_set, const 
   } catch (exception& e) {
     return false;
   }
-
-
 }
 
 // Table Insertion APIs
-
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<int>& value) {
   try {
     if (value.empty()) throw EmptyValueException();
@@ -707,21 +705,6 @@ bool Pkb::AddCfg(shared_ptr<CFG> cfg) {
   }
 }
 
-//bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const set<int>& entity_val) {
-//  try {
-//    switch (entity_identifier) {
-//      case EntityIdentifier::kStmtLst: {
-//        stmt_list_set_.insert(entity_val);
-//        return true;
-//      }
-//      default:
-//        throw InvalidIdentifierException();
-//    }
-//  } catch (exception& e) {
-//    return false;
-//  }
-//}
-
 typedef unordered_set<int>(Pkb::* GetEntityFn)();
 
 const unordered_map<EntityIdentifier, GetEntityFn> entity_map_ = {
@@ -795,32 +778,6 @@ vector<int> Pkb::GetStmtNumByStringAttribute(const EntityIdentifier entity_ident
   }
   return res;
 }
-
-
-//bool Pkb::IsAssign(const int stmt_no) const {
-//  return assign_set_.find(stmt_no) != assign_set_.end();
-//}
-
-//int Pkb::GetVarFromAssign(const int stmt_no) const {
-//  if (!IsAssign(stmt_no)) {
-//    return INVALID_INDEX;
-//  }
-//  return GetIndexByString(IndexTableType::kVarIndex, assign_table_->GetValueByKey(stmt_no));
-//}
-//
-//vector<int> Pkb::GetAssignByVar(const int var_idx) const {
-//  vector<int> res = {};
-//  if (!IsVar(var_idx)) {
-//    return res;
-//  }
-//  for (const auto& [key, val] : assign_table_->GetKeyValueLst()) {
-//    if (val == GetVarByIndex(var_idx)) res.push_back(key);
-//  }
-//  return res;
-//}
-
-// =================================================
-
 
 string Pkb::GetStringByIndex(const IndexTableType index_table_type, const int idx) const {
   try {

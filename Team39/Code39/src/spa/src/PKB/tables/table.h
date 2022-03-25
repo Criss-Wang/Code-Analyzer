@@ -83,7 +83,7 @@ class Table {
         table_[key] = value;
         return true;
       } catch (exception& e) {
-        return false;
+        throw UpdateKeyException();
       }
     }
 };
