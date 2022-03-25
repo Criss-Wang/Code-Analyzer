@@ -7,9 +7,8 @@
 #include "design_extractor.h"
 #include "Utility/CFG/control_flow_graph.h"
 
-#define kIndexZero 0
-#define kIndexOne 1
-#define kIndexTwo 2
+#define INDEX_OF_STMT_TYPE 0
+#define INDEX_OF_EQUAL_OP 1
 
 
 stack<int> populateFollowsAndNextRelationship(stack<int> previous, Pkb& pkb, int stmt_num, bool is_prev_stmt_if) {
@@ -169,15 +168,15 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         is_prev_stmt_if = false;
       }
 
-      if (tokens.at(kIndexOne).text_ == "=") {
+      if (tokens.at(INDEX_OF_EQUAL_OP).text_ == "=") {
         stmt_lst.push_back(make_shared<AssignStmt>(AssignStmt(tokens, stmt_num)));
         cfg_tokens.push_back(CFGToken(CFGTokenType::kAssign, stmt_num));
 
-      } else if (tokens.at(kIndexZero).text_ == "read") {
+      } else if (tokens.at(INDEX_OF_STMT_TYPE).text_ == "read") {
         stmt_lst.push_back(make_shared<ReadStmt>(ReadStmt(tokens, stmt_num)));
         cfg_tokens.push_back(CFGToken(CFGTokenType::kRead, stmt_num));
 
-      } else if (tokens.at(kIndexZero).text_ == "print") {
+      } else if (tokens.at(INDEX_OF_STMT_TYPE).text_ == "print") {
         stmt_lst.push_back(make_shared<PrintStmt>(PrintStmt(tokens, stmt_num)));
         cfg_tokens.push_back(CFGToken(CFGTokenType::kPrint, stmt_num));
 
@@ -202,7 +201,10 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         stmt_lst = {};
 
         cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-        // CFG::GenerateCfg(cfg_tokens);
+        CFG::GenerateCfg(cfg_tokens);
+        // TODO: change return type of GenerateCfg to CFG
+        //pkb.AddCfg(CFG::GenerateCfg(cfg_tokens));
+
       }
       
       proc_tokens = tokens;
@@ -229,7 +231,7 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
       children.push({});
       previous.push(stmt_num + 1);
 
-      if (tokens.at(kIndexZero).text_ == "while") {
+      if (tokens.at(INDEX_OF_STMT_TYPE).text_ == "while") {
         stmt_lst.push_back(make_shared<WhileStmt>(WhileStmt(tokens, stmt_num)));
         cfg_tokens.push_back(CFGToken(CFGTokenType::kWhile, stmt_num));
         end_tokens.push("while");
@@ -259,7 +261,9 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
   proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-  // CFG::GenerateCfg(cfg_tokens);
+  CFG::GenerateCfg(cfg_tokens);
+  // TODO: change return type of GenerateCfg to CFG
+  //pkb.AddCfg(CFG::GenerateCfg(cfg_tokens));
 
   if (curly_bracket_count != 0 || if_else_stmts != 0) {
     throw InvalidSyntaxException();

@@ -1,11 +1,12 @@
 #pragma once
+
+#include <string>
+#include <vector>
+
 #include "PKB/pkb.h"
 #include "SP/tokenizer.h"
 #include "assignment_pattern.h"
 #include "conditional_expr.h"
-
-#include <string>
-#include <vector>
 
 class Stmt {
   public:
