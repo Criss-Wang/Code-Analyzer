@@ -161,7 +161,7 @@ vector<string> populateIfStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_in_cond_expr);
 
   // Add stmt num and cond expr into if_pattern_to_stmt Table
-  pkb.AddInfoToTable(TableIdentifier::kIfPattern, stmt_num, cond_expr_pattern);
+  pkb.AddInfoToTable(TableIdentifier::kIfPattern, stmt_num, vars_in_cond_expr);
 
   return vars_in_cond_expr;
 }
@@ -210,7 +210,7 @@ vector<string> populateWhileStmt(vector<Token> tokens, Pkb& pkb, int stmt_num) {
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_in_cond_expr);
 
   // Add stmt num and cond expr into while_pattern_to_stmt Table
-  pkb.AddInfoToTable(TableIdentifier::kWhilePattern, stmt_num, cond_expr_pattern);
+  pkb.AddInfoToTable(TableIdentifier::kWhilePattern, stmt_num, vars_in_cond_expr);
 
   return vars_in_cond_expr;
 }
@@ -413,7 +413,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
         pkb.AddInfoToTable(TableIdentifier::kCalls, prev_proc, called_procedures);
 
         // Add procedure name and modified variables to ModifiesProcToVariablesTable
-        pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, prev_proc, modifies_p);
+        pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, prev_proc, modifies_p);
 
         // Add procedure name and used variables to UsesProcToVariablesTable
         pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, prev_proc, uses_p);
@@ -579,7 +579,7 @@ void populate(vector<Token> input_tokens, Pkb& pkb) {
   // Populate ProcRangeTable, CallsTable, ModifiesProcToVariablesTable, UsesProcToVariablesTable for the last procedure
   pkb.AddInfoToTable(TableIdentifier::kProcedure, prev_proc, pair<int, int>(start_stmt_num, end_stmt_num));
   pkb.AddInfoToTable(TableIdentifier::kCalls, prev_proc, called_procedures);
-  pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, prev_proc, modifies_p);
+  pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, prev_proc, modifies_p);
   pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, prev_proc, uses_p);
   
   // Generate CFG for last procedure

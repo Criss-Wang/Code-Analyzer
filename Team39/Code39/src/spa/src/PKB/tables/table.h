@@ -98,13 +98,26 @@ class EntityVarsListTable : public Table<int, vector<string>> {};
 class IndexToEntityTable : public Table<int, string> {};
 class EntityToIndexTable : public Table<string, int> {};
 
+enum class TableType {
+  kRelSimple,
+  kRelList,
+  kRelReverse,
+  kRelListOrReverse
+};
+
+enum class IndexTableType {
+  kVar,
+  kVarIndex,
+  kProc,
+  kProcIndex
+};
 
 enum class TableIdentifier {
   kAssign, kRead, kPrint, kConstant, kIf, kWhile, kProcedure,
   kAssignPattern, kIfPattern, kWhilePattern,
   kFollows, kFollowsStar,
   kParent, kParentStar,
-  kUsesStmtToVar, kUsesProcToVar, kModifiesStmtToVar, KModifiesProcToVar,
+  kUsesStmtToVar, kUsesProcToVar, kModifiesStmtToVar, kModifiesProcToVar,
   kCaller, kCalls, kCallsStar,
   kNext
 };

@@ -85,15 +85,15 @@ TEST_CASE("Populating Follows and FollowsBefore Table") {
   }
 
   SECTION("Test API for PQL side for FollowsTable") {
-    REQUIRE(pkb.IsFollows(1, 2));
-    REQUIRE(pkb.IsFollows(2, 3));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kFollows, 1, 2));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kFollows, 2, 3));
 
-    REQUIRE(pkb.GetStmtRightAfter(1) == vector<int>{2});
-    REQUIRE(pkb.GetStmtRightAfter(2) == vector<int>{3});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kFollows, 1) == vector<int>{2});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kFollows, 2) == vector<int>{3});
     // Key does not exist so the result should be empty
-    REQUIRE(pkb.GetStmtRightAfter(3000) == vector<int>{});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kFollows, 3000) == vector<int>{});
 
-    vector<pair<int, int>> follows_pairs = pkb.GetAllFollowsPairs();
+    vector<pair<int, int>> follows_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kFollows);
     vector<pair<int, int>> expected_follows_pairs = vector<pair<int, int>>{make_pair(1, 2), make_pair(2, 3)};
     vector<pair<int, int>> invalid_first_pair = vector<pair<int, int>>{make_pair(1, 3)};
     REQUIRE(follows_pairs == expected_follows_pairs);
@@ -101,9 +101,9 @@ TEST_CASE("Populating Follows and FollowsBefore Table") {
   }
 
   SECTION("Test API for PQL side for FollowsBeforeTable") {
-    REQUIRE(pkb.GetStmtRightBefore(0) == vector<int>{});
-    REQUIRE(pkb.GetStmtRightBefore(2) == vector<int>{1});
-    REQUIRE(pkb.GetStmtRightBefore(3) == vector<int>{2});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kFollows, 0) == vector<int>{});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kFollows, 2) == vector<int>{1});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kFollows, 3) == vector<int>{2});
   }
 }
 
@@ -131,23 +131,23 @@ TEST_CASE("Populating Parent and Child Table") {
   }
 
   SECTION("Test API for PQL side for ParentTable") {
-    REQUIRE(pkb.IsParent(1, 2));
-    REQUIRE(pkb.IsParent(1, 3));
-    REQUIRE(!pkb.IsParent(2, 3));
-    REQUIRE(!pkb.IsParent(1, 5));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kParent, 1, 2));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kParent, 1, 3));
+    REQUIRE(!pkb.IsRelationshipHolds(pql::RelationshipTypes::kParent, 2, 3));
+    REQUIRE(!pkb.IsRelationshipHolds(pql::RelationshipTypes::kParent, 1, 5));
 
-    REQUIRE(pkb.GetParent(1).empty());
-    REQUIRE(pkb.GetParent(2) == vector<int>{1});
-    REQUIRE(pkb.GetParent(5) == vector<int>{4});
-    REQUIRE(pkb.GetParent(5) != vector<int>{1});
-    REQUIRE(pkb.GetParent(6) != vector<int>{1});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kParent, 1).empty());
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kParent, 2) == vector<int>{1});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kParent, 5) == vector<int>{4});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kParent, 5) != vector<int>{1});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kParent, 6) != vector<int>{1});
   }
 
   SECTION("Test API for PQL side for ChildTable") {
-    REQUIRE(pkb.GetChild(1) == vector<int>{2, 3, 4});
-    REQUIRE(pkb.GetChild(1) != vector<int>{1, 2});
-    REQUIRE(pkb.GetChild(5).empty());
-    REQUIRE(pkb.GetChild(4) == vector<int>{5, 6});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kParent, 1) == vector<int>{2, 3, 4});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kParent, 1) != vector<int>{1, 2});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kParent, 5).empty());
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kParent, 4) == vector<int>{5, 6});
   }
 }
 
@@ -175,33 +175,33 @@ TEST_CASE("Populating Calls Table") {
     REQUIRE(!success);
   }
 
-  int p1_idx = pkb.GetIndexByProc("p1");
-  int p2_idx = pkb.GetIndexByProc("p2");
-  int p3_idx = pkb.GetIndexByProc("p3");
-  int p4_idx = pkb.GetIndexByProc("p4");
-  int p5_idx = pkb.GetIndexByProc("p5");
+  int p1_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p1");
+  int p2_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p2");
+  int p3_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p3");
+  int p4_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p4");
+  int p5_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p5");
   const int invalid_idx = 100;
 
   SECTION("Test API for PQL side for Calls Table") {
-    REQUIRE(pkb.IsCalls(p1_idx, p4_idx));
-    REQUIRE(pkb.IsCalls(p1_idx, p5_idx));
-    REQUIRE(pkb.IsCalls(p2_idx, p3_idx));
-    REQUIRE(pkb.IsCalls(p2_idx, p4_idx));
-    REQUIRE(!pkb.IsCalls(p1_idx, p2_idx));
-    REQUIRE(!pkb.IsCalls(p1_idx, invalid_idx));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p1_idx, p4_idx));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p1_idx, p5_idx));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p2_idx, p3_idx));
+    REQUIRE(pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p2_idx, p4_idx));
+    REQUIRE(!pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p1_idx, p2_idx));
+    REQUIRE(!pkb.IsRelationshipHolds(pql::RelationshipTypes::kCalls, p1_idx, invalid_idx));
 
-    REQUIRE(pkb.GetCallers(p5_idx) == vector<int>{p1_idx});
-    REQUIRE(pkb.GetCallers(p3_idx) == vector<int>{p2_idx});
-    REQUIRE(pkb.GetCallers(p4_idx) == vector<int>{p1_idx, p2_idx});
-    REQUIRE(pkb.GetCallers(p5_idx) != vector<int>{p1_idx, p2_idx});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kCalls, p5_idx) == vector<int>{p1_idx});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kCalls, p3_idx) == vector<int>{p2_idx});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kCalls, p4_idx) == vector<int>{p1_idx, p2_idx});
+    REQUIRE(pkb.GetRelFirstArgument(pql::RelationshipTypes::kCalls, p5_idx) != vector<int>{p1_idx, p2_idx});
 
-    REQUIRE(pkb.GetCallees(p1_idx) == vector<int>{p4_idx, p5_idx});
-    REQUIRE(pkb.GetCallees(p2_idx) == vector<int>{p3_idx, p4_idx});
-    REQUIRE(pkb.GetCallees(invalid_idx).empty());
-    REQUIRE(pkb.GetCallees(p1_idx) != vector<int>{p4_idx});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kCalls, p1_idx) == vector<int>{p4_idx, p5_idx});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kCalls, p2_idx) == vector<int>{p3_idx, p4_idx});
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kCalls, invalid_idx).empty());
+    REQUIRE(pkb.GetRelSecondArgument(pql::RelationshipTypes::kCalls, p1_idx) != vector<int>{p4_idx});
 
     vector<pair<int, int>> expected_calls_pairs = {make_pair(p1_idx, p4_idx), make_pair(p1_idx, p5_idx), make_pair(p2_idx, p3_idx), make_pair(p2_idx, p4_idx)};
-    vector<pair<int, int>> calls_pairs = pkb.GetAllCallsPairs();
+    vector<pair<int, int>> calls_pairs = pkb.GetRelArgumentPairs(pql::RelationshipTypes::kCalls);
     std::sort(calls_pairs.begin(), calls_pairs.end());
     std::sort(expected_calls_pairs.begin(), expected_calls_pairs.end());
     REQUIRE(calls_pairs == expected_calls_pairs);
@@ -211,38 +211,39 @@ TEST_CASE("Populating Calls Table") {
 TEST_CASE("Populating ModifiesProcToVariables and ModifiesVariableToProcs Table") {
   // ModifiesVariableToProcs table is populated behind the scenes
   Pkb pkb = Pkb();
-  bool success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p1", vector<string>{"a", "b", "c"});
-  success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p2", vector<string>{"c", "y", "z"}) && success;
+  bool success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p1", vector<string>{"a", "b", "c"});
+  success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p2", vector<string>{"c", "y", "z"}) && success;
 
   SECTION("Add item into table: string -> vector<string>") {
     REQUIRE(success);
   }
 
   SECTION("Add invalid item into table") {
-    success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, 1, 2);
+    success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, 1, 2);
     REQUIRE(!success);
 
     string str;
-    success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, 2, str);
+    success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, 2, str);
     REQUIRE(!success);
 
     vector<string> empty_vector = {};
-    success = pkb.AddInfoToTable(TableIdentifier::KModifiesProcToVar, "p4", empty_vector);
+    success = pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p4", empty_vector);
     REQUIRE(!success);
   }
 }
 
 TEST_CASE("Populating if and while pattern") {
   Pkb pkb = Pkb();
-  bool success = pkb.AddInfoToTable(TableIdentifier::kIfPattern, 2, "A < 3");
-  success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 3, "A + D + (AB * C) < 3");
-  success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 4, "A + D + (AB * C2E) <= 3");
-  success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 5, "1 == 3");
-  success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 6, "m != (QAQ + 1)");
-  success = success && pkb.AddInfoToTable(TableIdentifier::kWhilePattern, 11, "A2 >= 3 % 11 * EB2E");
+  vector<string> empty_list;
+  bool success = pkb.AddInfoToTable(TableIdentifier::kIfPattern, 2, vector<string>{"A"});
+  success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 3, vector<string>{"A", "D", "AB", "C"});
+  success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 4, vector<string>{"A", "D", "AB", "C2E"});
+  success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 6, vector<string>{"m", "QAQ"});
+  success = success && pkb.AddInfoToTable(TableIdentifier::kWhilePattern, 11, vector<string>{"A2", "EB2E"});
   SECTION("Adding patterns") {
     REQUIRE(success);
   }
+
 
   SECTION("Test Search by stmt") {
     unordered_set<string> res = pkb.GetAllPatternVariablesInStmt(2, TableIdentifier::kIfPattern);
@@ -253,9 +254,6 @@ TEST_CASE("Populating if and while pattern") {
 
     res = pkb.GetAllPatternVariablesInStmt(4, TableIdentifier::kIfPattern);
     REQUIRE(res == unordered_set<string>{"A", "D", "AB", "C2E"});
-
-    res = pkb.GetAllPatternVariablesInStmt(5, TableIdentifier::kIfPattern);
-    REQUIRE(res.empty());
 
     res = pkb.GetAllPatternVariablesInStmt(6, TableIdentifier::kIfPattern);
     REQUIRE(res == unordered_set<string>{"m", "QAQ"});
@@ -300,42 +298,42 @@ TEST_CASE("Populating StmtToPatterns Table") {
   }
 
   SECTION("Search pattern") {
-    unordered_set<int> res = pkb.GetAllStmtsWithPattern("X + B + C");
+    unordered_set<int> res = pkb.GetAllStmtsWithPattern("X + B + C", false);
     REQUIRE(res.empty());
 
-    res = pkb.GetAllStmtsWithPattern("A + (Bbs + C) + 2");
+    res = pkb.GetAllStmtsWithPattern("A + (Bbs + C) + 2", false);
     REQUIRE(res == unordered_set<int>{2});
 
-    res = pkb.GetAllStmtsWithPattern("Bbs ");
+    res = pkb.GetAllStmtsWithPattern("Bbs ", false);
     REQUIRE(res == unordered_set<int>{2, 3, 4});
 
-    res = pkb.GetAllStmtsWithPattern("Bbs + C");
+    res = pkb.GetAllStmtsWithPattern("Bbs + C", false);
     REQUIRE(res == unordered_set<int>{3, 2});
 
-    res = pkb.GetAllStmtsWithPattern("A + (Bbs + C)");
+    res = pkb.GetAllStmtsWithPattern("A + (Bbs + C)", false);
     REQUIRE(res == unordered_set<int>{2});
 
-    res = pkb.GetAllStmtsWithPattern("cenX");
+    res = pkb.GetAllStmtsWithPattern("cenX", false);
     REQUIRE(res == unordered_set<int>{5});
 
-    res = pkb.GetAllStmtsWithPattern("((2))");
+    res = pkb.GetAllStmtsWithPattern("((2))", false);
     REQUIRE(res == unordered_set<int>{2, 4});
 
-    res = pkb.GetAllStmtsWithPattern("289");
+    res = pkb.GetAllStmtsWithPattern("289", false);
     REQUIRE(res == unordered_set<int>{5});
 
-    res = pkb.GetAllStmtsWithPattern("((289 * (444)))");
+    res = pkb.GetAllStmtsWithPattern("((289 * (444)))", false);
     REQUIRE(res == unordered_set<int>{5});
   }
 
   SECTION("Search Exact pattern") {
-    unordered_set<int> res = pkb.GetStmtsWithExactPattern("A + (Bbs + C) + 2");
+    unordered_set<int> res = pkb.GetAllStmtsWithPattern("A + (Bbs + C) + 2", true);
     REQUIRE(res == unordered_set<int>{2});
 
-    res = pkb.GetStmtsWithExactPattern("Bbs");
+    res = pkb.GetAllStmtsWithPattern("Bbs", true);
     REQUIRE(res.empty());
 
-    res = pkb.GetStmtsWithExactPattern("289 * 444 + (f * cenX)");
+    res = pkb.GetAllStmtsWithPattern("289 * 444 + (f * cenX)", true);
     REQUIRE(res == unordered_set<int>{5});
   }
 }
@@ -353,56 +351,56 @@ TEST_CASE("Sample Tests for Pattern") {
   }
 
   SECTION("Nonempty results") {
-    unordered_set<int> res = pkb.GetStmtsWithExactPattern("v + x * y + z % t");
+    unordered_set<int> res = pkb.GetAllStmtsWithPattern("v + x * y + z % t", true);
     REQUIRE(res == unordered_set<int>{2});
 
-    res = pkb.GetAllStmtsWithPattern("v");
+    res = pkb.GetAllStmtsWithPattern("v", false);
     REQUIRE(res == unordered_set<int>{2});
 
-    res = pkb.GetAllStmtsWithPattern("x*y");
+    res = pkb.GetAllStmtsWithPattern("x*y", false);
     REQUIRE(res == unordered_set<int>{2});
 
-    res = pkb.GetAllStmtsWithPattern("v+x*y");
+    res = pkb.GetAllStmtsWithPattern("v+x*y", false);
     REQUIRE(res == unordered_set<int>{2});
 
-    res = pkb.GetAllStmtsWithPattern("v + x * y+ z % t");
+    res = pkb.GetAllStmtsWithPattern("v + x * y+ z % t", false);
     REQUIRE(res == unordered_set<int>{2});
   }
 
   SECTION("Corner cases") {
-    unordered_set<int> res = pkb.GetAllStmtsWithPattern("(lm+n)");
+    unordered_set<int> res = pkb.GetAllStmtsWithPattern("(lm+n)", false);
     REQUIRE(res == unordered_set<int>{11});
 
-    res = pkb.GetAllStmtsWithPattern("l+mn");
+    res = pkb.GetAllStmtsWithPattern("l+mn", false);
     REQUIRE(res == unordered_set<int>{12});
 
-    res = pkb.GetAllStmtsWithPattern("((l+((mn))))");
+    res = pkb.GetAllStmtsWithPattern("((l+((mn))))", false);
     REQUIRE(res == unordered_set<int>{12});
 
-    res = pkb.GetStmtsWithExactPattern("l");
+    res = pkb.GetAllStmtsWithPattern("l", true);
     REQUIRE(res.empty());
 
-    res = pkb.GetStmtsWithExactPattern("((l+((mn))))");
+    res = pkb.GetAllStmtsWithPattern("((l+((mn))))", true);
     REQUIRE(res == unordered_set<int>{12});
 
-    res = pkb.GetStmtsWithExactPattern("(a+b)*c");
+    res = pkb.GetAllStmtsWithPattern("(a+b)*c", true);
     REQUIRE(res == unordered_set<int>{14});
 
-    res = pkb.GetAllStmtsWithPattern("s1k + dks");
+    res = pkb.GetAllStmtsWithPattern("s1k + dks", false);
     REQUIRE(res == unordered_set<int>{13}); 
   }
 
   SECTION("Empty result") {
-    unordered_set<int> res = pkb.GetStmtsWithExactPattern("v");
+    unordered_set<int> res = pkb.GetAllStmtsWithPattern("v", true);
     REQUIRE(res.empty());
 
-    res = pkb.GetAllStmtsWithPattern("v+x");
+    res = pkb.GetAllStmtsWithPattern("v+x", false);
     REQUIRE(res.empty());
 
-    res = pkb.GetAllStmtsWithPattern("y+z%t");
+    res = pkb.GetAllStmtsWithPattern("y+z%t", false);
     REQUIRE(res.empty());
 
-    res = pkb.GetAllStmtsWithPattern("x * y + z % t");
+    res = pkb.GetAllStmtsWithPattern("x * y + z % t", false);
     REQUIRE(res.empty());
   }
 }
@@ -435,17 +433,17 @@ TEST_CASE("Add String Entity") {
 
     const unordered_set<int> res = pkb.GetAllEntity(EntityIdentifier::kVariable);
     REQUIRE(res.size() == 3);
-    REQUIRE(res.find(pkb.GetIndexByVar("x")) != res.end());
-    REQUIRE(res.find(pkb.GetIndexByVar("y")) != res.end());
-    REQUIRE(res.find(pkb.GetIndexByVar("z")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByString(IndexTableType::kVarIndex, "x")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByString(IndexTableType::kVarIndex, "y")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByString(IndexTableType::kVarIndex, "z")) != res.end());
 
-    const vector<pair<int, string>> full_res = pkb.GetAllIndexVarPairs();
+    const vector<pair<int, string>> full_res = pkb.GetAllIndexStringPairs(IndexTableType::kVar);
     REQUIRE(full_res.size() == 3);
-    const vector<pair<string, int>> full_res_2 = pkb.GetAllVarIndexPairs();
+    const vector<pair<string, int>> full_res_2 = pkb.GetAllStringIndexPairs(IndexTableType::kVarIndex);
     REQUIRE(full_res_2.size() == 3);
-    const string var_res = pkb.GetVarByIndex(0);
+    const string var_res = pkb.GetStringByIndex(IndexTableType::kVar, 0);
     REQUIRE(var_res == "x");
-    const int idx_res = pkb.GetIndexByVar("y");
+    const int idx_res = pkb.GetIndexByString(IndexTableType::kVarIndex, "y");
     REQUIRE(idx_res == 1);
   }
 
@@ -457,17 +455,17 @@ TEST_CASE("Add String Entity") {
 
     const unordered_set<int> res = pkb.GetAllEntity(EntityIdentifier::kProc);
     REQUIRE(res.size() == 3);
-    REQUIRE(res.find(pkb.GetIndexByProc("x")) != res.end());
-    REQUIRE(res.find(pkb.GetIndexByProc("y")) != res.end());
-    REQUIRE(res.find(pkb.GetIndexByProc("z")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByString(IndexTableType::kProcIndex, "x")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByString(IndexTableType::kProcIndex, "y")) != res.end());
+    REQUIRE(res.find(pkb.GetIndexByString(IndexTableType::kProcIndex, "z")) != res.end());
 
-    const vector<pair<int, string>> full_res = pkb.GetAllIndexProcPairs();
+    const vector<pair<int, string>> full_res = pkb.GetAllIndexStringPairs(IndexTableType::kProc);
     REQUIRE(full_res.size() == 3);
-    const vector<pair<string, int>> full_res_2 = pkb.GetAllProcIndexPairs();
+    const vector<pair<string, int>> full_res_2 = pkb.GetAllStringIndexPairs(IndexTableType::kProcIndex);
     REQUIRE(full_res_2.size() == 3);
-    const string proc_res = pkb.GetProcByIndex(0);
+    const string proc_res = pkb.GetStringByIndex(IndexTableType::kProc, 0);
     REQUIRE(proc_res == "x");
-    const int idx_res = pkb.GetIndexByProc("y");
+    const int idx_res = pkb.GetIndexByString(IndexTableType::kProcIndex, "y");
     REQUIRE(idx_res == 1);
   }
 }
@@ -484,25 +482,25 @@ TEST_CASE("Entity Attribute Operations") {
   success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "y");
 
   SECTION("Positive Test Cases") {
-    bool res = pkb.IsRead(1);
-    REQUIRE(res == true);
+    //bool res = pkb.IsRead(1);
+    //REQUIRE(res == true);
 
-    int x_idx = pkb.GetIndexByVar("x");
-    int var_idx = pkb.GetVarFromRead(1);
+    int x_idx = pkb.GetIndexByString(IndexTableType::kVarIndex, "x");
+    int var_idx = pkb.GetStringAttribute(EntityIdentifier::kRead, 1);
     REQUIRE(var_idx == x_idx);
 
-    vector<int> stmt_res = pkb.GetReadByVar(x_idx);
+    vector<int> stmt_res = pkb.GetStmtNumByStringAttribute(EntityIdentifier::kRead, x_idx);
     REQUIRE(stmt_res == vector<int>{1, 2});
   }
 
   SECTION("Negative Test Cases") {
-    bool res = pkb.IsRead(4);
-    REQUIRE(res == false);
+    //bool res = pkb.IsRead(4);
+    //REQUIRE(res == false);
 
-    int var_idx = pkb.GetVarFromRead(4);
+    int var_idx = pkb.GetStringAttribute(EntityIdentifier::kRead, 4);
     REQUIRE(var_idx == -1);
 
-    vector<int> stmt_res = pkb.GetReadByVar(20);
+    vector<int> stmt_res = pkb.GetStmtNumByStringAttribute(EntityIdentifier::kRead, 20);
     REQUIRE(stmt_res.empty());
   }
 }
