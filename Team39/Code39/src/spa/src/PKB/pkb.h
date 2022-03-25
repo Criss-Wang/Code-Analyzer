@@ -6,6 +6,7 @@
 #include "tables/entity_tables.h"
 #include "tables/relation_tables.h"
 #include "../Utility/entity.h"
+#include "Utility/CFG/control_flow_graph.h"
 #include "PQL/query_parser/token.h"
 
 // Custom hash function from https://www.geeksforgeeks.org/unordered-set-of-vectors-in-c-with-examples/
@@ -24,6 +25,8 @@ struct HashFunction {
 
 class Pkb {
   private:
+    CFG cfg_;
+
     // Entity tables
     shared_ptr<AssignTable> assign_table_ = make_shared<AssignTable>();
     shared_ptr<ReadTable> read_table_ = make_shared<ReadTable>();
@@ -65,7 +68,7 @@ class Pkb {
     shared_ptr<ModifiesVariableToStmtsTable> modifies_variable_to_stmts_table_ = make_shared<ModifiesVariableToStmtsTable>();
     shared_ptr<ModifiesProcToVariablesTable> modifies_proc_to_variables_table_ = make_shared<ModifiesProcToVariablesTable>();
     shared_ptr<ModifiesVariableToProcsTable> modifies_variable_to_procs_table_ = make_shared<ModifiesVariableToProcsTable>();
-    
+
     // Pattern tables
     shared_ptr<Table<int, unordered_set<string>>> assign_stmt_to_patterns_table_ = make_shared<Table<int, unordered_set<string>>>();
     shared_ptr<Table<string, unordered_set<int>>> assign_pattern_to_stmts_table_ = make_shared<Table<string, unordered_set<int>>>();
@@ -122,6 +125,8 @@ class Pkb {
     bool AddEntityToSet(EntityIdentifier entity_identifier, const string& entity_val);
     //bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
 
+    bool AddCFG(CFG cfg);
+
     // Get tables
     shared_ptr<RelTable> GetFollowsTable();
     shared_ptr<RelListTable> GetFollowsStarTable();
@@ -160,7 +165,8 @@ class Pkb {
     unordered_set<int> GetVarSet();
     unordered_set<int> GetProcSet();
     unordered_set<int> GetConstantSet();
-    
+
+    CFG GetCFG();
 
     // Relationship utility APIs for PQL
     bool IsRelationshipHolds(pql::RelationshipTypes rel_types, int key, int value);
@@ -191,5 +197,5 @@ class Pkb {
     //[[nodiscard]] bool IsAssign(int stmt_no) const;
     //[[nodiscard]] int GetVarFromAssign(int stmt_no) const;
     //[[nodiscard]] vector<int> GetAssignByVar(int var_idx) const;
-       
+
 };
