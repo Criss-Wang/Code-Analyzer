@@ -34,10 +34,16 @@ class InvalidIdentifierException final : public exception {
     }
 };
 
-// Thrown when wrong TableIdentifier or EntityIdentifier is provided
 class BadResultException final : public exception {
-public:
-  const char* what() const throw() {
-    return "The result given is not meeting the requirement";
-  }
+  public:
+    const char* what() const throw() {
+      return "The result given is not meeting the requirement";
+    }
+};
+
+class ReversePopulationException final : public exception {
+  public:
+    const char* what() const throw() {
+      return "Failed to populate reverse relation";
+    }
 };

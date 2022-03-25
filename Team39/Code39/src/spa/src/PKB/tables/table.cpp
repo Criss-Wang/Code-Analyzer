@@ -21,7 +21,7 @@ bool PopulateReverseRelationship(const vector<int>& keys, const int value_to_upd
     }
     return add_success;
   } catch (exception& e) {
-    return false;
+    throw ReversePopulationException();
   }
 }
 
