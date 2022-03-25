@@ -5,16 +5,16 @@
 #define SYNONYM 2
 
 namespace pql_clause {
-  typedef std::vector<int> (Pkb::*GetPatternDomainByVar)(const int) const;
-  typedef std::vector<std::pair<int, int>>(Pkb::* GetPatternVarPair)() const;
+  typedef std::vector<int> (Pkb::*GetPatternDomainByVar)(pql::RelationshipTypes, const int);
+  typedef std::vector<std::pair<int, int>>(Pkb::* GetPatternVarPair)(pql::RelationshipTypes);
   typedef void (PatternClause::* EvaluateLeftFn)(Pkb&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
 
   const map<pql::RelationshipTypes, GetPatternDomainByVar> GetPatternDomainByVarMap = {
-    { pql::kAssignPattern, &Pkb::GetModifiesStmtsByVar }
+    { pql::kAssignPattern, &Pkb::GetRelFirstArgument }
   };
 
   const map<pql::RelationshipTypes, GetPatternVarPair> GetPatternVarPairMap = {
-    { pql::kAssignPattern, &Pkb::GetAllModifiesStmtVarPairs }
+    { pql::kAssignPattern, &Pkb::GetRelArgumentPairs }
   };
 
   const map<int, EvaluateLeftFn> EvaluateLeftFnMap = {
@@ -31,17 +31,17 @@ namespace pql_clause {
   
   void PatternClause::EvaluateLeftEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int var_index = pkb.GetIndexByVar(left_);
+    int var_index = pkb.GetIndexByString(IndexTableType::kVarIndex, left_);
     GetPatternDomainByVar fn = GetPatternDomainByVarMap.at(type_);
     std::vector<int> pattern_domain = {};
-    pattern_domain = (pkb.*fn)(var_index);
+    pattern_domain = (pkb.*fn)(pql::kModifiesS, var_index);
     UpdateHashmap<int>(domain, pattern_synonym_name_, pattern_domain);
   }
 
   void PatternClause::EvaluateLeftSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     GetPatternVarPair fn = GetPatternVarPairMap.at(type_);
-    std::vector<std::pair<int, int>> domain_pair_lst = (pkb.*fn)();
+    std::vector<std::pair<int, int>> domain_pair_lst = (pkb.*fn)(pql::RelationshipTypes::kCalls);
     pql_table::Predicate pred(pattern_synonym_name_, left_, domain_pair_lst);
 
     predicates.push_back(pred);
@@ -67,9 +67,7 @@ namespace pql_clause {
       return;
     }
 
-    std::unordered_set<int> domain_set = is_exact_ 
-                                            ? pkb.GetStmtsWithExactPattern(expression_)
-                                            : pkb.GetAllStmtsWithPattern(expression_);
+    std::unordered_set<int> domain_set = pkb.GetAllStmtsWithPattern(expression_, is_exact_);
     std::vector<int> domain_lst(domain_set.begin(), domain_set.end());
     UpdateHashmap<int>(domain, pattern_synonym_name_, domain_lst);
   }

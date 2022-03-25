@@ -9,20 +9,20 @@
 #define ATTR_REF 1
 
 namespace pql_clause {
-  typedef std::vector<int>(Pkb::* GetDomainByAttribute)(const int) const;
+  typedef std::vector<int>(Pkb::* GetDomainByAttribute)(EntityIdentifier entity_identifier, const int);
   typedef void (WithClause::* EvaluateFn)(Pkb&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
-  typedef int (Pkb::* GetAttrFn)(const int) const;
+  typedef int (Pkb::* GetAttrFn)(EntityIdentifier entity_identifier, const int);
 
   const map<AttrIdentifier, GetDomainByAttribute> CallFnMap = {
-    { AttrIdentifier::kProcName, &Pkb::GetCallFromProc }
+    { AttrIdentifier::kProcName, &Pkb::GetStmtNumByStringAttribute }
   };
 
   const map<AttrIdentifier, GetDomainByAttribute> ReadFnMap = {
-    { AttrIdentifier::kVarName, &Pkb::GetReadByVar }
+    { AttrIdentifier::kVarName, &Pkb::GetStmtNumByStringAttribute }
   };
 
   const map<AttrIdentifier, GetDomainByAttribute> PrintFnMap = {
-    { AttrIdentifier::kVarName, &Pkb::GetPrintByVar }
+    { AttrIdentifier::kVarName, &Pkb::GetStmtNumByStringAttribute }
   };
 
   const map<EntityIdentifier, map<AttrIdentifier, GetDomainByAttribute>> GetDomainByAttributeMap = {
@@ -47,9 +47,9 @@ namespace pql_clause {
   };
 
   const map<EntityIdentifier, GetAttrFn> GetAttrFnMap = {
-    { EntityIdentifier::kCall, &Pkb::GetProcFromCall },
-    { EntityIdentifier::kRead, &Pkb::GetVarFromRead },
-    { EntityIdentifier::kPrint, &Pkb::GetVarFromPrint }
+    { EntityIdentifier::kCall, &Pkb::GetStringAttribute },
+    { EntityIdentifier::kRead, &Pkb::GetStringAttribute },
+    { EntityIdentifier::kPrint, &Pkb::GetStringAttribute }
   };
 
   struct hashFunction {
@@ -73,7 +73,7 @@ namespace pql_clause {
 
   int GetIntRepresentation(Pkb& pkb, AttrIdentifier attr_type, std::string& entity) {
     if (attr_type == AttrIdentifier::kProcName) {
-      int proc_index = pkb.GetIndexByProc(entity);
+      int proc_index = pkb.GetIndexByString(IndexTableType::kProcIndex, entity);
 
       if (proc_index == INVALID_INDEX) {
         throw pql_exceptions::ProcedureDoesNotExistException();
@@ -83,7 +83,7 @@ namespace pql_clause {
     }
 
     if (attr_type == AttrIdentifier::kVarName) {
-      int var_index = pkb.GetIndexByVar(entity);
+      int var_index = pkb.GetIndexByString(IndexTableType::kVarIndex, entity);
 
       if (var_index == INVALID_INDEX) {
         throw pql_exceptions::VariableDoesNotExistException();
@@ -105,7 +105,7 @@ namespace pql_clause {
     if (GetDomainByAttributeMap.find(syn_type) != GetDomainByAttributeMap.end()
         && GetDomainByAttributeMap.at(syn_type).find(attr_type) != GetDomainByAttributeMap.at(syn_type).end()) {
       GetDomainByAttribute fn = GetDomainByAttributeMap.at(syn_type).at(attr_type);
-      return (pkb.*fn)(entity);
+      return (pkb.*fn)(syn_type, entity);
     }
 
     return std::vector<int> { entity };
@@ -151,7 +151,7 @@ namespace pql_clause {
   int GetAttributeByType(Pkb& pkb, EntityIdentifier ent_type, int entity) {
     if (GetAttrFnMap.find(ent_type) != GetAttrFnMap.end()) {
       GetAttrFn fn = GetAttrFnMap.at(ent_type);
-      return (pkb.*fn)(entity);
+      return (pkb.*fn)(ent_type, entity);
     }
 
     //Until here, we are left with proc.procName and variable.varName
