@@ -187,7 +187,7 @@ namespace pql_cache {
 
   void Cache::ConstructAssignAffectPair(int assign_stmt,
       unordered_map<int, unordered_set<int>>& last_modified_table, unordered_set<pair<int, int>, hash_pair_fn>& affect_set ) {
-    vector<int> used_vars = pkb_.GetUsesVarByStmt(assign_stmt);
+    vector<int> used_vars = pkb_.GetRelSecondArgument(pql::RelationshipTypes::kUsesS, assign_stmt);
 
     for (int& used_var : used_vars) {
         //check used_var in LMT
@@ -220,19 +220,19 @@ namespace pql_cache {
           EntityIdentifier curr_type = curr->GetStmtType(curr_stmt);
 
           if (curr_type == EntityIdentifier::kAssign) {
-            int modvar = pkb_.GetModifiesVarByStmt(curr_stmt)[0];
+            int modvar = pkb_.GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt)[0];
             ConstructAssignAffectPair(curr_stmt, last_modified_table, affect_set);
             //Add LastModified(modvar, curr_stmt)
             last_modified_table[modvar] = unordered_set<int>{ curr_stmt };
           }
 
           if (curr_type == EntityIdentifier::kRead) {
-            int read_var = pkb_.GetVarFromRead(curr_stmt);
+            int read_var = pkb_.GetStringAttribute(curr_type, curr_stmt);
             last_modified_table.erase(read_var);
           }
 
           if (curr_type == EntityIdentifier::kCall) {
-            vector<int> call_modvars = pkb_.GetModifiesVarByStmt(curr_stmt);
+            vector<int> call_modvars = pkb_.GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt);
             for (int& call_modvar : call_modvars) {
               last_modified_table.erase(call_modvar);
             }

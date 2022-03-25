@@ -15,24 +15,24 @@ static vector<pql_table::Predicate> std_predicates;
 /*----------------------------------------Follows-----------------------------------------------------------------*/
 
 TEST_CASE("Checks the correctness of Follows clause when both arguments are wildcard") {
-    InitializePkb();
+  InitializePkb();
 
-    vector<int> domain({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
+  vector<int> domain({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
 
-    SECTION("Both of the argument is wildcard") {
-        // Follows(_, _)
-        query_domain.clear();
-        query_domain["s"] = domain;
-        vector<int> std_domain({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-        std_query_domain.clear();
-        std_query_domain["s"] = std_domain;
+  SECTION("Both of the argument is wildcard") {
+    // Follows(_, _)
+    query_domain.clear();
+    query_domain["s"] = domain;
+    vector<int> std_domain({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
+    std_query_domain.clear();
+    std_query_domain["s"] = std_domain;
 
-        pql_clause::FollowsClause follows_clause("_", false, "_", false);
+    pql_clause::FollowsClause follows_clause("_", false, "_", false);
 
-        REQUIRE(query_domain == std_query_domain);
-        follows_clause.Evaluate(pkb, query_domain, predicates);
-        REQUIRE(query_domain == std_query_domain); //The result should be the same since there is a Follows relationship
-    }
+    REQUIRE(query_domain == std_query_domain);
+    follows_clause.Evaluate(pkb, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); //The result should be the same since there is a Follows relationship
+  }
 }
 
 TEST_CASE("Checks correctness when at least one of the argument is a entity") {
