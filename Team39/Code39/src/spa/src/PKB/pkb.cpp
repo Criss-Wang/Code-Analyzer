@@ -68,6 +68,10 @@ shared_ptr<RelListTable> Pkb::GetCalledByStarTable() {
   return called_by_star_table_;
 }
 
+shared_ptr<RelTable> Pkb::GetNextTable() {
+  return next_table_;
+}
+
 shared_ptr<RelListTable> Pkb::GetModifiesStmtToVariablesTable() {
   return modifies_stmt_to_variables_table_;
 }

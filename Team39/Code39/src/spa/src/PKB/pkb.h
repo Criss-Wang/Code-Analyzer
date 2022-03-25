@@ -124,6 +124,7 @@ class Pkb {
     shared_ptr<RelListTable> GetCallsStarTable();
     shared_ptr<RelListTable> GetCalledByTable();
     shared_ptr<RelListTable> GetCalledByStarTable();
+    shared_ptr<RelTable> GetNextTable();
     shared_ptr<RelListTable> GetModifiesStmtToVariablesTable();
     shared_ptr<RelListReverseTable> GetModifiesVariableToStmtsTable();
     shared_ptr<RelListTable> GetModifiesProcToVariablesTable();
