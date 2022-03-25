@@ -10,20 +10,6 @@
 #include "Utility/CFG/control_flow_graph.h"
 #include "PQL/query_parser/token.h"
 
-// Custom hash function from https://www.geeksforgeeks.org/unordered-set-of-vectors-in-c-with-examples/
-struct HashFunction {
-  size_t operator()(const set<int> & my_vector) const {
-    std::hash<int> hasher;
-    size_t answer = 0;
-
-    for (int i : my_vector) {
-      answer ^= hasher(i) + 0x9e3779b9 + (answer << 6) + (answer >> 2);
-    }
-    return answer;
-  }
-};
-
-
 class Pkb {
   private:
     vector<shared_ptr<CFG>> cfg_list_;
@@ -79,7 +65,7 @@ class Pkb {
     shared_ptr<Table<string, unordered_set<int>>> while_pattern_to_stmt_table_ = make_shared<Table<string, unordered_set<int>>>();
     shared_ptr<Table<int, unordered_set<string>>> while_stmt_to_pattern_table_ = make_shared<Table<int, unordered_set<string>>>();
 
-    // Entity sets - statement numbers
+    // Entity sets storing statement numbers
     unordered_set<int> stmt_set_;
     unordered_set<int> assign_set_;
     unordered_set<int> read_set_;
@@ -89,10 +75,9 @@ class Pkb {
     unordered_set<int> while_set_;
     unordered_set<int> constant_set_;
 
-    // Entity sets - names and lists
+    // Entity sets storing names
     unordered_set<int> variable_set_;
     unordered_set<int> procedure_set_;
-    //unordered_set<set<int>, HashFunction> stmt_list_set_;
 
     // Insert all possible expression patterns for a statement
     bool AddPattern(int line_num, const vector<string>& input_set, const string& input, TableIdentifier table_identifier);
@@ -121,10 +106,8 @@ class Pkb {
     bool AddInfoToTable(TableIdentifier table_identifier, const string& key, const vector<string>& value);
     bool AddInfoToTable(TableIdentifier table_identifier, const string& key, const pair<int, int>& value);
 
-    // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
     bool AddEntityToSet(EntityIdentifier entity_identifier, int entity_val);
     bool AddEntityToSet(EntityIdentifier entity_identifier, const string& entity_val);
-    //bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
 
     bool AddCfg(shared_ptr<CFG> cfg);
 
@@ -183,7 +166,6 @@ class Pkb {
 
     // Get all the items of a certain entity type
     unordered_set<int> GetAllEntity(const EntityIdentifier entity_identifier);
-    //unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier entity_identifier);
 
     // Get all the index-string relationships
     [[nodiscard]] vector<pair<int, string>> GetAllIndexStringPairs(IndexTableType index_table_type) const;
@@ -194,9 +176,4 @@ class Pkb {
     // Get all the attribute
     int GetStringAttribute(EntityIdentifier entity_identifier, const int stmt_no);
     vector<int> GetStmtNumByStringAttribute(EntityIdentifier entity_identifier, const int string_idx);
-
-    //[[nodiscard]] bool IsAssign(int stmt_no) const;
-    //[[nodiscard]] int GetVarFromAssign(int stmt_no) const;
-    //[[nodiscard]] vector<int> GetAssignByVar(int var_idx) const;
-
 };
