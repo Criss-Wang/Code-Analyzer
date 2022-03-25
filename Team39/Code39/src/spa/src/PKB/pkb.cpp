@@ -698,9 +698,9 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const string&
   }
 }
 
-bool Pkb::AddCFG(CFG cfg) {
+bool Pkb::AddCfgList(vector<shared_ptr<CFG>> cfg_list) {
   try {
-    this->cfg_ = cfg;
+    this->cfg_list_ = cfg_list;
     return true;
   } catch (exception& e) {
     throw e;
@@ -873,6 +873,6 @@ vector<pair<string, int>> Pkb::GetAllStringIndexPairs(const IndexTableType index
   }
 }
 
-CFG Pkb::GetCFG() {
-  return this->cfg_;
+vector<shared_ptr<CFG>> Pkb::GetCfgList() {
+  return this->cfg_list_;
 }

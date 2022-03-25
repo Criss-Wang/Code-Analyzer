@@ -2,6 +2,7 @@
 
 #include <set>
 #include <unordered_set>
+#include <vector>
 
 #include "tables/entity_tables.h"
 #include "tables/relation_tables.h"
@@ -25,7 +26,7 @@ struct HashFunction {
 
 class Pkb {
   private:
-    CFG cfg_;
+    vector<shared_ptr<CFG>> cfg_list_;
 
     // Entity tables
     shared_ptr<AssignTable> assign_table_ = make_shared<AssignTable>();
@@ -125,7 +126,7 @@ class Pkb {
     bool AddEntityToSet(EntityIdentifier entity_identifier, const string& entity_val);
     //bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
 
-    bool AddCFG(CFG cfg);
+    bool AddCfgList(vector<shared_ptr<CFG>> cfg_list);
 
     // Get tables
     shared_ptr<RelTable> GetFollowsTable();
@@ -166,7 +167,7 @@ class Pkb {
     unordered_set<int> GetProcSet();
     unordered_set<int> GetConstantSet();
 
-    CFG GetCFG();
+    vector<shared_ptr<CFG>> GetCfgList();
 
     // Relationship utility APIs for PQL
     bool IsRelationshipHolds(pql::RelationshipTypes rel_types, int key, int value);
