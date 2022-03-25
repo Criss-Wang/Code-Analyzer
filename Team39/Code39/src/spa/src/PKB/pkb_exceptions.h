@@ -54,3 +54,16 @@ class ReversePopulationException final : public exception {
       return "Failed to populate reverse relation";
     }
 };
+
+class AddInfoToTableException final : public exception {
+  private:
+    string message;
+
+  public:
+    AddInfoToTableException(int table_identifier, string error_message)
+      : message("Failed to add info to table " + to_string(table_identifier) + ". " + error_message) {}
+
+    const char* what() const throw() {
+      return message.c_str();
+    }
+};
