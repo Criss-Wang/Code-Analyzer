@@ -17,6 +17,10 @@ class Table {
   public:
     ~Table() = default;
 
+    unordered_map<T1, T2> GetInternalMap() {
+      return this->table_;
+    }
+
     int GetTableSize() {
       return static_cast<int>(table_.size());
     }
