@@ -24,7 +24,7 @@ namespace pql {
 
       bool equal(const Synonym &s);
   };
-  
+
   class AttrRef {
     private:
       Synonym synonym_;
@@ -64,7 +64,8 @@ namespace pql {
     kAssignPattern,
     kIfPattern,
     kWhilePattern,
-    kWith
+    kWith,
+    kNext
   };
 
   const std::map<std::string, EntityIdentifier> declarationMap {
