@@ -2,6 +2,7 @@
 
 #include <set>
 #include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #include "tables/entity_tables.h"
@@ -84,7 +85,7 @@ class Pkb {
     bool AddParent(int key, const vector<int>& value);
     bool AddFollows(int key, int value);
     bool AddCalls(const string& key, const vector<string>& value);
-    bool AddNext(int key, int value);
+    bool AddNext(int key, const vector<int>& value);
     bool AddModifies(int key, const vector<string>& value);
     bool AddModifiesP(const string& key, const vector<string>& value);
     bool AddUses(int key, const vector<string>& value);
@@ -124,7 +125,7 @@ class Pkb {
     shared_ptr<RelListTable> GetCallsStarTable();
     shared_ptr<RelListTable> GetCalledByTable();
     shared_ptr<RelListTable> GetCalledByStarTable();
-    shared_ptr<RelTable> GetNextTable();
+    shared_ptr<RelListTable> GetNextTable();
     shared_ptr<RelListTable> GetModifiesStmtToVariablesTable();
     shared_ptr<RelListReverseTable> GetModifiesVariableToStmtsTable();
     shared_ptr<RelListTable> GetModifiesProcToVariablesTable();
@@ -167,6 +168,8 @@ class Pkb {
 
     // Get all the items of a certain entity type
     unordered_set<int> GetAllEntity(const EntityIdentifier entity_identifier);
+
+    unordered_map<int, vector<int>> GetNextInternalMap();
 
     // Get all the index-string relationships
     [[nodiscard]] vector<pair<int, string>> GetAllIndexStringPairs(IndexTableType index_table_type) const;
