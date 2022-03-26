@@ -173,11 +173,6 @@ const unordered_map<pql::RelationshipTypes, GetTableFn> list_table_map_ = {
   {pql::RelationshipTypes::kNext, &Pkb::GetNextTable}
 };
 
-typedef shared_ptr<RelTable>(Pkb::* GetSimpleTableFn)();
-const unordered_map<pql::RelationshipTypes, GetSimpleTableFn> simple_table_map_ = {
-  {pql::RelationshipTypes::kCalls, &Pkb::GetFollowsBeforeTable}
-};
-
 const unordered_map<pql::RelationshipTypes, GetTableFn> reverse_table_map_ = {
   {pql::RelationshipTypes::kCalls, &Pkb::GetCalledByTable},
   {pql::RelationshipTypes::kCallsT, &Pkb::GetCalledByStarTable},
