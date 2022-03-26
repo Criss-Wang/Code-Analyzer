@@ -154,6 +154,10 @@ unordered_set<int> Pkb::GetConstantSet() {
   return constant_set_;
 }
 
+unordered_map<int, vector<int>> Pkb::GetNextInternalMap() {
+  return this->next_table_->GetInternalMap();
+}
+
 typedef shared_ptr<RelListTable>(Pkb::* GetTableFn)();
 
 const unordered_map<pql::RelationshipTypes, GetTableFn> list_table_map_ = {

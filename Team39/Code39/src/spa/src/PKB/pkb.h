@@ -2,6 +2,7 @@
 
 #include <set>
 #include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #include "tables/entity_tables.h"
@@ -167,6 +168,8 @@ class Pkb {
 
     // Get all the items of a certain entity type
     unordered_set<int> GetAllEntity(const EntityIdentifier entity_identifier);
+
+    unordered_map<int, vector<int>> GetNextInternalMap();
 
     // Get all the index-string relationships
     [[nodiscard]] vector<pair<int, string>> GetAllIndexStringPairs(IndexTableType index_table_type) const;
