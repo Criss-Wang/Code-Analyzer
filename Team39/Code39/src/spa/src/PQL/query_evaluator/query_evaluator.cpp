@@ -24,7 +24,7 @@ namespace pql {
     }
   }
 
-  std::vector<std::string> EvaluateQuery(Query& query, Pkb& pkb) {
+  std::vector<std::string> EvaluateQuery(Query& query, Pkb* pkb) {
     try {
       if (!query.IsSemanticallyValid()) {
         throw pql_exceptions::SemanticallyInvalidException();
@@ -38,7 +38,7 @@ namespace pql {
       std::unordered_map<std::string, std::vector<int>> domain;
       pql_cache::Cache cache(pkb);
 
-      GetAllDomain(synonyms, domain, pkb);
+      GetAllDomain(synonyms, domain, *pkb);
 
       for (auto& clause : clauses) {
         clause->Evaluate(cache, domain, predicates);
@@ -46,7 +46,7 @@ namespace pql {
       
       pql_solver::Solver solver(&domain, &predicates, synonyms, selected_syns, is_return_boolean);
       pql_table::InterTable table = solver.Solve();
-      Formatter formatter = Formatter(pkb);
+      Formatter formatter = Formatter(&cache);
       
       return formatter.FormatRawInput(table, selected_syns);
 

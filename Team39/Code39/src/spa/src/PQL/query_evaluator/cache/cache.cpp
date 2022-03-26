@@ -12,15 +12,19 @@ namespace pql_cache {
 
   /*----------------------------------------------------API for attribute------------------------------------------------------------*/
   int Cache::GetIndexByString(IndexTableType index_table_type, const string& entity_name) {
-    return pkb_.GetIndexByString(index_table_type, entity_name);
+    return pkb_->GetIndexByString(index_table_type, entity_name);
   }
 
   vector<int> Cache::GetStmtNumByStringAttribute(EntityIdentifier entity_identifier, const int string_idx) {
-    return pkb_.GetStmtNumByStringAttribute(entity_identifier, string_idx);
+    return pkb_->GetStmtNumByStringAttribute(entity_identifier, string_idx);
   }
 
   int Cache::GetStringAttribute(EntityIdentifier entity_identifier, const int stmt_no) {
-    return pkb_.GetStringAttribute(entity_identifier, stmt_no);
+    return pkb_->GetStringAttribute(entity_identifier, stmt_no);
+  }
+
+  string Cache::GetStringByIndex(IndexTableType index_table_type, int idx) {
+    return pkb_->GetStringByIndex(index_table_type, idx);
   }
   /*-------------------------------------------------------API for clause----------------------------------------------------------*/
   typedef void (Cache::* GenerateCache)(pql::RelationshipTypes);
@@ -89,7 +93,7 @@ namespace pql_cache {
 
   bool Cache::IsComputeRelExists(pql::RelationshipTypes type) {
     if (type == pql::kNextT) {
-      return pkb_.IsRelationshipExists(pql::kNext);
+      return pkb_->IsRelationshipExists(pql::kNext);
     } 
       
     if (!pair_cache_boolean_[type]) {
@@ -107,7 +111,7 @@ namespace pql_cache {
       return IsComputeRelHolds(rel_types, key, value);
     }
 
-    return pkb_.IsRelationshipHolds(rel_types, key, value);
+    return pkb_->IsRelationshipHolds(rel_types, key, value);
   }
 
   bool Cache::IsRelationshipExists(pql::RelationshipTypes rel_types) {
@@ -115,7 +119,7 @@ namespace pql_cache {
       return IsComputeRelExists(rel_types);
     }
 
-    return pkb_.IsRelationshipExists(rel_types);
+    return pkb_->IsRelationshipExists(rel_types);
   }
 
   vector<int> Cache::GetRelFirstArgument(pql::RelationshipTypes rel_types, int second_arg_idx) {
@@ -123,7 +127,7 @@ namespace pql_cache {
       return GetComputeInverseRelDomain(rel_types, second_arg_idx);
     }
 
-    return pkb_.GetRelFirstArgument(rel_types, second_arg_idx);
+    return pkb_->GetRelFirstArgument(rel_types, second_arg_idx);
   }
 
   vector<int> Cache::GetRelSecondArgument(const pql::RelationshipTypes rel_types, const int first_arg_idx) {
@@ -131,7 +135,7 @@ namespace pql_cache {
       return GetComputeRelDomain(rel_types, first_arg_idx);
     }
 
-    return pkb_.GetRelSecondArgument(rel_types, first_arg_idx);
+    return pkb_->GetRelSecondArgument(rel_types, first_arg_idx);
   }
 
   vector<pair<int, int>> Cache::GetRelArgumentPairs(const pql::RelationshipTypes rel_types) {
@@ -139,7 +143,7 @@ namespace pql_cache {
       return GetComputeAllRelPairs(rel_types);
     }
 
-    return pkb_.GetRelArgumentPairs(rel_types);
+    return pkb_->GetRelArgumentPairs(rel_types);
   }
 
   int Dfs(unordered_map<int, vector<int>>& table_to_refer, unordered_map<int, vector<int>>& table_to_update, int key) {
@@ -178,15 +182,15 @@ namespace pql_cache {
 
   /*--------------------------------------------------API for pattern clause------------------------------------------------------------*/
   unordered_set<int> Cache::GetAllStmtsWithPattern(const string& pattern, bool is_exact) {
-    return pkb_.GetAllStmtsWithPattern(pattern, is_exact);
+    return pkb_->GetAllStmtsWithPattern(pattern, is_exact);
   }
 
   vector<pair<int, int>> Cache::GetContainerStmtVarPair(TableIdentifier table_identifier) {
-    return pkb_.GetContainerStmtVarPair(table_identifier);
+    return pkb_->GetContainerStmtVarPair(table_identifier);
   }
 
   unordered_set<int> Cache::GetAllStmtsWithPatternVariable(int pattern_var_idx, TableIdentifier table_identifier) {
-    return pkb_.GetAllStmtsWithPatternVariable(pattern_var_idx, table_identifier);
+    return pkb_->GetAllStmtsWithPatternVariable(pattern_var_idx, table_identifier);
   }
 
   /*-----------------------------------------------------Next* and Affects*------------------------------------------------------------*/
@@ -196,7 +200,7 @@ namespace pql_cache {
     unordered_map<int, vector<int>> star_rel_domain;
       
     if (type == pql::kNextT) {
-      //rel_domain = pkb_.GetNextInternalMap()
+      rel_domain = pkb_->GetNextInternalMap();
     } else {
       //the type here will be AffectsT
       if (!rel_cache_boolean_[pql::kAffects]) {
@@ -290,7 +294,7 @@ namespace pql_cache {
   }
 
   void Cache::GenerateAffectsPairDomain(pql::RelationshipTypes type) {
-    vector<shared_ptr<CFG>> cfg_lst = pkb_.GetCfgList();
+    vector<shared_ptr<CFG>> cfg_lst = pkb_->GetCfgList();
     vector<pair<int, int>> affects_lst;
 
     for (auto& cfg_ptr : cfg_lst) {
@@ -314,7 +318,7 @@ namespace pql_cache {
 
   void Cache::ConstructAssignAffectPair(int assign_stmt,
       unordered_map<int, unordered_set<int>>& last_modified_table, unordered_set<pair<int, int>, hash_pair_fn>& affect_set ) {
-    vector<int> used_vars = pkb_.GetRelSecondArgument(pql::RelationshipTypes::kUsesS, assign_stmt);
+    vector<int> used_vars = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kUsesS, assign_stmt);
 
     for (int& used_var : used_vars) {
         //check used_var in LMT
@@ -347,19 +351,19 @@ namespace pql_cache {
           EntityIdentifier curr_type = curr->GetStmtType(curr_stmt);
 
           if (curr_type == EntityIdentifier::kAssign) {
-            int modvar = pkb_.GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt)[0];
+            int modvar = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt)[0];
             ConstructAssignAffectPair(curr_stmt, last_modified_table, affect_set);
             //Add LastModified(modvar, curr_stmt)
             last_modified_table[modvar] = unordered_set<int>{ curr_stmt };
           }
 
           if (curr_type == EntityIdentifier::kRead) {
-            int read_var = pkb_.GetStringAttribute(curr_type, curr_stmt);
+            int read_var = pkb_->GetStringAttribute(curr_type, curr_stmt);
             last_modified_table.erase(read_var);
           }
 
           if (curr_type == EntityIdentifier::kCall) {
-            vector<int> call_modvars = pkb_.GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt);
+            vector<int> call_modvars = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt);
             for (int& call_modvar : call_modvars) {
               last_modified_table.erase(call_modvar);
             }

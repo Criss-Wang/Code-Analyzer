@@ -40,10 +40,10 @@ namespace pql_cache {
       std::unordered_map<pql::RelationshipTypes, std::unordered_map<int, std::vector<int>>> inverse_rel_cache_;
       std::unordered_map<pql::RelationshipTypes, bool> inverse_rel_cache_boolean_;
 
-      Pkb pkb_;
+      Pkb* pkb_;
 
     public:
-      Cache(Pkb& pkb) {
+      Cache(Pkb* pkb) {
         pkb_ = pkb;
 
         //we havent create any table for these types
@@ -83,6 +83,8 @@ namespace pql_cache {
       std::vector<int> GetStmtNumByStringAttribute(EntityIdentifier entity_identifier, const int string_idx);
 
       int GetStringAttribute(EntityIdentifier entity_identifier, const int stmt_no);
+
+      string GetStringByIndex(IndexTableType index_table_type, int idx);
 
     /*--------------------------------------------------API for pattern clause------------------------------------------------------------*/
       unordered_set<int> GetAllStmtsWithPattern(const string& pattern, bool is_exact);
