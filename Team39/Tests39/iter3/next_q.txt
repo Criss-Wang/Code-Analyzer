@@ -1,0 +1,65 @@
+1 - Valid boolean return
+
+Select BOOLEAN such that Next(2, 6) 
+TRUE
+5000
+2 - Valid synonym return
+stmt s;
+Select s such that Next(12, 6) and Uses(p, "print")
+7
+5000
+3 - Valid tuple return 
+assign a; while w;
+Select <a, w> such that Next(a, w)
+20 21, 22 19
+5000
+4 - Valid Next with synonym and given variable
+stmt s;
+Select s such that Next(9, s)
+10, 13
+5000
+5 - Arguments of Next are both underscores
+
+Select BOOLEAN such that Next(_, _)
+TRUE
+5000
+6 - Syntactically invalid arguments in Next
+
+Select BOOLEAN such that Next( _)
+
+5000
+7 - Semantically invalid use of Next
+stmt s;
+Select BOOLEAN such that Next(s, s)
+FALSE
+5000
+8 - Valid NextT
+stmt s;
+Select BOOLEAN such that Next*(s, s)
+TRUE
+5000
+9 - Valid NextT and Next
+stmt s; call cl;
+Select BOOLEAN such that Next*(cl, 14) such that Next(cl, 6)
+TRUE
+5000
+10 - Valid NextT and Next with explicit and
+stmt s; read r;
+Select BOOLEAN such that Next*(9, r) and Next(r, 6)
+TRUE
+5000
+11 - Valid Next with explicit and
+stmt s;
+Select s such that Next(s, 19) and Next(s, 22) and Next*(s, s)
+21
+5000
+12 - Valid Next with with clause
+assign a; while w; constant c;
+Select <a, w> such that Next(a, w) with a.stmt# = 20
+20 21
+5000
+13 - Line 12 executes after stmt in ifs
+stmt s;
+Select s.stmt# such that Next*(s, 12) such that Modifies(2, "x") such that Parent(ifs, s) pattern ifs("z", _, _) 
+10, 11, 13
+5000
