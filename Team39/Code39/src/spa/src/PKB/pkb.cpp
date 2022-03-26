@@ -2,6 +2,7 @@
 
 #include "PQL/query_parser/token.h"
 #include "Utility/helper.h"
+#include "Utility/CFG/control_flow_graph.h"
 
 #define INVALID_INDEX -1
 #define EMPTY_STRING ""
@@ -65,6 +66,10 @@ shared_ptr<RelListTable> Pkb::GetCalledByTable() {
 
 shared_ptr<RelListTable> Pkb::GetCalledByStarTable() {
   return called_by_star_table_;
+}
+
+shared_ptr<RelTable> Pkb::GetNextTable() {
+  return next_table_;
 }
 
 shared_ptr<RelListTable> Pkb::GetModifiesStmtToVariablesTable() {
@@ -197,8 +202,7 @@ const unordered_map<pql::RelationshipTypes, TableType> type_map_ = {
   {pql::RelationshipTypes::kModifiesP, TableType::kRelListOrReverse},
 };
 
-// Relationshiips APIs
-
+// Relationships APIs
 bool Pkb::IsRelationshipHolds(const pql::RelationshipTypes rel_types, const int key, const int value) {
   try {
     if (type_map_.at(rel_types) == TableType::kRelSimple) {
@@ -238,7 +242,7 @@ vector<int> Pkb::GetRelFirstArgument(const pql::RelationshipTypes rel_types, con
     const GetInverseTableFn table_getter = mod_use_reverse_table_map_.at(rel_types);
     const shared_ptr<RelListReverseTable> table = (this->*table_getter)();
     return table->GetValueByKey(second_arg_idx);
-    
+
   } catch (exception& e) {
     return vector<int>{};
   }
@@ -276,7 +280,6 @@ vector<pair<int, int>> Pkb::GetRelArgumentPairs(const pql::RelationshipTypes rel
 }
 
 // Pattern Searches APIs
-
 unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern, const bool is_exact) const {
   const string usable_pattern = PatternHelper::PreprocessPattern(pattern);
   constexpr bool is_full = false;
@@ -296,8 +299,7 @@ unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern, const bool
   return table->GetValueByKey(s);
 }
 
-
-unordered_set<string> Pkb::GetAllPatternVariablesInStmt(const int stmt_no, 
+unordered_set<string> Pkb::GetAllPatternVariablesInStmt(const int stmt_no,
   const TableIdentifier table_identifier) const {
   unordered_set<string> empty_set{};
   shared_ptr<Table<int, unordered_set<string>>> search_table;
@@ -492,7 +494,7 @@ bool Pkb::AddPattern(const int line_num, const vector<string>& input_set, const 
   // We then proceed to parse the set of valid substring patterns
   try {
     bool add_success;
-    
+
     if (table_identifier == TableIdentifier::kAssignPattern) {
       const string clean_input = PatternHelper::PreprocessPattern(input);
       const unordered_set<string> valid_sub_patterns = PatternHelper::GetPatternSetPostfix(clean_input, true);
@@ -515,19 +517,16 @@ bool Pkb::AddPattern(const int line_num, const vector<string>& input_set, const 
   } catch (exception& e) {
     return false;
   }
-  
-  
 }
 
 // Table Insertion APIs
-
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<int>& value) {
   try {
     if (value.empty()) throw EmptyValueException();
     switch (table_identifier) {
-      case TableIdentifier::kConstant: 
+      case TableIdentifier::kConstant:
         return constant_table_->AddKeyValuePair(key, value);
-      case TableIdentifier::kParent: 
+      case TableIdentifier::kParent:
         return AddParent(key, value);
       default:
         throw InvalidIdentifierException();
@@ -541,13 +540,13 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
   try {
     if (value.empty()) throw EmptyValueException();
     switch (table_identifier) {
-      case TableIdentifier::kIf: 
+      case TableIdentifier::kIf:
         return if_table_->AddKeyValuePair(key, value);
-      case TableIdentifier::kWhile: 
+      case TableIdentifier::kWhile:
         return while_table_->AddKeyValuePair(key, value);
-      case TableIdentifier::kModifiesStmtToVar: 
+      case TableIdentifier::kModifiesStmtToVar:
         return AddModifies(key, value);
-      case TableIdentifier::kUsesStmtToVar: 
+      case TableIdentifier::kUsesStmtToVar:
         return AddUses(key, value);
       case TableIdentifier::kIfPattern:
         return AddPattern(key, value, EMPTY_STRING, table_identifier);
@@ -565,9 +564,9 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
   try {
     if (value < 1) throw EmptyValueException();
     switch (table_identifier) {
-      case TableIdentifier::kFollows: 
+      case TableIdentifier::kFollows:
         return AddFollows(key, value);
-      case TableIdentifier::kNext: 
+      case TableIdentifier::kNext:
         return AddNext(key, value);
       default:
         throw InvalidIdentifierException();
@@ -581,15 +580,15 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
   try {
     if (value.empty()) throw EmptyValueException();
     switch (table_identifier) {
-      case TableIdentifier::kAssign: 
+      case TableIdentifier::kAssign:
         return assign_table_->AddKeyValuePair(key, value);
-      case TableIdentifier::kRead: 
+      case TableIdentifier::kRead:
         return read_table_->AddKeyValuePair(key, value);
-      case TableIdentifier::kCaller: 
+      case TableIdentifier::kCaller:
         return caller_table_->AddKeyValuePair(key, value);
-      case TableIdentifier::kPrint: 
+      case TableIdentifier::kPrint:
         return print_table_->AddKeyValuePair(key, value);
-      case TableIdentifier::kAssignPattern: 
+      case TableIdentifier::kAssignPattern:
         return AddPattern(key, EMPTY_STRING_LIST, value, table_identifier);
       default:
         throw InvalidIdentifierException();
@@ -603,11 +602,11 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
   try {
     if (value.empty()) throw EmptyValueException();
     switch (table_identifier) {
-      case TableIdentifier::kCalls: 
+      case TableIdentifier::kCalls:
         return AddCalls(key, value);
-      case TableIdentifier::kModifiesProcToVar: 
+      case TableIdentifier::kModifiesProcToVar:
         return AddModifiesP(key, value);
-      case TableIdentifier::kUsesProcToVar: 
+      case TableIdentifier::kUsesProcToVar:
         return AddUsesP(key, value);
       default:
         throw InvalidIdentifierException();
@@ -623,7 +622,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
       throw EmptyValueException();
     }
     switch (table_identifier) {
-      case TableIdentifier::kProcedure: 
+      case TableIdentifier::kProcedure:
         return proc_range_table_->AddKeyValuePair(key, value);
       default:
         throw InvalidIdentifierException();
@@ -697,20 +696,14 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const string&
   }
 }
 
-//bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const set<int>& entity_val) {
-//  try {
-//    switch (entity_identifier) {
-//      case EntityIdentifier::kStmtLst: {
-//        stmt_list_set_.insert(entity_val);
-//        return true;
-//      }
-//      default:
-//        throw InvalidIdentifierException();
-//    }
-//  } catch (exception& e) {
-//    return false;
-//  }
-//}
+bool Pkb::AddCfg(shared_ptr<CFG> cfg) {
+  try {
+    this->cfg_list_.push_back(cfg);
+    return true;
+  } catch (exception& e) {
+    throw e;
+  }
+}
 
 typedef unordered_set<int>(Pkb::* GetEntityFn)();
 
@@ -750,7 +743,6 @@ const unordered_map<EntityIdentifier, GetEntityTableFn> entity_table_map = {
   {EntityIdentifier::kCall, &Pkb::GetCallerTable},
 };
 
-// ==========================================
 int Pkb::GetStringAttribute(const EntityIdentifier entity_identifier, const int stmt_no) {
   try {
     if (!IsEntity(EntityIdentifier::kRead, stmt_no) && !IsEntity(EntityIdentifier::kPrint, stmt_no) && !IsEntity(EntityIdentifier::kCall, stmt_no)) {
@@ -787,32 +779,6 @@ vector<int> Pkb::GetStmtNumByStringAttribute(const EntityIdentifier entity_ident
   return res;
 }
 
-
-//bool Pkb::IsAssign(const int stmt_no) const {
-//  return assign_set_.find(stmt_no) != assign_set_.end();
-//}
-
-//int Pkb::GetVarFromAssign(const int stmt_no) const {
-//  if (!IsAssign(stmt_no)) {
-//    return INVALID_INDEX;
-//  }
-//  return GetIndexByString(IndexTableType::kVarIndex, assign_table_->GetValueByKey(stmt_no));
-//}
-//
-//vector<int> Pkb::GetAssignByVar(const int var_idx) const {
-//  vector<int> res = {};
-//  if (!IsVar(var_idx)) {
-//    return res;
-//  }
-//  for (const auto& [key, val] : assign_table_->GetKeyValueLst()) {
-//    if (val == GetVarByIndex(var_idx)) res.push_back(key);
-//  }
-//  return res;
-//}
-
-// =================================================
-
-
 string Pkb::GetStringByIndex(const IndexTableType index_table_type, const int idx) const {
   try {
     shared_ptr<IndexToEntityTable> table;
@@ -847,7 +813,7 @@ int Pkb::GetIndexByString(const IndexTableType index_table_type, const string& e
 
 vector<pair<int, string>> Pkb::GetAllIndexStringPairs(const IndexTableType index_table_type) const {
   if (index_table_type == IndexTableType::kProc) {
-    return index_proc_table_->GetKeyValueLst(); 
+    return index_proc_table_->GetKeyValueLst();
   } else if (index_table_type == IndexTableType::kVar) {
     return index_var_table_->GetKeyValueLst();
   } else {
@@ -862,4 +828,8 @@ vector<pair<string, int>> Pkb::GetAllStringIndexPairs(const IndexTableType index
   } else {
     throw InvalidIdentifierException();
   }
+}
+
+vector<shared_ptr<CFG>> Pkb::GetCfgList() {
+  return this->cfg_list_;
 }

@@ -19,6 +19,13 @@ class InvalidKeyException final : public exception {
     }
 };
 
+class UpdateKeyException final : public exception {
+  public:
+    const char* what() const throw() {
+      return "Could not update key with new value in table";
+    }
+};
+
 class EmptyValueException final : public exception {
   public:
     const char* what() const throw() {
@@ -34,10 +41,29 @@ class InvalidIdentifierException final : public exception {
     }
 };
 
-// Thrown when wrong TableIdentifier or EntityIdentifier is provided
 class BadResultException final : public exception {
-public:
-  const char* what() const throw() {
-    return "The result given is not meeting the requirement";
-  }
+  public:
+    const char* what() const throw() {
+      return "The result given is not meeting the requirement";
+    }
+};
+
+class ReversePopulationException final : public exception {
+  public:
+    const char* what() const throw() {
+      return "Failed to populate reverse relation";
+    }
+};
+
+class AddInfoToTableException final : public exception {
+  private:
+    string message;
+
+  public:
+    AddInfoToTableException(int table_identifier, string error_message)
+      : message("Failed to add info to table " + to_string(table_identifier) + ". " + error_message) {}
+
+    const char* what() const throw() {
+      return message.c_str();
+    }
 };

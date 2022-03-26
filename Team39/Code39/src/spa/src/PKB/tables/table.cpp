@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "table.h"
 
 // Helper function for populating the reverse relation for uses or modifies
@@ -19,7 +21,7 @@ bool PopulateReverseRelationship(const vector<int>& keys, const int value_to_upd
     }
     return add_success;
   } catch (exception& e) {
-    return false;
+    throw ReversePopulationException();
   }
 }
 

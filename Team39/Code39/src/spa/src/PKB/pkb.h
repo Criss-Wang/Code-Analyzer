@@ -2,28 +2,18 @@
 
 #include <set>
 #include <unordered_set>
+#include <vector>
 
 #include "tables/entity_tables.h"
 #include "tables/relation_tables.h"
 #include "../Utility/entity.h"
+#include "Utility/CFG/control_flow_graph.h"
 #include "PQL/query_parser/token.h"
-
-// Custom hash function from https://www.geeksforgeeks.org/unordered-set-of-vectors-in-c-with-examples/
-struct HashFunction {
-  size_t operator()(const set<int> & my_vector) const {
-    std::hash<int> hasher;
-    size_t answer = 0;
-
-    for (int i : my_vector) {
-      answer ^= hasher(i) + 0x9e3779b9 + (answer << 6) + (answer >> 2);
-    }
-    return answer;
-  }
-};
-
 
 class Pkb {
   private:
+    vector<shared_ptr<CFG>> cfg_list_;
+
     // Entity tables
     shared_ptr<AssignTable> assign_table_ = make_shared<AssignTable>();
     shared_ptr<ReadTable> read_table_ = make_shared<ReadTable>();
@@ -65,7 +55,7 @@ class Pkb {
     shared_ptr<ModifiesVariableToStmtsTable> modifies_variable_to_stmts_table_ = make_shared<ModifiesVariableToStmtsTable>();
     shared_ptr<ModifiesProcToVariablesTable> modifies_proc_to_variables_table_ = make_shared<ModifiesProcToVariablesTable>();
     shared_ptr<ModifiesVariableToProcsTable> modifies_variable_to_procs_table_ = make_shared<ModifiesVariableToProcsTable>();
-    
+
     // Pattern tables
     shared_ptr<Table<int, unordered_set<string>>> assign_stmt_to_patterns_table_ = make_shared<Table<int, unordered_set<string>>>();
     shared_ptr<Table<string, unordered_set<int>>> assign_pattern_to_stmts_table_ = make_shared<Table<string, unordered_set<int>>>();
@@ -75,7 +65,7 @@ class Pkb {
     shared_ptr<Table<string, unordered_set<int>>> while_pattern_to_stmt_table_ = make_shared<Table<string, unordered_set<int>>>();
     shared_ptr<Table<int, unordered_set<string>>> while_stmt_to_pattern_table_ = make_shared<Table<int, unordered_set<string>>>();
 
-    // Entity sets - statement numbers
+    // Entity sets storing statement numbers
     unordered_set<int> stmt_set_;
     unordered_set<int> assign_set_;
     unordered_set<int> read_set_;
@@ -85,10 +75,9 @@ class Pkb {
     unordered_set<int> while_set_;
     unordered_set<int> constant_set_;
 
-    // Entity sets - names and lists
+    // Entity sets storing names
     unordered_set<int> variable_set_;
     unordered_set<int> procedure_set_;
-    //unordered_set<set<int>, HashFunction> stmt_list_set_;
 
     // Insert all possible expression patterns for a statement
     bool AddPattern(int line_num, const vector<string>& input_set, const string& input, TableIdentifier table_identifier);
@@ -117,10 +106,10 @@ class Pkb {
     bool AddInfoToTable(TableIdentifier table_identifier, const string& key, const vector<string>& value);
     bool AddInfoToTable(TableIdentifier table_identifier, const string& key, const pair<int, int>& value);
 
-    // Add entities to individual sets (Again very bad practice, not sure how to optimize the code)
     bool AddEntityToSet(EntityIdentifier entity_identifier, int entity_val);
     bool AddEntityToSet(EntityIdentifier entity_identifier, const string& entity_val);
-    //bool AddEntityToSet(EntityIdentifier entity_identifier, const set<int>& entity_val);
+
+    bool AddCfg(shared_ptr<CFG> cfg);
 
     // Get tables
     shared_ptr<RelTable> GetFollowsTable();
@@ -135,6 +124,7 @@ class Pkb {
     shared_ptr<RelListTable> GetCallsStarTable();
     shared_ptr<RelListTable> GetCalledByTable();
     shared_ptr<RelListTable> GetCalledByStarTable();
+    shared_ptr<RelTable> GetNextTable();
     shared_ptr<RelListTable> GetModifiesStmtToVariablesTable();
     shared_ptr<RelListReverseTable> GetModifiesVariableToStmtsTable();
     shared_ptr<RelListTable> GetModifiesProcToVariablesTable();
@@ -160,7 +150,8 @@ class Pkb {
     unordered_set<int> GetVarSet();
     unordered_set<int> GetProcSet();
     unordered_set<int> GetConstantSet();
-    
+
+    vector<shared_ptr<CFG>> GetCfgList();
 
     // Relationship utility APIs for PQL
     bool IsRelationshipHolds(pql::RelationshipTypes rel_types, int key, int value);
@@ -176,7 +167,6 @@ class Pkb {
 
     // Get all the items of a certain entity type
     unordered_set<int> GetAllEntity(const EntityIdentifier entity_identifier);
-    //unordered_set<set<int>, HashFunction> GetAllEntityStmtLst(const EntityIdentifier entity_identifier);
 
     // Get all the index-string relationships
     [[nodiscard]] vector<pair<int, string>> GetAllIndexStringPairs(IndexTableType index_table_type) const;
@@ -187,9 +177,4 @@ class Pkb {
     // Get all the attribute
     int GetStringAttribute(EntityIdentifier entity_identifier, const int stmt_no);
     vector<int> GetStmtNumByStringAttribute(EntityIdentifier entity_identifier, const int string_idx);
-
-    //[[nodiscard]] bool IsAssign(int stmt_no) const;
-    //[[nodiscard]] int GetVarFromAssign(int stmt_no) const;
-    //[[nodiscard]] vector<int> GetAssignByVar(int var_idx) const;
-       
 };

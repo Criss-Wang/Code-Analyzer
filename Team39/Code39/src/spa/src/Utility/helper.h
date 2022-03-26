@@ -21,5 +21,3 @@ class PatternHelper : public Helper {
     static unordered_set<string> GetPatternSetPostfix(const string& input, const bool is_full);
     static unordered_set<string> GetContainerPatterns(const string& input);
 };
-
-

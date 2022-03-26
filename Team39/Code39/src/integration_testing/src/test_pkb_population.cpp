@@ -1,5 +1,4 @@
-#include "SP/tokenizer.h"
-#include "SP/populator.h"
+#include "SP/parser.h"
 #include "PKB/pkb.h"
 
 #include <fstream>
@@ -7,16 +6,17 @@
 
 using namespace std;
 
-vector<Token> parse(string path) {
+Pkb parse(string path) {
   ifstream input_file(path);
   if (!input_file.is_open()) {
     cerr << "Could not open the file " << endl;
     return {};
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-    Tokenizer tokenizer;
-    vector<Token> input_tokens = tokenizer.parse(input);
-    return input_tokens;
+    Pkb pkb;
+    Parser parser(input, pkb);
+    parser.Populate(pkb);
+    return pkb;
   }
 }
 
@@ -25,9 +25,7 @@ string populate_dir = "../../../../../../Tests39/sp/valid_programs/";
 TEST_CASE("Read/print statements for Population") {
 
   SECTION("1_test1") {
-    vector<Token> input_tokens = parse(populate_dir + "1_test1.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "1_test1.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -50,9 +48,7 @@ TEST_CASE("Read/print statements for Population") {
   }
 
   SECTION("1_test2") {
-    vector<Token> input_tokens = parse(populate_dir + "1_test2.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "1_test2.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -74,9 +70,7 @@ TEST_CASE("Read/print statements for Population") {
   }
 
   SECTION("1_test3") {
-    vector<Token> input_tokens = parse(populate_dir + "1_test3.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "1_test3.txt");
 
     // check entity tables
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -111,9 +105,7 @@ TEST_CASE("Read/print statements for Population") {
   }
 
   SECTION("1_test4") {
-    vector<Token> input_tokens = parse(populate_dir + "1_test4.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "1_test4.txt");
 
     // check entity tables
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -157,9 +149,7 @@ TEST_CASE("Read/print statements for Population") {
 TEST_CASE("Read/print/assign statments for Population") {
 
   SECTION("2_test1") {
-    vector<Token> input_tokens = parse(populate_dir + "2_test1.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "2_test1.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -167,6 +157,9 @@ TEST_CASE("Read/print/assign statments for Population") {
 
     unordered_set<int> expected_variable = { pkb.GetIndexByString(IndexTableType::kVarIndex, "x"), pkb.GetIndexByString(IndexTableType::kVarIndex, "y"), pkb.GetIndexByString(IndexTableType::kVarIndex, "z") };
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kVariable) == expected_variable);
+
+    unordered_set<int> expected_constant = { 5 };
+    REQUIRE(pkb.GetAllEntity(EntityIdentifier::kConstant) == expected_constant);
 
     unordered_set<int> expected_stmt = { 1 };
     REQUIRE(pkb.GetAllEntity(EntityIdentifier::kStmt) == expected_stmt);
@@ -185,9 +178,7 @@ TEST_CASE("Read/print/assign statments for Population") {
   }
 
   SECTION("2_test2") {
-    vector<Token> input_tokens = parse(populate_dir + "2_test2.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "2_test2.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -229,9 +220,7 @@ TEST_CASE("Read/print/assign statments for Population") {
   }
 
   SECTION("2_test3") {
-    vector<Token> input_tokens = parse(populate_dir + "2_test3.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "2_test3.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -273,9 +262,7 @@ TEST_CASE("Read/print/assign statments for Population") {
   }
 
   SECTION("2_test4") {
-    vector<Token> input_tokens = parse(populate_dir + "2_test4.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "2_test4.txt");
 
     // check entity tables
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -330,9 +317,7 @@ TEST_CASE("Read/print/assign statments for Population") {
 TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population") {
 
   SECTION("3_test1") {
-    vector<Token> input_tokens = parse(populate_dir + "3_test1.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "3_test1.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -384,9 +369,7 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
   }
 
   SECTION("3_test2") {
-    vector<Token> input_tokens = parse(populate_dir + "3_test2.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "3_test2.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -437,9 +420,7 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
   }
 
   SECTION("3_test3") {
-    vector<Token> input_tokens = parse(populate_dir + "3_test3.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "3_test3.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -498,9 +479,7 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
   }
 
   SECTION("3_test4") {
-    vector<Token> input_tokens = parse(populate_dir + "3_test4.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "3_test4.txt");
 
     // check entity tables
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -563,9 +542,7 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
 TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population") {
 
   SECTION("4_test1") {
-    vector<Token> input_tokens = parse(populate_dir + "4_test1.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "4_test1.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -621,9 +598,7 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
   }
   
   SECTION("4_test2") {
-    vector<Token> input_tokens = parse(populate_dir + "4_test2.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "4_test2.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -695,9 +670,7 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
 TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Population") {
 
   SECTION("5_test1") {
-    vector<Token> input_tokens = parse(populate_dir + "5_test1.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "5_test1.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
@@ -769,9 +742,7 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Population
 TEST_CASE("Read/print/assign/call statments for Population") {
 
   SECTION("6_test1") {
-    vector<Token> input_tokens = parse(populate_dir + "6_test1.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "6_test1.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "proc1"), pkb.GetIndexByString(IndexTableType::kProcIndex, "proc2") };
@@ -824,9 +795,7 @@ TEST_CASE("Read/print/assign/call statments for Population") {
   }
 
   SECTION("6_test2") {
-    vector<Token> input_tokens = parse(populate_dir + "6_test2.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "6_test2.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "proc1"), pkb.GetIndexByString(IndexTableType::kProcIndex, "proc2"), pkb.GetIndexByString(IndexTableType::kProcIndex, "proc3") };
@@ -884,9 +853,7 @@ TEST_CASE("Read/print/assign/call statments for Population") {
   }
 
   SECTION("6_test3") {
-    vector<Token> input_tokens = parse(populate_dir + "6_test3.txt");
-    Pkb pkb;
-    populate(input_tokens, pkb);
+    Pkb pkb = parse(populate_dir + "6_test3.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "proc1"), pkb.GetIndexByString(IndexTableType::kProcIndex, "proc2"), pkb.GetIndexByString(IndexTableType::kProcIndex, "procedure") };

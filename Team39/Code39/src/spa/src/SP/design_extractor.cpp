@@ -1,11 +1,11 @@
 #include "../PKB/pkb.h"
 #include "./design_extractor.h"
+#include "../Utility/helper.h"
 
 using namespace std;
 
 // Helper
-template<typename T1, typename T2>
-int Dfs(T1 table_to_refer, T2 table_to_update, int key) {
+int Dfs(shared_ptr<RelListTable> table_to_refer, shared_ptr<RelListTable> table_to_update, int key) {
   if (table_to_update->KeyExistsInTable(key)) {
     return key;
   }
@@ -19,7 +19,7 @@ int Dfs(T1 table_to_refer, T2 table_to_update, int key) {
 
   vector<int> ans;
   for (int child_key : children_lst) {
-    int end_val = Dfs<T1, T2>(table_to_refer, table_to_update, child_key);
+    int end_val = Dfs(table_to_refer, table_to_update, child_key);
     ans.push_back(end_val);
     // Add the children of the current key if the key exists
     if (table_to_update->KeyExistsInTable(end_val)) {
@@ -37,10 +37,9 @@ int Dfs(T1 table_to_refer, T2 table_to_update, int key) {
   return key;
 }
 
-template<typename T1, typename T2>
-void PopulateForPOrC(T1 table_to_refer, T2 table_to_update) {
+void PopulateForPOrC(shared_ptr<RelListTable> table_to_refer, shared_ptr<RelListTable> table_to_update) {
   for (int& key : table_to_refer->GetKeyLst()) {
-    Dfs<T1, T2>(table_to_refer, table_to_update, key);
+    Dfs(table_to_refer, table_to_update, key);
   }
 }
 
@@ -312,12 +311,12 @@ int PopulateNestedRelationships(Pkb& pkb) {
     PopulateForF<shared_ptr<RelTable>, shared_ptr<RelListTable>>(follows_before_table, follows_before_star_table);
 
     // Populate nested parent
-    PopulateForPOrC<shared_ptr<RelListTable>, shared_ptr<RelListTable>>(parent_table, parent_star_table);
-    PopulateForPOrC<shared_ptr<RelListTable>, shared_ptr<RelListTable>>(child_table, child_star_table);
+    PopulateForPOrC(parent_table, parent_star_table);
+    PopulateForPOrC(child_table, child_star_table);
 
     // Populate nested calls
-    PopulateForPOrC<shared_ptr<RelListTable>, shared_ptr<RelListTable>>(calls_table, calls_star_table);
-    PopulateForPOrC<shared_ptr<RelListTable>, shared_ptr<RelListTable>>(called_by_table, called_by_star_table);
+    PopulateForPOrC(calls_table, calls_star_table);
+    PopulateForPOrC(called_by_table, called_by_star_table);
 
     // Populate modifies
     PopulateNestedModifiesOrUses(*parent_star_table, *modifies_stmt_to_variables_table);
