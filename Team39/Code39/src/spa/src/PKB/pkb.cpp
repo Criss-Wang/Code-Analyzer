@@ -169,12 +169,13 @@ const unordered_map<pql::RelationshipTypes, GetTableFn> list_table_map_ = {
   {pql::RelationshipTypes::kUsesS, &Pkb::GetUsesStmtToVariablesTable},
   {pql::RelationshipTypes::kUsesP, &Pkb::GetUsesProcToVariablesTable},
   {pql::RelationshipTypes::kModifiesS, &Pkb::GetModifiesStmtToVariablesTable},
-  {pql::RelationshipTypes::kModifiesP, &Pkb::GetModifiesProcToVariablesTable}
+  {pql::RelationshipTypes::kModifiesP, &Pkb::GetModifiesProcToVariablesTable},
+  {pql::RelationshipTypes::kNext, &Pkb::GetNextTable}
 };
 
 typedef shared_ptr<RelTable>(Pkb::* GetSimpleTableFn)();
 const unordered_map<pql::RelationshipTypes, GetSimpleTableFn> simple_table_map_ = {
-  {pql::RelationshipTypes::kCalls, &Pkb::GetFollowsBeforeTable},
+  {pql::RelationshipTypes::kCalls, &Pkb::GetFollowsBeforeTable}
 };
 
 const unordered_map<pql::RelationshipTypes, GetTableFn> reverse_table_map_ = {
@@ -182,7 +183,7 @@ const unordered_map<pql::RelationshipTypes, GetTableFn> reverse_table_map_ = {
   {pql::RelationshipTypes::kCallsT, &Pkb::GetCalledByStarTable},
   {pql::RelationshipTypes::kParent, &Pkb::GetChildTable},
   {pql::RelationshipTypes::kParentT, &Pkb::GetChildStarTable},
-  {pql::RelationshipTypes::kFollowsT, &Pkb::GetFollowsBeforeStarTable},
+  {pql::RelationshipTypes::kFollowsT, &Pkb::GetFollowsBeforeStarTable}
 };
 
 typedef shared_ptr<RelListReverseTable>(Pkb::* GetInverseTableFn)();
@@ -190,7 +191,7 @@ const unordered_map<pql::RelationshipTypes, GetInverseTableFn> mod_use_reverse_t
   {pql::RelationshipTypes::kUsesP, &Pkb::GetUsesVariableToProcsTable},
   {pql::RelationshipTypes::kUsesS, &Pkb::GetUsesVariableToStmtsTable},
   {pql::RelationshipTypes::kModifiesP, &Pkb::GetModifiesVariableToProcsTable},
-  {pql::RelationshipTypes::kModifiesS, &Pkb::GetModifiesVariableToStmtsTable},
+  {pql::RelationshipTypes::kModifiesS, &Pkb::GetModifiesVariableToStmtsTable}
 };
 
 const unordered_map<pql::RelationshipTypes, TableType> type_map_ = {
@@ -204,6 +205,7 @@ const unordered_map<pql::RelationshipTypes, TableType> type_map_ = {
   {pql::RelationshipTypes::kUsesP, TableType::kRelListOrReverse},
   {pql::RelationshipTypes::kModifiesS, TableType::kRelListOrReverse},
   {pql::RelationshipTypes::kModifiesP, TableType::kRelListOrReverse},
+  {pql::RelationshipTypes::kNext, TableType::kRelList}
 };
 
 // Relationships APIs
