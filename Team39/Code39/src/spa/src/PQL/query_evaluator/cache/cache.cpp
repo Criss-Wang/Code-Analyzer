@@ -181,6 +181,14 @@ namespace pql_cache {
     return pkb_.GetAllStmtsWithPattern(pattern, is_exact);
   }
 
+  vector<pair<int, int>> Cache::GetContainerStmtVarPair(TableIdentifier table_identifier) {
+    return pkb_.GetContainerStmtVarPair(table_identifier);
+  }
+
+  unordered_set<int> Cache::GetAllStmtsWithPatternVariable(int pattern_var_idx, TableIdentifier table_identifier) {
+    return pkb_.GetAllStmtsWithPatternVariable(pattern_var_idx, table_identifier);
+  }
+
   /*-----------------------------------------------------Next* and Affects*------------------------------------------------------------*/
 
   void Cache::GenerateNextTOrAffectsTRelDomain(pql::RelationshipTypes type) {

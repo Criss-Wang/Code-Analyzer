@@ -84,6 +84,10 @@ namespace pql_cache {
     /*--------------------------------------------------API for pattern clause------------------------------------------------------------*/
       unordered_set<int> GetAllStmtsWithPattern(const string& pattern, bool is_exact);
 
+      vector<pair<int, int>> GetContainerStmtVarPair(TableIdentifier table_identifier);
+
+      unordered_set<int> GetAllStmtsWithPatternVariable(int pattern_var_idx, TableIdentifier table_identifier);
+
     /*---------------------------------------------------Next* and Affects*----------------------------------------------------------*/
       void GenerateNextTOrAffectsTRelDomain(pql::RelationshipTypes type);
 

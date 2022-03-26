@@ -5,16 +5,11 @@
 #define SYNONYM 2
 
 namespace pql_clause {
-  typedef std::vector<int> (pql_cache::Cache::*GetPatternDomainByVar)(pql::RelationshipTypes, const int);
-  typedef std::vector<std::pair<int, int>>(pql_cache::Cache::* GetPatternVarPair)(pql::RelationshipTypes);
   typedef void (PatternClause::* EvaluateLeftFn)(pql_cache::Cache&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
 
-  const map<pql::RelationshipTypes, GetPatternDomainByVar> GetPatternDomainByVarMap = {
-    { pql::kAssignPattern, &pql_cache::Cache::GetRelFirstArgument }
-  };
-
-  const map<pql::RelationshipTypes, GetPatternVarPair> GetPatternVarPairMap = {
-    { pql::kAssignPattern, &pql_cache::Cache::GetRelArgumentPairs }
+  const unordered_map<pql::RelationshipTypes, TableIdentifier> RelTypeToTableIdMap = {
+    { pql::kWhilePattern, TableIdentifier::kWhilePattern },
+    { pql::kIfPattern, TableIdentifier::kIfPattern }
   };
 
   const map<int, EvaluateLeftFn> EvaluateLeftFnMap = {
@@ -27,25 +22,43 @@ namespace pql_clause {
       std::vector<pql_table::Predicate>& predicates) {
     //do nothing only if it is of type pattern clause,e.g. pattern a (_, _)  
     if (type_ != pql::kAssignPattern) {
-      //waiting for pkb to implement the API
+      TableIdentifier table_id = RelTypeToTableIdMap.at(type_);
+      std::vector<std::pair<int,int>> pair_domain = cache.GetContainerStmtVarPair(table_id);
+      std::vector<int> domain_with_duplicates = std::move(ExtractFirst<int, int>(pair_domain));
+      std::vector<int> domain_lst = std::move(RemoveDuplicate<int>(domain_with_duplicates));
+
+      UpdateHashmap<int>(domain, pattern_synonym_name_, domain_lst);
     }
   }
   
   void PatternClause::EvaluateLeftEnt(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     int var_index = cache.GetIndexByString(IndexTableType::kVarIndex, left_);
-    GetPatternDomainByVar fn = GetPatternDomainByVarMap.at(type_);
-    std::vector<int> pattern_domain = {};
-    pattern_domain = (cache.*fn)(pql::kModifiesS, var_index);
+    std::vector<int> pattern_domain;
+
+    if (type_ == pql::kAssignPattern) {
+      pattern_domain = cache.GetRelFirstArgument(pql::kModifiesS, var_index);
+    } else {
+      TableIdentifier table_id = RelTypeToTableIdMap.at(type_);
+      std::unordered_set<int> domain_set = cache.GetAllStmtsWithPatternVariable(var_index, table_id);
+      pattern_domain.assign(domain_set.begin(), domain_set.end());
+    }
+
     UpdateHashmap<int>(domain, pattern_synonym_name_, pattern_domain);
   }
 
   void PatternClause::EvaluateLeftSyn(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    GetPatternVarPair fn = GetPatternVarPairMap.at(type_);
-    std::vector<std::pair<int, int>> domain_pair_lst = (cache.*fn)(pql::RelationshipTypes::kCalls);
-    pql_table::Predicate pred(pattern_synonym_name_, left_, domain_pair_lst);
+    std::vector<std::pair<int, int>> domain_pair_lst; 
 
+    if (type_ == pql::kAssignPattern) {
+      domain_pair_lst = cache.GetRelArgumentPairs(pql::kModifiesS);
+    } else {
+      TableIdentifier table_id = RelTypeToTableIdMap.at(type_);
+      domain_pair_lst = cache.GetContainerStmtVarPair(table_id);
+    }
+
+    pql_table::Predicate pred(pattern_synonym_name_, left_, domain_pair_lst);
     predicates.push_back(pred);
   }
 

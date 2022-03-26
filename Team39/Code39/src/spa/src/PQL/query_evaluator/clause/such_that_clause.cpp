@@ -36,37 +36,6 @@ namespace pql_clause {
     { SYNONYM,  SynEvaluateFnMap }
   };
 
-  template <typename T, typename R>
-  std::vector<T> ExtractFirst(std::vector<std::pair<T, R>>& lst) {
-    std::vector<T> res;
-
-    for (std::pair<T, R>& ele : lst) {
-      res.push_back(ele.first);
-    }
-
-    return res;
-  }
-
-  template <typename T, typename R>
-  std::vector<R> ExtractSecond(std::vector<std::pair<T, R>>& lst) {
-    std::vector<R> res;
-
-    for (std::pair<T, R>& ele : lst) {
-      res.push_back(ele.second);
-    }
-
-    return res;
-  }
-
-  template <typename T>
-  std::vector<T> RemoveDuplicate(std::vector<T>& lst) {
-    std::unordered_set<T> st;
-    std::for_each(lst.begin(), lst.end(), [&st](const T& k) { st.insert(k); });
-    std::vector<T> res(st.begin(), st.end());
-
-    return res;
-  }
-
   const std::set<pql::RelationshipTypes> LeftProcedureTypeSet { pql::kCalls, pql::kCallsT, pql::kModifiesP, pql::kUsesP };
   const std::set<pql::RelationshipTypes> RightProcedureTypeSet{ pql::kCalls, pql::kCallsT };
   const std::set<pql::RelationshipTypes> RightVariableTypeSet{ pql::kModifiesS, pql::kModifiesP, pql::kUsesS, pql::kUsesP };
