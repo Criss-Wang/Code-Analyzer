@@ -9,6 +9,20 @@
 using namespace std;
 
 namespace pql_cache {
+
+  /*----------------------------------------------------API for attribute------------------------------------------------------------*/
+  int Cache::GetIndexByString(IndexTableType index_table_type, const string& entity_name) {
+    return pkb_.GetIndexByString(index_table_type, entity_name);
+  }
+
+  vector<int> Cache::GetStmtNumByStringAttribute(EntityIdentifier entity_identifier, const int string_idx) {
+    return pkb_.GetStmtNumByStringAttribute(entity_identifier, string_idx);
+  }
+
+  int Cache::GetStringAttribute(EntityIdentifier entity_identifier, const int stmt_no) {
+    return pkb_.GetStringAttribute(entity_identifier, stmt_no);
+  }
+  /*-------------------------------------------------------API for clause----------------------------------------------------------*/
   typedef void (Cache::* GenerateCache)(pql::RelationshipTypes);
 
   const map<pql::RelationshipTypes, GenerateCache> GenerateRelCacheMap = {
@@ -29,7 +43,7 @@ namespace pql_cache {
     { pql::kAffectsT, &Cache::GenerateNextTOrAffectsTPairDomain }
   };
 
-  bool Cache::IsRelHolds(pql::RelationshipTypes type, int left, int right) {
+  bool Cache::IsComputeRelHolds(pql::RelationshipTypes type, int left, int right) {
     if (!rel_cache_boolean_[type]) {
       GenerateCache fn = GenerateRelCacheMap.at(type);
       (this->*fn)(type);
@@ -43,7 +57,7 @@ namespace pql_cache {
     return true;
   }
 
-  vector<int> Cache::GetRelDomain(pql::RelationshipTypes type, int left) {
+  vector<int> Cache::GetComputeRelDomain(pql::RelationshipTypes type, int left) {
     if (!rel_cache_boolean_[type]) {
       GenerateCache fn = GenerateRelCacheMap.at(type);
       (this->*fn)(type);
@@ -54,7 +68,7 @@ namespace pql_cache {
   }
 
 
-  vector<int> Cache::GetInverseRelDomain(pql::RelationshipTypes type, int right) {
+  vector<int> Cache::GetComputeInverseRelDomain(pql::RelationshipTypes type, int right) {
     if (!inverse_rel_cache_boolean_[pql::kNextT]) {
       GenerateCache fn = GenerateInverseRelCacheMap.at(type);
       (this->*fn)(type);
@@ -64,7 +78,7 @@ namespace pql_cache {
         ? vector<int>() : inverse_rel_cache_[type][right];
   }
 
-  vector<pair<int, int>> Cache::GetAllRelPairs(pql::RelationshipTypes type) {
+  vector<pair<int, int>> Cache::GetComputeAllRelPairs(pql::RelationshipTypes type) {
     if (!pair_cache_boolean_[type]) {
       GenerateCache fn = GeneratePairCacheMap.at(type);
       (this->*fn)(type);
@@ -73,9 +87,9 @@ namespace pql_cache {
     return pair_cache_[type];
   }
 
-  bool Cache::isRelExists(pql::RelationshipTypes type) {
+  bool Cache::IsComputeRelExists(pql::RelationshipTypes type) {
     if (type == pql::kNextT) {
-      return pkb_.IsRelationshipExists(type);
+      return pkb_.IsRelationshipExists(pql::kNext);
     } 
       
     if (!pair_cache_boolean_[type]) {
@@ -85,6 +99,48 @@ namespace pql_cache {
 
     return !pair_cache_[type].empty();
   }  
+
+  const unordered_set<pql::RelationshipTypes> NonPrecomputeRelationshipTypeMap = { pql::kAffects, pql::kAffectsT, pql::kNextT };
+
+  bool Cache::IsRelationshipHolds(pql::RelationshipTypes rel_types, int key, int value) {
+    if (NonPrecomputeRelationshipTypeMap.find(rel_types) != NonPrecomputeRelationshipTypeMap.end()) {
+      return IsComputeRelHolds(rel_types, key, value);
+    }
+
+    return pkb_.IsRelationshipHolds(rel_types, key, value);
+  }
+
+  bool Cache::IsRelationshipExists(pql::RelationshipTypes rel_types) {
+    if (NonPrecomputeRelationshipTypeMap.find(rel_types) != NonPrecomputeRelationshipTypeMap.end()) {
+      return IsComputeRelExists(rel_types);
+    }
+
+    return pkb_.IsRelationshipExists(rel_types);
+  }
+
+  vector<int> Cache::GetRelFirstArgument(pql::RelationshipTypes rel_types, int second_arg_idx) {
+    if (NonPrecomputeRelationshipTypeMap.find(rel_types) != NonPrecomputeRelationshipTypeMap.end()) {
+      return GetComputeInverseRelDomain(rel_types, second_arg_idx);
+    }
+
+    return pkb_.GetRelFirstArgument(rel_types, second_arg_idx);
+  }
+
+  vector<int> Cache::GetRelSecondArgument(const pql::RelationshipTypes rel_types, const int first_arg_idx) {
+    if (NonPrecomputeRelationshipTypeMap.find(rel_types) != NonPrecomputeRelationshipTypeMap.end()) {
+      return GetComputeRelDomain(rel_types, first_arg_idx);
+    }
+
+    return pkb_.GetRelSecondArgument(rel_types, first_arg_idx);
+  }
+
+  vector<pair<int, int>> Cache::GetRelArgumentPairs(const pql::RelationshipTypes rel_types) {
+    if (NonPrecomputeRelationshipTypeMap.find(rel_types) != NonPrecomputeRelationshipTypeMap.end()) {
+      return GetComputeAllRelPairs(rel_types);
+    }
+
+    return pkb_.GetRelArgumentPairs(rel_types);
+  }
 
   int Dfs(unordered_map<int, vector<int>>& table_to_refer, unordered_map<int, vector<int>>& table_to_update, int key) {
     if (table_to_update.find(key) != table_to_update.end()
@@ -118,6 +174,11 @@ namespace pql_cache {
     }
 
     return key;
+  }
+
+  /*--------------------------------------------------API for pattern clause------------------------------------------------------------*/
+  unordered_set<int> Cache::GetAllStmtsWithPattern(const string& pattern, bool is_exact) {
+    return pkb_.GetAllStmtsWithPattern(pattern, is_exact);
   }
 
   /*-----------------------------------------------------Next* and Affects*------------------------------------------------------------*/

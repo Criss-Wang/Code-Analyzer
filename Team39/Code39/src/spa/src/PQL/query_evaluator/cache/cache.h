@@ -52,22 +52,45 @@ namespace pql_cache {
       }
 
     public:
-    /*-------------------------------------------------------API for clause---------------------------------------------------------------*/
-      bool IsRelHolds(pql::RelationshipTypes type, int left, int right);
+    /*-------------------------------------------------------API for clause----------------------------------------------------------*/
+      bool IsComputeRelHolds(pql::RelationshipTypes type, int left, int right);
 
-      std::vector<int> GetRelDomain(pql::RelationshipTypes type, int left);
+      std::vector<int> GetComputeRelDomain(pql::RelationshipTypes type, int left);
 
-      std::vector<int> GetInverseRelDomain(pql::RelationshipTypes type, int right);
+      std::vector<int> GetComputeInverseRelDomain(pql::RelationshipTypes type, int right);
 
-      std::vector<std::pair<int, int>> GetAllRelPairs(pql::RelationshipTypes type);
+      std::vector<std::pair<int, int>> GetComputeAllRelPairs(pql::RelationshipTypes type);
 
-      bool isRelExists(pql::RelationshipTypes type);
+      bool IsComputeRelExists(pql::RelationshipTypes type);
+
+      //Overload pkb's function
+      bool IsRelationshipHolds(pql::RelationshipTypes rel_types, int key, int value);
+
+      bool IsRelationshipExists(pql::RelationshipTypes rel_types);
+
+      vector<int> GetRelFirstArgument(pql::RelationshipTypes rel_types, int second_arg_idx);
+
+      vector<int> GetRelSecondArgument(const pql::RelationshipTypes rel_types, const int first_arg_idx);
+
+      vector<pair<int, int>> GetRelArgumentPairs(const pql::RelationshipTypes rel_types);
+
+    /*--------------------------------------------------API for attribute------------------------------------------------------------*/
+      int GetIndexByString(IndexTableType index_table_type, const string& entity_name);
+
+      std::vector<int> GetStmtNumByStringAttribute(EntityIdentifier entity_identifier, const int string_idx);
+
+      int GetStringAttribute(EntityIdentifier entity_identifier, const int stmt_no);
+
+    /*--------------------------------------------------API for pattern clause------------------------------------------------------------*/
+      unordered_set<int> GetAllStmtsWithPattern(const string& pattern, bool is_exact);
+
     /*---------------------------------------------------Next* and Affects*----------------------------------------------------------*/
       void GenerateNextTOrAffectsTRelDomain(pql::RelationshipTypes type);
 
       void GenerateNextTOrAffectsTInverseRelDomain(pql::RelationshipTypes type);
 
       void GenerateNextTOrAffectsTPairDomain(pql::RelationshipTypes type);
+
     /*---------------------------------------------------------Affect---------------------------------------------------------------*/
       void GenerateAffectsRelDomain(pql::RelationshipTypes type);
 

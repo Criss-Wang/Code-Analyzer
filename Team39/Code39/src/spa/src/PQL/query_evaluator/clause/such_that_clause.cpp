@@ -2,6 +2,7 @@
 #include <set>
 
 #include "such_that_clause.h"
+#include "../query_evaluator_exceptions.h"
 
 #define INVALID_INDEX -1
 #define WILDCARD 0
@@ -9,12 +10,7 @@
 #define SYNONYM 2
 
 namespace pql_clause {
-  typedef bool (Pkb::* IsRelHolds)(const pql::RelationshipTypes, const int, const int);
-  typedef std::vector<int> (Pkb::* GetRelDomain)(const pql::RelationshipTypes, const int);
-  typedef std::vector<int> (Pkb::* GetInverseRelDomain)(const pql::RelationshipTypes, const int);
-  typedef std::vector<std::pair<int, int>>(Pkb::* GetRelPairs)(const pql::RelationshipTypes);
-  typedef bool (Pkb::* DoesRelHolds)(const pql::RelationshipTypes);
-  typedef void (SuchThatClause::*EvaluateFn)(Pkb&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
+  typedef void (SuchThatClause::*EvaluateFn)(pql_cache::Cache&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
 
   const map<int, EvaluateFn> WildcardEvaluateFnMap = {
     { WILDCARD, &SuchThatClause::EvaluateWildWild },
@@ -75,13 +71,13 @@ namespace pql_clause {
   const std::set<pql::RelationshipTypes> RightProcedureTypeSet{ pql::kCalls, pql::kCallsT };
   const std::set<pql::RelationshipTypes> RightVariableTypeSet{ pql::kModifiesS, pql::kModifiesP, pql::kUsesS, pql::kUsesP };
 
-  int GetIntArgumentRepresentation(Pkb& pkb, pql::RelationshipTypes type, std::string& name, bool is_left) {
+  int GetIntArgumentRepresentation(pql_cache::Cache& cache, pql::RelationshipTypes type, std::string& name, bool is_left) {
     //variable argument : ModifiesS/ModifiesP/UsesS/UsesP right argument
     //procedure argument : Calls/CallsT both argument and ModifiesP/UsesP left argument
 
     if ((is_left && LeftProcedureTypeSet.find(type) != LeftProcedureTypeSet.end())
         || (!is_left && RightProcedureTypeSet.find(type) != RightProcedureTypeSet.end())) {
-      int proc_index = pkb.GetIndexByString(IndexTableType::kProcIndex, name);
+      int proc_index = cache.GetIndexByString(IndexTableType::kProcIndex, name);
 
       if (proc_index == INVALID_INDEX) {
         throw pql_exceptions::ProcedureDoesNotExistException();
@@ -91,7 +87,7 @@ namespace pql_clause {
     }
 
     if (!is_left && RightVariableTypeSet.find(type) != RightVariableTypeSet.end()) {
-      int var_index = pkb.GetIndexByString(IndexTableType::kVarIndex, name);
+      int var_index = cache.GetIndexByString(IndexTableType::kVarIndex, name);
 
       if (var_index == INVALID_INDEX) {
         throw pql_exceptions::VariableDoesNotExistException();
@@ -104,83 +100,83 @@ namespace pql_clause {
     return stoi(name); 
   }
 
-  void SuchThatClause::EvaluateWildWild(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void SuchThatClause::EvaluateWildWild(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    bool rel_exist = pkb.IsRelationshipExists(type_);
+    bool rel_exist = cache.IsRelationshipExists(type_);
 
     if (!rel_exist) {
       throw pql_exceptions::EmptyDomainException();
     }
   }
 
-  void SuchThatClause::EvaluateWildEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void SuchThatClause::EvaluateWildEnt(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int right = GetIntArgumentRepresentation(pkb, type_, right_, false);
-    std::vector<int> domain_lst = pkb.GetRelFirstArgument(type_, right);
+    int right = GetIntArgumentRepresentation(cache, type_, right_, false);
+    std::vector<int> domain_lst = cache.GetRelFirstArgument(type_, right);
     
     if (domain_lst.empty()) {
         throw pql_exceptions::EmptyDomainException();
     }
   }
 
-  void SuchThatClause::EvaluateWildSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void SuchThatClause::EvaluateWildSyn(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    std::vector<std::pair<int, int>> domain_pair = pkb.GetRelArgumentPairs(type_);
+    std::vector<std::pair<int, int>> domain_pair = cache.GetRelArgumentPairs(type_);
     std::vector<int> domain_with_duplicates = ExtractSecond<int, int>(domain_pair);
     std::vector<int> domain_lst = RemoveDuplicate<int>(domain_with_duplicates);
 
     UpdateHashmap<int>(domain, right_, domain_lst);
   }
 
-  void SuchThatClause::EvaluateEntWild(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void SuchThatClause::EvaluateEntWild(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int left = GetIntArgumentRepresentation(pkb, type_, left_, true);
-    std::vector<int> domain_lst = pkb.GetRelSecondArgument(type_, left);
+    int left = GetIntArgumentRepresentation(cache, type_, left_, true);
+    std::vector<int> domain_lst = cache.GetRelSecondArgument(type_, left);
 
     if (domain_lst.empty()) {
       throw pql_exceptions::EmptyDomainException();
     }
   }
 
-  void SuchThatClause::EvaluateEntEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void SuchThatClause::EvaluateEntEnt(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int left = GetIntArgumentRepresentation(pkb, type_, left_, true);
-    int right = GetIntArgumentRepresentation(pkb, type_, right_, false);
-    bool rel_exist = pkb.IsRelationshipHolds(type_, left, right);
+    int left = GetIntArgumentRepresentation(cache, type_, left_, true);
+    int right = GetIntArgumentRepresentation(cache, type_, right_, false);
+    bool rel_exist = cache.IsRelationshipHolds(type_, left, right);
 
     if (!rel_exist) {
       throw pql_exceptions::FalseRelationException();
     }
   }
 
-  void SuchThatClause::EvaluateEntSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void SuchThatClause::EvaluateEntSyn(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int left = GetIntArgumentRepresentation(pkb, type_, left_, true);
-    std::vector<int> domain_lst = pkb.GetRelSecondArgument(type_, left);
+    int left = GetIntArgumentRepresentation(cache, type_, left_, true);
+    std::vector<int> domain_lst = cache.GetRelSecondArgument(type_, left);
 
     UpdateHashmap<int>(domain, right_, domain_lst);
   }
 
-  void SuchThatClause::EvaluateSynWild(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void SuchThatClause::EvaluateSynWild(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    std::vector<std::pair<int, int>> domain_pair = pkb.GetRelArgumentPairs(type_);
+    std::vector<std::pair<int, int>> domain_pair = cache.GetRelArgumentPairs(type_);
     std::vector<int> domain_with_duplicates = ExtractFirst<int, int>(domain_pair);
     std::vector<int> domain_lst = RemoveDuplicate<int>(domain_with_duplicates);
 
     UpdateHashmap<int>(domain, left_, domain_lst);
   }
 
-  void SuchThatClause::EvaluateSynEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void SuchThatClause::EvaluateSynEnt(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int right = GetIntArgumentRepresentation(pkb, type_, right_, false);
-    std::vector<int> domain_lst = pkb.GetRelFirstArgument(type_, right);
+    int right = GetIntArgumentRepresentation(cache, type_, right_, false);
+    std::vector<int> domain_lst = cache.GetRelFirstArgument(type_, right);
 
     UpdateHashmap<int>(domain, left_, domain_lst);
   }
 
-  void SuchThatClause::EvaluateSynSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void SuchThatClause::EvaluateSynSyn(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    std::vector<std::pair<int, int>> domain_pair = pkb.GetRelArgumentPairs(type_);
+    std::vector<std::pair<int, int>> domain_pair = cache.GetRelArgumentPairs(type_);
     pql_table::Predicate pred(left_, right_, domain_pair);
 
     predicates.push_back(pred);
@@ -194,61 +190,61 @@ namespace pql_clause {
     return name == "_" ? WILDCARD : ENTITY;
   }
 
-  void SuchThatClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void SuchThatClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     int left_type = GetArgumentType(left_, is_synonym_left_);
     int right_type = GetArgumentType(right_, is_synonym_right_);
     EvaluateFn fn = EvaluateFnMap.at(left_type).at(right_type);
-    (this->*fn)(pkb, domain, predicates);
+    (this->*fn)(cache, domain, predicates);
   }
 
-  void FollowsClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void FollowsClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(pkb, domain, predicates);
+    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
-  void FollowsTClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void FollowsTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(pkb, domain, predicates);
+    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
-  void ParentClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void ParentClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(pkb, domain, predicates);
+    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
-  void ParentTClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void ParentTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(pkb, domain, predicates);
+    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
-  void CallsClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void CallsClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(pkb, domain, predicates);
+    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
-  void CallsTClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void CallsTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(pkb, domain, predicates);
+    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
-  void UsesSClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void UsesSClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(pkb, domain, predicates);
+    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
-  void ModifiesSClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void ModifiesSClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(pkb, domain, predicates);
+    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
-  void UsesPClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void UsesPClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(pkb, domain, predicates);
+    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
-  void ModifiesPClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void ModifiesPClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(pkb, domain, predicates);
+    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 }

@@ -7,8 +7,7 @@
 #include <algorithm>
 
 #include "../solver/predicate.h"
-#include "../../../PKB/pkb.h"
-#include "../query_evaluator_exceptions.h"
+#include "../cache/cache.h"
 #include "../../query_parser/token.h"
 
 namespace pql_clause {
@@ -51,7 +50,7 @@ namespace pql_clause {
         virtual ~Clause() = default;
 
     public:
-      virtual void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      virtual void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates) = 0;
   };
 }

@@ -18,34 +18,34 @@ namespace pql_clause {
       }
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
  
-      void EvaluateWildWild(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void EvaluateWildWild(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
      
-      void EvaluateWildEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void EvaluateWildEnt(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
       
-      void EvaluateWildSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void EvaluateWildSyn(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
 
-      void EvaluateEntWild(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void EvaluateEntWild(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
 
-      void EvaluateEntEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void EvaluateEntEnt(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
 
-      void EvaluateEntSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void EvaluateEntSyn(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
 
-      void EvaluateSynWild(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void EvaluateSynWild(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
 
-      void EvaluateSynEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void EvaluateSynEnt(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
 
-      void EvaluateSynSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void EvaluateSynSyn(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
   };
 
@@ -57,7 +57,7 @@ namespace pql_clause {
       }
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
   };
 
@@ -69,7 +69,7 @@ namespace pql_clause {
       }
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
   };
 
@@ -81,7 +81,7 @@ namespace pql_clause {
       }
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
   };
 
@@ -93,7 +93,7 @@ namespace pql_clause {
       }
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
   };
 
@@ -105,7 +105,7 @@ namespace pql_clause {
       }
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
   };
 
@@ -117,7 +117,7 @@ namespace pql_clause {
       }
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
   };
 
@@ -129,7 +129,7 @@ namespace pql_clause {
       }
 
   public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
   };
 
@@ -141,7 +141,7 @@ namespace pql_clause {
       }
 
   public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
   };
 
@@ -153,7 +153,7 @@ namespace pql_clause {
       }
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
   };
 
@@ -165,7 +165,7 @@ namespace pql_clause {
       }
 
     public:
-      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
   };
 }
