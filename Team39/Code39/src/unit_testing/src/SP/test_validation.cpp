@@ -1,5 +1,7 @@
 #include "SP/parser.h"
 #include "SP/validator.h"
+#include "SP/sp_exceptions.h"
+#include "PKB/pkb.h"
 
 #include <fstream>
 #include "catch.hpp"
@@ -12,22 +14,40 @@ void RequireValid(string path) {
     cerr << "Could not open the file " << endl;
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-    Tokenizer tokenize;
-    vector<Token> tokens = tokenize.parse(input);
-    REQUIRE(!tokens.empty());
-    REQUIRE(Validate(tokens));
+    Pkb pkb;
+    REQUIRE_NOTHROW(Parser(input, pkb));
+    Parser parser(input, pkb);
+    REQUIRE_NOTHROW(parser.Validate());
   }
 }
 
-void RequireInvalid(string path) {
+void RequireInvalidSyntax(string path) {
   ifstream input_file(path);
   if (!input_file.is_open()) {
     cerr << "Could not open the file " << endl;
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-    Tokenizer tokenize;
-    vector<Token> tokens = tokenize.parse(input);
-    REQUIRE(!Validate(tokens));
+    try {
+      Pkb pkb;
+      Parser parser(input, pkb);
+      parser.Validate();
+      REQUIRE(0 == 1);
+    } catch (InvalidSyntaxException) {
+      REQUIRE(1 == 1);
+    }
+  }
+}
+
+void RequireInvalidSemantic(string path) {
+  ifstream input_file(path);
+  if (!input_file.is_open()) {
+    cerr << "Could not open the file " << endl;
+  } else {
+    string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+    Pkb pkb;
+    REQUIRE_NOTHROW(Parser(input, pkb));
+    Parser parser(input, pkb);
+    REQUIRE_THROWS_AS(parser.Validate(), InvalidSemanticException);
   }
 }
 
@@ -47,12 +67,12 @@ TEST_CASE("Read/print statements for Validation") {
 
   SECTION("Invalid Programs") {
 
-    RequireInvalid(invalid_dir + "1_test1.txt");
-    RequireInvalid(invalid_dir + "1_test2.txt");
-    RequireInvalid(invalid_dir + "1_test3.txt");
-    RequireInvalid(invalid_dir + "1_test4.txt");
-    RequireInvalid(invalid_dir + "1_test5.txt");
-    RequireInvalid(invalid_dir + "1_test6.txt");
+    RequireInvalidSyntax(invalid_dir + "1_test1.txt");
+    RequireInvalidSyntax(invalid_dir + "1_test2.txt");
+    RequireInvalidSyntax(invalid_dir + "1_test3.txt");
+    RequireInvalidSyntax(invalid_dir + "1_test4.txt");
+    RequireInvalidSyntax(invalid_dir + "1_test5.txt");
+    RequireInvalidSyntax(invalid_dir + "1_test6.txt");
 
   }
 }
@@ -70,13 +90,13 @@ TEST_CASE("Read/print/assign statments for Validation") {
 
   SECTION("Invalid Programs") {
 
-    RequireInvalid(invalid_dir + "2_test1.txt");
-    RequireInvalid(invalid_dir + "2_test2.txt");
-    RequireInvalid(invalid_dir + "2_test3.txt");
-    RequireInvalid(invalid_dir + "2_test4.txt");
-    RequireInvalid(invalid_dir + "2_test5.txt");
-    RequireInvalid(invalid_dir + "2_test6.txt");
-    RequireInvalid(invalid_dir + "2_test7.txt");
+    RequireInvalidSyntax(invalid_dir + "2_test1.txt");
+    RequireInvalidSyntax(invalid_dir + "2_test2.txt");
+    RequireInvalidSyntax(invalid_dir + "2_test3.txt");
+    RequireInvalidSyntax(invalid_dir + "2_test4.txt");
+    RequireInvalidSyntax(invalid_dir + "2_test5.txt");
+    RequireInvalidSyntax(invalid_dir + "2_test6.txt");
+    RequireInvalidSyntax(invalid_dir + "2_test7.txt");
 
   }
 
@@ -95,8 +115,9 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation
 
   SECTION("Invalid Programs") {
 
-    RequireInvalid(invalid_dir + "3_test1.txt");
-    RequireInvalid(invalid_dir + "3_test2.txt");
+    RequireInvalidSyntax(invalid_dir + "3_test1.txt");
+    RequireInvalidSyntax(invalid_dir + "3_test2.txt");
+    RequireInvalidSyntax(invalid_dir + "3_test3.txt");
 
   }
 }
@@ -132,9 +153,9 @@ TEST_CASE("Read/print/assign/call statments for Validation") {
 
   SECTION("Invalid Programs") {
 
-    RequireInvalid(invalid_dir + "6_test1.txt");
-    RequireInvalid(invalid_dir + "6_test2.txt");
-    RequireInvalid(invalid_dir + "6_test3.txt");
+    RequireInvalidSemantic(invalid_dir + "6_test1.txt");
+    RequireInvalidSemantic(invalid_dir + "6_test2.txt");
+    RequireInvalidSemantic(invalid_dir + "6_test3.txt");
 
   }
 }

@@ -72,7 +72,6 @@ class ModifiesProcToVariablesTable : public RelListTable {};
 
 class ModifiesVariableToProcsTable : public RelListReverseTable {};
 
-
 // Line number will be the key and the list of valid substring patterns will be the value
 class StmtToPatternsTable : public Table<int, unordered_set<string>> {};
 
