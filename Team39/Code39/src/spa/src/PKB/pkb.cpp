@@ -68,7 +68,7 @@ shared_ptr<RelListTable> Pkb::GetCalledByStarTable() {
   return called_by_star_table_;
 }
 
-shared_ptr<RelTable> Pkb::GetNextTable() {
+shared_ptr<RelListTable> Pkb::GetNextTable() {
   return next_table_;
 }
 
@@ -165,7 +165,7 @@ const unordered_map<pql::RelationshipTypes, GetTableFn> list_table_map_ = {
   {pql::RelationshipTypes::kUsesS, &Pkb::GetUsesStmtToVariablesTable},
   {pql::RelationshipTypes::kUsesP, &Pkb::GetUsesProcToVariablesTable},
   {pql::RelationshipTypes::kModifiesS, &Pkb::GetModifiesStmtToVariablesTable},
-  {pql::RelationshipTypes::kModifiesP, &Pkb::GetModifiesProcToVariablesTable},
+  {pql::RelationshipTypes::kModifiesP, &Pkb::GetModifiesProcToVariablesTable}
 };
 
 typedef shared_ptr<RelTable>(Pkb::* GetSimpleTableFn)();
@@ -399,10 +399,12 @@ bool Pkb::AddCalls(const string& key, const vector<string>& value) {
   return add_success;
 }
 
-bool Pkb::AddNext(const int key, const int value) {
+bool Pkb::AddNext(const int key, const vector<int>& value) {
   bool add_success = next_table_->AddKeyValuePair(key, value);
   // Populate the reverse relation
-  add_success = before_table_->AddKeyValuePair(value, key) && add_success;
+  for (const int val : value) {
+    add_success = before_table_->AddKeyValuePair(val, key) && add_success;
+  }
   return add_success;
 }
 
@@ -528,6 +530,8 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         return constant_table_->AddKeyValuePair(key, value);
       case TableIdentifier::kParent:
         return AddParent(key, value);
+      case TableIdentifier::kNext:
+        return AddNext(key, value);
       default:
         throw InvalidIdentifierException();
     }
@@ -566,8 +570,6 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
     switch (table_identifier) {
       case TableIdentifier::kFollows:
         return AddFollows(key, value);
-      case TableIdentifier::kNext:
-        return AddNext(key, value);
       default:
         throw InvalidIdentifierException();
     }
