@@ -6,29 +6,13 @@
 
 using namespace std;
 
-//CFG::CFG() {
-//  this->proc_name_ = "";
-//  this->start_node_ = nullptr;
-//}
-//
-//CFG::CFG(string proc_name) {
-//  this->proc_name_ = proc_name;
-//  this->start_node_ = &GraphNode(NodeType::START);
-//}
-//
-//
-//GraphNode* CFG::GetStartNode() {
-//  return this->start_node_;
-//}
-//
-//CFG::~CFG() {
-//  free(start_node_);
-//}
-//
-//CFG::CFG(vector<CFGToken>& tokens) {
-//  start_node_ = new GraphNode(NodeType::START);
-//  GenerateCfg(start_node_, tokens);
-//}
+CFG::CFG(shared_ptr<GraphNode>& head) {
+  start_node_ = head;
+}
+
+shared_ptr<GraphNode> CFG::GetHead() {
+  return start_node_;
+}
 
 void Connect(shared_ptr<GraphNode>& source, shared_ptr<GraphNode>& dst) {
   if (!source->next_node_) {

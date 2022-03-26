@@ -143,13 +143,10 @@ TEST_CASE("Checks the correctness of constructing Affects relationship") {
   shared_ptr<GraphNode> head = CFG::GenerateCfg(tokens);
   pql_cache::Cache cache(pkb1);
 
-  vector<pair<int, int>> affect_lst = cache.ComputeAffectsRelationship(*head);
+  unordered_set<pair<int, int>, pql_cache::hash_pair_fn> affect_set = cache.ComputeAffectsRelationship(*head);
 
-  vector<pair<int, int>> ans = { make_pair(1, 4), make_pair(4, 6), make_pair(5, 6), make_pair(6, 7),
+  unordered_set<pair<int, int>, pql_cache::hash_pair_fn> ans_set = { make_pair(1, 4), make_pair(4, 6), make_pair(5, 6), make_pair(6, 7),
       make_pair(1, 7), make_pair(6, 8), make_pair(7, 8), make_pair(6, 5), make_pair(8, 5), make_pair(7, 6), make_pair(8, 6) };
-
-  unordered_set<pair<int,int>, pql_cache::hash_pair_fn> affect_set(affect_lst.begin(), affect_lst.end());
-  unordered_set<pair<int,int>, pql_cache::hash_pair_fn> ans_set(ans.begin(), ans.end());
 
   REQUIRE(affect_set == ans_set);
 

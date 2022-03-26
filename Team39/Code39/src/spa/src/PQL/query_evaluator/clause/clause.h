@@ -9,6 +9,7 @@
 #include "../solver/predicate.h"
 #include "../cache/cache.h"
 #include "../../query_parser/token.h"
+#include "../query_evaluator_exceptions.h"
 
 namespace pql_clause {
   template <typename T>

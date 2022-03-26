@@ -290,8 +290,16 @@ namespace pql_cache {
   }
 
   void Cache::GenerateAffectsPairDomain(pql::RelationshipTypes type) {
-    //need to get all cfg then compute affects relationship
-    pair_cache_boolean_[type] = true;
+    vector<shared_ptr<CFG>> cfg_lst = pkb_.GetCfgList();
+    vector<pair<int, int>> affects_lst;
+
+    for (auto& cfg_ptr : cfg_lst) {
+      unordered_set<pair<int, int>, hash_pair_fn> curr_affects_set = move(ComputeAffectsRelationship(*cfg_ptr->GetHead()));
+      affects_lst.insert(affects_lst.end(), curr_affects_set.begin(), curr_affects_set.end());
+    }
+
+    pair_cache_[pql::kAffects] = move(affects_lst);
+    pair_cache_boolean_[pql::kAffects] = true;
   }
 
   void Cache::MergeTable(unordered_map<int, unordered_set<int>>& dst, unordered_map<int, unordered_set<int>>& src) {
@@ -318,7 +326,7 @@ namespace pql_cache {
     }
   }
 
-  vector<pair<int, int>> Cache::ComputeAffectsRelationship(GraphNode& head) {
+  unordered_set<pair<int, int>, hash_pair_fn> Cache::ComputeAffectsRelationship(GraphNode& head) {
     //LMT maps the variable to the stmt that modifies it  
     //It is mapped to a vector because we could have multiple assign statements modifying same variable
     //e.g. if (1==1) then {a = a + 1;} else {a = a + 1;}
@@ -412,6 +420,6 @@ namespace pql_cache {
       }
     }
 
-    return vector<pair<int,int>>(affect_set.begin(), affect_set.end());
+    return affect_set;
   }
 }

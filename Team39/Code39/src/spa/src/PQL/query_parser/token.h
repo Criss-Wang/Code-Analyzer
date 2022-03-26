@@ -65,7 +65,6 @@ namespace pql {
     kIfPattern,
     kWhilePattern,
     kWith,
-    kNext
   };
 
   const std::map<std::string, EntityIdentifier> declarationMap {

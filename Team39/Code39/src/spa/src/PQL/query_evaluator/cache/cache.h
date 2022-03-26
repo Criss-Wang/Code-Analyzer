@@ -1,3 +1,6 @@
+#ifndef CACHE_H
+#define CACHE_H
+
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -102,7 +105,7 @@ namespace pql_cache {
 
       void GenerateAffectsPairDomain(pql::RelationshipTypes type);
 
-      std::vector<std::pair<int, int>> ComputeAffectsRelationship(GraphNode& head);
+      std::unordered_set<std::pair<int, int>, hash_pair_fn> ComputeAffectsRelationship(GraphNode& head);
 
       void ConstructAssignAffectPair(int assign_stmt,
          std::unordered_map<int, std::unordered_set<int>>& last_modified_table, unordered_set<pair<int, int>, hash_pair_fn>& affect_lst);
@@ -110,3 +113,5 @@ namespace pql_cache {
       static void MergeTable(unordered_map<int, unordered_set<int>>& dst, unordered_map<int, unordered_set<int>>& src);      
   };
 }
+
+#endif
