@@ -55,6 +55,13 @@ class ReversePopulationException final : public exception {
     }
 };
 
+class UpdateIndexTableException final : public exception {
+  public:
+    const char* what() const throw() {
+      return "Failed to update index table";
+    }
+};
+
 class AddInfoToTableException final : public exception {
   private:
     string message;

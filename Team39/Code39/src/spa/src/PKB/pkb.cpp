@@ -6,6 +6,7 @@
 
 #define INVALID_INDEX -1
 #define EMPTY_STRING ""
+#define EMPTY_INT_LIST vector<int>{}
 #define EMPTY_STRING_LIST vector<string>{}
 
 // Does not work if the table's value is not a vector
@@ -237,14 +238,13 @@ vector<int> Pkb::GetRelFirstArgument(const pql::RelationshipTypes rel_types, con
       if (rel_types == pql::RelationshipTypes::kParent) {
         return {res[0]};
       }
-      return  res;
+      return res;
     }
     const GetInverseTableFn table_getter = mod_use_reverse_table_map_.at(rel_types);
     const shared_ptr<RelListReverseTable> table = (this->*table_getter)();
     return table->GetValueByKey(second_arg_idx);
-
   } catch (exception& e) {
-    return vector<int>{};
+    return EMPTY_INT_LIST;
   }
 }
 
@@ -258,7 +258,7 @@ vector<int> Pkb::GetRelSecondArgument(const pql::RelationshipTypes rel_types, co
     const shared_ptr<RelListTable> table = (this->*table_getter)();
     return  table->GetValueByKey(first_arg_idx);
   } catch (exception& e) {
-    return vector<int>{};
+    return EMPTY_INT_LIST;
   }
 }
 
@@ -285,7 +285,7 @@ unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern, const bool
   constexpr bool is_full = false;
   unordered_set<int> empty_set{};
   const unordered_set<string> res = PatternHelper::GetPatternSetPostfix(usable_pattern, is_full);
-  if (res.size() != 1){
+  if (res.size() != 1) {
     throw BadResultException();
   }
   const string s = *(res.begin());
@@ -295,7 +295,9 @@ unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern, const bool
   } else {
     table = exact_pattern_to_stmt_table_;
   }
-  if (!table->KeyExistsInTable(s)) return empty_set;
+  if (!table->KeyExistsInTable(s)) {
+    return empty_set;
+  }
   return table->GetValueByKey(s);
 }
 
@@ -485,7 +487,7 @@ bool Pkb::UpdateIndexTable(shared_ptr<Table<int, string>> index_to_string_table,
     success = success && index_to_string_table->AddKeyValuePair(curr_string_lst.size(), entity_value);
     return success;
   } catch (exception& e) {
-    return false;
+    throw UpdateIndexTableException();
   }
 }
 
