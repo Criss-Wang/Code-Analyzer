@@ -63,8 +63,6 @@ namespace pql_cache {
 
       bool isRelExists(pql::RelationshipTypes type);
     /*---------------------------------------------------Next* and Affects*----------------------------------------------------------*/
-      void GenerateNextTRelDomain();
-
       void GenerateNextTOrAffectsTRelDomain(pql::RelationshipTypes type);
 
       void GenerateNextTOrAffectsTInverseRelDomain(pql::RelationshipTypes type);

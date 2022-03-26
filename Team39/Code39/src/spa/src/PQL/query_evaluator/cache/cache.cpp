@@ -122,12 +122,24 @@ namespace pql_cache {
 
   /*-----------------------------------------------------Next* and Affects*------------------------------------------------------------*/
 
-  void Cache::GenerateNextTRelDomain() {
-    //get next table from pkb then popoulate into another table
-  }
-
   void Cache::GenerateNextTOrAffectsTRelDomain(pql::RelationshipTypes type) {
-    //need to wait for pkb refactor
+    unordered_map<int, vector<int>> rel_domain;
+    unordered_map<int, vector<int>> star_rel_domain;
+      
+    if (type == pql::kNextT) {
+      //rel_domain = pkb_.GetNextInternalMap()
+    } else {
+      //the type here will be AffectsT
+      if (!rel_cache_boolean_[pql::kAffects]) {
+        GenerateAffectsRelDomain(pql::kAffects);
+      }
+    }
+
+    for (auto it = rel_domain.begin(); it != rel_domain.end(); it++) {
+      Dfs(rel_domain, star_rel_domain, it->first);
+    }
+
+    rel_cache_[type] = move(star_rel_domain);
     rel_cache_boolean_[type] = true;
   }
 
