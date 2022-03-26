@@ -219,6 +219,10 @@ bool Pkb::IsRelationshipHolds(const pql::RelationshipTypes rel_types, const int 
 }
 
 bool Pkb::IsRelationshipExists(const pql::RelationshipTypes rel_types) {
+  if (type_map_.at(rel_types) == TableType::kRelSimple) {
+    const shared_ptr<RelTable> table = GetFollowsTable();
+    return table->GetTableSize() > 0;
+  }
   const GetTableFn table_getter = list_table_map_.at(rel_types);
   const shared_ptr<RelListTable> table = (this->*table_getter)();
   return table->GetTableSize() > 0;
@@ -316,7 +320,7 @@ unordered_set<string> Pkb::GetAllPatternVariablesInStmt(const int stmt_no,
   return search_table->GetValueByKey(stmt_no);
 }
 
-unordered_set<int> Pkb::GetAllStmtsWithPatternVariable(const string& pattern_var_string,
+unordered_set<int> Pkb::GetAllStmtsWithPatternVariable(const int pattern_var_idx,
   const TableIdentifier table_identifier) const {
   unordered_set<int> empty_set{};
   shared_ptr<Table<string, unordered_set<int>>> search_table;
@@ -327,14 +331,14 @@ unordered_set<int> Pkb::GetAllStmtsWithPatternVariable(const string& pattern_var
   } else {
     throw InvalidIdentifierException();
   }
-  if (!search_table->KeyExistsInTable(pattern_var_string)) {
+  if (!search_table->KeyExistsInTable(GetStringByIndex(IndexTableType::kVar, pattern_var_idx))) {
     return empty_set;
   }
-  return search_table->GetValueByKey(pattern_var_string);
+  return search_table->GetValueByKey(GetStringByIndex(IndexTableType::kVar, pattern_var_idx));
 }
 
-vector<pair<int, string>> Pkb::GetContainerStmtVarPair(const TableIdentifier table_identifier) const {
-  vector<pair<int, string>> result;
+vector<pair<int, int>> Pkb::GetContainerStmtVarPair(const TableIdentifier table_identifier) const {
+  vector<pair<int, int>> result;
   shared_ptr<Table<int, unordered_set<string>>> search_table;
   if (table_identifier == TableIdentifier::kIfPattern) {
     search_table = if_stmt_to_pattern_table_;
@@ -344,8 +348,8 @@ vector<pair<int, string>> Pkb::GetContainerStmtVarPair(const TableIdentifier tab
     throw InvalidIdentifierException();
   }
   for (const auto& [key, val_lst] : search_table->GetKeyValueLst()) {
-    for (auto val_item : val_lst) {
-      result.emplace_back(make_pair(key, val_item));
+    for (const auto& val_item : val_lst) {
+      result.emplace_back(make_pair(key, GetIndexByString(IndexTableType::kVarIndex, val_item)));
     }
   }
   return result;

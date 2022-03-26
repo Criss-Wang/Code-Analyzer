@@ -162,8 +162,8 @@ class Pkb {
 
     [[nodiscard]] unordered_set<int> GetAllStmtsWithPattern(const string& pattern, bool is_exact) const;
     [[nodiscard]] unordered_set<string> GetAllPatternVariablesInStmt(const int stmt_no, TableIdentifier table_identifier) const;
-    [[nodiscard]] unordered_set<int> GetAllStmtsWithPatternVariable(const string& pattern_var_string, TableIdentifier table_identifier) const;
-    [[nodiscard]] vector<pair<int, string>> GetContainerStmtVarPair(TableIdentifier table_identifier) const;
+    [[nodiscard]] unordered_set<int> GetAllStmtsWithPatternVariable(int pattern_var_idx, TableIdentifier table_identifier) const;
+    [[nodiscard]] vector<pair<int, int>> GetContainerStmtVarPair(TableIdentifier table_identifier) const;
 
     // Get all the items of a certain entity type
     unordered_set<int> GetAllEntity(const EntityIdentifier entity_identifier);

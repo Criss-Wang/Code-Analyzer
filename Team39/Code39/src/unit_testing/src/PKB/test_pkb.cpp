@@ -235,7 +235,16 @@ TEST_CASE("Populating ModifiesProcToVariables and ModifiesVariableToProcs Table"
 TEST_CASE("Populating if and while pattern") {
   Pkb pkb = Pkb();
   vector<string> empty_list;
-  bool success = pkb.AddInfoToTable(TableIdentifier::kIfPattern, 2, vector<string>{"A"});
+  bool success = pkb.AddEntityToSet(EntityIdentifier::kVariable, "A");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "D");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "AB");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "C");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "C2E");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "m");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "QAQ");
+  success = success && pkb.AddEntityToSet(EntityIdentifier::kVariable, "EB2E");
+
+  success = pkb.AddInfoToTable(TableIdentifier::kIfPattern, 2, vector<string>{"A"});
   success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 3, vector<string>{"A", "D", "AB", "C"});
   success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 4, vector<string>{"A", "D", "AB", "C2E"});
   success = success && pkb.AddInfoToTable(TableIdentifier::kIfPattern, 6, vector<string>{"m", "QAQ"});
@@ -266,22 +275,22 @@ TEST_CASE("Populating if and while pattern") {
   }
 
   SECTION("Test Search by variable") {
-    unordered_set<int> res = pkb.GetAllStmtsWithPatternVariable("A", TableIdentifier::kIfPattern);
+    unordered_set<int> res = pkb.GetAllStmtsWithPatternVariable(pkb.GetIndexByString(IndexTableType::kVarIndex, "A"), TableIdentifier::kIfPattern);
     REQUIRE(res == unordered_set<int>{2, 3, 4});
 
-    res = pkb.GetAllStmtsWithPatternVariable("D", TableIdentifier::kIfPattern);
+    res = pkb.GetAllStmtsWithPatternVariable(pkb.GetIndexByString(IndexTableType::kVarIndex, "D"), TableIdentifier::kIfPattern);
     REQUIRE(res == unordered_set<int>{3, 4});
 
-    res = pkb.GetAllStmtsWithPatternVariable("A", TableIdentifier::kWhilePattern);
+    res = pkb.GetAllStmtsWithPatternVariable(pkb.GetIndexByString(IndexTableType::kVarIndex, "A"), TableIdentifier::kWhilePattern);
     REQUIRE(res.empty());
 
-    res = pkb.GetAllStmtsWithPatternVariable("EB2E", TableIdentifier::kWhilePattern);
+    res = pkb.GetAllStmtsWithPatternVariable(pkb.GetIndexByString(IndexTableType::kVarIndex, "EB2E"), TableIdentifier::kWhilePattern);
     REQUIRE(res == unordered_set<int>{11});
   }
 
   SECTION("Test search entire pair") {
-    vector<pair<int, string>> res = pkb.GetContainerStmtVarPair(TableIdentifier::kWhilePattern);
-    vector<pair<int, string>> expected_res = { make_pair(11, "A2"), make_pair(11, "EB2E") };
+    vector<pair<int, int>> res = pkb.GetContainerStmtVarPair(TableIdentifier::kWhilePattern);
+    vector<pair<int, int>> expected_res = { make_pair(11, pkb.GetIndexByString(IndexTableType::kVarIndex, "A2")), make_pair(11, pkb.GetIndexByString(IndexTableType::kVarIndex, "EB2E")) };
     REQUIRE(res == expected_res);
   }
 }
