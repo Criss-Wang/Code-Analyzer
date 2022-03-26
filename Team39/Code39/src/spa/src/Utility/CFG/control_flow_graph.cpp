@@ -99,9 +99,7 @@ std::shared_ptr<GraphNode> CFG::GenerateCfg(vector<CFGToken>& tokens) {
     } else if (tokens[index].type_ == CFGTokenType::kEnd) {
       shared_ptr<GraphNode> end_node = make_shared<GraphNode>(NodeType::END);
       Connect(curr, end_node);
-    } else if (curr->GetNodeType() == NodeType::WHILE || curr->GetNodeType() == NodeType::IF
-        || curr->GetNodeType() == NodeType::WHILEEND || curr->GetNodeType() == NodeType::IFEND
-        || curr->GetNodeType() == NodeType::START) {
+    } else if (curr->GetNodeType() != NodeType::STMT) {
       //The token type can only be stmt node up to this point
       //need to create a new node if the curr is a while/if node or at ifend/while end
       shared_ptr<GraphNode> new_node = make_shared<GraphNode>(tokens[index]);

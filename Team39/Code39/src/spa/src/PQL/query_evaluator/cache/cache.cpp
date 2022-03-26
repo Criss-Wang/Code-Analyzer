@@ -4,6 +4,7 @@
 #include <stack>
 
 #include "cache.h"
+#include "../../../PKB/tables/table.h"
 
 using namespace std;
 
@@ -74,8 +75,7 @@ namespace pql_cache {
 
   bool Cache::isRelExists(pql::RelationshipTypes type) {
     if (type == pql::kNextT) {
-      //add in pkb isNextExist
-      return true;
+      return pkb_.IsRelationshipExists(type);
     } 
       
     if (!pair_cache_boolean_[type]) {
@@ -86,7 +86,45 @@ namespace pql_cache {
     return !pair_cache_[type].empty();
   }  
 
+  int Dfs(unordered_map<int, vector<int>>& table_to_refer, unordered_map<int, vector<int>>& table_to_update, int key) {
+    if (table_to_update.find(key) != table_to_update.end()
+        || table_to_refer.find(key) != table_to_refer.end()) {
+      //we immediately return if the key is already populated
+      //or the key does not have any relationship
+      return key;
+    }
+
+    vector<int> children_lst = table_to_refer[key];
+    vector<int> ans;
+
+    for (int child_key : children_lst) {
+      if (child_key == key) {
+        //we skip to prevent infinite loop since it is possible to have Next(2,2)
+        continue;
+      }
+
+      int end_val = Dfs(table_to_refer, table_to_update, child_key);
+      ans.push_back(end_val);
+
+      if (table_to_update.find(end_val) != table_to_update.end()) {
+        //children of child key wil satisfy the star relationship
+        vector<int> value = table_to_update[end_val];
+        ans.insert(ans.end(), value.begin(), value.end());
+      }
+    }
+
+    if (!ans.empty()) {
+      table_to_update[key] = move(ans);
+    }
+
+    return key;
+  }
+
   /*-----------------------------------------------------Next* and Affects*------------------------------------------------------------*/
+
+  void Cache::GenerateNextTRelDomain() {
+    //get next table from pkb then popoulate into another table
+  }
 
   void Cache::GenerateNextTOrAffectsTRelDomain(pql::RelationshipTypes type) {
     //need to wait for pkb refactor
