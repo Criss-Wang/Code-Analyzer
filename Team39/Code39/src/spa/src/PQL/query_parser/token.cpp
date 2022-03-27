@@ -16,8 +16,12 @@ namespace pql {
     return Synonym::name == s.name && Synonym::declaration == s.declaration;
   }
 
-  Synonym AttrRef::GetSynonym() {
-    return *synonym_;
+  std::string AttrRef::GetSynName() {
+    return synonym_->GetName();
+  }
+
+  EntityIdentifier AttrRef::GetSynDeclaration() {
+    return synonym_->GetDeclaration();
   }
 
   AttrIdentifier AttrRef::GetAttrIdentifier() {

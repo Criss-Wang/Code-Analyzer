@@ -7,9 +7,9 @@
 #include <algorithm>
 
 #include "../solver/predicate.h"
-#include "../../../PKB/pkb.h"
-#include "../query_evaluator_exceptions.h"
+#include "../cache/cache.h"
 #include "../../query_parser/token.h"
+#include "../query_evaluator_exceptions.h"
 
 namespace pql_clause {
   template <typename T>
@@ -43,6 +43,37 @@ namespace pql_clause {
     hmap[name] = inter;
   }
 
+  template <typename T, typename R>
+  std::vector<T> ExtractFirst(std::vector<std::pair<T, R>>& lst) {
+    std::vector<T> res;
+
+    for (std::pair<T, R>& ele : lst) {
+      res.push_back(ele.first);
+    }
+
+    return res;
+  }
+
+  template <typename T, typename R>
+  std::vector<R> ExtractSecond(std::vector<std::pair<T, R>>& lst) {
+    std::vector<R> res;
+
+    for (std::pair<T, R>& ele : lst) {
+      res.push_back(ele.second);
+    }
+
+    return res;
+  }
+
+  template <typename T>
+  std::vector<T> RemoveDuplicate(std::vector<T>& lst) {
+    std::unordered_set<T> st;
+    std::for_each(lst.begin(), lst.end(), [&st](const T& k) { st.insert(k); });
+    std::vector<T> res(st.begin(), st.end());
+
+    return res;
+  }
+
   class Clause {
     public:
       pql::RelationshipTypes type_;
@@ -51,7 +82,7 @@ namespace pql_clause {
         virtual ~Clause() = default;
 
     public:
-      virtual void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      virtual void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates) = 0;
   };
 }

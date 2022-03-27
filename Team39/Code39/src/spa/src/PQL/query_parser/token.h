@@ -32,9 +32,11 @@ namespace pql {
     public:
       AttrRef(Synonym& s, AttrIdentifier attribute) : synonym_(&s), attribute_(attribute) {};
 
-      Synonym GetSynonym();
-
       AttrIdentifier GetAttrIdentifier();
+
+      std::string GetSynName();
+
+      EntityIdentifier GetSynDeclaration();
   };
 
   struct ParseException : public std::exception {
@@ -55,14 +57,14 @@ namespace pql {
     kModifiesP,
     kCalls,
     kCallsT,
+    kNext,
+    kNextT,
+    kAffects,
+    kAffectsT,
     kAssignPattern,
     kIfPattern,
     kWhilePattern,
     kWith,
-    kNext,
-    kNextT,
-    kAffects,
-    kAffectsT
   };
 
   const std::map<std::string, EntityIdentifier> declarationMap {
