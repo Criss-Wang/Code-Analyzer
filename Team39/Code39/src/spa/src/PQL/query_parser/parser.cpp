@@ -2,6 +2,9 @@
 #define IS_SUCH_THAT 1
 #define IS_PATTERN 2
 #define IS_WITH 3
+#define ATTR_REF 4
+#define IDENT 5
+#define INTEGER 6
 
 #include <iostream>
 #include <stdexcept>
@@ -300,89 +303,79 @@ namespace pql {
     Parser::query.AddPattern(EntityIdentifier::kIf, synonym, left, "", false);
   }
 
+  std::map<AttrIdentifier, int> attrDomain {
+    {AttrIdentifier::kValue, INTEGER},
+    {AttrIdentifier::kVarName, IDENT},
+    {AttrIdentifier::kProcName, IDENT},
+    {AttrIdentifier::kStmtNum, INTEGER}
+  };
+
+  bool IsValid(pair<pair<std::shared_ptr<AttrRef>, std::string>, int>& left, pair<pair<std::shared_ptr<AttrRef>, std::string>, int>& right) {
+    int left_domain;
+    if (left.second == ATTR_REF) {
+      left_domain = attrDomain.at(left.first.first->GetAttrIdentifier());
+    } else {
+      left_domain = left.second;
+    }
+    int right_domain;
+    if (right.second == ATTR_REF) {
+      right_domain = attrDomain.at(right.first.first->GetAttrIdentifier());
+    } else {
+      right_domain = right.second;
+    }
+    return (left_domain == right_domain);
+  }
+
   void Parser::ParseWith() {
-    std::string left = ps.ParseRef(Parser::query);
-    std::shared_ptr<AttrRef> left_attr_ref = nullptr;
-    std::string left_entity = "";
-    bool is_attr_ref_left = false;
-    bool is_ident_left = false;
-    bool is_int_left = false;
-    if (Parser::query.SynonymDeclared(left)) {
+    auto left = Parser::ParseWithArgument();
+    ps.EatWhiteSpaces();
+    ps.ExpectChar('=');
+    ps.EatWhiteSpaces();
+    auto right = Parser::ParseWithArgument();
+    if (IsValid(left, right)) {
+      Parser::query.AddWith(left.first.first, left.first.second, left.second == ATTR_REF,
+                            right.first.first, right.first.second, right.second == ATTR_REF);
+    } else {
+      Parser::query.SetSemanticallyInvalid();
+    }
+  }
+
+  pair<pair<std::shared_ptr<AttrRef>, std::string>, int> Parser::ParseWithArgument() {
+    std::string ref = ps.ParseRef(Parser::query);
+    std::shared_ptr<AttrRef> attr_ref = nullptr;
+    std::string entity;
+    int type = ATTR_REF;
+    if (Parser::query.SynonymDeclared(ref)) {
       ps.ExpectChar('.');
       std::string attr = ps.ParseAttribute();
-      if (!Parser::query.IsAttrStringValid(attr)) {
+      if (!Query::IsAttrStringValid(attr)) {
         throw ParseException();
       }
-      Synonym left_synonym = Parser::query.GetSynonymByName(left);
-      AttrIdentifier left_attribute = GetAttributeByString(attr);
-      if (!Parser::query.IsAttrValidForSyn(left_synonym, left_attribute)) {
+      Synonym synonym = Parser::query.GetSynonymByName(ref);
+      AttrIdentifier attribute = GetAttributeByString(attr);
+      if (!Query::IsAttrValidForSyn(synonym, attribute)) {
         Parser::query.SetSemanticallyInvalid();
       }
-
-      left_attr_ref = std::make_shared<AttrRef>(left_synonym, left_attribute);
-      is_attr_ref_left = true;
-    } else if (IsIdent(left)){
-      left.erase(0, 1);
-      int left_len = left.length();
-      left.erase(left_len - 1, 1);
-      left_entity = left;
-      is_ident_left = true;
-    } else if (IsInteger(left)) {
-      left_entity = left;
-      is_int_left = true;
+      attr_ref = std::make_shared<AttrRef>(synonym, attribute);
+    } else if (IsIdent(ref)){
+      ref.erase(0, 1);
+      int len = ref.length();
+      ref.erase(len - 1, 1);
+      entity = ref;
+      type = IDENT;
+    } else if (IsInteger(ref)) {
+      entity = ref;
+      type = INTEGER;
     } else {
       //If it reaches here means that this is an undeclared synonym with attribute
       Parser::query.SetSemanticallyInvalid();
       ps.Expect(".");
       std::string attr = ps.ParseAttribute();
-      if (!Parser::query.IsAttrStringValid(attr)) {
-          throw ParseException();
-      }
-    }
-    ps.EatWhiteSpaces();
-    ps.ExpectChar('=');
-    ps.EatWhiteSpaces();
-    std::string right = ps.ParseRef(Parser::query);
-    std::shared_ptr<AttrRef> right_attr_ref = nullptr;
-    std::string right_entity = "";
-    bool is_attr_ref_right = false;
-    if (Parser::query.SynonymDeclared(right)) {
-      ps.ExpectChar('.');
-      std::string attr = ps.ParseAttribute();
-      if (!Parser::query.IsAttrStringValid(attr)) {
-        throw ParseException();
-      }
-      Synonym right_synonym = Parser::query.GetSynonymByName(right);
-      //need to check if the attribute is valid for the synonym
-      AttrIdentifier right_attribute = GetAttributeByString(attr);
-      if (!Parser::query.IsAttrValidForSyn(right_synonym, right_attribute)) {
-        Parser::query.SetSemanticallyInvalid();
-      }
-
-      right_attr_ref = std::make_shared<AttrRef>(right_synonym, right_attribute);
-      is_attr_ref_right = true;
-    } else if (IsIdent(right)) {
-      if (is_int_left) {
-        Parser::query.SetSemanticallyInvalid();
-      }
-      right.erase(0, 1);
-      int right_len = right.length();
-      right.erase(right_len - 1, 1);
-      right_entity = right;
-    } else if (IsInteger(right)) {
-      if (is_ident_left) {
-        Parser::query.SetSemanticallyInvalid();
-      }
-      right_entity = right;
-    } else {
-      Parser::query.SetSemanticallyInvalid();
-      ps.Expect(".");
-      std::string attr = ps.ParseAttribute();
-      if (!Parser::query.IsAttrStringValid(attr)) {
+      if (!Query::IsAttrStringValid(attr)) {
         throw ParseException();
       }
     }
-    Parser::query.AddWith(left_attr_ref, left_entity, is_attr_ref_left, right_attr_ref, right_entity, is_attr_ref_right);
+    return make_pair(make_pair(attr_ref, entity), type);
   }
 
 }

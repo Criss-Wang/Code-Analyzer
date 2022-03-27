@@ -68,7 +68,7 @@ namespace pql_cache {
     }
     
     return rel_cache_[type].find(left) == rel_cache_[type].end() 
-        ? vector<int>() : rel_cache_[type][left];
+        ? vector<int>() : vector<int>(rel_cache_[type][left].begin(), rel_cache_[type][left].end());
   }
 
 
@@ -79,7 +79,7 @@ namespace pql_cache {
     }
 
     return inverse_rel_cache_[type].find(right) == inverse_rel_cache_[type].end() 
-        ? vector<int>() : inverse_rel_cache_[type][right];
+        ? vector<int>() : vector<int>(inverse_rel_cache_[type][right].begin(), inverse_rel_cache_[type][right].end());
   }
 
   vector<pair<int, int>> Cache::GetComputeAllRelPairs(pql::RelationshipTypes type) {
@@ -88,7 +88,7 @@ namespace pql_cache {
       (this->*fn)(type);
     }
 
-    return pair_cache_[type];
+    return vector<pair<int,int>> (pair_cache_[type].begin(), pair_cache_[type].end());
   }
 
   bool Cache::IsComputeRelExists(pql::RelationshipTypes type) {
@@ -146,9 +146,9 @@ namespace pql_cache {
     return pkb_->GetRelArgumentPairs(rel_types);
   }
 
-  int Dfs(unordered_map<int, vector<int>>& table_to_refer, unordered_map<int, vector<int>>& table_to_update, int key) {
+  int Cache::Dfs(unordered_map<int, vector<int>>& table_to_refer, unordered_map<int, vector<int>>& table_to_update, int key) {
     if (table_to_update.find(key) != table_to_update.end()
-        || table_to_refer.find(key) != table_to_refer.end()) {
+        || table_to_refer.find(key) == table_to_refer.end()) {
       //we immediately return if the key is already populated
       //or the key does not have any relationship
       return key;
@@ -158,11 +158,6 @@ namespace pql_cache {
     vector<int> ans;
 
     for (int child_key : children_lst) {
-      if (child_key == key) {
-        //we skip to prevent infinite loop since it is possible to have Next(2,2)
-        continue;
-      }
-
       int end_val = Dfs(table_to_refer, table_to_update, child_key);
       ans.push_back(end_val);
 
@@ -194,22 +189,71 @@ namespace pql_cache {
   }
 
   /*-----------------------------------------------------Next* and Affects*------------------------------------------------------------*/
+  bool AddGrandchildrenToNeigh(unordered_map<int, unordered_set<int>>& rel_table, unordered_set<int>& neighs, int child) {
+    if (rel_table.find(child) == rel_table.end()) {
+       //the neighs is not modified
+       return false;
+    }
+
+    unordered_set<int> copy_of_child_neighs = rel_table[child];
+    neighs.merge(copy_of_child_neighs);
+
+    //if the size of the child neighs copy is the same as original, means we never added any new child to neighs
+    return copy_of_child_neighs.size() != rel_table[child].size();
+  }
+
+
+  unordered_map<int, unordered_set<int>> Cache::PopulateStarRelationship(unordered_map<int, unordered_set<int>>& rel_table) {
+    unordered_map<int, unordered_set<int>> curr_table = rel_table;
+    bool is_same = true;
+
+    do {
+      is_same = true;
+      for (auto& it = curr_table.begin(); it != curr_table.end(); it++) {
+        unordered_set<int> curr_neigh = it->second;
+        for (const int child : curr_neigh) {
+          if (child == it->first) {
+            continue;
+          }
+          //merge the neighbours of the child to the current neighbour list
+          bool is_modified = AddGrandchildrenToNeigh(curr_table, it->second, child);
+
+          is_same &= !is_modified;
+          
+        }
+      }
+
+    } while (!is_same);
+
+    return curr_table;
+  }
+  
+  unordered_map<int, unordered_set<int>> ConvertNextTableToTableOfSet(unordered_map<int, vector<int>>& next_table) {
+    unordered_map<int, unordered_set<int>> res;
+
+    for (auto it = next_table.begin(); it != next_table.end(); it++) {
+      res[it->first] = unordered_set<int>(it->second.begin(), it->second.end());
+    }
+
+    return res;
+  }
 
   void Cache::GenerateNextTOrAffectsTRelDomain(pql::RelationshipTypes type) {
-    unordered_map<int, vector<int>> rel_domain;
-    unordered_map<int, vector<int>> star_rel_domain;
+    unordered_map<int, unordered_set<int>> rel_domain;
+    unordered_map<int, unordered_set<int>> star_rel_domain;
       
     if (type == pql::kNextT) {
-      rel_domain = pkb_->GetNextInternalMap();
+      unordered_map<int, vector<int>> next_table = pkb_->GetNextInternalMap();
+      rel_domain = move(ConvertNextTableToTableOfSet(next_table));
+      star_rel_domain = move(PopulateStarRelationship(rel_domain));
+
     } else {
       //the type here will be AffectsT
       if (!rel_cache_boolean_[pql::kAffects]) {
         GenerateAffectsRelDomain(pql::kAffects);
       }
-    }
 
-    for (auto it = rel_domain.begin(); it != rel_domain.end(); it++) {
-      Dfs(rel_domain, star_rel_domain, it->first);
+      star_rel_domain = move(PopulateStarRelationship(rel_cache_[pql::kAffects]));
     }
 
     rel_cache_[type] = move(star_rel_domain);
@@ -221,14 +265,14 @@ namespace pql_cache {
       GenerateNextTOrAffectsTRelDomain(type);
     }
 
-    unordered_map<int, vector<int>> inverse_table;
+    unordered_map<int, unordered_set<int>> inverse_table;
 
     for (auto it = rel_cache_[type].begin(); it != rel_cache_[type].end(); it++) {
-      for (int& right : it->second) {
+      for (const int right : it->second) {
         if (inverse_table.find(right) == inverse_table.end()) {
-          inverse_table[right] = vector<int>{ it->first };
+          inverse_table[right] = unordered_set<int>{ it->first };
         } else {
-          inverse_table[right].push_back(it->first);
+          inverse_table[right].insert(it->first);
         }
       }
     }
@@ -242,11 +286,11 @@ namespace pql_cache {
       GenerateNextTOrAffectsTRelDomain(type);
     }
 
-    vector<pair<int, int>> res;
+    unordered_set<pair<int, int>, hash_pair_fn> res;
 
     for (auto it = rel_cache_[type].begin(); it != rel_cache_[type].end(); it++) {
-      for (int& right : it->second) {
-        res.push_back(make_pair(it->first, right));
+      for (const int right : it->second) {
+        res.insert(make_pair(it->first, right));
       }
     }
 
@@ -260,13 +304,13 @@ namespace pql_cache {
       GenerateAffectsPairDomain(type);
     }
 
-    unordered_map<int, vector<int>> rel_table;
+    unordered_map<int, unordered_set<int>> rel_table;
 
     for (auto& pair : pair_cache_[pql::kAffects]) {
       if (rel_table.find(pair.first) == rel_table.end()) {
-        rel_table[pair.first] = vector<int>{ pair.second };
+        rel_table[pair.first] = unordered_set<int>{ pair.second };
       } else {
-        rel_table[pair.first].push_back(pair.second);
+        rel_table[pair.first].insert(pair.second);
       }
     }
 
@@ -279,13 +323,13 @@ namespace pql_cache {
       GenerateAffectsPairDomain(type);
     }
 
-    unordered_map<int, vector<int>> inverse_rel_table;
+    unordered_map<int, unordered_set<int>> inverse_rel_table;
 
     for (auto& pair : pair_cache_[pql::kAffects]) {
       if (inverse_rel_table.find(pair.second) == inverse_rel_table.end()) {
-        inverse_rel_table[pair.second] = vector<int>{ pair.first };
+        inverse_rel_table[pair.second] = unordered_set<int>{ pair.first };
       } else {
-        inverse_rel_table[pair.second].push_back(pair.first);
+        inverse_rel_table[pair.second].insert(pair.first);
       }
     }
 
@@ -295,14 +339,11 @@ namespace pql_cache {
 
   void Cache::GenerateAffectsPairDomain(pql::RelationshipTypes type) {
     vector<shared_ptr<CFG>> cfg_lst = pkb_->GetCfgList();
-    vector<pair<int, int>> affects_lst;
 
     for (auto& cfg_ptr : cfg_lst) {
-      unordered_set<pair<int, int>, hash_pair_fn> curr_affects_set = move(ComputeAffectsRelationship(*cfg_ptr->GetHead()));
-      affects_lst.insert(affects_lst.end(), curr_affects_set.begin(), curr_affects_set.end());
+      ComputeAffectsRelationship(*cfg_ptr->GetHead());  
     }
 
-    pair_cache_[pql::kAffects] = move(affects_lst);
     pair_cache_boolean_[pql::kAffects] = true;
   }
 
@@ -330,12 +371,11 @@ namespace pql_cache {
     }
   }
 
-  unordered_set<pair<int, int>, hash_pair_fn> Cache::ComputeAffectsRelationship(GraphNode& head) {
+  void Cache::ComputeAffectsRelationship(GraphNode& head) {
     //LMT maps the variable to the stmt that modifies it  
     //It is mapped to a vector because we could have multiple assign statements modifying same variable
     //e.g. if (1==1) then {a = a + 1;} else {a = a + 1;}
     unordered_map<int, unordered_set<int>> last_modified_table;
-    unordered_set<pair<int, int>, hash_pair_fn> affect_set;
     stack<unordered_map<int, unordered_set<int>>> last_modified_stack;
     stack<shared_ptr<GraphNode>> ptr_stack;
     
@@ -352,7 +392,7 @@ namespace pql_cache {
 
           if (curr_type == EntityIdentifier::kAssign) {
             int modvar = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt)[0];
-            ConstructAssignAffectPair(curr_stmt, last_modified_table, affect_set);
+            ConstructAssignAffectPair(curr_stmt, last_modified_table, pair_cache_[pql::kAffects]);
             //Add LastModified(modvar, curr_stmt)
             last_modified_table[modvar] = unordered_set<int>{ curr_stmt };
           }
@@ -423,7 +463,5 @@ namespace pql_cache {
         }
       }
     }
-
-    return affect_set;
   }
 }

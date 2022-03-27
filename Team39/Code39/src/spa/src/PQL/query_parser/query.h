@@ -42,7 +42,7 @@ namespace pql {
 
       Synonym GetSynonymByName(const std::string &name);
 
-      bool IsAttrStringValid(const std::string& attribute);
+      static bool IsAttrStringValid(const std::string& attribute);
 
       bool IsAssignSynonym(const std::string &name);
 
@@ -60,9 +60,9 @@ namespace pql {
 
       std::vector <pql::Synonym> GetAllUsedSynonyms();
 
-      void AddAttrRef(Synonym s);
+      void AddAttrRef(Synonym& s);
 
-      void AddAttrRef(Synonym s, AttrIdentifier attr);
+      void AddAttrRef(Synonym& s, AttrIdentifier attr);
 
       std::vector <pql::AttrRef> GetAttrRef();
 
@@ -79,10 +79,10 @@ namespace pql {
 
       void SetBoolean(bool b);
 
-      bool GetBoolean();
+      [[nodiscard]] bool GetBoolean() const;
 
-      bool IsSemanticallyValid();
+      [[nodiscard]] bool IsSemanticallyValid() const;
 
-      bool IsAttrValidForSyn(Synonym& s, AttrIdentifier attr);
+      static bool IsAttrValidForSyn(Synonym& s, AttrIdentifier attr);
     };
 }

@@ -29,15 +29,15 @@ namespace pql_cache {
     private:
       //pair_cache_ stores the pair relationship such that all <x,y> in vector satisfy the relationship
       //For clauses like Next(syn, syn) 
-      std::unordered_map<pql::RelationshipTypes, std::vector<std::pair<int, int>>> pair_cache_;
+      std::unordered_map<pql::RelationshipTypes, std::unordered_set<std::pair<int, int>, hash_pair_fn>> pair_cache_;
       std::unordered_map<pql::RelationshipTypes, bool> pair_cache_boolean_;
       //rel_cache_ stores the table mapping the key to vector of values, where <key, value> satisfy the relationship
       //For clauses like Next(ent, syn) or Next(ent, ent)
-      std::unordered_map<pql::RelationshipTypes, std::unordered_map<int, std::vector<int>>> rel_cache_;
+      std::unordered_map<pql::RelationshipTypes, std::unordered_map<int, std::unordered_set<int>>> rel_cache_;
       std::unordered_map<pql::RelationshipTypes, bool> rel_cache_boolean_;
       //inverse_rel_cache_ stores the table mapping the key to vector of values, where <value, key> satisfy the relationship
       //For clauses like Next(syn, ent)
-      std::unordered_map<pql::RelationshipTypes, std::unordered_map<int, std::vector<int>>> inverse_rel_cache_;
+      std::unordered_map<pql::RelationshipTypes, std::unordered_map<int, std::unordered_set<int>>> inverse_rel_cache_;
       std::unordered_map<pql::RelationshipTypes, bool> inverse_rel_cache_boolean_;
 
       Pkb* pkb_;
@@ -100,6 +100,9 @@ namespace pql_cache {
 
       void GenerateNextTOrAffectsTPairDomain(pql::RelationshipTypes type);
 
+      static int Dfs(unordered_map<int, vector<int>>& table_to_refer, unordered_map<int, vector<int>>& table_to_update, int key);
+
+      static unordered_map<int, unordered_set<int>> Cache::PopulateStarRelationship(unordered_map<int, unordered_set<int>>& rel_table);
     /*---------------------------------------------------------Affect---------------------------------------------------------------*/
       void GenerateAffectsRelDomain(pql::RelationshipTypes type);
 
@@ -107,7 +110,7 @@ namespace pql_cache {
 
       void GenerateAffectsPairDomain(pql::RelationshipTypes type);
 
-      std::unordered_set<std::pair<int, int>, hash_pair_fn> ComputeAffectsRelationship(GraphNode& head);
+      void ComputeAffectsRelationship(GraphNode& head);
 
       void ConstructAssignAffectPair(int assign_stmt,
          std::unordered_map<int, std::unordered_set<int>>& last_modified_table, unordered_set<pair<int, int>, hash_pair_fn>& affect_lst);
