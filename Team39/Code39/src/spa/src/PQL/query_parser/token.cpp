@@ -20,6 +20,10 @@ namespace pql {
     return synonym_->GetName();
   }
 
+  EntityIdentifier AttrRef::GetSynDeclaration() {
+    return synonym_->GetDeclaration();
+  }
+
   AttrIdentifier AttrRef::GetAttrIdentifier() {
     return attribute_;
   }

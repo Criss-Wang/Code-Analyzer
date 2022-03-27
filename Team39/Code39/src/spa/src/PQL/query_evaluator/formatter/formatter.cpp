@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "formatter.h"
+#include "../../../Utility/entity.h"
 
 Formatter::Formatter(pql_cache::Cache* cache) {
   cache_ = cache;
