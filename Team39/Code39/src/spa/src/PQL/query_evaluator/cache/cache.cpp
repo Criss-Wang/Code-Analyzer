@@ -146,35 +146,6 @@ namespace pql_cache {
     return pkb_->GetRelArgumentPairs(rel_types);
   }
 
-  int Cache::Dfs(unordered_map<int, vector<int>>& table_to_refer, unordered_map<int, vector<int>>& table_to_update, int key) {
-    if (table_to_update.find(key) != table_to_update.end()
-        || table_to_refer.find(key) == table_to_refer.end()) {
-      //we immediately return if the key is already populated
-      //or the key does not have any relationship
-      return key;
-    }
-
-    vector<int> children_lst = table_to_refer[key];
-    vector<int> ans;
-
-    for (int child_key : children_lst) {
-      int end_val = Dfs(table_to_refer, table_to_update, child_key);
-      ans.push_back(end_val);
-
-      if (table_to_update.find(end_val) != table_to_update.end()) {
-        //children of child key wil satisfy the star relationship
-        vector<int> value = table_to_update[end_val];
-        ans.insert(ans.end(), value.begin(), value.end());
-      }
-    }
-
-    if (!ans.empty()) {
-      table_to_update[key] = move(ans);
-    }
-
-    return key;
-  }
-
   /*--------------------------------------------------API for pattern clause------------------------------------------------------------*/
   unordered_set<int> Cache::GetAllStmtsWithPattern(const string& pattern, bool is_exact) {
     return pkb_->GetAllStmtsWithPattern(pattern, is_exact);
@@ -357,15 +328,14 @@ namespace pql_cache {
     }
   }
 
-  void Cache::ConstructAssignAffectPair(int assign_stmt,
-      unordered_map<int, unordered_set<int>>& last_modified_table, unordered_set<pair<int, int>, hash_pair_fn>& affect_set ) {
+  void Cache::ConstructAndAddAssignAffectPair(int assign_stmt, unordered_map<int, unordered_set<int>>& last_modified_table) {
     vector<int> used_vars = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kUsesS, assign_stmt);
 
     for (int& used_var : used_vars) {
         //check used_var in LMT
       if (last_modified_table.find(used_var) != last_modified_table.end()) {
         for (const int left : last_modified_table[used_var]) {
-          affect_set.insert(make_pair(left, assign_stmt));
+          pair_cache_[pql::kAffects].insert(make_pair(left, assign_stmt));
         }
       }
     }
@@ -392,7 +362,7 @@ namespace pql_cache {
 
           if (curr_type == EntityIdentifier::kAssign) {
             int modvar = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt)[0];
-            ConstructAssignAffectPair(curr_stmt, last_modified_table, pair_cache_[pql::kAffects]);
+            ConstructAndAddAssignAffectPair(curr_stmt, last_modified_table);
             //Add LastModified(modvar, curr_stmt)
             last_modified_table[modvar] = unordered_set<int>{ curr_stmt };
           }

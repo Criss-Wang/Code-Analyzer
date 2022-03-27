@@ -26,7 +26,7 @@ namespace pql_cache {
   };
 
   class Cache {
-    private:
+    public:
       //pair_cache_ stores the pair relationship such that all <x,y> in vector satisfy the relationship
       //For clauses like Next(syn, syn) 
       std::unordered_map<pql::RelationshipTypes, std::unordered_set<std::pair<int, int>, hash_pair_fn>> pair_cache_;
@@ -100,8 +100,6 @@ namespace pql_cache {
 
       void GenerateNextTOrAffectsTPairDomain(pql::RelationshipTypes type);
 
-      static int Dfs(unordered_map<int, vector<int>>& table_to_refer, unordered_map<int, vector<int>>& table_to_update, int key);
-
       static unordered_map<int, unordered_set<int>> Cache::PopulateStarRelationship(unordered_map<int, unordered_set<int>>& rel_table);
     /*---------------------------------------------------------Affect---------------------------------------------------------------*/
       void GenerateAffectsRelDomain(pql::RelationshipTypes type);
@@ -112,8 +110,7 @@ namespace pql_cache {
 
       void ComputeAffectsRelationship(GraphNode& head);
 
-      void ConstructAssignAffectPair(int assign_stmt,
-         std::unordered_map<int, std::unordered_set<int>>& last_modified_table, unordered_set<pair<int, int>, hash_pair_fn>& affect_lst);
+      void ConstructAndAddAssignAffectPair(int assign_stmt, std::unordered_map<int, std::unordered_set<int>>& last_modified_table);
       
       static void MergeTable(unordered_map<int, unordered_set<int>>& dst, unordered_map<int, unordered_set<int>>& src);      
   };
