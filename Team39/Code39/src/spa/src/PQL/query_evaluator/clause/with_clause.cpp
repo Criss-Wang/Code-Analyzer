@@ -3,33 +3,14 @@
 #include <unordered_map>
 
 #include "with_clause.h"
+#include "../query_evaluator_exceptions.h"
 
 #define INVALID_INDEX -1
 #define ENTITY 0
 #define ATTR_REF 1
 
 namespace pql_clause {
-  typedef std::vector<int>(Pkb::* GetDomainByAttribute)(EntityIdentifier entity_identifier, const int);
-  typedef void (WithClause::* EvaluateFn)(Pkb&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
-  typedef int (Pkb::* GetAttrFn)(EntityIdentifier entity_identifier, const int);
-
-  const map<AttrIdentifier, GetDomainByAttribute> CallFnMap = {
-    { AttrIdentifier::kProcName, &Pkb::GetStmtNumByStringAttribute }
-  };
-
-  const map<AttrIdentifier, GetDomainByAttribute> ReadFnMap = {
-    { AttrIdentifier::kVarName, &Pkb::GetStmtNumByStringAttribute }
-  };
-
-  const map<AttrIdentifier, GetDomainByAttribute> PrintFnMap = {
-    { AttrIdentifier::kVarName, &Pkb::GetStmtNumByStringAttribute }
-  };
-
-  const map<EntityIdentifier, map<AttrIdentifier, GetDomainByAttribute>> GetDomainByAttributeMap = {
-    { EntityIdentifier::kCall, CallFnMap },
-    { EntityIdentifier::kRead, ReadFnMap },
-    { EntityIdentifier::kPrint, PrintFnMap }
-  };
+  typedef void (WithClause::* EvaluateFn)(pql_cache::Cache&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
 
   const map<int, EvaluateFn> EntEvaluateFnMap = {
     { ENTITY   , &WithClause::EvaluateEntEnt    },
@@ -46,15 +27,12 @@ namespace pql_clause {
     { ATTR_REF,  AttrEvaluateFnMap }
   };
 
-  const map<EntityIdentifier, GetAttrFn> GetAttrFnMap = {
-    { EntityIdentifier::kCall, &Pkb::GetStringAttribute },
-    { EntityIdentifier::kRead, &Pkb::GetStringAttribute },
-    { EntityIdentifier::kPrint, &Pkb::GetStringAttribute }
-  };
+  struct hash_pair_fn {
+    std::size_t operator() (const std::pair<int, int>& p) const {
+      std::size_t h1 = std::hash<int>{}(p.first);
+      std::size_t h2 = std::hash<int>{}(p.second);
 
-  struct hashFunction {
-    size_t operator()(const pair<int, int>& x) const {
-      return x.first ^ x.second;
+      return h1 ^ h2;
     }
   };
 
@@ -62,7 +40,7 @@ namespace pql_clause {
       return is_attr_ref ? ATTR_REF : ENTITY;
   }
 
-  void WithClause::EvaluateEntEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void WithClause::EvaluateEntEnt(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     bool is_equal = left_entity_ == right_entity_;
 
@@ -71,9 +49,9 @@ namespace pql_clause {
     }
   }
 
-  int GetIntRepresentation(Pkb& pkb, AttrIdentifier attr_type, std::string& entity) {
+  int GetIntRepresentation(pql_cache::Cache& cache, AttrIdentifier attr_type, std::string& entity) {
     if (attr_type == AttrIdentifier::kProcName) {
-      int proc_index = pkb.GetIndexByString(IndexTableType::kProcIndex, entity);
+      int proc_index = cache.GetIndexByString(IndexTableType::kProcIndex, entity);
 
       if (proc_index == INVALID_INDEX) {
         throw pql_exceptions::ProcedureDoesNotExistException();
@@ -83,7 +61,7 @@ namespace pql_clause {
     }
 
     if (attr_type == AttrIdentifier::kVarName) {
-      int var_index = pkb.GetIndexByString(IndexTableType::kVarIndex, entity);
+      int var_index = cache.GetIndexByString(IndexTableType::kVarIndex, entity);
 
       if (var_index == INVALID_INDEX) {
         throw pql_exceptions::VariableDoesNotExistException();
@@ -96,43 +74,50 @@ namespace pql_clause {
     return stoi(entity);
   }
 
-  std::vector<int> GetSynDomainByEntity(Pkb& pkb, pql::AttrRef& attr_ref, int entity) {
+  const unordered_set<EntityIdentifier> StmtTypeWithStringAttrSet = {
+    EntityIdentifier::kCall, EntityIdentifier::kRead, EntityIdentifier::kPrint
+  };
+
+  const unordered_set<AttrIdentifier> AttributeTypeAsStmtAttrSet = {
+    AttrIdentifier::kVarName, AttrIdentifier::kProcName
+  };
+
+  std::vector<int> GetSynDomainByEntity(pql_cache::Cache& cache, pql::AttrRef& attr_ref, int entity) {
     //need to do extra work for read.varName, call.procName and print.varName 
     //since we are not directly comparing the value in domain
-    EntityIdentifier syn_type = attr_ref.GetSynonym().GetDeclaration();
+    EntityIdentifier syn_type = attr_ref.GetSynDeclaration();
     AttrIdentifier attr_type = attr_ref.GetAttrIdentifier();
 
-    if (GetDomainByAttributeMap.find(syn_type) != GetDomainByAttributeMap.end()
-        && GetDomainByAttributeMap.at(syn_type).find(attr_type) != GetDomainByAttributeMap.at(syn_type).end()) {
-      GetDomainByAttribute fn = GetDomainByAttributeMap.at(syn_type).at(attr_type);
-      return (pkb.*fn)(syn_type, entity);
+    if (StmtTypeWithStringAttrSet.find(syn_type) != StmtTypeWithStringAttrSet.end()
+        && AttributeTypeAsStmtAttrSet.find(attr_type) != AttributeTypeAsStmtAttrSet.end()) {
+      return cache.GetStmtNumByStringAttribute(syn_type, entity);
     }
 
     return std::vector<int> { entity };
   }
 
-  void WithClause::EvaluateEntAttr(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void WithClause::EvaluateEntAttr(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int left = GetIntRepresentation(pkb, right_attr_->GetAttrIdentifier(), left_entity_);
-    std::vector<int> syn_domain = GetSynDomainByEntity(pkb, *right_attr_, left);
-    UpdateHashmap<int>(domain, right_attr_->GetSynonym().GetName(), syn_domain);
+    int left = GetIntRepresentation(cache, right_attr_->GetAttrIdentifier(), left_entity_);
+    std::vector<int> syn_domain = GetSynDomainByEntity(cache, *right_attr_, left);
+    UpdateHashmap<int>(domain, right_attr_->GetSynName(), syn_domain);
   }
 
-  void WithClause::EvaluateAttrEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void WithClause::EvaluateAttrEnt(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int right = GetIntRepresentation(pkb, left_attr_->GetAttrIdentifier(), right_entity_);
-    std::vector<int> syn_domain = GetSynDomainByEntity(pkb, *left_attr_, right);
-    UpdateHashmap<int>(domain, left_attr_->GetSynonym().GetName(), syn_domain);
+    int right = GetIntRepresentation(cache, left_attr_->GetAttrIdentifier(), right_entity_);
+    std::vector<int> syn_domain = GetSynDomainByEntity(cache, *left_attr_, right);
+    UpdateHashmap<int>(domain, left_attr_->GetSynName(), syn_domain);
   }
 
-  void WithClause::EvaluateAttrAttrNum(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void WithClause::EvaluateAttrAttrNum(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    std::string left_syn_name = left_attr_->GetSynonym().GetName();
-    std::string right_syn_name = right_attr_->GetSynonym().GetName();
+    std::string left_syn_name = left_attr_->GetSynName();
+    std::string right_syn_name = right_attr_->GetSynName();
     std::vector<int> left_domain = domain[left_syn_name];
     std::vector<int> right_domain = domain[right_syn_name];
 
-    std::unordered_set<std::pair<int, int>, hashFunction> s;
+    std::unordered_set<std::pair<int, int>, hash_pair_fn> s;
     
     //the attribute value will be same as the int representation
     for (int& left_val : left_domain) {
@@ -147,11 +132,12 @@ namespace pql_clause {
     pql_table::Predicate predicate(left_syn_name, right_syn_name, pred_lst);
     predicates.push_back(predicate);
   }
-  
-  int GetAttributeByType(Pkb& pkb, EntityIdentifier ent_type, int entity) {
-    if (GetAttrFnMap.find(ent_type) != GetAttrFnMap.end()) {
-      GetAttrFn fn = GetAttrFnMap.at(ent_type);
-      return (pkb.*fn)(ent_type, entity);
+
+  //Before calling this function, we assume the attribute is of type string
+  int GetAttributeByType(pql_cache::Cache& cache, EntityIdentifier ent_type, int entity) {
+    //this is for print.varName, read.varName and call.procName
+    if (StmtTypeWithStringAttrSet.find(ent_type) != StmtTypeWithStringAttrSet.end()) {
+      return cache.GetStringAttribute(ent_type, entity);
     }
 
     //Until here, we are left with proc.procName and variable.varName
@@ -160,11 +146,11 @@ namespace pql_clause {
   }
 
   //This function maps the value to a list of entities such that entity.attribute = value
-  std::unordered_map<int, std::vector<int>> GenerateAttrToEntitiesMap(Pkb& pkb, std::vector<int>& domain_lst, pql::AttrRef& attr_ref) {
+  std::unordered_map<int, std::vector<int>> GenerateAttrToEntitiesMap(pql_cache::Cache& cache, std::vector<int>& domain_lst, pql::AttrRef& attr_ref) {
     std::unordered_map<int, std::vector<int>> res_map;
     
     for (int& ent_val : domain_lst) {
-      int attribute_val = GetAttributeByType(pkb, attr_ref.GetSynonym().GetDeclaration(), ent_val);
+      int attribute_val = GetAttributeByType(cache, attr_ref.GetSynDeclaration(), ent_val);
 
       if (res_map.find(attribute_val) == res_map.end()) {
         res_map[attribute_val] = std::vector<int> { ent_val };
@@ -176,7 +162,7 @@ namespace pql_clause {
     return res_map;
   }
 
-  void AddCrossProductIntoSet(std::unordered_set<std::pair<int, int>, hashFunction>& s, std::vector<int>& first, std::vector<int>& second) {
+  void AddCrossProductIntoSet(std::unordered_set<std::pair<int, int>, hash_pair_fn>& s, std::vector<int>& first, std::vector<int>& second) {
     for (int& first_val : first) {
       for (int& second_val : second) {
         s.insert(std::make_pair(first_val, second_val));
@@ -184,17 +170,17 @@ namespace pql_clause {
     }
   }
 
-  void WithClause::EvaluateAttrAttrVar(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void WithClause::EvaluateAttrAttrVar(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
     std::vector<pql_table::Predicate>& predicates) {
-    std::string left_syn_name = left_attr_->GetSynonym().GetName();
-    std::string right_syn_name = right_attr_->GetSynonym().GetName();
+    std::string left_syn_name = left_attr_->GetSynName();
+    std::string right_syn_name = right_attr_->GetSynName();
     std::vector<int> left_domain = domain[left_syn_name];
     std::vector<int> right_domain = domain[right_syn_name];
 
-    std::unordered_set<std::pair<int, int>, hashFunction> s;
+    std::unordered_set<std::pair<int, int>, hash_pair_fn> s;
 
-    std::unordered_map<int, std::vector<int>> left_attr_ent_map = GenerateAttrToEntitiesMap(pkb, left_domain, *left_attr_);
-    std::unordered_map<int, std::vector<int>> right_attr_ent_map = GenerateAttrToEntitiesMap(pkb, right_domain, *right_attr_);
+    std::unordered_map<int, std::vector<int>> left_attr_ent_map = GenerateAttrToEntitiesMap(cache, left_domain, *left_attr_);
+    std::unordered_map<int, std::vector<int>> right_attr_ent_map = GenerateAttrToEntitiesMap(cache, right_domain, *right_attr_);
 
     //We iterate through curr_map which has shorter length
     bool is_left_map_smaller = left_attr_ent_map.size() < right_attr_ent_map.size();
@@ -222,23 +208,23 @@ namespace pql_clause {
     predicates.push_back(predicate);
   }
 
-  void WithClause::EvaluateAttrAttr(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void WithClause::EvaluateAttrAttr(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     if (left_attr_->GetAttrIdentifier() == AttrIdentifier::kStmtNum
         || left_attr_->GetAttrIdentifier() == AttrIdentifier::kValue) {
-      EvaluateAttrAttrNum(pkb, domain, predicates);
+      EvaluateAttrAttrNum(cache, domain, predicates);
     } else {
-      EvaluateAttrAttrVar(pkb, domain, predicates);
+      EvaluateAttrAttrVar(cache, domain, predicates);
     }
   }
 
-  void WithClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void WithClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
     std::vector<pql_table::Predicate>& predicates) {
     int left_type = GetArgumentType(is_attr_ref_left_);
     int right_type = GetArgumentType(is_attr_ref_right_);
 
     EvaluateFn fn = EvaluateFnMap.at(left_type).at(right_type);
-    (this->*fn)(pkb, domain, predicates);
+    (this->*fn)(cache, domain, predicates);
   }
 
 }

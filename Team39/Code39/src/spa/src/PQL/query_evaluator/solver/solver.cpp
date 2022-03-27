@@ -58,7 +58,7 @@ namespace pql_solver {
       std::vector<int> return_idxs;
 
       for (auto& attr_ref : return_syns_) {
-        std::string syn_name = attr_ref.GetSynonym().GetName();
+        std::string syn_name = attr_ref.GetSynName();
 
         if (added_syns.find(syn_name) == added_syns.end()
             && table.FindSynCol(syn_name) >= 0) {
