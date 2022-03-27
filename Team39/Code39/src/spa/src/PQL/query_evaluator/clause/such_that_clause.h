@@ -168,4 +168,52 @@ namespace pql_clause {
       void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
   };
+
+  class NextClause : public SuchThatClause {
+    public:
+      NextClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
+        type_ = pql::RelationshipTypes::kNext;
+      }
+
+    public:
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates);
+  };
+
+  class NextTClause : public SuchThatClause {
+    public:
+      NextTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
+        type_ = pql::RelationshipTypes::kNextT;
+      }
+
+    public:
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates);
+  };
+
+  class AffectsClause : public SuchThatClause {
+    public:
+      AffectsClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
+        type_ = pql::RelationshipTypes::kAffects;
+      }
+
+    public:
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates);
+  };
+
+  class AffectsTClause : public SuchThatClause {
+    public:
+      AffectsTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
+        type_ = pql::RelationshipTypes::kAffectsT;
+      }
+
+    public:
+      void Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+          std::vector<pql_table::Predicate>& predicates);
+  };
 }

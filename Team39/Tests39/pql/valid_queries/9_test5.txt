@@ -1,0 +1,2 @@
+if ifs; while w;
+Select <ifs, w.stmt#> with ifs.stmt# = 1 and w.stmt# = 3

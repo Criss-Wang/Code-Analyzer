@@ -9,10 +9,6 @@
 
 namespace pql {
 
-  bool IsLetter(char c);
-
-  bool IsDigit(char c);
-
   class ParserState {
     private:
       std::stringstream ss;
@@ -81,6 +77,8 @@ namespace pql {
       void ParseIfPattern(const std::string& synonym);
 
       void ParseWith();
+
+      pair<pair<std::shared_ptr<AttrRef>, std::string>, int> ParseWithArgument();
   };
 
 }

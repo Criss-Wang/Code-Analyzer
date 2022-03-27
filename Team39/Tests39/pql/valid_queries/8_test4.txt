@@ -1,0 +1,2 @@
+if ifs; while w;
+Select <ifs, w.stmt#> pattern ifs("a", _, _) pattern w(_, _)

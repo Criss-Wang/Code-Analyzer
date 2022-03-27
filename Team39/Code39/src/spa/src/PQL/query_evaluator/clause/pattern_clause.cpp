@@ -77,4 +77,14 @@ namespace pql_clause {
     PatternClause::EvaluateLeft(pkb, domain, predicates);
     AssignPatternClause::EvaluateExpr(pkb, domain);
   }
+
+  void IfPatternClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    PatternClause::EvaluateLeft(pkb, domain, predicates);
+  }
+
+  void WhilePatternClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    PatternClause::EvaluateLeft(pkb, domain, predicates);
+  }
 }
