@@ -1,0 +1,2 @@
+assign a, a1;
+Select a pattern a(_, _) and a1(_, _)

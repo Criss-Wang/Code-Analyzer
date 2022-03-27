@@ -1,0 +1,2 @@
+stmt s;
+Select BOLEAN such that Parent(1, 2)

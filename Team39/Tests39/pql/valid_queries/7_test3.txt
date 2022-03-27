@@ -1,0 +1,2 @@
+variable v;
+Select v with v.varName = "var"

@@ -238,9 +238,9 @@ namespace pql {
       if (left == "_" && left_domains.find(EntityIdentifier::kWildcard) == left_domains.end()) {
         return false;
       } else if (pql::IsIdent(left) && left_domains.find(EntityIdentifier::kIdent) == left_domains.end()) {
-        return false;
+        throw ParseException();
       } else if (pql::IsInteger(left) && left_domains.find(EntityIdentifier::kStmtNumber) == left_domains.end()) {
-        return false;
+        throw ParseException();
       }
     }
 
@@ -252,9 +252,9 @@ namespace pql {
       if (right == "_" && right_domains.find(EntityIdentifier::kWildcard) == right_domains.end()) {
         return false;
       } else if (pql::IsIdent(right) && right_domains.find(EntityIdentifier::kIdent) == right_domains.end()) {
-        return false;
+        throw ParseException();
       } else if (pql::IsInteger(right) && right_domains.find(EntityIdentifier::kStmtNumber) == right_domains.end()) {
-        return false;
+        throw ParseException();
       }
     }
 
