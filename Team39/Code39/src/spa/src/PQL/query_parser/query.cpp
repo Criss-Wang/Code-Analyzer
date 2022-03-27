@@ -3,7 +3,6 @@
 #include "../query_evaluator/clause/with_clause.h"
 #include "../query_evaluator/clause/pattern_clause.h"
 
-#include <algorithm>
 #include <map>
 #include <unordered_set>
 #include <string>
@@ -81,6 +80,12 @@ namespace pql {
     EntityIdentifier::kIdent
   });
 
+  std::unordered_set<EntityIdentifier> assign({
+    EntityIdentifier::kAssign,
+    EntityIdentifier::kWildcard,
+    EntityIdentifier::kStmtNumber,
+  });
+
   const std::map<pql::RelationshipTypes, std::unordered_set<EntityIdentifier>> left_synonym_domains {
     {kFollows, stmts},
     {kFollowsT, stmts},
@@ -91,7 +96,11 @@ namespace pql {
     {kModifiesS, stmts},
     {kModifiesP, uses_and_modifies_left_domain},
     {kCalls, procs},
-    {kCallsT, procs}
+    {kCallsT, procs},
+    {kNext, stmts},
+    {kNextT, stmts},
+    {kAffects, assign},
+    {kAffectsT, assign}
   };
 
   const std::map<pql::RelationshipTypes, std::unordered_set<EntityIdentifier>> right_synonym_domains {
@@ -104,7 +113,11 @@ namespace pql {
     {kModifiesS, vars},
     {kModifiesP, vars},
     {kCalls, procs},
-    {kCallsT, procs}
+    {kCallsT, procs},
+    {kNext, stmts},
+    {kNextT, stmts},
+    {kAffects, assign},
+    {kAffectsT, assign}
   };
   
   const std::map<std::string, AttrIdentifier> attributeMap{
@@ -193,6 +206,14 @@ namespace pql {
         return std::make_shared<pql_clause::CallsClause>(left, is_synonym_left, right, is_synonym_right);
       case RelationshipTypes::kCallsT:
         return std::make_shared<pql_clause::CallsTClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kNext:
+        return std::make_shared<pql_clause::NextClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kNextT:
+        return std::make_shared<pql_clause::NextTClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kAffects:
+        return std::make_shared<pql_clause::AffectsClause>(left, is_synonym_left, right, is_synonym_right);
+      case RelationshipTypes::kAffectsT:
+        return std::make_shared<pql_clause::AffectsTClause>(left, is_synonym_left, right, is_synonym_right);
       default:
         throw pql_exceptions::EmptyDomainException();
     }
@@ -320,7 +341,7 @@ namespace pql {
     return Query::used_synonyms;
   }
   
-  void Query::AddAttrRef(Synonym s) {
+  void Query::AddAttrRef(Synonym& s) {
     AttrIdentifier attr = defaultAttrMap.at(s.GetDeclaration()); 
     AttrRef attr_ref = AttrRef(s, attr);
     Query::attr_refs.push_back(attr_ref);
@@ -332,7 +353,7 @@ namespace pql {
     return expected_attrs.find(attr) != expected_attrs.end();
   }
 
-  void Query::AddAttrRef(Synonym s, AttrIdentifier attr) {
+  void Query::AddAttrRef(Synonym& s, AttrIdentifier attr) {
     if (IsAttrValidForSyn(s, attr)) {
       AttrRef attr_ref = AttrRef(s, attr);
       Query::attr_refs.push_back(attr_ref);
@@ -376,9 +397,9 @@ namespace pql {
       if (syn_entity == EntityIdentifier::kAssign) {
         Query::clauses.push_back(std::make_shared<pql_clause::AssignPatternClause>(synonym, left, is_synonym_left, expression, exact));
       } else if (syn_entity == EntityIdentifier::kWhile) {
-        // add WhilePatternClause
+        Query::clauses.push_back(std::make_shared<pql_clause::WhilePatternClause>(synonym, left, is_synonym_left));
       } else if (syn_entity == EntityIdentifier::kIf) {
-        // add IfPatternClause
+        Query::clauses.push_back(std::make_shared<pql_clause::IfPatternClause>(synonym, left, is_synonym_left));
       }
     }
   }
@@ -398,11 +419,11 @@ namespace pql {
     Query::is_boolean = b;
   }
 
-  bool Query::GetBoolean() {
+  bool Query::GetBoolean() const {
     return Query::is_boolean;
   }
 
-  bool Query::IsSemanticallyValid() {
+  bool Query::IsSemanticallyValid() const {
     return Query::is_semantically_valid;
   }
 }

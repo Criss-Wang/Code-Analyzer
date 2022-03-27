@@ -325,4 +325,24 @@ namespace pql_clause {
       std::vector<pql_table::Predicate>& predicates) {
     SuchThatClause::Evaluate(pkb, domain, predicates);
   }
+
+  void NextClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    SuchThatClause::Evaluate(pkb, domain, predicates);
+  }
+
+  void NextTClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    SuchThatClause::Evaluate(pkb, domain, predicates);
+  }
+
+  void AffectsClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    SuchThatClause::Evaluate(pkb, domain, predicates);
+  }
+
+  void AffectsTClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    SuchThatClause::Evaluate(pkb, domain, predicates);
+  }
 }
