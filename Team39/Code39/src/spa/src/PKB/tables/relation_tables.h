@@ -48,7 +48,8 @@ class CallsStarTable : public RelListTable {};
 class CalledByStarTable : public RelListTable {};
 
 // Line number will be the key mapping to another line number which is next in the execution flow
-class NextTable: public RelTable {};
+// In certain cases such as container statements, it can map to two numbers
+class NextTable: public RelListTable {};
 
 class BeforeTable: public RelTable {};
 
@@ -71,7 +72,6 @@ class ModifiesVariableToStmtsTable : public RelListReverseTable {};
 class ModifiesProcToVariablesTable : public RelListTable {};
 
 class ModifiesVariableToProcsTable : public RelListReverseTable {};
-
 
 // Line number will be the key and the list of valid substring patterns will be the value
 class StmtToPatternsTable : public Table<int, unordered_set<string>> {};

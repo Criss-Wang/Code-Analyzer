@@ -4,15 +4,9 @@
 #include <string>
 #include <stack>
 
-#include "../PKB/pkb.h"
-
 using namespace std;
 
-class Helper {
-  public:
-    // Helper method for populating nested relations such as Parent* and Calls*
-    static int Dfs(shared_ptr<RelListTable> table_to_refer, shared_ptr<RelListTable> table_to_update, int key);
-};
+class Helper {};
 
 class PatternHelper : public Helper {
   private:
