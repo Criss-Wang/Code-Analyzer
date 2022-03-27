@@ -2,9 +2,16 @@
 #define IS_SUCH_THAT 1
 #define IS_PATTERN 2
 #define IS_WITH 3
-#define ATTR_REF 4
-#define IDENT 5
-#define INTEGER 6
+#define ATTR_REF -1
+#define IDENT -2
+#define INTEGER -3
+#define INDEX_OF_ATTR_REF 0
+#define INDEX_OF_ENTITY 1
+#define INDEX_OF_TYPE 2
+#define INDEX_OF_LEFT 0
+#define INDEX_OF_DOMAIN 1
+#define INDEX_OF_EXPRESSION 2
+#define INDEX_OF_EXACT 3
 
 #include <iostream>
 #include <stdexcept>
@@ -178,10 +185,10 @@ namespace pql {
   void Parser::ParsePattern() {
     std::string synonym = ps.ParseName();
     auto pattern = Parser::ParsePatternSyntax();
-    std::string left = std::get<0>(pattern);
-    std::vector<EntityIdentifier> domain = std::get<1>(pattern);
-    std::string expression = std::get<2>(pattern);
-    bool is_exact = std::get<3>(pattern);
+    std::string left = std::get<INDEX_OF_LEFT>(pattern);
+    std::vector<EntityIdentifier> domain = std::get<INDEX_OF_DOMAIN>(pattern);
+    std::string expression = std::get<INDEX_OF_EXPRESSION>(pattern);
+    bool is_exact = std::get<INDEX_OF_EXACT>(pattern);
     if (Parser::query.IsAssignSynonym(synonym) && std::find(domain.begin(), domain.end(), EntityIdentifier::kAssign) != domain.end()) {
       Parser::query.AddPattern(EntityIdentifier::kAssign, synonym, left, expression, is_exact);
     } else if (Parser::query.IsWhileSynonym(synonym) && std::find(domain.begin(), domain.end(), EntityIdentifier::kWhile) != domain.end()) {
@@ -251,16 +258,16 @@ namespace pql {
 
   bool IsValid(std::tuple<std::shared_ptr<AttrRef>, std::string, int>& left, std::tuple<std::shared_ptr<AttrRef>, std::string, int>& right) {
     int left_domain;
-    if (std::get<2>(left) == ATTR_REF) {
-      left_domain = attrDomain.at(std::get<0>(left)->GetAttrIdentifier());
+    if (std::get<INDEX_OF_TYPE>(left) == ATTR_REF) {
+      left_domain = attrDomain.at(std::get<INDEX_OF_ATTR_REF>(left)->GetAttrIdentifier());
     } else {
-      left_domain = std::get<2>(left);
+      left_domain = std::get<INDEX_OF_TYPE>(left);
     }
     int right_domain;
-    if (std::get<2>(right) == ATTR_REF) {
-      right_domain = attrDomain.at(std::get<0>(right)->GetAttrIdentifier());
+    if (std::get<INDEX_OF_TYPE>(right) == ATTR_REF) {
+      right_domain = attrDomain.at(std::get<INDEX_OF_ATTR_REF>(right)->GetAttrIdentifier());
     } else {
-      right_domain = std::get<2>(right);
+      right_domain = std::get<INDEX_OF_TYPE>(right);
     }
     return (left_domain == right_domain);
   }
@@ -272,8 +279,9 @@ namespace pql {
     ps.EatWhiteSpaces();
     auto right = Parser::ParseWithArgument();
     if (IsValid(left, right)) {
-      Parser::query.AddWith(std::get<0>(left), std::get<1>(left), std::get<2>(left) == ATTR_REF,
-                            std::get<0>(right), std::get<1>(right), std::get<2>(right) == ATTR_REF);
+      Parser::query.AddWith(std::get<INDEX_OF_ATTR_REF>(left), std::get<INDEX_OF_ENTITY>(left),
+                std::get<INDEX_OF_TYPE>(left) == ATTR_REF,std::get<INDEX_OF_ATTR_REF>(right),
+                  std::get<INDEX_OF_ENTITY>(right), std::get<INDEX_OF_TYPE>(right) == ATTR_REF);
     } else {
       Parser::query.SetSemanticallyInvalid();
     }
