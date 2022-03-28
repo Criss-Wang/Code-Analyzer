@@ -74,3 +74,16 @@ class AddInfoToTableException final : public exception {
       return message.c_str();
     }
 };
+
+class AddEntityToSetException final : public exception {
+  private:
+    string message;
+
+  public:
+    AddEntityToSetException(int entity_identifier, string error_message)
+      : message("Failed to add entity to set " + to_string(entity_identifier) + ". " + error_message) {}
+
+    const char* what() const throw() {
+      return message.c_str();
+    }
+};

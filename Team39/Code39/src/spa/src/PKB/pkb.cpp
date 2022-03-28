@@ -549,9 +549,6 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    cout << "Error here for kConstant table" << endl;
-    cout << "Adding " << key << endl;
-    cout << AddInfoToTableException(static_cast<int>(table_identifier), e.what()).what() << endl;
     throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
@@ -579,9 +576,6 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    cout << "Error here for kUsesStmtToVar" << endl;
-    cout << "Adding " << key << endl;
-    cout << AddInfoToTableException(static_cast<int>(table_identifier), e.what()).what() << endl;
     throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
@@ -599,8 +593,6 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    cout << "Adding " << key << endl;
-    cout << AddInfoToTableException(static_cast<int>(table_identifier), e.what()).what() << endl;
     throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
@@ -626,8 +618,6 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    cout << "Adding " << key << endl;
-    cout << AddInfoToTableException(static_cast<int>(table_identifier), e.what()).what() << endl;
     throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
@@ -649,8 +639,6 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    cout << "Adding " << key << endl;
-    cout << AddInfoToTableException(static_cast<int>(table_identifier), e.what()).what() << endl;
     throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
@@ -667,8 +655,6 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    cout << "Adding " << key << endl;
-    cout << AddInfoToTableException(static_cast<int>(table_identifier), e.what()).what() << endl;
     throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
@@ -712,7 +698,7 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const int ent
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    return false;
+    throw AddEntityToSetException(static_cast<int>(entity_identifier), e.what());
   }
 }
 
@@ -733,7 +719,7 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const string&
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    return false;
+    throw AddEntityToSetException(static_cast<int>(entity_identifier), e.what());
   }
 }
 
@@ -832,7 +818,7 @@ string Pkb::GetStringByIndex(const IndexTableType index_table_type, const int id
     }
     return table->GetValueByKey(idx);
   } catch (exception& e) {
-    return "";
+    return EMPTY_STRING;
   }
 }
 
