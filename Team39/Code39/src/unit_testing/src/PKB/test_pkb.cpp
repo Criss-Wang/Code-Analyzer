@@ -403,6 +403,10 @@ TEST_CASE("Add Integer Entity") {
     REQUIRE(res.find(2) != res.end());
     REQUIRE(res.find(3) != res.end());
   }
+
+  SECTION("Add invalid entity into set") {
+    CHECK_THROWS_AS(pkb.AddEntityToSet(EntityIdentifier::kStmt, "invalid"), AddEntityToSetException);
+  }
 }
 
 TEST_CASE("Add String Entity") {
@@ -450,6 +454,10 @@ TEST_CASE("Add String Entity") {
     REQUIRE(proc_res == "x");
     const int idx_res = pkb.GetIndexByString(IndexTableType::kProcIndex, "y");
     REQUIRE(idx_res == 1);
+  }
+
+  SECTION("Add invalid entity into set") {
+    CHECK_THROWS_AS(pkb.AddEntityToSet(EntityIdentifier::kProc, 123), AddEntityToSetException);
   }
 }
 
