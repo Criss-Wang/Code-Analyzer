@@ -50,7 +50,7 @@ stack<int> populateNextRelationshipForIf(stack<int> last_stmt_nums_in_if, Pkb& p
 
   last_stmt_nums_in_if.pop();
 
-  pkb.AddInfoToTable(TableIdentifier::, last_stmt_nums_in_if.top(), vector<int>{ stmt_num });
+  pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), vector<int>{ stmt_num });
   cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
 
   last_stmt_nums_in_if.pop();
