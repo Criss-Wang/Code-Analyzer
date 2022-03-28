@@ -13,14 +13,14 @@ namespace pql_clause {
       bool is_attr_ref_right_;
     
     public:
-      WithClause(std::shared_ptr<pql::AttrRef> left_attr, std::string& left_entity, bool is_attr_ref_left, 
-          std::shared_ptr<pql::AttrRef> right_attr, std::string& right_entity, bool is_attr_ref_right) :
+      WithClause(std::shared_ptr<pql::AttrRef> left_attr, std::string left_entity, bool is_attr_ref_left, 
+          std::shared_ptr<pql::AttrRef> right_attr, std::string right_entity, bool is_attr_ref_right) :
         Clause{} {
           left_attr_ = std::move(left_attr);
-          left_entity_ = left_entity;
+          left_entity_ = std::move(left_entity);
           is_attr_ref_left_ = is_attr_ref_left;
           right_attr_ = std::move(right_attr);
-          right_entity_ = right_entity;
+          right_entity_ = std::move(right_entity);
           is_attr_ref_right_ = is_attr_ref_right;
           type_ = pql::kWith;
       }
