@@ -402,11 +402,12 @@ bool Pkb::AddCalls(const string& key, const vector<string>& value) {
   return add_success;
 }
 
-bool Pkb::AddNext(const int key, const vector<int>& value) {
-  bool add_success = next_table_->AddKeyValuePair(key, value);
-  // Populate the reverse relation
-  for (const int val : value) {
-    add_success = before_table_->AddKeyValuePair(val, key) && add_success;
+bool Pkb::AddNextOrBefore(TableIdentifier table_identifier, const int key, const vector<int>& value) {
+  bool add_success;
+  if (table_identifier == TableIdentifier::kNext) {
+    add_success = next_table_->AddKeyValuePair(key, value);
+  } else {
+    add_success = before_table_->AddKeyValuePair(key, value);
   }
   return add_success;
 }
@@ -537,7 +538,8 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
       case TableIdentifier::kParent:
         return AddParent(key, value);
       case TableIdentifier::kNext:
-        return AddNext(key, value);
+      case TableIdentifier::kBefore:
+        return AddNextOrBefore(table_identifier, key, value);
       default:
         throw InvalidIdentifierException();
     }

@@ -85,7 +85,7 @@ class Pkb {
     bool AddParent(int key, const vector<int>& value);
     bool AddFollows(int key, int value);
     bool AddCalls(const string& key, const vector<string>& value);
-    bool AddNext(int key, const vector<int>& value);
+    bool AddNextOrBefore(TableIdentifier table_identifier, int key, const vector<int>& value);
     bool AddModifies(int key, const vector<string>& value);
     bool AddModifiesP(const string& key, const vector<string>& value);
     bool AddUses(int key, const vector<string>& value);

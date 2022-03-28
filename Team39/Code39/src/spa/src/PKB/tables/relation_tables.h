@@ -51,7 +51,7 @@ class CalledByStarTable : public RelListTable {};
 // In certain cases such as container statements, it can map to two numbers
 class NextTable: public RelListTable {};
 
-class BeforeTable: public RelTable {};
+class BeforeTable: public RelListTable {};
 
 // Line number will be the key and the list of variables used will be the value
 class UsesStmtToVariablesTable : public RelListTable {};
