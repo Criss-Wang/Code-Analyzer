@@ -133,7 +133,7 @@ static Pkb InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kAssign, 10, "5");
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 10, "5");
     pkb.AddInfoToTable(TableIdentifier::kConstant, 10, vector<int>({ 5 }));
-    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 10, vector<string>{});
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 10, vector<string>{ "count" });
     pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 10, vector<string>{});  
 
     //line 11 cenX = 20
@@ -142,7 +142,7 @@ static Pkb InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kAssign, 11, "20");
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 11, "20");
     pkb.AddInfoToTable(TableIdentifier::kConstant, 11, vector<int>({ 20 }));
-    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 11, vector<string>{});
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 11, vector<string>{ "cenX" });
     pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 11, vector<string>{});
 
     //line 12 cenY = 25
@@ -151,7 +151,7 @@ static Pkb InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kAssign, 12, "25");
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 12, "25");
     pkb.AddInfoToTable(TableIdentifier::kConstant, 12, vector<int>({ 25 }));
-    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 12, vector<string>{});
+    pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 12, vector<string>{ "cenY" });
     pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 12, vector<string>{});
 
     //line 13 call readPoint
@@ -257,7 +257,6 @@ static Pkb InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kFollows, 1, 2);
     pkb.AddInfoToTable(TableIdentifier::kFollows, 2, 3);
     pkb.AddInfoToTable(TableIdentifier::kFollows, 4, 5);
-    pkb.AddInfoToTable(TableIdentifier::kFollows, 5, 6);
     pkb.AddInfoToTable(TableIdentifier::kFollows, 6, 7);
     pkb.AddInfoToTable(TableIdentifier::kFollows, 7, 8);
     pkb.AddInfoToTable(TableIdentifier::kFollows, 8, 9);
@@ -270,6 +269,7 @@ static Pkb InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kFollows, 16, 17);
     pkb.AddInfoToTable(TableIdentifier::kFollows, 17, 18);
     pkb.AddInfoToTable(TableIdentifier::kFollows, 19, 23);
+    pkb.AddInfoToTable(TableIdentifier::kFollows, 21, 22);
     pkb.AddInfoToTable(TableIdentifier::kFollows, 23, 24);
     pkb.AddInfoToTable(TableIdentifier::kFollows, 24, 25);
 
