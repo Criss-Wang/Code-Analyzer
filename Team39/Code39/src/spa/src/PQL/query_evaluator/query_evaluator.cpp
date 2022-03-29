@@ -46,7 +46,7 @@ namespace pql {
       
       pql_solver::Solver solver(&domain, &predicates, synonyms, selected_syns, is_return_boolean);
       pql_table::InterTable table = solver.Solve();
-      Formatter formatter = Formatter(&cache);
+      pql_formatter::Formatter formatter(&cache);
       
       return formatter.FormatRawInput(table, selected_syns);
 
