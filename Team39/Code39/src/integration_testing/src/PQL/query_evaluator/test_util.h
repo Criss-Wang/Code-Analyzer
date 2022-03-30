@@ -79,7 +79,6 @@ static Pkb InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 1, "7");
     pkb.AddInfoToTable(TableIdentifier::kConstant, 1, vector<int>({ 7 }));
     pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 1, vector<string>{ "flag" });
-    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 1, vector<string>{});
 
     //line 2 call computeCentroid
     pkb.AddEntityToSet(EntityIdentifier::kStmt, 2);
@@ -134,7 +133,6 @@ static Pkb InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 10, "5");
     pkb.AddInfoToTable(TableIdentifier::kConstant, 10, vector<int>({ 5 }));
     pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 10, vector<string>{ "count" });
-    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 10, vector<string>{});  
 
     //line 11 cenX = 20
     pkb.AddEntityToSet(EntityIdentifier::kStmt, 11);
@@ -143,7 +141,6 @@ static Pkb InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 11, "20");
     pkb.AddInfoToTable(TableIdentifier::kConstant, 11, vector<int>({ 20 }));
     pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 11, vector<string>{ "cenX" });
-    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 11, vector<string>{});
 
     //line 12 cenY = 25
     pkb.AddEntityToSet(EntityIdentifier::kStmt, 12);
@@ -152,7 +149,6 @@ static Pkb InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 12, "25");
     pkb.AddInfoToTable(TableIdentifier::kConstant, 12, vector<int>({ 25 }));
     pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 12, vector<string>{ "cenY" });
-    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 12, vector<string>{});
 
     //line 13 call readPoint
     pkb.AddEntityToSet(EntityIdentifier::kStmt, 13);
@@ -180,7 +176,6 @@ static Pkb InitializePkb() {
     pkb.AddEntityToSet(EntityIdentifier::kAssign, 16);
     pkb.AddInfoToTable(TableIdentifier::kAssign, 16, "cenX + x");
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 16, "cenX + x");
-    pkb.AddInfoToTable(TableIdentifier::kConstant, 16, vector<int>({}));
     pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 16, vector<string>{ "cenX" });
     pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 16, vector<string>{ "cenX", "x" });
 
@@ -189,7 +184,6 @@ static Pkb InitializePkb() {
     pkb.AddEntityToSet(EntityIdentifier::kAssign, 17);
     pkb.AddInfoToTable(TableIdentifier::kAssign, 17, "cenY + y");
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 17, "cenY + y");
-    pkb.AddInfoToTable(TableIdentifier::kConstant, 17, vector<int>({}));
     pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 17, vector<string>{ "cenY" });
     pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 17, vector<string>{ "cenY", "y" });
 
@@ -212,14 +206,12 @@ static Pkb InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 20, "1");
     pkb.AddInfoToTable(TableIdentifier::kConstant, 20, vector<int>({1}));
     pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 20, vector<string>{ "flag" });
-    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 20, vector<string>{});
         
     //line 21 cenX = cenX / count
     pkb.AddEntityToSet(EntityIdentifier::kStmt, 21);
     pkb.AddEntityToSet(EntityIdentifier::kAssign, 21);
     pkb.AddInfoToTable(TableIdentifier::kAssign, 21, "cenX / count");
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 21, "cenX / count");
-    pkb.AddInfoToTable(TableIdentifier::kConstant, 21, vector<int>({}));
     pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 21, vector<string>{ "cenX" });
     pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 21, vector<string>{ "cenX", "count" });
 
@@ -228,7 +220,6 @@ static Pkb InitializePkb() {
     pkb.AddEntityToSet(EntityIdentifier::kAssign, 22);
     pkb.AddInfoToTable(TableIdentifier::kAssign, 22, "cenY / count");
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 22, "cenY / count");
-    pkb.AddInfoToTable(TableIdentifier::kConstant, 22, vector<int>({}));
     pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 22, vector<string>{ "cenY" });
     pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 22, vector<string>{ "cenY", "count" });
     
@@ -237,7 +228,6 @@ static Pkb InitializePkb() {
     pkb.AddEntityToSet(EntityIdentifier::kAssign, 23);
     pkb.AddInfoToTable(TableIdentifier::kAssign, 23, "cenX * cenX + cenY * cenY");
     pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 23, "cenX * cenX + cenY * cenY");
-    pkb.AddInfoToTable(TableIdentifier::kConstant, 23, vector<int>({}));
     pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 23, vector<string>{ "normSq" });
     pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 23, vector<string>{ "cenX", "cenY" });
     

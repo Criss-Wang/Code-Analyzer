@@ -31,17 +31,12 @@ Pkb InitializePatternPkb() {
   //line 1 if (1 == 2)
   pkb.AddEntityToSet(EntityIdentifier::kStmt, 1);
   pkb.AddEntityToSet(EntityIdentifier::kIf, 1);
-  pkb.AddInfoToTable(TableIdentifier::kIf, 1, vector<string>{});
   pkb.AddInfoToTable(TableIdentifier::kConstant, 1, vector<int>{1, 2});
-  pkb.AddInfoToTable(TableIdentifier::kIfPattern, 1, vector<string>{});
 
   //line 2 while (3 == 4)
   pkb.AddEntityToSet(EntityIdentifier::kStmt, 2);
   pkb.AddEntityToSet(EntityIdentifier::kWhile, 2);
-  pkb.AddInfoToTable(TableIdentifier::kWhile, 2, vector<string>{});
   pkb.AddInfoToTable(TableIdentifier::kConstant, 2, vector<int>{3, 4});
-  pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 2, vector<string>{});
-  pkb.AddInfoToTable(TableIdentifier::kWhilePattern, 2, vector<string>{});
 
   //line 3 x = 1
   pkb.AddEntityToSet(EntityIdentifier::kAssign, 3);
@@ -49,7 +44,6 @@ Pkb InitializePatternPkb() {
   pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 3, "1");
   pkb.AddInfoToTable(TableIdentifier::kConstant, 3, vector<int>({1}));
   pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 3, vector<string>{ "x" });
-  pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 3, vector<string>{});
 
   //line 4 if ((x == 1) && (a > b))
   pkb.AddEntityToSet(EntityIdentifier::kStmt, 4);
@@ -63,7 +57,6 @@ Pkb InitializePatternPkb() {
   pkb.AddEntityToSet(EntityIdentifier::kStmt, 5);
   pkb.AddEntityToSet(EntityIdentifier::kWhile, 5);
   pkb.AddInfoToTable(TableIdentifier::kWhile, 5, vector<string>{"x", "y"});
-  pkb.AddInfoToTable(TableIdentifier::kConstant, 5, vector<int>{});
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 5, vector<string>{"x", "y"});
   pkb.AddInfoToTable(TableIdentifier::kWhilePattern, 5, vector<string>{"x", "y"});
 
@@ -73,13 +66,11 @@ Pkb InitializePatternPkb() {
   pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 6, "1");
   pkb.AddInfoToTable(TableIdentifier::kConstant, 6, vector<int>({ 2 }));
   pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 6, vector<string>{ "z" });
-  pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 6, vector<string>{});
 
   //line 7 y =  x + y * z
   pkb.AddEntityToSet(EntityIdentifier::kAssign, 7);
   pkb.AddInfoToTable(TableIdentifier::kAssign, 7, "x + y * z");
   pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 7, "x + y * z");
-  pkb.AddInfoToTable(TableIdentifier::kConstant, 7, vector<int>({}));
   pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 7, vector<string>{ "y" });
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 7, vector<string>{"x", "y", "Z"});
 

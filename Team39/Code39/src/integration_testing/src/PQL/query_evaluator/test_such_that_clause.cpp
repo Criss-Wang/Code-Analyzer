@@ -1874,31 +1874,31 @@ TEST_CASE("Checks the correctness of Next clause when both arguments are wildcar
 }
 
 TEST_CASE("Checks correctness of Next when at least one of the argument is a entity") {
-  //SECTION("The first argument is wildcard, second argument is number") {
-  //  SECTION("Positive case") {
-  //    //e.g Next(_, 3)
-  //    query_domain.clear();
-  //    query_domain["s"] = stmt_domain;
-  //    std_query_domain.clear();
-  //    std_query_domain["s"] = stmt_domain;
+  SECTION("The first argument is wildcard, second argument is number") {
+    SECTION("Positive case") {
+      //e.g Next(_, 3)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
 
-  //    pql_clause::NextClause next_clause("_", false, "3", false);
+      pql_clause::NextClause next_clause("_", false, "3", false);
 
-  //    REQUIRE(query_domain == std_query_domain);
-  //    next_clause.Evaluate(st_cache, query_domain, predicates);
-  //    REQUIRE(query_domain == std_query_domain);
-  //  }
+      REQUIRE(query_domain == std_query_domain);
+      next_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
 
-  //  SECTION("Negative case") {
-  //    //e.g Next(_, 4)
-  //    query_domain.clear();
-  //    query_domain["s"] = stmt_domain;
+    SECTION("Negative case") {
+      //e.g Next(_, 4)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
 
-  //    pql_clause::NextClause next_clause("_", false, "4", false);
+      pql_clause::NextClause next_clause("_", false, "4", false);
 
-  //    CHECK_THROWS_AS(next_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
-  //  }
-  //}
+      CHECK_THROWS_AS(next_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
 
   SECTION("The first argument is number, second argument is wildcard") {
     SECTION("Positive case") {
@@ -2039,31 +2039,267 @@ TEST_CASE("Checks the correctness of Next clause when one synonym is involved") 
   }
 }
 
-//TEST_CASE("Checks the correctness of Follows clause when two synonyms are involved") {
-//  SECTION("Both arguments are synonym") {
-//    // Follows(s, s1)
-//    query_domain.clear();
-//    predicates.clear();
-//    query_domain["s"] = stmt_domain;
-//    query_domain["s1"] = stmt_domain;
-//    std_query_domain.clear();
-//    std_query_domain["s"] = stmt_domain;
-//    std_query_domain["s1"] = stmt_domain;
-//    vector<pair<int, int>> std_predicates_lst({ make_pair(1,2), make_pair(2,3), make_pair(4,5), 
-//        make_pair(6,7), make_pair(7,8), make_pair(8,9), make_pair(10,11), make_pair(11,12), make_pair(12,13),
-//        make_pair(13,14), make_pair(14,19), make_pair(15,16), make_pair(16,17), make_pair(17,18), make_pair(19,23),
-//        make_pair(21,22), make_pair(23,24), make_pair(24,25) });
-//    string first = "s";
-//    string second = "s1";
-//    std_predicates.clear();
-//    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
-//
-//    pql_clause::FollowsClause follows_clause("s", true, "s1", true);
-//
-//    REQUIRE(query_domain == std_query_domain);
-//    REQUIRE(!ComparePredicates(predicates, std_predicates));
-//    follows_clause.Evaluate(st_cache, query_domain, predicates);
-//    REQUIRE(query_domain == std_query_domain); //Will only modify the predicates
-//    REQUIRE(ComparePredicates(predicates, std_predicates));
-//  }
-//}
+TEST_CASE("Checks the correctness of Next clause when two synonyms are involved") {
+  SECTION("Both arguments are synonym") {
+    // Next(s, s1)
+    query_domain.clear();
+    predicates.clear();
+    query_domain["s"] = stmt_domain;
+    query_domain["s1"] = stmt_domain;
+    std_query_domain.clear();
+    std_query_domain["s"] = stmt_domain;
+    std_query_domain["s1"] = stmt_domain;
+    vector<pair<int, int>> std_predicates_lst({ make_pair(1,2), make_pair(2,3), make_pair(4,5), 
+        make_pair(6,7), make_pair(7,8), make_pair(8,9), make_pair(10,11), make_pair(11,12), make_pair(12,13),
+        make_pair(13,14), make_pair(14,19), make_pair(14,15), make_pair(15,16), make_pair(16,17), make_pair(17,18), 
+        make_pair(18,14), make_pair(19,20), make_pair(19,21), make_pair(21,22), make_pair(20,23), make_pair(22,23),
+        make_pair(23,24), make_pair(24,25) });
+    string first = "s";
+    string second = "s1";
+    std_predicates.clear();
+    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
+
+    pql_clause::NextClause next_clause("s", true, "s1", true);
+
+    REQUIRE(query_domain == std_query_domain);
+    REQUIRE(!ComparePredicates(predicates, std_predicates));
+    next_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); //Will only modify the predicates
+    REQUIRE(ComparePredicates(predicates, std_predicates));
+  }
+}
+/*-----------------------------------------------------------------------------------------------------------------*/
+
+/*------------------------------------------------Next*------------------------------------------------------------*/
+TEST_CASE("Checks the correctness of Next* clause when both arguments are wildcard") {
+  SECTION("Both of the argument is wildcard") {
+    // Next*(_, _)
+    query_domain.clear();
+    query_domain["s"] = stmt_domain;
+    std_query_domain.clear();
+    std_query_domain["s"] = stmt_domain;
+
+    pql_clause::NextTClause nextT_clause("_", false, "_", false);
+
+    REQUIRE(query_domain == std_query_domain);
+    nextT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); //The result should be the same since there is a Follows relationship
+  }
+}
+
+TEST_CASE("Checks correctness of Next* when at least one of the argument is a entity") {
+  SECTION("The first argument is wildcard, second argument is number") {
+    SECTION("Positive case") {
+      //e.g Next*(_, 8)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
+
+      pql_clause::NextTClause nextT_clause("_", false, "8", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      nextT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Next*(_, 6)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::NextTClause nextT_clause("_", false, "6", false);
+
+      CHECK_THROWS_AS(nextT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("The first argument is number, second argument is wildcard") {
+    SECTION("Positive case") {
+      //e.g Next*(17, _)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
+
+      pql_clause::NextTClause nextT_clause("17", false, "_", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      nextT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Next*(3, _)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::NextTClause nextT_clause("3", false, "_", false);
+
+      CHECK_THROWS_AS(nextT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("Both arguments are number") {
+    SECTION("Positive case") {
+      //e.g Next*(10, 25)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
+
+      pql_clause::NextTClause nextT_clause("10", false, "25", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      nextT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Next*(3, 8)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::NextTClause nextT_clause("3", false, "8", false);
+
+      CHECK_THROWS_AS(nextT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::FalseRelationException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of Next* clause when one synonym is involved") {
+  SECTION("First argument is synonym, second argument is wildcard") {
+    // Next*(s, _)
+    query_domain.clear();
+    query_domain["s"] = stmt_domain;
+    vector<int> std_domain({ 1, 2, 4, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24 });
+    std_query_domain.clear();
+    std_query_domain["s"] = std_domain;
+
+    pql_clause::NextTClause nextT_clause("s", true, "_", false);
+
+    REQUIRE(query_domain != std_query_domain);
+    nextT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); 
+  }
+
+  SECTION("The first argument is synonym, second argument is number") {
+    SECTION("Positive case") {
+      //e.g Next*(s, 15)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      vector<int> std_domain({ 10, 11, 12, 13, 14, 15, 16, 17, 18 });
+      std_query_domain.clear();
+      std_query_domain["s"] = std_domain;
+
+      pql_clause::NextTClause nextT_clause("s", true, "15", false);
+
+      REQUIRE(query_domain != std_query_domain);
+      nextT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Next*(s, 4)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::NextTClause nextT_clause("s", true, "4", false);
+
+      CHECK_THROWS_AS(nextT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("First argument is wildcard, second argument is synonym") {
+    //e.g Next*(_, s)
+    query_domain.clear();
+    query_domain["s"] = stmt_domain;
+    vector<int> std_domain({ 2,3,5,7,8,9,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25 });
+    std_query_domain.clear();
+    std_query_domain["s"] = std_domain;
+
+    pql_clause::NextTClause nextT_clause("_", false, "s", true);
+
+    REQUIRE(query_domain != std_query_domain);
+    nextT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain);
+  }
+
+  SECTION("First argument is number, second argument is synonym") {
+    SECTION("Positive case") {
+      //e.g Next*(14, s)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      vector<int> std_domain({ 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 });
+      std_query_domain.clear();
+      std_query_domain["s"] = std_domain;
+
+      pql_clause::NextTClause nextT_clause("14", false, "s", true);
+
+      REQUIRE(query_domain != std_query_domain);
+      nextT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Next*(9, s)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::NextTClause nextT_clause("9", false, "s", true);
+
+      CHECK_THROWS_AS(nextT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of Next* clause when two synonyms are involved") {
+  SECTION("Both arguments are synonym") {
+    // Next*(s, s1)
+    query_domain.clear();
+    predicates.clear();
+    query_domain["s"] = stmt_domain;
+    query_domain["s1"] = stmt_domain;
+    std_query_domain.clear();
+    std_query_domain["s"] = stmt_domain;
+    std_query_domain["s1"] = stmt_domain;
+    vector<pair<int, int>> std_predicates_lst({ make_pair(1,2), make_pair(1,3), make_pair(2,3),
+        make_pair(4,5), make_pair(6,7), make_pair(6,8), make_pair(6,9), make_pair(7,8), make_pair(7,9), make_pair(8,9),
+        make_pair(10,11), make_pair(10,12), make_pair(10,13), make_pair(10,14), make_pair(10,15), make_pair(10,16),
+        make_pair(10,17), make_pair(10,18), make_pair(10,19), make_pair(10,20), make_pair(10,21), make_pair(10,22),
+        make_pair(10,23), make_pair(10,24), make_pair(10,25), make_pair(11,12), make_pair(11,13), make_pair(11,14), 
+        make_pair(11,15), make_pair(11,16), make_pair(11,17), make_pair(11,18), make_pair(11,19), make_pair(11,20), 
+        make_pair(11,21), make_pair(11,22), make_pair(11,23), make_pair(11,24), make_pair(11,25), make_pair(12,13), 
+        make_pair(12,14), make_pair(12,15), make_pair(12,16), make_pair(12,17), make_pair(12,18), make_pair(12,19),
+        make_pair(12,20), make_pair(12,21), make_pair(12,22), make_pair(12,23), make_pair(12,24), make_pair(12,25), 
+        make_pair(13,14), make_pair(13,15), make_pair(13,16), make_pair(13,17), make_pair(13,18), make_pair(13,19), 
+        make_pair(13,20), make_pair(13,21), make_pair(13,22), make_pair(13,23), make_pair(13,24), make_pair(13,25), 
+        make_pair(14,14), make_pair(14,15), make_pair(14,16), make_pair(14,17), make_pair(14,18), make_pair(14,19), 
+        make_pair(14,20), make_pair(14,21), make_pair(14,22), make_pair(14,23), make_pair(14,24), make_pair(14,25),
+        make_pair(15,14), make_pair(15,15), make_pair(15,16), make_pair(15,17), make_pair(15,18), make_pair(15,19),
+        make_pair(15,20), make_pair(15,21), make_pair(15,22), make_pair(15,23), make_pair(15,24), make_pair(15,25),
+        make_pair(16,14), make_pair(16,15), make_pair(16,16), make_pair(16,17), make_pair(16,18), make_pair(16,19),
+        make_pair(16,20), make_pair(16,21), make_pair(16,22), make_pair(16,23), make_pair(16,24), make_pair(16,25),
+        make_pair(17,14), make_pair(17,15), make_pair(17,16), make_pair(17,17), make_pair(17,18), make_pair(17,19),
+        make_pair(17,20), make_pair(17,21), make_pair(17,22), make_pair(17,23), make_pair(17,24), make_pair(17,25),
+        make_pair(18,14), make_pair(18,15), make_pair(18,16), make_pair(18,17), make_pair(18,18), make_pair(18,19),
+        make_pair(18,20), make_pair(18,21), make_pair(18,22), make_pair(18,23), make_pair(18,24), make_pair(18,25),
+        make_pair(19,20), make_pair(19,21), make_pair(19,22), make_pair(19,23), make_pair(19,24), make_pair(19,25),
+        make_pair(20,23), make_pair(20,24), make_pair(20,25), make_pair(21,22), make_pair(21,23), make_pair(21,24), 
+        make_pair(21,25), make_pair(22,23), make_pair(22,24), make_pair(22,25), make_pair(23,24), make_pair(23,25),
+        make_pair(24,25)});
+    string first = "s";
+    string second = "s1";
+    std_predicates.clear();
+    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
+
+    pql_clause::NextTClause nextT_clause("s", true, "s1", true);
+
+    REQUIRE(query_domain == std_query_domain);
+    REQUIRE(!ComparePredicates(predicates, std_predicates));
+    nextT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); 
+    REQUIRE(ComparePredicates(predicates, std_predicates));
+  }
+}
+

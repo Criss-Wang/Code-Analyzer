@@ -52,17 +52,14 @@ Pkb InitializePkb1() {
 
   //line 1
   pkb.AddEntityToSet(EntityIdentifier::kAssign, 1);	
-
   pkb.AddInfoToTable(TableIdentifier::kAssign, 1, "b * c + d");
   pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 1, "b * c + d");
-  pkb.AddInfoToTable(TableIdentifier::kConstant, 1, vector<int>({}));
   pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 1, vector<string>{ "a" });
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 1, vector<string>{ "b", "c", "d" });
 
   //line 2 while (c > 0)
   pkb.AddEntityToSet(EntityIdentifier::kWhile, 2);
   pkb.AddEntityToSet(EntityIdentifier::kConstant, 0);
-
   pkb.AddInfoToTable(TableIdentifier::kWhile, 2, vector<string>({ "c" }));
   pkb.AddInfoToTable(TableIdentifier::kConstant, 2, vector<int>({ 0 }));
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 2, vector<string>({ "c" }));
@@ -70,14 +67,12 @@ Pkb InitializePkb1() {
   //line 3 if (d > 0)
   pkb.AddEntityToSet(EntityIdentifier::kIf, 3);
   pkb.AddEntityToSet(EntityIdentifier::kConstant, 0);
-
   pkb.AddInfoToTable(TableIdentifier::kIf, 3, vector<string>{"d"});
-  pkb.AddInfoToTable(TableIdentifier::kConstant, 3, 0);
+  pkb.AddInfoToTable(TableIdentifier::kConstant, 3, vector < int>{0});
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 3, vector<string>{"d"});
 
   //line 4
   pkb.AddEntityToSet(EntityIdentifier::kAssign, 4);
-
   pkb.AddInfoToTable(TableIdentifier::kAssign, 4, "a - 1");
   pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 4, "a - 1");
   pkb.AddInfoToTable(TableIdentifier::kConstant, 4, vector<int>({1}));
@@ -86,37 +81,29 @@ Pkb InitializePkb1() {
 
   //line 5 c = b * d
   pkb.AddEntityToSet(EntityIdentifier::kAssign, 5);
-
   pkb.AddInfoToTable(TableIdentifier::kAssign, 5, "b * d");
   pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 5, "b * d");
-  pkb.AddInfoToTable(TableIdentifier::kConstant, 5, vector<int>({}));
   pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 5, vector<string>{ "c" });
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 5, vector<string>{ "b", "d" });
 
   //line 6 d = b + c
   pkb.AddEntityToSet(EntityIdentifier::kAssign, 6);
-
   pkb.AddInfoToTable(TableIdentifier::kAssign, 6, "b + c");
   pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 6, "b + c");
-  pkb.AddInfoToTable(TableIdentifier::kConstant, 6, vector<int>({}));
   pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 6, vector<string>{ "d" });
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 6, vector<string>{ "b", "c" });
 
   //line 7 c = d * a
   pkb.AddEntityToSet(EntityIdentifier::kAssign, 7);
-
   pkb.AddInfoToTable(TableIdentifier::kAssign, 7, "d * a");
   pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 7, "d * a");
-  pkb.AddInfoToTable(TableIdentifier::kConstant, 7, vector<int>({}));
   pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 7, vector<string>{ "c" });
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 7, vector<string>{ "d", "a" });
 
   //line 8 b = d - c
   pkb.AddEntityToSet(EntityIdentifier::kAssign, 8);
-
   pkb.AddInfoToTable(TableIdentifier::kAssign, 8, "d - c");
   pkb.AddInfoToTable(TableIdentifier::kAssignPattern, 8, "d - c");
-  pkb.AddInfoToTable(TableIdentifier::kConstant, 8, vector<int>({}));
   pkb.AddInfoToTable(TableIdentifier::kModifiesStmtToVar, 8, vector<string>{ "b" });
   pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, 8, vector<string>{ "d", "c" });
 
