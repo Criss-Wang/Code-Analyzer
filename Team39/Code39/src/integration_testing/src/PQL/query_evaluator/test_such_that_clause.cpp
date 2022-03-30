@@ -15,8 +15,7 @@ static vector<pql_table::Predicate> predicates;
 static unordered_map<string, vector<int>> std_query_domain;
 static vector<pql_table::Predicate> std_predicates;
 
-Pkb pkb_such_that_clause = move(InitializePkb());
-pql_cache::Cache st_cache(&pkb_such_that_clause);
+pql_cache::Cache st_cache(&pkb_util);
 
 vector<int> print_domain = { 6, 7, 8, 9, 24, 25 };
 vector<int> read_domain = { 4, 5 };
@@ -2302,4 +2301,3 @@ TEST_CASE("Checks the correctness of Next* clause when two synonyms are involved
     REQUIRE(ComparePredicates(predicates, std_predicates));
   }
 }
-

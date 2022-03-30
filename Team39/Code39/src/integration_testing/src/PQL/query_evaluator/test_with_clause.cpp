@@ -7,8 +7,7 @@
 
 using namespace std;
 
-Pkb pkb_with = std::move(InitializePkb());
-pql_cache::Cache cache(&pkb_with);
+pql_cache::Cache cache(&pkb_util);
 
 unordered_map<string, vector<int>> query_domain;
 vector<pql_table::Predicate> predicates;

@@ -1,3 +1,6 @@
+#ifndef TEST_UTIL_H
+#define TEST_UTIL_H
+
 #include "../../spa/src/PKB/pkb.h"
 #include "../../spa/src/SP/design_extractor.h"
 #include "../../spa/src/Utility/entity.h"
@@ -43,7 +46,6 @@
 25      print y;
     }
 */
-
 using namespace std;
 
 static Pkb InitializePkb() {
@@ -310,6 +312,8 @@ static Pkb InitializePkb() {
     return pkb;
 }
 
+static Pkb pkb_util = move(InitializePkb());
+
 static bool ComparePredicates(vector<pql_table::Predicate> p1, vector<pql_table::Predicate> p2) {
   if (p1.size() != p2.size()) {
     return false;
@@ -323,3 +327,5 @@ static bool ComparePredicates(vector<pql_table::Predicate> p1, vector<pql_table:
 
   return true;
 }
+
+#endif

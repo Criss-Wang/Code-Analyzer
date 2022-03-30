@@ -6,14 +6,16 @@
 #include "graph_node.h"
 #include "cfg_token.h"
 
-class CFG {
-  private:
-    std::shared_ptr<GraphNode> start_node_;
+namespace cfg {
+  class CFG {
+    private:
+      std::shared_ptr<GraphNode> start_node_;
 
-  public:
-    CFG(std::shared_ptr<GraphNode>& head);
+    public:
+      CFG(std::shared_ptr<GraphNode>& head);
+ 
+      static std::shared_ptr<GraphNode> GenerateCfg(std::vector<CFGToken>& tokens);
 
-    static std::shared_ptr<GraphNode> GenerateCfg(std::vector<CFGToken>& tokens);
-    
-    std::shared_ptr<GraphNode> GetHead();
-};
+      std::shared_ptr<GraphNode> GetHead();
+  };
+}

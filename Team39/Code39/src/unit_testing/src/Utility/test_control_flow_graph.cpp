@@ -51,7 +51,29 @@ TEST_CASE("TEST GenerateCfg function") {
     CFGToken(CFGTokenType::kEnd, 0),
   });
 
-  shared_ptr<GraphNode> head = CFG::GenerateCfg(tokens1);
+  vector<CFGToken> tokens3({
+      CFGToken(),
+      CFGToken(CFGTokenType::kAssign, 10),
+      CFGToken(CFGTokenType::kAssign, 11),
+      CFGToken(CFGTokenType::kAssign, 12),
+      CFGToken(CFGTokenType::kCall, 13),
+      CFGToken(CFGTokenType::kWhile, 14),
+      CFGToken(CFGTokenType::kAssign, 15),
+      CFGToken(CFGTokenType::kAssign, 16),
+      CFGToken(CFGTokenType::kAssign, 17),
+      CFGToken(CFGTokenType::kCall, 18),
+      CFGToken(CFGTokenType::kWhileEnd, 0),
+      CFGToken(CFGTokenType::kIf, 19),
+      CFGToken(CFGTokenType::kAssign, 20),
+      CFGToken(CFGTokenType::kThenEnd, 0),
+      CFGToken(CFGTokenType::kAssign, 21),
+      CFGToken(CFGTokenType::kAssign, 22),
+      CFGToken(CFGTokenType::kElseEnd, 0),
+      CFGToken(CFGTokenType::kAssign, 23),
+      CFGToken(CFGTokenType::kPrint, 24),
+      CFGToken(CFGTokenType::kPrint, 25),
+      CFGToken(CFGTokenType::kEnd, 0)
+   });
 
-  REQUIRE(1 == 1);
+    shared_ptr<GraphNode> head = CFG::GenerateCfg(tokens3);
 }

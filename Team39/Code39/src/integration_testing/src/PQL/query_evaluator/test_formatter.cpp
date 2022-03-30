@@ -5,8 +5,7 @@
 
 #include "catch.hpp"
 
-Pkb pkb_formatter = std::move(InitializePkb());
-pql_cache::Cache cache_formatter(&pkb_formatter);
+pql_cache::Cache cache_formatter(&pkb_util);
 pql_formatter::Formatter formatter(&cache_formatter);
 /*
 Similar to testing with clause, we split AttrRef into 3 groups: (all AttrRef in same group behaves the same)

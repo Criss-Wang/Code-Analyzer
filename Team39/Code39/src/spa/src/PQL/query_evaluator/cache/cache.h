@@ -108,7 +108,7 @@ namespace pql_cache {
 
       void GenerateAffectsPairDomain(pql::RelationshipTypes type);
 
-      void ComputeAffectsRelationship(GraphNode& head);
+      void ComputeAffectsRelationship(cfg::GraphNode& head);
 
       void ConstructAndAddAssignAffectPair(int assign_stmt, std::unordered_map<int, std::unordered_set<int>>& last_modified_table);
       
