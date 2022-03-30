@@ -15,9 +15,11 @@ void RequireValid(string path) {
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     Pkb pkb;
+    Pkb pkb1;
     REQUIRE_NOTHROW(Parser(input, pkb));
-    Parser parser(input, pkb);
+    Parser parser(input, pkb1);
     REQUIRE_NOTHROW(parser.Validate());
+    REQUIRE_NOTHROW(parser.Populate(pkb));
   }
 }
 
@@ -45,8 +47,9 @@ void RequireInvalidSemantic(string path) {
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     Pkb pkb;
+    Pkb pkb1;
     REQUIRE_NOTHROW(Parser(input, pkb));
-    Parser parser(input, pkb);
+    Parser parser(input, pkb1);
     REQUIRE_THROWS_AS(parser.Validate(), InvalidSemanticException);
   }
 }
@@ -141,6 +144,17 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Validation
   }
 }
 
+TEST_CASE("Iteration 1 test cases") {
+
+  SECTION("Valid Programs") {
+
+    RequireValid(valid_dir + "test1_source.txt");
+    RequireValid(valid_dir + "test2_source.txt");
+    RequireValid(valid_dir + "test3_source.txt");
+
+  }
+}
+
 TEST_CASE("Read/print/assign/call statments for Validation") {
 
   SECTION("Valid Programs") {
@@ -156,6 +170,17 @@ TEST_CASE("Read/print/assign/call statments for Validation") {
     RequireInvalidSemantic(invalid_dir + "6_test1.txt");
     RequireInvalidSemantic(invalid_dir + "6_test2.txt");
     RequireInvalidSemantic(invalid_dir + "6_test3.txt");
+
+  }
+}
+
+TEST_CASE("Iteration 2 test cases") {
+
+  SECTION("Valid Programs") {
+
+    RequireValid(valid_dir + "s1.txt");
+    RequireValid(valid_dir + "complex_calls_s.txt");
+    RequireValid(valid_dir + "assign_pattern_s.txt");
 
   }
 }

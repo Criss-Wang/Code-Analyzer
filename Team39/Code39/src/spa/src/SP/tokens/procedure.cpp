@@ -80,8 +80,15 @@ void Procedure::PopulateEntities(Pkb& pkb) {
   pkb.AddInfoToTable(TableIdentifier::kProcedure, proc_name_, pair<int, int>(start_stmt_num, end_stmt_num));
 
   // Populate CallsTable, ModifiesProcToVariablesTable, UsesProcToVariablesTable
-  pkb.AddInfoToTable(TableIdentifier::kCalls, proc_name_, called_procedures_);
-  pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, proc_name_, modifies_p_);
-  pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, proc_name_, uses_p_);
+  if (!called_procedures_.empty()) {
+    pkb.AddInfoToTable(TableIdentifier::kCalls, proc_name_, called_procedures_);
+  }
 
+  if (!modifies_p_.empty()) {
+    pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, proc_name_, modifies_p_);
+  }
+
+  if (!uses_p_.empty()) {
+    pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, proc_name_, uses_p_);
+  }
 }

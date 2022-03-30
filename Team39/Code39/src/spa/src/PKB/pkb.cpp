@@ -6,6 +6,7 @@
 
 #define INVALID_INDEX -1
 #define EMPTY_STRING ""
+#define EMPTY_INT_LIST vector<int>{}
 #define EMPTY_STRING_LIST vector<string>{}
 
 // Does not work if the table's value is not a vector
@@ -70,6 +71,10 @@ shared_ptr<RelListTable> Pkb::GetCalledByStarTable() {
 
 shared_ptr<RelListTable> Pkb::GetNextTable() {
   return next_table_;
+}
+
+shared_ptr<RelListTable> Pkb::GetBeforeTable() {
+  return before_table_;
 }
 
 shared_ptr<RelListTable> Pkb::GetModifiesStmtToVariablesTable() {
@@ -178,7 +183,8 @@ const unordered_map<pql::RelationshipTypes, GetTableFn> reverse_table_map_ = {
   {pql::RelationshipTypes::kCallsT, &Pkb::GetCalledByStarTable},
   {pql::RelationshipTypes::kParent, &Pkb::GetChildTable},
   {pql::RelationshipTypes::kParentT, &Pkb::GetChildStarTable},
-  {pql::RelationshipTypes::kFollowsT, &Pkb::GetFollowsBeforeStarTable}
+  {pql::RelationshipTypes::kFollowsT, &Pkb::GetFollowsBeforeStarTable},
+  {pql::RelationshipTypes::kNext, &Pkb::GetBeforeTable}
 };
 
 typedef shared_ptr<RelListReverseTable>(Pkb::* GetInverseTableFn)();
@@ -242,14 +248,13 @@ vector<int> Pkb::GetRelFirstArgument(const pql::RelationshipTypes rel_types, con
       if (rel_types == pql::RelationshipTypes::kParent) {
         return {res[0]};
       }
-      return  res;
+      return res;
     }
     const GetInverseTableFn table_getter = mod_use_reverse_table_map_.at(rel_types);
     const shared_ptr<RelListReverseTable> table = (this->*table_getter)();
     return table->GetValueByKey(second_arg_idx);
-
   } catch (exception& e) {
-    return vector<int>{};
+    return EMPTY_INT_LIST;
   }
 }
 
@@ -263,7 +268,7 @@ vector<int> Pkb::GetRelSecondArgument(const pql::RelationshipTypes rel_types, co
     const shared_ptr<RelListTable> table = (this->*table_getter)();
     return  table->GetValueByKey(first_arg_idx);
   } catch (exception& e) {
-    return vector<int>{};
+    return EMPTY_INT_LIST;
   }
 }
 
@@ -290,7 +295,7 @@ unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern, const bool
   constexpr bool is_full = false;
   unordered_set<int> empty_set{};
   const unordered_set<string> res = PatternHelper::GetPatternSetPostfix(usable_pattern, is_full);
-  if (res.size() != 1){
+  if (res.size() != 1) {
     throw BadResultException();
   }
   const string s = *(res.begin());
@@ -300,7 +305,9 @@ unordered_set<int> Pkb::GetAllStmtsWithPattern(const string& pattern, const bool
   } else {
     table = exact_pattern_to_stmt_table_;
   }
-  if (!table->KeyExistsInTable(s)) return empty_set;
+  if (!table->KeyExistsInTable(s)) {
+    return empty_set;
+  }
   return table->GetValueByKey(s);
 }
 
@@ -406,10 +413,17 @@ bool Pkb::AddCalls(const string& key, const vector<string>& value) {
 
 bool Pkb::AddNext(const int key, const vector<int>& value) {
   bool add_success = next_table_->AddKeyValuePair(key, value);
-  // Populate the reverse relation
-  for (const int val : value) {
-    add_success = before_table_->AddKeyValuePair(val, key) && add_success;
+  // Populate reverse relation
+  for (const int v : value) {
+    if (before_table_->KeyExistsInTable(v)) {
+      vector<int> value_to_update = before_table_->GetValueByKey(v);
+      value_to_update.push_back(key);
+      add_success = add_success && before_table_->UpdateKeyWithNewValue(v, value_to_update);
+    } else {
+      add_success = add_success && before_table_->AddKeyValuePair(v, vector<int>{key});
+    }
   }
+
   return add_success;
 }
 
@@ -492,7 +506,7 @@ bool Pkb::UpdateIndexTable(shared_ptr<Table<int, string>> index_to_string_table,
     success = success && index_to_string_table->AddKeyValuePair(curr_string_lst.size(), entity_value);
     return success;
   } catch (exception& e) {
-    return false;
+    throw UpdateIndexTableException();
   }
 }
 
@@ -522,14 +536,17 @@ bool Pkb::AddPattern(const int line_num, const vector<string>& input_set, const 
     }
     return add_success;
   } catch (exception& e) {
-    return false;
+    throw e;
   }
 }
 
 // Table Insertion APIs
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<int>& value) {
   try {
-    if (value.empty()) throw EmptyValueException();
+    if (value.empty()) {
+      throw EmptyValueException();
+    }
+
     switch (table_identifier) {
       case TableIdentifier::kConstant:
         return constant_table_->AddKeyValuePair(key, value);
@@ -541,13 +558,16 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    return false;
+    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
 
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const vector<string>& value) {
   try {
-    if (value.empty()) throw EmptyValueException();
+    if (value.empty()) {
+      throw EmptyValueException();
+    }
+
     switch (table_identifier) {
       case TableIdentifier::kIf:
         return if_table_->AddKeyValuePair(key, value);
@@ -565,13 +585,16 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    return false;
+    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
 
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const int value) {
   try {
-    if (value < 1) throw EmptyValueException();
+    if (value < 1) {
+      throw EmptyValueException();
+    }
+
     switch (table_identifier) {
       case TableIdentifier::kFollows:
         return AddFollows(key, value);
@@ -579,13 +602,16 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    return false;
+    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
 
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, const string& value) {
   try {
-    if (value.empty()) throw EmptyValueException();
+    if (value.empty()) {
+      throw EmptyValueException();
+    }
+
     switch (table_identifier) {
       case TableIdentifier::kAssign:
         return assign_table_->AddKeyValuePair(key, value);
@@ -601,13 +627,16 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    return false;
+    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
 
 bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& key, const vector<string>& value) {
   try {
-    if (value.empty()) throw EmptyValueException();
+    if (value.empty()) {
+      throw EmptyValueException();
+    }
+
     switch (table_identifier) {
       case TableIdentifier::kCalls:
         return AddCalls(key, value);
@@ -619,7 +648,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    return false;
+    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -635,7 +664,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    return false;
+    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -678,7 +707,7 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const int ent
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    return false;
+    throw AddEntityToSetException(static_cast<int>(entity_identifier), e.what());
   }
 }
 
@@ -699,7 +728,7 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const string&
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    return false;
+    throw AddEntityToSetException(static_cast<int>(entity_identifier), e.what());
   }
 }
 
@@ -798,7 +827,7 @@ string Pkb::GetStringByIndex(const IndexTableType index_table_type, const int id
     }
     return table->GetValueByKey(idx);
   } catch (exception& e) {
-    return "";
+    return EMPTY_STRING;
   }
 }
 

@@ -68,17 +68,11 @@ namespace pql {
 
       void ParsePattern();
 
-      void ParsePatternSyntax();
-
-      void ParseAssignPattern(const std::string& synonym);
-
-      void ParseWhilePattern(const std::string& synonym);
-
-      void ParseIfPattern(const std::string& synonym);
+      std::tuple<std::string, std::vector<EntityIdentifier>, std::string, bool> ParsePatternSyntax();
 
       void ParseWith();
 
-      pair<pair<std::shared_ptr<AttrRef>, std::string>, int> ParseWithArgument();
+      std::tuple<std::shared_ptr<AttrRef>, std::string, int> ParseWithArgument();
   };
 
 }
