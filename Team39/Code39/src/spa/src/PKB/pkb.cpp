@@ -73,6 +73,10 @@ shared_ptr<RelListTable> Pkb::GetNextTable() {
   return next_table_;
 }
 
+shared_ptr<RelListTable> Pkb::GetBeforeTable() {
+  return before_table_;
+}
+
 shared_ptr<RelListTable> Pkb::GetModifiesStmtToVariablesTable() {
   return modifies_stmt_to_variables_table_;
 }
@@ -179,7 +183,8 @@ const unordered_map<pql::RelationshipTypes, GetTableFn> reverse_table_map_ = {
   {pql::RelationshipTypes::kCallsT, &Pkb::GetCalledByStarTable},
   {pql::RelationshipTypes::kParent, &Pkb::GetChildTable},
   {pql::RelationshipTypes::kParentT, &Pkb::GetChildStarTable},
-  {pql::RelationshipTypes::kFollowsT, &Pkb::GetFollowsBeforeStarTable}
+  {pql::RelationshipTypes::kFollowsT, &Pkb::GetFollowsBeforeStarTable},
+  {pql::RelationshipTypes::kNext, &Pkb::GetBeforeTable}
 };
 
 typedef shared_ptr<RelListReverseTable>(Pkb::* GetInverseTableFn)();
