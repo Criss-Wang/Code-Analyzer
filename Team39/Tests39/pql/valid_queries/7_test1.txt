@@ -1,0 +1,2 @@
+stmt s;
+Select s with s.stmt# = 1

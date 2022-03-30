@@ -5,16 +5,11 @@
 #define SYNONYM 2
 
 namespace pql_clause {
-  typedef std::vector<int> (Pkb::*GetPatternDomainByVar)(pql::RelationshipTypes, const int);
-  typedef std::vector<std::pair<int, int>>(Pkb::* GetPatternVarPair)(pql::RelationshipTypes);
-  typedef void (PatternClause::* EvaluateLeftFn)(Pkb&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
+  typedef void (PatternClause::* EvaluateLeftFn)(pql_cache::Cache&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
 
-  const map<pql::RelationshipTypes, GetPatternDomainByVar> GetPatternDomainByVarMap = {
-    { pql::kAssignPattern, &Pkb::GetRelFirstArgument }
-  };
-
-  const map<pql::RelationshipTypes, GetPatternVarPair> GetPatternVarPairMap = {
-    { pql::kAssignPattern, &Pkb::GetRelArgumentPairs }
+  const unordered_map<pql::RelationshipTypes, TableIdentifier> RelTypeToTableIdMap = {
+    { pql::kWhilePattern, TableIdentifier::kWhilePattern },
+    { pql::kIfPattern, TableIdentifier::kIfPattern }
   };
 
   const map<int, EvaluateLeftFn> EvaluateLeftFnMap = {
@@ -23,27 +18,47 @@ namespace pql_clause {
     { SYNONYM, &PatternClause::EvaluateLeftSyn }
   };
 
-  void PatternClause::EvaluateLeftWildcard(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain, 
+  void PatternClause::EvaluateLeftWildcard(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    //do nothing if the first argument is wildcard
-    //e.g. pattern a (_, expr), if (_, _, _), while (_, _)
+    //do nothing only if it is of type pattern clause,e.g. pattern a (_, _)  
+    if (type_ != pql::kAssignPattern) {
+      TableIdentifier table_id = RelTypeToTableIdMap.at(type_);
+      std::vector<std::pair<int,int>> pair_domain = cache.GetContainerStmtVarPair(table_id);
+      std::vector<int> domain_with_duplicates = std::move(ExtractFirst<int, int>(pair_domain));
+      std::vector<int> domain_lst = std::move(RemoveDuplicate<int>(domain_with_duplicates));
+
+      UpdateHashmap<int>(domain, pattern_synonym_name_, domain_lst);
+    }
   }
   
-  void PatternClause::EvaluateLeftEnt(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void PatternClause::EvaluateLeftEnt(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int var_index = pkb.GetIndexByString(IndexTableType::kVarIndex, left_);
-    GetPatternDomainByVar fn = GetPatternDomainByVarMap.at(type_);
-    std::vector<int> pattern_domain = {};
-    pattern_domain = (pkb.*fn)(pql::kModifiesS, var_index);
+    int var_index = cache.GetIndexByString(IndexTableType::kVarIndex, left_);
+    std::vector<int> pattern_domain;
+
+    if (type_ == pql::kAssignPattern) {
+      pattern_domain = cache.GetRelFirstArgument(pql::kModifiesS, var_index);
+    } else {
+      TableIdentifier table_id = RelTypeToTableIdMap.at(type_);
+      std::unordered_set<int> domain_set = cache.GetAllStmtsWithPatternVariable(var_index, table_id);
+      pattern_domain.assign(domain_set.begin(), domain_set.end());
+    }
+
     UpdateHashmap<int>(domain, pattern_synonym_name_, pattern_domain);
   }
 
-  void PatternClause::EvaluateLeftSyn(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void PatternClause::EvaluateLeftSyn(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    GetPatternVarPair fn = GetPatternVarPairMap.at(type_);
-    std::vector<std::pair<int, int>> domain_pair_lst = (pkb.*fn)(pql::RelationshipTypes::kCalls);
-    pql_table::Predicate pred(pattern_synonym_name_, left_, domain_pair_lst);
+    std::vector<std::pair<int, int>> domain_pair_lst; 
 
+    if (type_ == pql::kAssignPattern) {
+      domain_pair_lst = cache.GetRelArgumentPairs(pql::kModifiesS);
+    } else {
+      TableIdentifier table_id = RelTypeToTableIdMap.at(type_);
+      domain_pair_lst = cache.GetContainerStmtVarPair(table_id);
+    }
+
+    pql_table::Predicate pred(pattern_synonym_name_, left_, domain_pair_lst);
     predicates.push_back(pred);
   }
 
@@ -55,26 +70,36 @@ namespace pql_clause {
     return name == "_" ? WILDCARD : ENTITY;
   }
 
-  void PatternClause::EvaluateLeft(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void PatternClause::EvaluateLeft(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     int var_type = GetVarType(left_, is_synonymy_left_);
     EvaluateLeftFn fn = EvaluateLeftFnMap.at(var_type);
-    (this->*fn)(pkb, domain, predicates);
+    (this->*fn)(cache, domain, predicates);
   }
 
-  void AssignPatternClause::EvaluateExpr(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain) {
+  void AssignPatternClause::EvaluateExpr(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain) {
     if (expression_ == "_") {
       return;
     }
 
-    std::unordered_set<int> domain_set = pkb.GetAllStmtsWithPattern(expression_, is_exact_);
+    std::unordered_set<int> domain_set = cache.GetAllStmtsWithPattern(expression_, is_exact_);
     std::vector<int> domain_lst(domain_set.begin(), domain_set.end());
     UpdateHashmap<int>(domain, pattern_synonym_name_, domain_lst);
   }
 
-  void AssignPatternClause::Evaluate(Pkb& pkb, std::unordered_map<std::string, std::vector<int>>& domain,
+  void AssignPatternClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    PatternClause::EvaluateLeft(pkb, domain, predicates);
-    AssignPatternClause::EvaluateExpr(pkb, domain);
+    PatternClause::EvaluateLeft(cache, domain, predicates);
+    AssignPatternClause::EvaluateExpr(cache, domain);
+  }
+
+  void IfPatternClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    PatternClause::EvaluateLeft(cache, domain, predicates);
+  }
+  
+  void WhilePatternClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
+      std::vector<pql_table::Predicate>& predicates) {
+    PatternClause::EvaluateLeft(cache, domain, predicates);
   }
 }

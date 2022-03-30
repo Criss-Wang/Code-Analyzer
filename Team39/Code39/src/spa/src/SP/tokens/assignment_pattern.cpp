@@ -89,10 +89,14 @@ void AssignmentPattern::PopulateEntities(Pkb& pkb, int stmt_num) {
   pkb.AddInfoToTable(TableIdentifier::kAssign, stmt_num, pattern_);
   pkb.AddInfoToTable(TableIdentifier::kAssignPattern, stmt_num, pattern_);
 
-  // Add stmt num and rhs constants to Constant Table
-  pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, constants_);
+  if (!constants_.empty()) {
+    // Add stmt num and rhs constants to Constant Table
+    pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, constants_);
+  }
 
-  // Add stmt num and vector of rhs variables into Uses Table
-  pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_);
+  if (!vars_.empty()) {
+    // Add stmt num and vector of rhs variables into Uses Table
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_);
+  }
 
 }

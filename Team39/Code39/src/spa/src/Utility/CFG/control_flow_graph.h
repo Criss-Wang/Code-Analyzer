@@ -7,21 +7,13 @@
 #include "cfg_token.h"
 
 class CFG {
+  private:
+    std::shared_ptr<GraphNode> start_node_;
+
   public:
-    ~CFG() = default;
-
-//    CFG();
-
-//    CFG(string proc_name);
-
-    //CFG(std::vector<CFGToken>& tokens);
-
-    //GraphNode* GetStartNode();
+    CFG(std::shared_ptr<GraphNode>& head);
 
     static std::shared_ptr<GraphNode> GenerateCfg(std::vector<CFGToken>& tokens);
-
-  private:
-    //string proc_name_;
-    GraphNode* start_node_;
-
+    
+    std::shared_ptr<GraphNode> GetHead();
 };

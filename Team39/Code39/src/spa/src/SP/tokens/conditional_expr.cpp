@@ -96,9 +96,14 @@ void ConditionalExpression::PopulateEntities(Pkb& pkb, int stmt_num) {
     pkb.AddEntityToSet(EntityIdentifier::kConstant, i);
   }
 
-  // Add stmt num and constants in cond expr into Constant Table
-  pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, constants_);
+  if (!constants_.empty()) {
+    // Add stmt num and constants in cond expr into Constant Table
+    pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, constants_);
+  }
 
-  // Add stmt num and variables in cond expr into Uses Table
-  pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_);
+  if (!vars_.empty()) {
+    // Add stmt num and variables in cond expr into Uses Table
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_);
+  }
+
 }

@@ -1,0 +1,2 @@
+print p; stmt s;
+Select <p, p.varName> such that Parent(1, 2) such that Uses(p, "a") such that Follows(p, s)

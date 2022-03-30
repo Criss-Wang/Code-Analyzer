@@ -9,7 +9,8 @@
 using namespace std;
 
 //Set of token type that does not have a statement number
-const unordered_set<NodeType> NodeTypeWithoutStmtNumSet{ NodeType::START, NodeType::END, NodeType::DUMMY };
+const unordered_set<NodeType> NodeTypeWithoutStmtNumSet 
+ { NodeType::START, NodeType::END, NodeType::IFEND, NodeType::THENEND, NodeType::WHILEEND };
 
 //Map valid statment types to EntityIdentifier
 const unordered_map<CFGTokenType, EntityIdentifier> NodeTypeToEntityIdentifierMap{
@@ -22,16 +23,15 @@ const unordered_map<CFGTokenType, EntityIdentifier> NodeTypeToEntityIdentifierMa
 };
 
 
-GraphNode::GraphNode() {
- /* this->type_ = NodeType::DUMMY;
-  this->stmt_num_ = {};
-  this->next_node_ = nullptr;
-  this->alternative_node_ = nullptr;*/
-}
+//GraphNode::GraphNode() {
+// /* this->type_ = NodeType::DUMMY;
+//  this->stmt_num_ = {};
+//  this->next_node_ = nullptr;
+//  this->alternative_node_ = nullptr;*/
+//}
 
-//This constructor will be called to create Start, Dummy and End node only
+//This constructor will be called to create nodes without stmt number only
 GraphNode::GraphNode(NodeType type) {
-  //prevent NodeType different than Start/Dummy/End to create a node
   if (NodeTypeWithoutStmtNumSet.find(type) == NodeTypeWithoutStmtNumSet.end()) {
     throw exception();
   }
@@ -65,4 +65,28 @@ void GraphNode::append(CFGToken& token) {
   //Move the end by 1 and add the current statemnt type into stmt_type
   end_ = token.stmt_num_;
   stmt_type_[token.stmt_num_] = NodeTypeToEntityIdentifierMap.at(token.type_);
+}
+
+std::shared_ptr<GraphNode> GraphNode::GetNext() {
+  return next_node_;
+}
+
+std::shared_ptr<GraphNode> GraphNode::GetAlternative() {
+  return alternative_node_;
+}
+
+NodeType GraphNode::GetNodeType() {
+  return type_;
+}
+
+int GraphNode::GetStart() {
+  return start_;
+}
+
+int GraphNode::GetEnd() {
+  return end_;
+}
+
+EntityIdentifier GraphNode::GetStmtType(int stmt_num) {
+  return stmt_type_[stmt_num];
 }

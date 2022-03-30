@@ -55,6 +55,13 @@ class ReversePopulationException final : public exception {
     }
 };
 
+class UpdateIndexTableException final : public exception {
+  public:
+    const char* what() const throw() {
+      return "Failed to update index table";
+    }
+};
+
 class AddInfoToTableException final : public exception {
   private:
     string message;
@@ -62,6 +69,19 @@ class AddInfoToTableException final : public exception {
   public:
     AddInfoToTableException(int table_identifier, string error_message)
       : message("Failed to add info to table " + to_string(table_identifier) + ". " + error_message) {}
+
+    const char* what() const throw() {
+      return message.c_str();
+    }
+};
+
+class AddEntityToSetException final : public exception {
+  private:
+    string message;
+
+  public:
+    AddEntityToSetException(int entity_identifier, string error_message)
+      : message("Failed to add entity to set " + to_string(entity_identifier) + ". " + error_message) {}
 
     const char* what() const throw() {
       return message.c_str();

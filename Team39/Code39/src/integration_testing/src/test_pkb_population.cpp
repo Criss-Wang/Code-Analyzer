@@ -539,6 +539,7 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
   }
 }
 
+/*
 TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population") {
 
   SECTION("4_test1") {
@@ -910,3 +911,4 @@ TEST_CASE("Read/print/assign/call statments for Population") {
 
   }
 }
+*/

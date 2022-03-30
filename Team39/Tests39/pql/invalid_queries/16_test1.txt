@@ -1,0 +1,2 @@
+assign a;
+Select a pattern a(1, _)
