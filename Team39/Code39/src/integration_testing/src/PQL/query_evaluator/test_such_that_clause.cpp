@@ -24,6 +24,7 @@ vector<int> var_domain = { 0, 1, 2, 3, 4, 5, 6 };
 vector<int> call_domain = { 2, 3, 13, 18 };
 vector<int> stmt_domain = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 };
 vector<int> const_domain = { 0, 1, 5, 7, 20, 25 };
+vector<int> assign_domain = { 1, 10, 11, 12, 15, 16, 17, 20, 21, 22, 23 };
 
 /*----------------------------------------Follows------------------------------------------------------------*/
 
@@ -2298,6 +2299,443 @@ TEST_CASE("Checks the correctness of Next* clause when two synonyms are involved
     REQUIRE(!ComparePredicates(predicates, std_predicates));
     nextT_clause.Evaluate(st_cache, query_domain, predicates);
     REQUIRE(query_domain == std_query_domain); 
+    REQUIRE(ComparePredicates(predicates, std_predicates));
+  }
+}
+
+/*-----------------------------------------------------------------------------------------------------------------*/
+
+/*------------------------------------------------Affects------------------------------------------------------------*/
+TEST_CASE("Checks the correctness of Affects clause when both arguments are wildcard") {
+  unordered_set<pair<int, int>, pql_cache::hash_pair_fn> affects_pair = {
+    make_pair(10,15), make_pair(10, 21), make_pair(10,22), make_pair(11,16), make_pair(11, 21), make_pair(11,23),
+    make_pair(12,17), make_pair(12, 22), make_pair(12,23), make_pair(15,15), make_pair(15, 21), make_pair(15,22),
+    make_pair(16,16), make_pair(16, 21), make_pair(16,23), make_pair(17,17), make_pair(17, 22), make_pair(17,23),
+    make_pair(21, 23), make_pair(22, 23)
+  };
+
+  st_cache.pair_cache_[pql::kAffects] = affects_pair;
+  st_cache.pair_cache_boolean_[pql::kAffects] = true;
+
+  SECTION("Both of the argument is wildcard") {
+    // Affects(_, _)
+    query_domain.clear();
+    query_domain["a"] = assign_domain;
+    std_query_domain.clear();
+    std_query_domain["a"] = assign_domain;
+
+    pql_clause::AffectsClause affects_clause("_", false, "_", false);
+
+    REQUIRE(query_domain == std_query_domain);
+    affects_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); //The result should be the same since there is a Follows relationship
+  }
+}
+
+TEST_CASE("Checks correctness of Affects when at least one of the argument is a entity") {
+  SECTION("The first argument is wildcard, second argument is number") {
+    SECTION("Positive case") {
+      //e.g Affects(_, 17)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+      std_query_domain.clear();
+      std_query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsClause affects_clause("_", false, "17", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      affects_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Affects(_, 4)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsClause affects_clause("_", false, "4", false);
+
+      CHECK_THROWS_AS(affects_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("The first argument is number, second argument is wildcard") {
+    SECTION("Positive case") {
+      //e.g Affects(12, _)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+      std_query_domain.clear();
+      std_query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsClause affects_clause("12", false, "_", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      affects_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Affects(7, _)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsClause affects_clause("7", false, "_", false);
+
+      CHECK_THROWS_AS(affects_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("Both arguments are number") {
+    SECTION("Positive case") {
+      //e.g Affects(10, 22)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+      std_query_domain.clear();
+      std_query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsClause affects_clause("10", false, "22", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      affects_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Affects(16, 11)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsClause affects_clause("16", false, "11", false);
+
+      CHECK_THROWS_AS(affects_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::FalseRelationException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of Affects clause when one synonym is involved") {
+  SECTION("First argument is synonym, second argument is wildcard") {
+    // Affects(a, _)
+    query_domain.clear();
+    query_domain["a"] = assign_domain;
+    vector<int> std_domain({ 10, 11, 12, 15, 16, 17, 21, 22 });
+    std_query_domain.clear();
+    std_query_domain["a"] = std_domain;
+
+    pql_clause::AffectsClause affects_clause("a", true, "_", false);
+
+    REQUIRE(query_domain != std_query_domain);
+    affects_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); 
+  }
+
+  SECTION("The first argument is synonym, second argument is number") {
+    SECTION("Positive case") {
+      //e.g Affects(a, 22)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+      vector<int> std_domain({ 10, 12, 15, 17 });
+      std_query_domain.clear();
+      std_query_domain["a"] = std_domain;
+
+      pql_clause::AffectsClause affects_clause("a", true, "22", false);
+
+      REQUIRE(query_domain != std_query_domain);
+      affects_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Affects(a, 1)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsClause affects_clause("a", true, "1", false);
+
+      CHECK_THROWS_AS(affects_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("First argument is wildcard, second argument is synonym") {
+    //e.g Affects(_, a1)
+    query_domain.clear();
+    query_domain["a1"] = assign_domain;
+    vector<int> std_domain({ 15, 16, 17, 21, 22, 23 });
+    std_query_domain.clear();
+    std_query_domain["a1"] = std_domain;
+
+    pql_clause::AffectsClause affects_clause("_", false, "a1", true);
+
+    REQUIRE(query_domain != std_query_domain);
+    affects_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain);
+  }
+
+  SECTION("First argument is number, second argument is synonym") {
+    SECTION("Positive case") {
+      //e.g Affects(15, a1)
+      query_domain.clear();
+      query_domain["a1"] = assign_domain;
+      vector<int> std_domain({ 15, 21, 22 });
+      std_query_domain.clear();
+      std_query_domain["a1"] = std_domain;
+
+      pql_clause::AffectsClause affects_clause("15", false, "a1", true);
+
+      REQUIRE(query_domain != std_query_domain);
+      affects_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Affects(5, a1)
+      query_domain.clear();
+      query_domain["a1"] = stmt_domain;
+
+      pql_clause::AffectsClause affects_clause("5", false, "a1", true);
+
+      CHECK_THROWS_AS(affects_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of Affects clause when two synonyms are involved") {
+  SECTION("Both arguments are synonym") {
+    // Affects(a, a1)
+    query_domain.clear();
+    predicates.clear();
+    query_domain["a"] = assign_domain;
+    query_domain["a1"] = assign_domain;
+    std_query_domain.clear();
+    std_query_domain["a"] = assign_domain;
+    std_query_domain["a1"] = assign_domain;
+    vector<pair<int, int>> std_predicates_lst({ make_pair(10,15), make_pair(10, 21), make_pair(10,22), 
+      make_pair(11,16), make_pair(11, 21), make_pair(11,23), make_pair(12,17), make_pair(12, 22), make_pair(12,23), 
+      make_pair(15,15), make_pair(15, 21), make_pair(15,22), make_pair(16,16), make_pair(16, 21), make_pair(16,23), 
+      make_pair(17,17), make_pair(17, 22), make_pair(17,23), make_pair(21, 23), make_pair(22, 23) });
+    string first = "a";
+    string second = "a1";
+    std_predicates.clear();
+    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
+
+    pql_clause::AffectsClause affects_clause("a", true, "a1", true);
+
+    REQUIRE(query_domain == std_query_domain);
+    REQUIRE(!ComparePredicates(predicates, std_predicates));
+    affects_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); //Will only modify the predicates
+    REQUIRE(ComparePredicates(predicates, std_predicates));
+  }
+}
+/*-----------------------------------------------------------------------------------------------------------------*/
+
+/*------------------------------------------------Affects*------------------------------------------------------------*/
+TEST_CASE("Checks the correctness of Affects* clause when both arguments are wildcard") {
+  SECTION("Both of the argument is wildcard") {
+    // Affects*(_, _)
+    query_domain.clear();
+    query_domain["a"] = assign_domain;
+    std_query_domain.clear();
+    std_query_domain["a"] = assign_domain;
+
+    pql_clause::AffectsTClause affectsT_clause("_", false, "_", false);
+
+    REQUIRE(query_domain == std_query_domain);
+    affectsT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); //The result should be the same since there is a Follows relationship
+  }
+}
+
+TEST_CASE("Checks correctness of Affects* when at least one of the argument is a entity") {
+  SECTION("The first argument is wildcard, second argument is number") {
+    SECTION("Positive case") {
+      //e.g Affects*(_, 23)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+      std_query_domain.clear();
+      std_query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsTClause affectsT_clause("_", false, "23", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      affectsT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Affects*(_, 14)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsTClause affectsT_clause("_", false, "14", false);
+
+      CHECK_THROWS_AS(affectsT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("The first argument is number, second argument is wildcard") {
+    SECTION("Positive case") {
+      //e.g Affects*(22, _)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+      std_query_domain.clear();
+      std_query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsTClause affectsT_clause("22", false, "_", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      affectsT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Affects*(23, _)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsTClause affectsT_clause("23", false, "_", false);
+
+      CHECK_THROWS_AS(affectsT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("Both arguments are number") {
+    SECTION("Positive case") {
+      //e.g Affects*(10, 23)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+      std_query_domain.clear();
+      std_query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsTClause affectsT_clause("10", false, "23", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      affectsT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Affects*(16, 11)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsTClause affectsT_clause("16", false, "11", false);
+
+      CHECK_THROWS_AS(affectsT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::FalseRelationException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of Affects* clause when one synonym is involved") {
+  SECTION("First argument is synonym, second argument is wildcard") {
+    // Affects*(a, _)
+    query_domain.clear();
+    query_domain["a"] = assign_domain;
+    vector<int> std_domain({ 10, 11, 12, 15, 16, 17, 21, 22 });
+    std_query_domain.clear();
+    std_query_domain["a"] = std_domain;
+
+    pql_clause::AffectsTClause affectsT_clause("a", true, "_", false);
+
+    REQUIRE(query_domain != std_query_domain);
+    affectsT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); 
+  }
+
+  SECTION("The first argument is synonym, second argument is number") {
+    SECTION("Positive case") {
+      //e.g Affects*(a, 23)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+      vector<int> std_domain({ 10, 11, 12, 15, 16, 17, 21, 22 });
+      std_query_domain.clear();
+      std_query_domain["a"] = std_domain;
+
+      pql_clause::AffectsTClause affectsT_clause("a", true, "23", false);
+
+      REQUIRE(query_domain != std_query_domain);
+      affectsT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Affects*(a, 1)
+      query_domain.clear();
+      query_domain["a"] = assign_domain;
+
+      pql_clause::AffectsTClause affectsT_clause("a", true, "1", false);
+
+      CHECK_THROWS_AS(affectsT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("First argument is wildcard, second argument is synonym") {
+    //e.g Affects*(_, a1)
+    query_domain.clear();
+    query_domain["a1"] = assign_domain;
+    vector<int> std_domain({ 15, 16, 17, 21, 22, 23 });
+    std_query_domain.clear();
+    std_query_domain["a1"] = std_domain;
+
+    pql_clause::AffectsTClause affectsT_clause("_", false, "a1", true);
+
+    REQUIRE(query_domain != std_query_domain);
+    affectsT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain);
+  }
+
+  SECTION("First argument is number, second argument is synonym") {
+    SECTION("Positive case") {
+      //e.g Affects*(15, a1)
+      query_domain.clear();
+      query_domain["a1"] = assign_domain;
+      vector<int> std_domain({ 15, 21, 22, 23 });
+      std_query_domain.clear();
+      std_query_domain["a1"] = std_domain;
+
+      pql_clause::AffectsTClause affectsT_clause("15", false, "a1", true);
+
+      REQUIRE(query_domain != std_query_domain);
+      affectsT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Affects(5, a1)
+      query_domain.clear();
+      query_domain["a1"] = stmt_domain;
+
+      pql_clause::AffectsTClause affectsT_clause("5", false, "a1", true);
+
+      CHECK_THROWS_AS(affectsT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of Affects* clause when two synonyms are involved") {
+  SECTION("Both arguments are synonym") {
+    // Affects*(a, a1)
+    query_domain.clear();
+    predicates.clear();
+    query_domain["a"] = assign_domain;
+    query_domain["a1"] = assign_domain;
+    std_query_domain.clear();
+    std_query_domain["a"] = assign_domain;
+    std_query_domain["a1"] = assign_domain;
+    vector<pair<int, int>> std_predicates_lst({ make_pair(10,15), make_pair(10, 21), make_pair(10,22), make_pair(10,23),
+      make_pair(11,16), make_pair(11, 21), make_pair(11,23), make_pair(12,17), make_pair(12, 22), make_pair(12,23), 
+      make_pair(15,15), make_pair(15, 21), make_pair(15,22), make_pair(15,23), make_pair(16,16), make_pair(16, 21), 
+      make_pair(16,23), make_pair(17,17), make_pair(17, 22), make_pair(17,23), make_pair(21, 23), make_pair(22, 23) });
+    string first = "a";
+    string second = "a1";
+    std_predicates.clear();
+    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
+
+    pql_clause::AffectsTClause affectsT_clause("a", true, "a1", true);
+
+    REQUIRE(query_domain == std_query_domain);
+    REQUIRE(!ComparePredicates(predicates, std_predicates));
+    affectsT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); //Will only modify the predicates
     REQUIRE(ComparePredicates(predicates, std_predicates));
   }
 }

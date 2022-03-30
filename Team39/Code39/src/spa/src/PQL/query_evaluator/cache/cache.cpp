@@ -73,7 +73,7 @@ namespace pql_cache {
 
 
   vector<int> Cache::GetComputeInverseRelDomain(pql::RelationshipTypes type, int right) {
-    if (!inverse_rel_cache_boolean_[pql::kNextT]) {
+    if (!inverse_rel_cache_boolean_[type]) {
       GenerateCache fn = GenerateInverseRelCacheMap.at(type);
       (this->*fn)(type);
     }
