@@ -971,7 +971,7 @@ TEST_CASE("Checks the correctness of UsesS clause when two synonyms are involved
     REQUIRE(ComparePredicates(predicates, std_predicates));
   }
 }
-/*-----------------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------------------*/
 
 /*--------------------------------------------ModifiesS-----------------------------------------------------------------*/
 //In Modifies, the first argument cannot be a wildcard
@@ -1123,3 +1123,947 @@ TEST_CASE("Checks the correctness of ModifiesS clause when two synonyms are invo
   }
 }
 
+/*-----------------------------------------------------------------------------------------------------------------*/
+
+/*--------------------------------------------UsesP-----------------------------------------------------------------*/
+TEST_CASE("Checks the correctness of UsesP clause when no synonym is involved") {
+  SECTION("The first argument is procedure name, second argument is wildcard") {
+    SECTION("Positive case") {
+      //e.g Uses("x", _)
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+      std_query_domain.clear();
+      std_query_domain["p"] = proc_domain;
+
+      pql_clause::UsesPClause usesP_clause("x", false, "_", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      usesP_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case when procedure name does exist") {
+      //e.g Uses("readPoint", _)
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+
+      pql_clause::UsesPClause usesP_clause("readPoint", false, "_", false);
+
+      CHECK_THROWS_AS(usesP_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+
+    SECTION("Negative case when procedure name does not exist") {
+      //e.g Uses("foo", _)
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+
+      pql_clause::UsesPClause usesP_clause("foo", false, "_", false);
+
+      CHECK_THROWS_AS(usesP_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::ProcedureDoesNotExistException);
+    }
+  }
+
+  SECTION("First argument is a string, second argument is a string") {
+    SECTION("Positive case") {
+      //e.g Uses("x", "flag") 
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
+
+      pql_clause::UsesPClause usesP_clause("x", false, "flag", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      usesP_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Uses("x", "y")
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::UsesPClause usesP_clause("x", false, "y", false);
+
+      CHECK_THROWS_AS(usesP_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::FalseRelationException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of UsesP clause when one synonym is involved") {
+  SECTION("First argument is synonym, second argument is wildcard") {
+    // Uses(p, _)
+    query_domain.clear();
+    query_domain["p"] = proc_domain;
+    vector<int> std_domain({ 0, 2, 3 });
+    std_query_domain.clear();
+    std_query_domain["p"] = std_domain;
+
+    pql_clause::UsesPClause usesP_clause("p", true, "_", false);
+
+    REQUIRE(query_domain != std_query_domain);
+    usesP_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain);
+  }
+
+  SECTION("The first argument is synonym, second argument is string") {
+    SECTION("Positive case") {
+      //e.g Uses(p, "flag")
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+      vector<int> std_stmt_domain({ 0, 2 });
+      std_query_domain.clear();
+      std_query_domain["p"] = std_stmt_domain;
+
+      pql_clause::UsesPClause usesP_clause("p", true, "flag", false);
+
+      REQUIRE(query_domain != std_query_domain);
+      usesP_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case when the variable does exist") {
+      //e.g UsesS(p, "normSq")
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+
+      pql_clause::UsesPClause usesP_clause("p", true, "normSq", false);
+
+      CHECK_THROWS_AS(usesP_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+    
+  SECTION("First argument is procedure name, second argument is synonym") {
+    SECTION("Positive case") {
+      //e.g Uses("computeCentroid", v)
+      query_domain.clear();
+      query_domain["v"] = var_domain;
+      vector<int> std_var_domain({ 0, 2, 3, 4, 5 });
+      std_query_domain.clear();
+      std_query_domain["v"] = std_var_domain;
+
+      pql_clause::UsesPClause usesP_clause("computeCentroid", false, "v",true);
+
+      REQUIRE(query_domain != std_query_domain);
+      usesP_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Uses("readPoint", v)
+      query_domain.clear();
+      query_domain["v"] = var_domain;
+
+      pql_clause::UsesPClause usesP_clause("readPoint", false, "v", true);
+
+      CHECK_THROWS_AS(usesP_clause.Evaluate(st_cache, query_domain, predicates) , pql_exceptions::EmptyDomainException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of UsesP clause when two synonyms are involved") {
+  SECTION("Both arguments are synonym") {
+    // UsesS(p, v)
+    query_domain.clear();
+    predicates.clear();
+    query_domain["p"] = proc_domain;
+    query_domain["v"] = var_domain;
+    std_query_domain.clear();
+    std_query_domain["p"] = proc_domain;
+    std_query_domain["v"] = var_domain;
+    vector<pair<int, int>> std_predicates_lst({ make_pair(0, 0), make_pair(0, 1), make_pair(0, 2), make_pair(0, 3), 
+        make_pair(0, 4), make_pair(0, 5), make_pair(2, 1), make_pair(2, 4), make_pair(3, 0),  
+        make_pair(3, 2), make_pair(3, 3), make_pair(3, 4), make_pair(3, 5) });
+    string first = "p";
+    string second = "v";
+    std_predicates.clear();
+    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
+
+    pql_clause::UsesPClause usesP_clause("p", true, "v", true);
+
+    REQUIRE(query_domain == std_query_domain);
+    REQUIRE(!ComparePredicates(predicates, std_predicates));
+    usesP_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain);
+    REQUIRE(ComparePredicates(predicates, std_predicates));
+  }
+}
+/*----------------------------------------------------------------------------------------------------------------------*/
+
+/*--------------------------------------------ModifiesP-----------------------------------------------------------------*/
+TEST_CASE("Checks the correctness of ModifiesP clause when no synonym is involved") {
+  SECTION("The first argument is string, second argument is wildcard") {
+    SECTION("Positive case") {
+      //e.g Modifies(main, _)
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+      std_query_domain.clear();
+      std_query_domain["p"] = proc_domain;
+
+      pql_clause::ModifiesPClause modifiesP_clause("main", false, "_", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      modifiesP_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Modifies("x", _)
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+
+      pql_clause::ModifiesPClause modifiesP_clause("x", false, "_", false);
+
+      CHECK_THROWS_AS(modifiesP_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("First argument is a string, second argument is a string") {
+    SECTION("Positive case") {
+      //e.g Modifies("readPoint", "x")
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
+
+      pql_clause::ModifiesPClause modifiesP_clause("readPoint", false, "x", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      modifiesP_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Modifies("readPoint", "flag")
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::ModifiesPClause modifiesP_clause("readPoint", false, "flag", false);
+
+      CHECK_THROWS_AS(modifiesP_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::FalseRelationException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of ModifiesP clause when one synonym is involved") {
+  SECTION("First argument is synonym, second argument is wildcard") {
+    // Modifies(p, _)
+    query_domain.clear();
+    query_domain["p"] = proc_domain;
+    std_query_domain.clear();
+    vector<int> std_domain = { 0, 1, 3 };
+    std_query_domain["p"] = std_domain;
+
+    pql_clause::ModifiesPClause modifiesP_clause("p", true, "_", false);
+
+    REQUIRE(query_domain != std_query_domain);
+    modifiesP_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain);
+  }
+
+  SECTION("The first argument is synonym, second argument is string") {
+    SECTION("Positive case") {
+      //e.g Modifies(s, "count")
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+      vector<int> std_domain({ 0, 3 });
+      std_query_domain.clear();
+      std_query_domain["p"] = std_domain;
+
+      pql_clause::ModifiesPClause modifiesP_clause("p", true, "count", false);
+
+      REQUIRE(query_domain != std_query_domain);
+      modifiesP_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+  }
+
+  SECTION("First argument is number, second argument is synonym") {
+    SECTION("Positive case") {
+      //e.g Modifies("readPoint", v)
+      query_domain.clear();
+      query_domain["v"] = var_domain;
+      vector<int> std_domain({ 2, 3 });
+      std_query_domain.clear();
+      std_query_domain["v"] = std_domain;
+
+      pql_clause::ModifiesPClause modifiesP_clause("readPoint", false, "v", true);
+
+      REQUIRE(query_domain != std_query_domain);
+      modifiesP_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Uses("x", v)
+      query_domain.clear();
+      query_domain["v"] = var_domain;
+
+      pql_clause::ModifiesPClause modifiesP_clause("x", false, "v", true);
+
+      CHECK_THROWS_AS(modifiesP_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of ModifiesP clause when two synonyms are involved") {
+  SECTION("Both arguments are synonym") {
+    // Modifies(s, v)
+    query_domain.clear();
+    predicates.clear();
+    query_domain["p"] = proc_domain;
+    query_domain["v"] = var_domain;
+    std_query_domain.clear();
+    std_query_domain["p"] = proc_domain;
+    std_query_domain["v"] = var_domain;
+    vector<pair<int, int>> std_predicates_lst({ make_pair(0, 0), make_pair(0, 1), make_pair(0, 2), make_pair(0, 3),
+        make_pair(0, 4), make_pair(0, 5), make_pair(0, 6), make_pair(1, 2), make_pair(1, 3), 
+        make_pair(3, 0), make_pair(3, 1), make_pair(3, 2), make_pair(3, 3), make_pair(3, 4), make_pair(3, 5), make_pair(3, 6) });
+    string first = "p";
+    string second = "v";
+    std_predicates.clear();
+    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
+
+    pql_clause::ModifiesPClause modifiesP_clause("p", true, "v", true);
+
+    REQUIRE(query_domain == std_query_domain);
+    REQUIRE(!ComparePredicates(predicates, std_predicates));
+    modifiesP_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain);
+    REQUIRE(ComparePredicates(predicates, std_predicates));
+  }
+}
+/*-----------------------------------------------------------------------------------------------------------------*/
+
+/*-------------------------------------------Calls-----------------------------------------------------------------*/
+TEST_CASE("Checks the correctness of Calls clause when both arguments are wildcard") {
+  SECTION("Both of the argument is wildcard") {
+    // Calls(_, _)
+    query_domain.clear();
+    query_domain["s"] = stmt_domain;
+    std_query_domain.clear();
+    std_query_domain["s"] = stmt_domain;
+
+    pql_clause::CallsClause calls_clause("_", false, "_", false);
+
+    REQUIRE(query_domain == std_query_domain);
+    calls_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); 
+  }
+}
+
+TEST_CASE("Checks correctness for Calls when at least one of the argument is a entity") {
+  SECTION("The first argument is wildcard, second argument is procedure") {
+    SECTION("Positive case") {
+      //e.g Calls(_, "x")
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
+
+      pql_clause::CallsClause calls_clause("_", false, "x", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      calls_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Calls(_, "main")
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::CallsClause calls_clause("_", false, "main", false);
+
+      CHECK_THROWS_AS(calls_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("The first argument is procedure, second argument is wildcard") {
+    SECTION("Positive case") {
+      //e.g Calls("computeCentroid", _)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
+
+      pql_clause::CallsClause calls_clause("computeCentroid", false, "_", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      calls_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Calls("readPoint", _)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::CallsClause calls_clause("readPoint", false, "_", false);
+
+      CHECK_THROWS_AS(calls_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("Both arguments are strings") {
+    SECTION("Positive case") {
+      //e.g Calls("main", "computeCentroid")
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+      std_query_domain.clear();
+      std_query_domain["p"] = proc_domain;
+
+      pql_clause::CallsClause calls_clause("main", false, "computeCentroid", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      calls_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Calls("main", "readPoint")
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+
+      pql_clause::CallsClause calls_clause("main", false, "readPoint", false);
+
+      CHECK_THROWS_AS(calls_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::FalseRelationException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of Calls clause when one synonym is involved") {
+  SECTION("First argument is synonym, second argument is wildcard") {
+    // Calls(p, _)
+    query_domain.clear();
+    query_domain["p"] = proc_domain;
+    vector<int> std_domain({ 0, 3 });
+    std_query_domain.clear();
+    std_query_domain["p"] = std_domain;
+
+    pql_clause::CallsClause calls_clause("p", true, "_", false);
+
+    REQUIRE(query_domain != std_query_domain);
+    calls_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); 
+  }
+
+  SECTION("The first argument is synonym, second argument is procedure") {
+    SECTION("Positive case") {
+      //e.g Calls(p, "readPoint")
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+      vector<int> std_domain({ 3 });
+      std_query_domain.clear();
+      std_query_domain["p"] = std_domain;
+
+      pql_clause::CallsClause calls_clause("p", true, "readPoint", false);
+
+      REQUIRE(query_domain != std_query_domain);
+      calls_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Calls(p, "main")
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+
+      pql_clause::CallsClause calls_clause("p", true, "main", false);
+
+      CHECK_THROWS_AS(calls_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("First argument is wildcard, second argument is synonym") {
+    //e.g Calls(_, q)
+    query_domain.clear();
+    query_domain["q"] = proc_domain;
+    vector<int> std_domain({ 1, 2, 3 });
+    std_query_domain.clear();
+    std_query_domain["q"] = std_domain;
+
+    pql_clause::CallsClause calls_clause("_", false, "q", true);
+
+    REQUIRE(query_domain != std_query_domain);
+    calls_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain);
+  }
+
+  SECTION("First argument is procedure, second argument is synonym") {
+    SECTION("Positive case") {
+      //e.g Calls("main", q)
+      query_domain.clear();
+      query_domain["q"] = proc_domain;
+      vector<int> std_domain({ 2, 3 });
+      std_query_domain.clear();
+      std_query_domain["q"] = std_domain;
+
+      pql_clause::CallsClause calls_clause("main", false, "q", true);
+
+      REQUIRE(query_domain != std_query_domain);
+      calls_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Calls("readPoint", q)
+      query_domain.clear();
+      query_domain["q"] = proc_domain;
+
+      pql_clause::CallsClause calls_clause("readPoint", false, "q", true);
+
+      CHECK_THROWS_AS(calls_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of Calls clause when two synonyms are involved") {
+  SECTION("Both arguments are synonym") {
+    // Calls(p, q)
+    query_domain.clear();
+    predicates.clear();
+    query_domain["p"] = proc_domain;
+    query_domain["q"] = proc_domain;
+    std_query_domain.clear();
+    std_query_domain["p"] = proc_domain;
+    std_query_domain["q"] = proc_domain;
+    vector<pair<int, int>> std_predicates_lst({ make_pair(0,2), make_pair(0,3), make_pair(3,1) });
+    string first = "p";
+    string second = "q";
+    std_predicates.clear();
+    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
+
+    pql_clause::CallsClause calls_clause("p", true, "q", true);
+
+    REQUIRE(query_domain == std_query_domain);
+    REQUIRE(!ComparePredicates(predicates, std_predicates));
+    calls_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); //Will only modify the predicates
+    REQUIRE(ComparePredicates(predicates, std_predicates));
+  }
+}
+/*-----------------------------------------------------------------------------------------------------------------*/
+
+/*-------------------------------------------Calls*-----------------------------------------------------------------*/
+TEST_CASE("Checks the correctness of Calls* clause when both arguments are wildcard") {
+  SECTION("Both of the argument is wildcard") {
+    // Calls*(_, _)
+    query_domain.clear();
+    query_domain["s"] = stmt_domain;
+    std_query_domain.clear();
+    std_query_domain["s"] = stmt_domain;
+
+    pql_clause::CallsTClause callsT_clause("_", false, "_", false);
+
+    REQUIRE(query_domain == std_query_domain);
+    callsT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); 
+  }
+}
+
+TEST_CASE("Checks correctness for Calls* when at least one of the argument is a entity") {
+  SECTION("The first argument is wildcard, second argument is procedure") {
+    SECTION("Positive case") {
+      //e.g Calls*(_, "x")
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
+
+      pql_clause::CallsTClause callsT_clause("_", false, "x", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      callsT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Calls*(_, "main")
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::CallsTClause callsT_clause("_", false, "main", false);
+
+      CHECK_THROWS_AS(callsT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("The first argument is procedure, second argument is wildcard") {
+    SECTION("Positive case") {
+      //e.g Calls*("computeCentroid", _)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
+
+      pql_clause::CallsTClause callsT_clause("computeCentroid", false, "_", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      callsT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Calls*("readPoint", _)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::CallsTClause callsT_clause("readPoint", false, "_", false);
+
+      CHECK_THROWS_AS(callsT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("Both arguments are strings") {
+    SECTION("Positive case") {
+      //e.g Calls*("main", "readPoint")
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+      std_query_domain.clear();
+      std_query_domain["p"] = proc_domain;
+
+      pql_clause::CallsTClause callsT_clause("main", false, "readPoint", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      callsT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Calls*("readPoint", "x")
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+
+      pql_clause::CallsTClause callsT_clause("readPoint", false, "x", false);
+
+      CHECK_THROWS_AS(callsT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::FalseRelationException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of Calls* clause when one synonym is involved") {
+  SECTION("First argument is synonym, second argument is wildcard") {
+    // Calls*(p, _)
+    query_domain.clear();
+    query_domain["p"] = proc_domain;
+    vector<int> std_domain({ 0, 3 });
+    std_query_domain.clear();
+    std_query_domain["p"] = std_domain;
+
+    pql_clause::CallsTClause callsT_clause("p", true, "_", false);
+
+    REQUIRE(query_domain != std_query_domain);
+    callsT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); 
+  }
+
+  SECTION("The first argument is synonym, second argument is procedure") {
+    SECTION("Positive case") {
+      //e.g Calls*(p, "readPoint")
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+      vector<int> std_domain({ 0, 3 });
+      std_query_domain.clear();
+      std_query_domain["p"] = std_domain;
+
+      pql_clause::CallsTClause callsT_clause("p", true, "readPoint", false);
+
+      REQUIRE(query_domain != std_query_domain);
+      callsT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Calls(p, "main")
+      query_domain.clear();
+      query_domain["p"] = proc_domain;
+
+      pql_clause::CallsTClause callsT_clause("p", true, "main", false);
+
+      CHECK_THROWS_AS(callsT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("First argument is wildcard, second argument is synonym") {
+    //e.g Calls*(_, q)
+    query_domain.clear();
+    query_domain["q"] = proc_domain;
+    vector<int> std_domain({ 1, 2, 3 });
+    std_query_domain.clear();
+    std_query_domain["q"] = std_domain;
+
+    pql_clause::CallsTClause callsT_clause("_", false, "q", true);
+
+    REQUIRE(query_domain != std_query_domain);
+    callsT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain);
+  }
+
+  SECTION("First argument is procedure, second argument is synonym") {
+    SECTION("Positive case") {
+      //e.g Calls*("main", q)
+      query_domain.clear();
+      query_domain["q"] = proc_domain;
+      vector<int> std_domain({ 1, 2, 3 });
+      std_query_domain.clear();
+      std_query_domain["q"] = std_domain;
+
+      pql_clause::CallsTClause callsT_clause("main", false, "q", true);
+
+      REQUIRE(query_domain != std_query_domain);
+      callsT_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Calls("readPoint", q)
+      query_domain.clear();
+      query_domain["q"] = proc_domain;
+
+      pql_clause::CallsTClause callsT_clause("readPoint", false, "q", true);
+
+      CHECK_THROWS_AS(callsT_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of Calls* clause when two synonyms are involved") {
+  SECTION("Both arguments are synonym") {
+    // Calls(p, q)
+    query_domain.clear();
+    predicates.clear();
+    query_domain["p"] = proc_domain;
+    query_domain["q"] = proc_domain;
+    std_query_domain.clear();
+    std_query_domain["p"] = proc_domain;
+    std_query_domain["q"] = proc_domain;
+    vector<pair<int, int>> std_predicates_lst({ make_pair(0,1), make_pair(0,2), make_pair(0,3), make_pair(3,1) });
+    string first = "p";
+    string second = "q";
+    std_predicates.clear();
+    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
+
+    pql_clause::CallsTClause callsT_clause("p", true, "q", true);
+
+    REQUIRE(query_domain == std_query_domain);
+    REQUIRE(!ComparePredicates(predicates, std_predicates));
+    callsT_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); //Will only modify the predicates
+    REQUIRE(ComparePredicates(predicates, std_predicates));
+  }
+}
+/*-----------------------------------------------------------------------------------------------------------------*/
+
+/*------------------------------------------------Next------------------------------------------------------------*/
+TEST_CASE("Checks the correctness of Next clause when both arguments are wildcard") {
+  SECTION("Both of the argument is wildcard") {
+    // Next(_, _)
+    query_domain.clear();
+    query_domain["s"] = stmt_domain;
+    std_query_domain.clear();
+    std_query_domain["s"] = stmt_domain;
+
+    pql_clause::NextClause next_clause("_", false, "_", false);
+
+    REQUIRE(query_domain == std_query_domain);
+    next_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); //The result should be the same since there is a Follows relationship
+  }
+}
+
+TEST_CASE("Checks correctness of Next when at least one of the argument is a entity") {
+  //SECTION("The first argument is wildcard, second argument is number") {
+  //  SECTION("Positive case") {
+  //    //e.g Next(_, 3)
+  //    query_domain.clear();
+  //    query_domain["s"] = stmt_domain;
+  //    std_query_domain.clear();
+  //    std_query_domain["s"] = stmt_domain;
+
+  //    pql_clause::NextClause next_clause("_", false, "3", false);
+
+  //    REQUIRE(query_domain == std_query_domain);
+  //    next_clause.Evaluate(st_cache, query_domain, predicates);
+  //    REQUIRE(query_domain == std_query_domain);
+  //  }
+
+  //  SECTION("Negative case") {
+  //    //e.g Next(_, 4)
+  //    query_domain.clear();
+  //    query_domain["s"] = stmt_domain;
+
+  //    pql_clause::NextClause next_clause("_", false, "4", false);
+
+  //    CHECK_THROWS_AS(next_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+  //  }
+  //}
+
+  SECTION("The first argument is number, second argument is wildcard") {
+    SECTION("Positive case") {
+      //e.g Next(1, _)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
+
+      pql_clause::NextClause next_clause("1", false, "_", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      next_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Next(3, _)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::NextClause next_clause("3", false, "_", false);
+
+      CHECK_THROWS_AS(next_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("Both arguments are number") {
+    SECTION("Positive case") {
+      //e.g Next(10, 11)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      std_query_domain.clear();
+      std_query_domain["s"] = stmt_domain;
+
+      pql_clause::NextClause next_clause("10", false, "11", false);
+
+      REQUIRE(query_domain == std_query_domain);
+      next_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Next(3, 4)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::NextClause next_clause("3", false, "4", false);
+
+      CHECK_THROWS_AS(next_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::FalseRelationException);
+    }
+  }
+}
+
+TEST_CASE("Checks the correctness of Next clause when one synonym is involved") {
+  SECTION("First argument is synonym, second argument is wildcard") {
+    // Next(s, _)
+    query_domain.clear();
+    query_domain["s"] = stmt_domain;
+    vector<int> std_domain({ 1, 2, 4, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24 });
+    std_query_domain.clear();
+    std_query_domain["s"] = std_domain;
+
+    pql_clause::NextClause next_clause("s", true, "_", false);
+
+    REQUIRE(query_domain != std_query_domain);
+    next_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain); 
+  }
+
+  SECTION("The first argument is synonym, second argument is number") {
+    SECTION("Positive case") {
+      //e.g Next(s, 14)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      vector<int> std_domain({ 13, 18 });
+      std_query_domain.clear();
+      std_query_domain["s"] = std_domain;
+
+      pql_clause::NextClause next_clause("s", true, "14", false);
+
+      REQUIRE(query_domain != std_query_domain);
+      next_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Next(s, 1)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::NextClause next_clause("s", true, "1", false);
+
+      CHECK_THROWS_AS(next_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+
+  SECTION("First argument is wildcard, second argument is synonym") {
+    //e.g Next(_, s)
+    query_domain.clear();
+    query_domain["s"] = stmt_domain;
+    vector<int> std_domain({ 2,3,5,7,8,9,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25 });
+    std_query_domain.clear();
+    std_query_domain["s"] = std_domain;
+
+    pql_clause::NextClause next_clause("_", false, "s", true);
+
+    REQUIRE(query_domain != std_query_domain);
+    next_clause.Evaluate(st_cache, query_domain, predicates);
+    REQUIRE(query_domain == std_query_domain);
+  }
+
+  SECTION("First argument is number, second argument is synonym") {
+    SECTION("Positive case") {
+      //e.g Next(14, s)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+      vector<int> std_domain({ 15, 19 });
+      std_query_domain.clear();
+      std_query_domain["s"] = std_domain;
+
+      pql_clause::NextClause next_clause("14", false, "s", true);
+
+      REQUIRE(query_domain != std_query_domain);
+      next_clause.Evaluate(st_cache, query_domain, predicates);
+      REQUIRE(query_domain == std_query_domain);
+    }
+
+    SECTION("Negative case") {
+      //e.g Next(9, s)
+      query_domain.clear();
+      query_domain["s"] = stmt_domain;
+
+      pql_clause::NextClause next_clause("9", false, "s", true);
+
+      CHECK_THROWS_AS(next_clause.Evaluate(st_cache, query_domain, predicates), pql_exceptions::EmptyDomainException);
+    }
+  }
+}
+
+//TEST_CASE("Checks the correctness of Follows clause when two synonyms are involved") {
+//  SECTION("Both arguments are synonym") {
+//    // Follows(s, s1)
+//    query_domain.clear();
+//    predicates.clear();
+//    query_domain["s"] = stmt_domain;
+//    query_domain["s1"] = stmt_domain;
+//    std_query_domain.clear();
+//    std_query_domain["s"] = stmt_domain;
+//    std_query_domain["s1"] = stmt_domain;
+//    vector<pair<int, int>> std_predicates_lst({ make_pair(1,2), make_pair(2,3), make_pair(4,5), 
+//        make_pair(6,7), make_pair(7,8), make_pair(8,9), make_pair(10,11), make_pair(11,12), make_pair(12,13),
+//        make_pair(13,14), make_pair(14,19), make_pair(15,16), make_pair(16,17), make_pair(17,18), make_pair(19,23),
+//        make_pair(21,22), make_pair(23,24), make_pair(24,25) });
+//    string first = "s";
+//    string second = "s1";
+//    std_predicates.clear();
+//    std_predicates.push_back(pql_table::Predicate(first, second, std_predicates_lst));
+//
+//    pql_clause::FollowsClause follows_clause("s", true, "s1", true);
+//
+//    REQUIRE(query_domain == std_query_domain);
+//    REQUIRE(!ComparePredicates(predicates, std_predicates));
+//    follows_clause.Evaluate(st_cache, query_domain, predicates);
+//    REQUIRE(query_domain == std_query_domain); //Will only modify the predicates
+//    REQUIRE(ComparePredicates(predicates, std_predicates));
+//  }
+//}

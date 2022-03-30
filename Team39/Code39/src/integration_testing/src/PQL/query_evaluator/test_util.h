@@ -278,15 +278,16 @@ static Pkb InitializePkb() {
     pkb.AddInfoToTable(TableIdentifier::kParent, 19, vector<int>({20, 21, 22}));
 
     //Add procedure calls relationship
-    pkb.AddInfoToTable(TableIdentifier::kCalls, "main", vector<string>({ "computeCentroid", "printResults"}));
+    pkb.AddInfoToTable(TableIdentifier::kCalls, "main", vector<string>({ "computeCentroid", "x"}));
     pkb.AddInfoToTable(TableIdentifier::kCalls, "computeCentroid", vector<string>({ "readPoint" }));
 
     //Add procedure modifies relationship
-    pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "main", vector<string>({ "flag" }));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "main", vector<string>({ "flag", "count", "cenX", "cenY", "normSq" }));
     pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "readPoint", vector<string>({ "x", "y" }));
-    pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "computeCentroid", vector<string>({ "count", "cenX", "cenY", "flag", "normSq"}));
+    pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "computeCentroid", vector<string>({ "count", "cenX", "cenY", "flag", "normSq" }));
 
     //Add procedure uses relationship
+    pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, "main", vector<string>({ "flag", "count", "cenX", "x", "cenY", "y" }));
     pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, "x", vector<string>({ "flag", "cenX" }));
     pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, "computeCentroid", vector<string>({ "count", "cenX", "x", "cenY", "y" }));
 
