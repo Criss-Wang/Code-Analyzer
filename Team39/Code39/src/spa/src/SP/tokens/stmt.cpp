@@ -164,13 +164,15 @@ void IfStmt::PopulateEntities(Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num_);
   pkb.AddEntityToSet(EntityIdentifier::kIf, stmt_num_);
 
-  // Add stmt num and variables in cond expr into If Table
-  pkb.AddInfoToTable(TableIdentifier::kIf, stmt_num_, cond_expr_.GetVars());
+  cond_expr_.PopulateEntities(pkb, stmt_num_);
+
+  if (!cond_expr_.GetVars().empty()) {
+    // Add stmt num and variables in cond expr into If Table
+    pkb.AddInfoToTable(TableIdentifier::kIf, stmt_num_, cond_expr_.GetVars());
+  }
 
   // Add stmt num and cond expr into if_pattern_to_stmt Table
   //pkb.AddInfoToTable(TableIdentifier::kIfPattern, stmt_num_, cond_expr_.GetVars());
-
-  cond_expr_.PopulateEntities(pkb, stmt_num_);
 }
 
 WhileStmt::WhileStmt(std::vector<Token>& tokens, int stmt_num) {
@@ -212,13 +214,15 @@ void WhileStmt::PopulateEntities(Pkb& pkb) {
   pkb.AddEntityToSet(EntityIdentifier::kStmt, stmt_num_);
   pkb.AddEntityToSet(EntityIdentifier::kWhile, stmt_num_);
 
-  // Add stmt num and variables in cond expr into While Table
-  pkb.AddInfoToTable(TableIdentifier::kWhile, stmt_num_, cond_expr_.GetVars());
+  cond_expr_.PopulateEntities(pkb, stmt_num_);
+
+  if (!cond_expr_.GetVars().empty()) {
+    // Add stmt num and variables in cond expr into While Table
+    pkb.AddInfoToTable(TableIdentifier::kWhile, stmt_num_, cond_expr_.GetVars());
+  }
 
   // Add stmt num and cond expr into while_pattern_to_stmt Table
   //pkb.AddInfoToTable(TableIdentifier::kWhilePattern, stmt_num_, cond_expr_.GetVars());
-
-  cond_expr_.PopulateEntities(pkb, stmt_num_);
 }
 
 CallStmt::CallStmt(std::vector<Token>& tokens, int stmt_num) {
