@@ -243,7 +243,7 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         stmt_lst = {};
 
         cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-        CFG::GenerateCfg(cfg_tokens);
+        cfg::CFG::GenerateCfg(cfg_tokens);
         // TODO: change return type of GenerateCfg to CFG
         //pkb.AddCfg(CFG::GenerateCfg(cfg_tokens));
 
@@ -324,7 +324,7 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
   proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-  CFG::GenerateCfg(cfg_tokens);
+  cfg::CFG::GenerateCfg(cfg_tokens);
   // TODO: change return type of GenerateCfg to CFG
   //pkb.AddCfg(CFG::GenerateCfg(cfg_tokens));
 

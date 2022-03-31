@@ -13,7 +13,7 @@
 
 class Pkb {
   private:
-    vector<shared_ptr<CFG>> cfg_list_;
+    vector<shared_ptr<cfg::CFG>> cfg_list_;
 
     // Entity tables
     shared_ptr<AssignTable> assign_table_ = make_shared<AssignTable>();
@@ -110,7 +110,7 @@ class Pkb {
     bool AddEntityToSet(EntityIdentifier entity_identifier, int entity_val);
     bool AddEntityToSet(EntityIdentifier entity_identifier, const string& entity_val);
 
-    bool AddCfg(shared_ptr<CFG> cfg);
+    bool AddCfg(shared_ptr<cfg::CFG> cfg);
 
     // Get tables
     shared_ptr<RelTable> GetFollowsTable();
@@ -126,6 +126,7 @@ class Pkb {
     shared_ptr<RelListTable> GetCalledByTable();
     shared_ptr<RelListTable> GetCalledByStarTable();
     shared_ptr<RelListTable> GetNextTable();
+    shared_ptr<RelListTable> GetBeforeTable();
     shared_ptr<RelListTable> GetModifiesStmtToVariablesTable();
     shared_ptr<RelListReverseTable> GetModifiesVariableToStmtsTable();
     shared_ptr<RelListTable> GetModifiesProcToVariablesTable();
@@ -152,7 +153,7 @@ class Pkb {
     unordered_set<int> GetProcSet();
     unordered_set<int> GetConstantSet();
 
-    vector<shared_ptr<CFG>> GetCfgList();
+    vector<shared_ptr<cfg::CFG>> GetCfgList();
 
     // Relationship utility APIs for PQL
     bool IsRelationshipHolds(pql::RelationshipTypes rel_types, int key, int value);

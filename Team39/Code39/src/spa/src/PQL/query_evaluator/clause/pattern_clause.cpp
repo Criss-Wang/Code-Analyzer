@@ -1,5 +1,6 @@
 #include "pattern_clause.h"
 
+#define INVALID_INDEX -1
 #define WILDCARD 0
 #define ENTITY 1
 #define SYNONYM 2
@@ -34,6 +35,11 @@ namespace pql_clause {
   void PatternClause::EvaluateLeftEnt(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     int var_index = cache.GetIndexByString(IndexTableType::kVarIndex, left_);
+    
+    if (var_index == INVALID_INDEX) {
+      throw pql_exceptions::VariableDoesNotExistException();
+    }
+    
     std::vector<int> pattern_domain;
 
     if (type_ == pql::kAssignPattern) {
