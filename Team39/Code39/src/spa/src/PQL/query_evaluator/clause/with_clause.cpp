@@ -117,15 +117,14 @@ namespace pql_clause {
     std::vector<int> left_domain = domain[left_syn_name];
     std::vector<int> right_domain = domain[right_syn_name];
 
+    std::unordered_set<int> left_set(left_domain.begin(), left_domain.end());
     std::unordered_set<std::pair<int, int>, hash_pair_fn> s;
     
     //the attribute value will be same as the int representation
-    for (int& left_val : left_domain) {
-      s.insert(std::make_pair(left_val, left_val));
-    }
-
     for (int& right_val : right_domain) {
-      s.insert(std::make_pair(right_val, right_val));
+      if (left_set.find(right_val) != left_set.end()) {
+        s.insert(std::make_pair(right_val, right_val));
+      }
     }
 
     std::vector<std::pair<int, int>> pred_lst(s.begin(), s.end());
@@ -146,11 +145,16 @@ namespace pql_clause {
   }
 
   //This function maps the value to a list of entities such that entity.attribute = value
-  std::unordered_map<int, std::vector<int>> GenerateAttrToEntitiesMap(pql_cache::Cache& cache, std::vector<int>& domain_lst, pql::AttrRef& attr_ref) {
-    std::unordered_map<int, std::vector<int>> res_map;
+  std::unordered_map<std::string, std::vector<int>> GenerateAttrToEntitiesMap(pql_cache::Cache& cache, std::vector<int>& domain_lst, pql::AttrRef& attr_ref) {
+    std::unordered_map<std::string, std::vector<int>> res_map;
     
     for (int& ent_val : domain_lst) {
-      int attribute_val = GetAttributeByType(cache, attr_ref.GetSynDeclaration(), ent_val);
+      int attribute_index = StmtTypeWithStringAttrSet.find(attr_ref.GetSynDeclaration()) != StmtTypeWithStringAttrSet.end() 
+          ? GetAttributeByType(cache, attr_ref.GetSynDeclaration(), ent_val) : ent_val;
+
+      std::string attribute_val = attr_ref.GetAttrIdentifier() == AttrIdentifier::kProcName
+          ? cache.GetStringByIndex(IndexTableType::kProc, attribute_index)
+          : cache.GetStringByIndex(IndexTableType::kVar, attribute_index);
 
       if (res_map.find(attribute_val) == res_map.end()) {
         res_map[attribute_val] = std::vector<int> { ent_val };
@@ -179,30 +183,27 @@ namespace pql_clause {
 
     std::unordered_set<std::pair<int, int>, hash_pair_fn> s;
 
-    std::unordered_map<int, std::vector<int>> left_attr_ent_map = GenerateAttrToEntitiesMap(cache, left_domain, *left_attr_);
-    std::unordered_map<int, std::vector<int>> right_attr_ent_map = GenerateAttrToEntitiesMap(cache, right_domain, *right_attr_);
+    std::unordered_map<std::string, std::vector<int>> left_attr_ent_map = GenerateAttrToEntitiesMap(cache, left_domain, *left_attr_);
+    std::unordered_map<std::string, std::vector<int>> right_attr_ent_map = GenerateAttrToEntitiesMap(cache, right_domain, *right_attr_);
 
     //We iterate through curr_map which has shorter length
     bool is_left_map_smaller = left_attr_ent_map.size() < right_attr_ent_map.size();
-    std::unordered_map<int, std::vector<int>> curr_map = is_left_map_smaller ? left_attr_ent_map : right_attr_ent_map;
-    std::unordered_map<int, std::vector<int>> other_map = !is_left_map_smaller ? left_attr_ent_map : right_attr_ent_map;
+    std::unordered_map<std::string, std::vector<int>>* curr_map = is_left_map_smaller ? &left_attr_ent_map : &right_attr_ent_map;
+    std::unordered_map<std::string, std::vector<int>>* other_map = !is_left_map_smaller ? &left_attr_ent_map : &right_attr_ent_map;
 
-    for (std::unordered_map<int, std::vector<int>>::iterator curr_it = curr_map.begin(); 
-        curr_it != curr_map.end(); curr_it++) {
-      int curr_attr_val = curr_it->first;
+    for (auto curr_it = curr_map->begin(); 
+        curr_it != curr_map->end(); curr_it++) {
+      std::string curr_attr_val = curr_it->first;
 
-      if (other_map.find(curr_attr_val) == other_map.end()) {
+      if (other_map->find(curr_attr_val) == other_map->end()) {
         continue;
       }
 
-      std::vector<int> curr_domain = curr_it->second;
-      std::vector<int> other_domain = other_map[curr_attr_val];
-
-      AddCrossProductIntoSet(s, curr_domain, other_domain);
+      AddCrossProductIntoSet(s, curr_it->second, (*other_map)[curr_attr_val]);
     }
 
-    std::string first = is_left_map_smaller ? left_syn_name : right_syn_name;
-    std::string second = !is_left_map_smaller ? left_syn_name : right_syn_name;
+    std::string first = is_left_map_smaller ? std::move(left_syn_name) : std::move(right_syn_name);
+    std::string second = !is_left_map_smaller ? std::move(left_syn_name) : std::move(right_syn_name);
     std::vector<std::pair<int, int>> pred_lst(s.begin(), s.end());
     pql_table::Predicate predicate(first, second, pred_lst);
     predicates.push_back(predicate);
@@ -210,6 +211,11 @@ namespace pql_clause {
 
   void WithClause::EvaluateAttrAttr(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
+    //need to consider cases that is trivially true, e.g. procedure.procName = procedure.procName
+    if (left_attr_->GetSynName() == right_attr_->GetSynName()) {
+        return;
+    }
+    
     if (left_attr_->GetAttrIdentifier() == AttrIdentifier::kStmtNum
         || left_attr_->GetAttrIdentifier() == AttrIdentifier::kValue) {
       EvaluateAttrAttrNum(cache, domain, predicates);

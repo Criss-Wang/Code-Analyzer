@@ -73,7 +73,7 @@ namespace pql_cache {
 
 
   vector<int> Cache::GetComputeInverseRelDomain(pql::RelationshipTypes type, int right) {
-    if (!inverse_rel_cache_boolean_[pql::kNextT]) {
+    if (!inverse_rel_cache_boolean_[type]) {
       GenerateCache fn = GenerateInverseRelCacheMap.at(type);
       (this->*fn)(type);
     }
@@ -146,35 +146,6 @@ namespace pql_cache {
     return pkb_->GetRelArgumentPairs(rel_types);
   }
 
-  int Cache::Dfs(unordered_map<int, vector<int>>& table_to_refer, unordered_map<int, vector<int>>& table_to_update, int key) {
-    if (table_to_update.find(key) != table_to_update.end()
-        || table_to_refer.find(key) == table_to_refer.end()) {
-      //we immediately return if the key is already populated
-      //or the key does not have any relationship
-      return key;
-    }
-
-    vector<int> children_lst = table_to_refer[key];
-    vector<int> ans;
-
-    for (int child_key : children_lst) {
-      int end_val = Dfs(table_to_refer, table_to_update, child_key);
-      ans.push_back(end_val);
-
-      if (table_to_update.find(end_val) != table_to_update.end()) {
-        //children of child key wil satisfy the star relationship
-        vector<int> value = table_to_update[end_val];
-        ans.insert(ans.end(), value.begin(), value.end());
-      }
-    }
-
-    if (!ans.empty()) {
-      table_to_update[key] = move(ans);
-    }
-
-    return key;
-  }
-
   /*--------------------------------------------------API for pattern clause------------------------------------------------------------*/
   unordered_set<int> Cache::GetAllStmtsWithPattern(const string& pattern, bool is_exact) {
     return pkb_->GetAllStmtsWithPattern(pattern, is_exact);
@@ -209,7 +180,7 @@ namespace pql_cache {
 
     do {
       is_same = true;
-      for (auto& it = curr_table.begin(); it != curr_table.end(); it++) {
+      for (auto it = curr_table.begin(); it != curr_table.end(); it++) {
         unordered_set<int> curr_neigh = it->second;
         for (const int child : curr_neigh) {
           if (child == it->first) {
@@ -338,7 +309,7 @@ namespace pql_cache {
   }
 
   void Cache::GenerateAffectsPairDomain(pql::RelationshipTypes type) {
-    vector<shared_ptr<CFG>> cfg_lst = pkb_->GetCfgList();
+    vector<shared_ptr<cfg::CFG>> cfg_lst = pkb_->GetCfgList();
 
     for (auto& cfg_ptr : cfg_lst) {
       ComputeAffectsRelationship(*cfg_ptr->GetHead());  
@@ -357,32 +328,31 @@ namespace pql_cache {
     }
   }
 
-  void Cache::ConstructAssignAffectPair(int assign_stmt,
-      unordered_map<int, unordered_set<int>>& last_modified_table, unordered_set<pair<int, int>, hash_pair_fn>& affect_set ) {
+  void Cache::ConstructAndAddAssignAffectPair(int assign_stmt, unordered_map<int, unordered_set<int>>& last_modified_table) {
     vector<int> used_vars = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kUsesS, assign_stmt);
 
     for (int& used_var : used_vars) {
         //check used_var in LMT
       if (last_modified_table.find(used_var) != last_modified_table.end()) {
         for (const int left : last_modified_table[used_var]) {
-          affect_set.insert(make_pair(left, assign_stmt));
+          pair_cache_[pql::kAffects].insert(make_pair(left, assign_stmt));
         }
       }
     }
   }
 
-  void Cache::ComputeAffectsRelationship(GraphNode& head) {
+  void Cache::ComputeAffectsRelationship(cfg::GraphNode& head) {
     //LMT maps the variable to the stmt that modifies it  
     //It is mapped to a vector because we could have multiple assign statements modifying same variable
     //e.g. if (1==1) then {a = a + 1;} else {a = a + 1;}
     unordered_map<int, unordered_set<int>> last_modified_table;
     stack<unordered_map<int, unordered_set<int>>> last_modified_stack;
-    stack<shared_ptr<GraphNode>> ptr_stack;
+    stack<shared_ptr<cfg::GraphNode>> ptr_stack;
     
-    shared_ptr<GraphNode> curr = head.GetNext();
+    shared_ptr<cfg::GraphNode> curr = head.GetNext();
 
-    while (curr->GetNodeType() != NodeType::END) {
-      if (curr->GetNodeType() == NodeType::STMT) {
+    while (curr->GetNodeType() != cfg::NodeType::END) {
+      if (curr->GetNodeType() == cfg::NodeType::STMT) {
         int start = curr->GetStart();
         int end = curr->GetEnd();
 
@@ -392,7 +362,7 @@ namespace pql_cache {
 
           if (curr_type == EntityIdentifier::kAssign) {
             int modvar = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt)[0];
-            ConstructAssignAffectPair(curr_stmt, last_modified_table, pair_cache_[pql::kAffects]);
+            ConstructAndAddAssignAffectPair(curr_stmt, last_modified_table);
             //Add LastModified(modvar, curr_stmt)
             last_modified_table[modvar] = unordered_set<int>{ curr_stmt };
           }
@@ -412,7 +382,7 @@ namespace pql_cache {
 
         curr = curr->GetNext();
 
-      } else if (curr->GetNodeType() == NodeType::IF) {
+      } else if (curr->GetNodeType() == cfg::NodeType::IF) {
 
         unordered_map<int, unordered_set<int>> last_modified_table_else = last_modified_table;
         //we push this copy for else branch later
@@ -420,14 +390,14 @@ namespace pql_cache {
         ptr_stack.push(curr);
         curr = curr->GetNext();
 
-      } else if (curr->GetNodeType() == NodeType::WHILE) {
+      } else if (curr->GetNodeType() == cfg::NodeType::WHILE) {
         //make a copy
         unordered_map<int, unordered_set<int>> before_last_modified_table = last_modified_table;
         last_modified_stack.push(before_last_modified_table);
         ptr_stack.push(curr);
         curr = curr->GetNext();
 
-      } else if (curr->GetNodeType() == NodeType::THENEND) {
+      } else if (curr->GetNodeType() == cfg::NodeType::THENEND) {
 
         unordered_map<int, unordered_set<int>> last_modified_table_else = move(last_modified_stack.top());
         last_modified_stack.pop();
@@ -436,11 +406,11 @@ namespace pql_cache {
         //we do a move here since moving is faster than copying and last_modified_table_else will not be reference anymore
         last_modified_table = move(last_modified_table_else);
         
-        shared_ptr<GraphNode> if_node = move(ptr_stack.top());
+        shared_ptr<cfg::GraphNode> if_node = move(ptr_stack.top());
         ptr_stack.pop();
         curr = if_node->GetAlternative();
 
-      } else if (curr->GetNodeType() == NodeType::IFEND) {
+      } else if (curr->GetNodeType() == cfg::NodeType::IFEND) {
         
         unordered_map<int, unordered_set<int >> last_modified_table_then = move(last_modified_stack.top());
         last_modified_stack.pop();
@@ -450,7 +420,7 @@ namespace pql_cache {
       } else {
         //It will be WhileEnd until this point
 
-        shared_ptr<GraphNode> while_node = move(ptr_stack.top());
+        shared_ptr<cfg::GraphNode> while_node = move(ptr_stack.top());
         ptr_stack.pop();
         unordered_map<int, unordered_set<int >> before_last_modified_table = move(last_modified_stack.top());
         last_modified_stack.pop();

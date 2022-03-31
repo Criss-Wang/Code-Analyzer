@@ -48,7 +48,7 @@ namespace pql {
 
       pql_solver::Solver solver(query);
       pql_table::InterTable table = solver.Solve();
-      Formatter formatter = Formatter(&cache);
+      pql_formatter::Formatter formatter(&cache);
       
       return formatter.FormatRawInput(table, selected_syns);
 

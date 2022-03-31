@@ -732,7 +732,7 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const string&
   }
 }
 
-bool Pkb::AddCfg(shared_ptr<CFG> cfg) {
+bool Pkb::AddCfg(shared_ptr<cfg::CFG> cfg) {
   try {
     this->cfg_list_.push_back(cfg);
     return true;
@@ -866,6 +866,6 @@ vector<pair<string, int>> Pkb::GetAllStringIndexPairs(const IndexTableType index
   }
 }
 
-vector<shared_ptr<CFG>> Pkb::GetCfgList() {
+vector<shared_ptr<cfg::CFG>> Pkb::GetCfgList() {
   return this->cfg_list_;
 }
