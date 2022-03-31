@@ -54,8 +54,7 @@ void TestWrapper::evaluate(std::string query, std::list<std::string>& results) {
     pql::Parser parser = pql::Parser(query);
     parser.Parse();
     pql::Query queryObj = parser.GetQuery();
-    Pkb* pkb_ptr = &pkb;
-    std::vector<std::string> res = EvaluateQuery(queryObj, pkb_ptr);
+    std::vector<std::string> res = EvaluateQuery(&queryObj, &pkb);
 
     for (string s : res) {
         results.push_back(s);

@@ -24,27 +24,29 @@ namespace pql {
     }
   }
 
-  std::vector<std::string> EvaluateQuery(Query& query, Pkb* pkb) {
+  std::vector<std::string> EvaluateQuery(Query* query, Pkb* pkb) {
     try {
-      if (!query.IsSemanticallyValid()) {
+      if (!query->IsSemanticallyValid()) {
         throw pql_exceptions::SemanticallyInvalidException();
       }
 
-      bool is_return_boolean = query.GetBoolean();
+      /*bool is_return_boolean = query.GetBoolean();
       std::vector<shared_ptr<pql_clause::Clause>> clauses = query.GetClauses();
       std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
-      std::vector<pql::AttrRef> selected_syns = query.GetAttrRef();
       std::vector<pql_table::Predicate> predicates;
-      std::unordered_map<std::string, std::vector<int>> domain;
-      pql_cache::Cache cache(pkb);
+      std::unordered_map<std::string, std::vector<int>> domain;*/
 
-      GetAllDomain(synonyms, domain, *pkb);
+      /*GetAllDomain(synonyms, domain, *pkb);
 
       for (auto& clause : clauses) {
         clause->Evaluate(cache, domain, predicates);
-      }
+      }*/
       
-      pql_solver::Solver solver(&domain, &predicates, synonyms, selected_syns, is_return_boolean);
+      std::vector<pql::AttrRef> selected_syns = query->GetAttrRef();
+
+      pql_cache::Cache cache(pkb);
+
+      pql_solver::Solver solver(query);
       pql_table::InterTable table = solver.Solve();
       Formatter formatter = Formatter(&cache);
       
@@ -53,7 +55,7 @@ namespace pql {
     } catch (pql_exceptions::TrueResultException e) {
       return BOOLEAN_TRUE_LIST;
     } catch (pql_exceptions::EmptyResultException e) {      
-      if (query.GetBoolean()) {
+      if (query->GetBoolean()) {
         return BOOLEAN_FALSE_LIST;
       }
       return EMPTY_LIST;

@@ -10,19 +10,8 @@
 
 namespace pql_solver {
 
-  Solver::Solver(std::unordered_map<std::string, std::vector<int>>* domain,
-    std::vector<pql_table::Predicate>* preds,
-    std::vector<pql::Synonym>& syn_list, std::vector<pql::AttrRef>& selected_syns,
-    bool is_return_boolean) {
-    
-    predicates_ = preds;
-    return_syns_ = selected_syns;
-    is_return_boolean_ = is_return_boolean;
-
-    for (pql::Synonym& syn : syn_list) {
-      pql_table::InterTable table(syn, (*domain)[syn.GetName()]);
-      tables_.push_back(table);
-    }
+  Solver::Solver(pql::Query* query) {
+    query_ = query;
   }
 
   int Solver::GetTableIndex(std::string& name) {
@@ -57,7 +46,7 @@ namespace pql_solver {
     for (auto& table : tables_) {
       std::vector<int> return_idxs;
 
-      for (auto& attr_ref : return_syns_) {
+      for (auto& attr_ref : query_->GetAttrRef()) {
         std::string syn_name = attr_ref.GetSynName();
 
         if (added_syns.find(syn_name) == added_syns.end()
@@ -88,10 +77,6 @@ namespace pql_solver {
   pql_table::InterTable Solver::ExtractResult() {
     //At this stage all the tabls will not be empty
     //Or there will be no tables which means there are no constraints
-    if (is_return_boolean_) {
-      throw pql_exceptions::TrueResultException();
-    }
-
     std::vector<pql_table::InterTable> tables = GetReturnTables();
     pql_table::InterTable final_table = MergeComponents(tables);
     
@@ -99,9 +84,11 @@ namespace pql_solver {
   }
 
   pql_table::InterTable Solver::Solve() {
- 
+    
+
+
     for (pql_table::Predicate& pred : *predicates_) {
-    Consume(pred);
+      Consume(pred);
     }
 
     return ExtractResult();
