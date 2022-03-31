@@ -495,3 +495,4 @@ TEST_CASE("Entity Attribute Operations") {
     REQUIRE(stmt_res.empty());
   }
 }
+
