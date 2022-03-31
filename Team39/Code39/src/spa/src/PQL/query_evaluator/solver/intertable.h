@@ -36,7 +36,7 @@ namespace pql_table {
 
       InterTable MergeAndFilter(InterTable& t1, Predicate& pred);
 
-      bool equal(InterTable& t);
+      bool equal(InterTable t);
   }; 
 }
 
