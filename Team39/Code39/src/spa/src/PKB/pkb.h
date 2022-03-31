@@ -80,6 +80,9 @@ class Pkb {
     unordered_set<int> variable_set_;
     unordered_set<int> procedure_set_;
 
+    shared_ptr<Table<pql::RelationshipTypes, vector<pair<int, int>>>> argument_pairs_table_ =
+      make_shared<Table<pql::RelationshipTypes, vector<pair<int, int>>>>();
+
     // Insert all possible expression patterns for a statement
     bool AddPattern(int line_num, const vector<string>& input_set, const string& input, TableIdentifier table_identifier);
     bool AddParent(int key, const vector<int>& value);
