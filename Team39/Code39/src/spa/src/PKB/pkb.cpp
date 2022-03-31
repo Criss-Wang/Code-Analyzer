@@ -558,7 +558,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -585,7 +585,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -602,7 +602,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -627,7 +627,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -648,7 +648,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -664,7 +664,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -707,7 +707,7 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const int ent
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddEntityToSetException(static_cast<int>(entity_identifier), e.what());
+    throw AddEntityException(static_cast<int>(entity_identifier), e.what());
   }
 }
 
@@ -728,7 +728,7 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const string&
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddEntityToSetException(static_cast<int>(entity_identifier), e.what());
+    throw AddEntityException(static_cast<int>(entity_identifier), e.what());
   }
 }
 
