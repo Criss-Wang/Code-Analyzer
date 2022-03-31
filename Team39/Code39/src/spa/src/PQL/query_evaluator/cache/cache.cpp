@@ -180,7 +180,7 @@ namespace pql_cache {
 
     do {
       is_same = true;
-      for (auto& it = curr_table.begin(); it != curr_table.end(); it++) {
+      for (auto it = curr_table.begin(); it != curr_table.end(); it++) {
         unordered_set<int> curr_neigh = it->second;
         for (const int child : curr_neigh) {
           if (child == it->first) {

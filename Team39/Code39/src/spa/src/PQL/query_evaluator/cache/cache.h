@@ -100,7 +100,7 @@ namespace pql_cache {
 
       void GenerateNextTOrAffectsTPairDomain(pql::RelationshipTypes type);
 
-      static unordered_map<int, unordered_set<int>> Cache::PopulateStarRelationship(unordered_map<int, unordered_set<int>>& rel_table);
+      static unordered_map<int, unordered_set<int>> PopulateStarRelationship(unordered_map<int, unordered_set<int>>& rel_table);
     /*---------------------------------------------------------Affect---------------------------------------------------------------*/
       void GenerateAffectsRelDomain(pql::RelationshipTypes type);
 
