@@ -46,7 +46,7 @@ namespace pql {
 
       pql_cache::Cache cache(pkb);
 
-      pql_solver::Solver solver(query);
+      pql_solver::Solver solver(query, &cache);
       pql_table::InterTable table = solver.Solve();
       pql_formatter::Formatter formatter(&cache);
       

@@ -40,6 +40,20 @@ namespace pql_clause {
   const std::set<pql::RelationshipTypes> RightProcedureTypeSet{ pql::kCalls, pql::kCallsT };
   const std::set<pql::RelationshipTypes> RightVariableTypeSet{ pql::kModifiesS, pql::kModifiesP, pql::kUsesS, pql::kUsesP };
 
+  std::vector<std::string> SuchThatClause::GetInvovledSynonyms() {
+    std::vector<std::string> res;
+
+    if (is_synonym_left_) {
+      res.push_back(left_);
+    }
+
+    if (is_synonym_right_) {
+      res.push_back(right_);
+    }
+
+    return res;
+  }
+
   int GetIntArgumentRepresentation(pql_cache::Cache& cache, pql::RelationshipTypes type, std::string& name, bool is_left) {
     //variable argument : ModifiesS/ModifiesP/UsesS/UsesP right argument
     //procedure argument : Calls/CallsT both argument and ModifiesP/UsesP left argument

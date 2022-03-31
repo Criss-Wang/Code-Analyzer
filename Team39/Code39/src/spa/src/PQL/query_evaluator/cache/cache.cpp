@@ -9,6 +9,10 @@
 using namespace std;
 
 namespace pql_cache {
+  /*-------------------------------------------------------API for domain---------------------------------------------------------*/
+  unordered_set<int> Cache::GetAllEntity(const EntityIdentifier entity_identifier) {
+    return pkb_->GetAllEntity(entity_identifier);
+  }
 
   /*----------------------------------------------------API for attribute------------------------------------------------------------*/
   int Cache::GetIndexByString(IndexTableType index_table_type, const string& entity_name) {

@@ -36,6 +36,20 @@ namespace pql_clause {
     }
   };
 
+  std::vector<std::string> WithClause::GetInvovledSynonyms() {
+    std::vector<std::string> res;
+
+    if (is_attr_ref_left_) {
+      res.push_back(left_attr_->GetSynName());
+    }
+
+    if (is_attr_ref_right_) {
+      res.push_back(right_attr_->GetSynName());
+    }
+
+    return res;
+  }
+
   int GetArgumentType(bool is_attr_ref) {
       return is_attr_ref ? ATTR_REF : ENTITY;
   }

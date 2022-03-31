@@ -19,6 +19,16 @@ namespace pql_clause {
     { SYNONYM, &PatternClause::EvaluateLeftSyn }
   };
 
+  std::vector<std::string> PatternClause::GetInvovledSynonyms() {
+    std::vector<std::string> res({pattern_synonym_name_});
+
+    if (is_synonym_left_) {
+      res.push_back(left_);
+    }
+
+    return res;
+  }
+
   void PatternClause::EvaluateLeftWildcard(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
     //do nothing only if it is of type pattern clause,e.g. pattern a (_, _)  

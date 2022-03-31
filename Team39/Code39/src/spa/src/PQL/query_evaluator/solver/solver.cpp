@@ -9,9 +9,56 @@
 
 
 namespace pql_solver {
+  Ufds::Ufds(std::vector<pql::Synonym>* synonyms, std::vector<std::shared_ptr<pql_clause::Clause>>* clauses) {
+    synonyms_ = synonyms;
+    clauses_ = clauses;
 
-  Solver::Solver(pql::Query* query) {
+    for (int i = 0; i < synonyms->size(); i++) {
+      parent_.push_back(i);
+      rank_.push_back(0);
+      name_to_idx_map_[(*synonyms)[i].GetName()] = i;
+    }
+  }
+
+  int Ufds::Find(int idx) {
+    if (parent_[idx] == idx) {
+      return idx;
+    } else {
+      parent_[idx] = Find(parent_[idx]);
+      return parent_[idx];
+    }
+  }
+
+  int Ufds::Union(int i, int j) {
+    int idx_i = Find(i);
+    int idx_j = Find(j);
+    int to_be_insert = idx_i;
+    int to_be_delete = idx_j;
+
+    if (idx_i != idx_j) {
+      if (rank_[idx_i] > rank_[idx_j]) {
+        parent_[idx_j] = idx_i;
+      } else {
+        parent_[idx_i] = idx_j;
+        to_be_insert = idx_j;
+        to_be_delete = idx_i;
+
+        if (rank_[idx_i] == rank_[idx_j]) {
+          rank_[idx_j] += 1;
+        }
+      }
+
+      syn_to_clauses_map_[to_be_insert].insert(syn_to_clauses_map_[to_be_insert].end(),
+            syn_to_clauses_map_[to_be_delete].begin(), syn_to_clauses_map_[to_be_delete].end());
+      syn_to_clauses_map_[to_be_delete].clear();
+    }
+
+    return to_be_insert;
+  }
+
+  Solver::Solver(pql::Query* query, pql_cache::Cache* cache) {
     query_ = query;
+    cache_ = cache;
   }
 
   int Solver::GetTableIndex(std::string& name) {
@@ -84,8 +131,8 @@ namespace pql_solver {
   }
 
   pql_table::InterTable Solver::Solve() {
+   
     
-
 
     for (pql_table::Predicate& pred : *predicates_) {
       Consume(pred);

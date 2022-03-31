@@ -55,6 +55,9 @@ namespace pql_cache {
       }
 
     public:
+    /*-------------------------------------------------------API for domain---------------------------------------------------------*/
+      unordered_set<int> GetAllEntity(const EntityIdentifier entity_identifier);
+
     /*-------------------------------------------------------API for clause----------------------------------------------------------*/
       bool IsComputeRelHolds(pql::RelationshipTypes type, int left, int right);
 
