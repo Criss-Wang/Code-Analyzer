@@ -58,6 +58,26 @@ stack<vector<pair<int, int>>> populateNextRelationshipForIf(stack<vector<pair<in
   return last_stmts_in_if;
 }
 
+void PopulateNextRelationshipForWhile(stack<int>& while_stmt_num, stack<vector<pair<int, int>>>& last_stmt_nums_in_if, bool& is_prev_stmt_while, Pkb& pkb) {
+  if (is_prev_stmt_while) {
+    // No stmt after while loop, add stmt num of while and first stmt num in container to Next Table
+    pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), vector<int>{while_stmt_num.top() + 1});
+    while_stmt_num.pop();
+    is_prev_stmt_while = false;
+  } else {
+    // Find all while loops still waiting for next stmt and add them to Next Table
+    while (!last_stmt_nums_in_if.empty()) {
+      for (int i = 0; i < last_stmt_nums_in_if.top().size(); i++) {
+        pair<int, int> stmt = last_stmt_nums_in_if.top().at(i);
+        if (stmt.second != 0) {
+          pkb.AddInfoToTable(TableIdentifier::kNext, stmt.first, vector<int>{stmt.second});
+        }
+      }
+      last_stmt_nums_in_if.pop();
+    }
+  }
+}
+
 Parser::Parser(const std::string& input, Pkb& pkb) {
 
   vector<Token> tokens_lst = tokenizer_.parse(input);
@@ -145,11 +165,8 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
           children.pop();
         }
 
-        if (end_tokens.empty() && is_prev_stmt_while) {
-          // No stmt after while loop, add stmt num of while and first stmt num in container to Next Table
-          pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), vector<int>{while_stmt_num.top() + 1});
-          while_stmt_num.pop();
-          is_prev_stmt_while = false;
+        if (end_tokens.empty()) {
+          PopulateNextRelationshipForWhile(while_stmt_num, last_stmt_nums_in_if, is_prev_stmt_while, pkb);
         }
 
         if (!end_tokens.empty()) {
@@ -247,11 +264,6 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
         cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
 
-        // TODO: Remove debug statements
-        for (int i = 0; i < cfg_tokens.size(); i++) {
-          cfg_tokens.at(i).print();
-        }
-
         cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
         pkb.AddCfg(make_shared<cfg::CFG>(cfg));
 
@@ -327,11 +339,6 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
   proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-
-  // TODO: Remove debug statements
-  for (int i = 0; i < cfg_tokens.size(); i++) {
-    cfg_tokens.at(i).print();
-  }
 
   cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
   pkb.AddCfg(make_shared<cfg::CFG>(cfg));
