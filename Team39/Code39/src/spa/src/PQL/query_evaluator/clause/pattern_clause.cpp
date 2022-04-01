@@ -88,7 +88,7 @@ namespace pql_clause {
 
   void PatternClause::EvaluateLeft(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int var_type = GetVarType(left_, is_synonymy_left_);
+    int var_type = GetVarType(left_, is_synonym_left_);
     EvaluateLeftFn fn = EvaluateLeftFnMap.at(var_type);
     (this->*fn)(cache, domain, predicates);
   }

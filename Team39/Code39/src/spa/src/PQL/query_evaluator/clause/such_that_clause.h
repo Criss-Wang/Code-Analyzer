@@ -52,7 +52,7 @@ namespace pql_clause {
   };
 
   class FollowsClause : public SuchThatClause {
-  public:
+    public:
       FollowsClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
           SuchThatClause{ left, is_synonym_left, right, is_synonym_right } {
           type_ = pql::RelationshipTypes::kFollows;

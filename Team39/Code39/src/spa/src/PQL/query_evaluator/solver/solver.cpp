@@ -19,6 +19,9 @@ namespace pql_solver {
       name_to_idx_map_[(*synonyms)[i].GetName()] = i;
       idx_to_syn_map_[i] = &(*synonyms)[i];
     }
+
+    HandleClauses();
+    Group();
   }
 
   int Ufds::Find(int idx) {
@@ -52,13 +55,13 @@ namespace pql_solver {
       //add the clauses of the children to the parent's vector
       syn_to_clauses_map_[to_be_insert].insert(syn_to_clauses_map_[to_be_insert].end(),
             syn_to_clauses_map_[to_be_delete].begin(), syn_to_clauses_map_[to_be_delete].end());
-      syn_to_clauses_map_[to_be_delete].clear();
+      syn_to_clauses_map_.erase(to_be_delete);
     }
 
     return to_be_insert;
   }
 
-  void Ufds::Group() {
+  void Ufds::HandleClauses() {
     syn_groups_.push_back(std::vector<pql::Synonym>());
     clause_groups_.push_back(std::vector<std::shared_ptr<pql_clause::Clause>>());
 
@@ -66,20 +69,65 @@ namespace pql_solver {
       std::vector<std::string> syn_invovled = clause->GetInvovledSynonyms();
 
       if (syn_invovled.size() == 0) {
+
         clause_groups_[GROUP_INDEX_WITH_NO_SYN].push_back(clause);
+
       } else if (syn_invovled.size() == 1) {
-        std::string first_syn = syn_invovled[0];
-        int index = name_to_idx_map_[first_syn];
+
+        int index = name_to_idx_map_[syn_invovled[0]];
+        syn_to_clauses_map_[Find(index)].push_back(clause);
 
       } else {
-        
+
+        int first_idx = name_to_idx_map_[syn_invovled[0]];
+        int second_idx = name_to_idx_map_[syn_invovled[1]];
+
+        int root = Union(first_idx, second_idx);
+        syn_to_clauses_map_[root].push_back(clause);
+
       }
     }
   }
-
-  std::pair<std::vector<std::vector<pql::Synonym>>,
-      std::vector<std::vector<std::shared_ptr<pql_clause::Clause>>>> Ufds::GetGroupings() {
   
+  void Ufds::Group() {
+    std::unordered_map<int, std::vector<int>> idx_group_map;
+
+    for (int i = 0; i < parent_.size(); i++) {
+      if (idx_group_map.find(Find(i)) == idx_group_map.end()) {
+        idx_group_map[Find(i)] = vector<int>{ i };
+      } else {
+        idx_group_map[Find(i)].push_back(i);
+      }
+    }
+
+
+    //we already found all connected components at this stage
+    for (auto it = syn_to_clauses_map_.begin(); it != syn_to_clauses_map_.end(); it++) {
+      int group_idx = it->first;
+
+      std::vector<pql::Synonym> curr_syn_groups;
+
+      for (int idx : idx_group_map[group_idx]) {
+        std::string syn_name = idx_to_syn_map_[idx]->GetName();
+        curr_syn_groups.push_back(std::move(*idx_to_syn_map_[idx]));
+        syn_invovled_in_clause_set_.insert(std::move(syn_name));
+      }
+
+      clause_groups_.push_back(std::move(it->second));
+      syn_groups_.push_back(std::move(curr_syn_groups));
+    }
+  }
+
+  std::vector<std::vector<pql::Synonym>> Ufds::GetSynGroups() {
+    return syn_groups_;
+  }
+
+  std::vector<std::vector<std::shared_ptr<pql_clause::Clause>>> Ufds::GetClauseGroups() {
+    return clause_groups_;
+  }
+
+  std::unordered_set<std::string> Ufds::GetSynInvovledInClause() {
+    return syn_invovled_in_clause_set_;
   }
 
   Solver::Solver(pql::Query* query, pql_cache::Cache* cache) {
@@ -160,9 +208,9 @@ namespace pql_solver {
    
     
 
-    for (pql_table::Predicate& pred : *predicates_) {
+    /*for (pql_table::Predicate& pred : *predicates_) {
       Consume(pred);
-    }
+    }*/
 
     return ExtractResult();
   }
