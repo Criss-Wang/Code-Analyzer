@@ -20,6 +20,8 @@ namespace pql_clause {
     public:
       std::vector<std::string> GetInvovledSynonyms() override;
 
+      virtual int GetPriority() = 0;
+
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
  
@@ -61,6 +63,8 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class FollowsTClause : public SuchThatClause {
@@ -73,6 +77,8 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class ParentClause : public SuchThatClause {
@@ -85,6 +91,8 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class ParentTClause : public SuchThatClause {
@@ -97,6 +105,8 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class UsesSClause : public SuchThatClause {
@@ -109,6 +119,8 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class ModifiesSClause : public SuchThatClause {
@@ -121,30 +133,36 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class UsesPClause : public SuchThatClause {
-  public:
+    public:
       UsesPClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
           type_ = pql::RelationshipTypes::kUsesP;
       }
 
-  public:
+    public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class ModifiesPClause : public SuchThatClause {
-  public:
-    ModifiesPClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+    public:
+      ModifiesPClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
         SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
           type_ = pql::RelationshipTypes::kModifiesP;
       }
 
-  public:
+    public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class CallsClause : public SuchThatClause {
@@ -157,6 +175,8 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class CallsTClause : public SuchThatClause {
@@ -169,6 +189,8 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class NextClause : public SuchThatClause {
@@ -181,6 +203,8 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class NextTClause : public SuchThatClause {
@@ -193,6 +217,8 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class AffectsClause : public SuchThatClause {
@@ -205,6 +231,8 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 
   class AffectsTClause : public SuchThatClause {
@@ -217,5 +245,7 @@ namespace pql_clause {
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
           std::vector<pql_table::Predicate>& predicates);
+
+      int GetPriority() override;
   };
 }

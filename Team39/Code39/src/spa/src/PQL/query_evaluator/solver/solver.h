@@ -20,16 +20,18 @@ namespace pql_solver {
       Solver(pql::Query* query, pql_cache::Cache* cache);
      
     public:
-      int GetTableIndex(std::string& name);
+      int GetTableIndex(std::string& name, std::vector<pql_table::InterTable>& tables);
       
-      void Consume(pql_table::Predicate& pred);
+      void Consume(pql_table::Predicate& pred, std::vector<pql_table::InterTable>& tables);
 
-      pql_table::InterTable ExtractResult();
+      void AddTablesForSynonymNotInClause(std::unordered_set<std::string>& syn_set);
 
+      void SolveConnectedComponent(std::vector<pql::Synonym>& used_synonyms, std::vector<std::shared_ptr<pql_clause::Clause>>& clauses);
+      
       pql_table::InterTable Solve();
     
     private:
-        std::vector<pql_table::InterTable> GetReturnTables();
+      void AddConnectedComponentTable(pql_table::InterTable& table);
   };
 
   class Ufds {

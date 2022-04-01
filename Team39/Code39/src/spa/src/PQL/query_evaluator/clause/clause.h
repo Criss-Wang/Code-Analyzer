@@ -86,7 +86,13 @@ namespace pql_clause {
           std::vector<pql_table::Predicate>& predicates) = 0;
 
       virtual std::vector<std::string> GetInvovledSynonyms() = 0;
+
+      virtual int GetPriority() = 0;
   };
+
+  //We define the priority of clause in below:
+  //with <-- (pattern, Follows, Calls, ModifiesS, Next, Parent) <-- (FollowsT, ParentT, 
+  // CallsT, UsesS, NextT, UsesP, ModifiesP) <-- (Affects, AffectsT) 
 }
 
 #endif

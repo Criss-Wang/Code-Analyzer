@@ -15,15 +15,6 @@
 #include "formatter/formatter.h"
 
 namespace pql {
-  void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& domain, Pkb& pkb) {
-    //domain stores <synonym.name, domain> pair.
-    for (pql::Synonym& synonym : synonyms) {
-      std::unordered_set<int> domain_set = pkb.GetAllEntity(synonym.GetDeclaration());
-      std::vector<int> domain_list(std::begin(domain_set), std::end(domain_set));
-      domain.insert({ synonym.GetName(), domain_list });
-    }
-  }
-
   std::vector<std::string> EvaluateQuery(Query* query, Pkb* pkb) {
     try {
       if (!query->IsSemanticallyValid()) {
@@ -31,8 +22,6 @@ namespace pql {
       }
 
       /*bool is_return_boolean = query.GetBoolean();
-      std::vector<shared_ptr<pql_clause::Clause>> clauses = query.GetClauses();
-      std::vector<pql::Synonym> synonyms = query.GetAllUsedSynonyms();
       std::vector<pql_table::Predicate> predicates;
       std::unordered_map<std::string, std::vector<int>> domain;*/
 

@@ -18,13 +18,13 @@ using namespace std;
 //Table with one column and elements are integer
 static vector<int> table1_col({ 1,2,3,4,5 });
 static pql::Synonym table1_syn("s1", EntityIdentifier::kStmt);
-static pql_table::InterTable table1 = pql_table::InterTable(table1_syn, table1_col);
+static pql_table::InterTable table1 = pql_table::InterTable(table1_syn.GetName(), table1_col);
 
 static vector<int> table1_out_order_col({ 3,2,4,5,1 });
-static pql_table::InterTable table1_out_order = pql_table::InterTable(table1_syn, table1_out_order_col);
+static pql_table::InterTable table1_out_order = pql_table::InterTable(table1_syn.GetName(), table1_out_order_col);
 
 static vector<int> table1_duplicate_col({ 1,1,1,2,3,3,4,4,4,4,5 });
-static pql_table::InterTable table1_duplicate = pql_table::InterTable(table1_syn, table1_duplicate_col);
+static pql_table::InterTable table1_duplicate = pql_table::InterTable(table1_syn.GetName(), table1_duplicate_col);
 /*-------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 /*------------------------------------------------------TABLES with two columns ------------------------------------------------------------------ */ 
@@ -42,8 +42,8 @@ static vector<vector<int>> table2_duplicate_rows = { {2, 1}, {4, 3}, {6, 5}, {8,
 static pql_table::InterTable table2_duplicate(table2_header, table2_duplicate_rows);
 
 //tables used for Merge, Filter and mergeAndFilter
-static pql_table::InterTable table1_merge1(table2_first_syn, table2_first_col);
-static pql_table::InterTable table1_merge2(table2_second_syn, table2_second_col);
+static pql_table::InterTable table1_merge1(table2_first_syn.GetName(), table2_first_col);
+static pql_table::InterTable table1_merge2(table2_second_syn.GetName(), table2_second_col);
 static vector<vector<int>> table2_merge_rows = { {2, 1}, {2, 3}, {2, 5}, {2, 7}, {2, 9}, {4, 1}, {4, 3}, {4, 5}, {4, 7}, {4, 9}, 
 																								 {6, 1}, {6, 3}, {6, 5}, {6, 7}, {6, 9}, {8, 1}, {8, 3}, {8, 5}, {8, 7}, {8, 9}, 
 																								 {10, 1}, {10, 3}, {10, 5}, {10, 7}, {10, 9} };

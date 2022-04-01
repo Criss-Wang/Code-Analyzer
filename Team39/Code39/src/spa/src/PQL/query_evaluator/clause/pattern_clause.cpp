@@ -4,6 +4,7 @@
 #define WILDCARD 0
 #define ENTITY 1
 #define SYNONYM 2
+#define SECOND_HIGHEST_PRIORITY 1
 
 namespace pql_clause {
   typedef void (PatternClause::* EvaluateLeftFn)(pql_cache::Cache&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
@@ -27,6 +28,10 @@ namespace pql_clause {
     }
 
     return res;
+  }
+
+  int PatternClause::GetPriority() {
+    return SECOND_HIGHEST_PRIORITY;
   }
 
   void PatternClause::EvaluateLeftWildcard(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,

@@ -8,6 +8,7 @@
 #define INVALID_INDEX -1
 #define ENTITY 0
 #define ATTR_REF 1
+#define HIGHEST_PRIORITY 0
 
 namespace pql_clause {
   typedef void (WithClause::* EvaluateFn)(pql_cache::Cache&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
@@ -48,6 +49,10 @@ namespace pql_clause {
     }
 
     return res;
+  }
+
+  int WithClause::GetPriority() {
+    return HIGHEST_PRIORITY;
   }
 
   int GetArgumentType(bool is_attr_ref) {

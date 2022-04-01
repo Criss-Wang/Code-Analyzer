@@ -28,6 +28,8 @@ namespace pql_clause {
     public:
       std::vector<std::string> GetInvovledSynonyms() override;
 
+      int GetPriority() override;
+
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
      

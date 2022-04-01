@@ -135,9 +135,9 @@ namespace pql_solver {
     cache_ = cache;
   }
 
-  int Solver::GetTableIndex(std::string& name) {
-    for (int index = 0; index < tables_.size(); index++) {
-      if (tables_[index].FindSynCol(name) >= 0) {
+  int Solver::GetTableIndex(std::string& name, std::vector<pql_table::InterTable>& tables) {
+    for (int index = 0; index < tables.size(); index++) {
+      if (tables[index].FindSynCol(name) >= 0) {
         return index;
       }
     }
@@ -145,73 +145,136 @@ namespace pql_solver {
     return -1;
   }
 
-  void Solver::Consume(pql_table::Predicate& pred) {
-    int first_index = GetTableIndex(pred.first_syn_);
-    int second_index = GetTableIndex(pred.second_syn_);
+  void Solver::Consume(pql_table::Predicate& pred, std::vector<pql_table::InterTable>& tables) {
+    int first_index = GetTableIndex(pred.first_syn_, tables);
+    int second_index = GetTableIndex(pred.second_syn_, tables);
 
     if (first_index != second_index) {
       //both synonyms are in different table, can use mergeAndFilter
       //need to remove the second table because it is already merged to the first table
-      tables_[first_index] = tables_[first_index].MergeAndFilter(tables_[second_index], pred);
+      tables[first_index] = std::move(tables[first_index].MergeAndFilter(tables[second_index], pred));
       tables_.erase(tables_.begin() + second_index);
     } else {
       //both synonyms are in the same table, can only use filter
-      tables_[first_index] = tables_[first_index].Filter(pred);
+      tables[first_index] = std::move(tables[first_index].Filter(pred));
     }
   }
 
-  std::vector<pql_table::InterTable> Solver::GetReturnTables() {
-    //Remove synonyms that are not returned and return a list of tables with only returned synonyms involved
-    std::vector<pql_table::InterTable> new_tables;
+  void Solver::AddConnectedComponentTable(pql_table::InterTable& table) {
+    //Remove columns that are not returned and return table with returned synonyms
     std::unordered_set<std::string> added_syns;
-    for (auto& table : tables_) {
-      std::vector<int> return_idxs;
+    std::vector<int> return_idxs;
 
-      for (auto& attr_ref : query_->GetAttrRef()) {
-        std::string syn_name = attr_ref.GetSynName();
+    for (auto& attr_ref : query_->GetAttrRef()) {
+      std::string syn_name = attr_ref.GetSynName();
 
-        if (added_syns.find(syn_name) == added_syns.end()
-            && table.FindSynCol(syn_name) >= 0) {
-          return_idxs.push_back(table.FindSynCol(syn_name));
-          added_syns.insert(syn_name);
-        }
-      }
-
-      if (!return_idxs.empty()) {
-        new_tables.push_back(table.GetColsByIndices(return_idxs));
+      if (added_syns.find(syn_name) == added_syns.end()
+          && table.FindSynCol(syn_name) >= 0) {
+        return_idxs.push_back(table.FindSynCol(syn_name));
+        added_syns.insert(syn_name);
       }
     }
 
-    return new_tables;
+    if (return_idxs.size() > 0) {
+      //add the table to the list of tables only if it contains at least one returned synonyms 
+      tables_.push_back(std::move(table.GetColsByIndices(return_idxs)));
+    }
   }
 
   pql_table::InterTable MergeComponents(std::vector<pql_table::InterTable>& tables) {
     pql_table::InterTable return_table = tables[0];
 
     for (int index = 1; index < tables.size(); index++) {
-      return_table = return_table.Merge(tables[index]);
+      return_table = std::move(return_table.Merge(tables[index]));
     }
 
     return return_table;
   }
 
-  pql_table::InterTable Solver::ExtractResult() {
-    //At this stage all the tabls will not be empty
-    //Or there will be no tables which means there are no constraints
-    std::vector<pql_table::InterTable> tables = GetReturnTables();
-    pql_table::InterTable final_table = MergeComponents(tables);
+  void Solver::AddTablesForSynonymNotInClause(std::unordered_set<std::string>& syn_set) {
+    //need to initialize table for return synonyms that are not invovled in any clauses
+    for (auto& attr_ref : query_->GetAttrRef()) {
+      if (syn_set.find(attr_ref.GetSynName()) == syn_set.end()) {
+        std::unordered_set<int> curr_domain_set = cache_->GetAllEntity(attr_ref.GetSynDeclaration());
+        std::vector<int> curr_domain(curr_domain_set.begin(), curr_domain_set.end());
+        
+        tables_.push_back(pql_table::InterTable(attr_ref.GetSynName(), curr_domain));
+        syn_set.insert(attr_ref.GetSynName());
+      }
+    }
+  }
+
+  void GetAllDomain(std::vector<pql::Synonym>& synonyms, std::unordered_map<std::string, std::vector<int>>& domain, pql_cache::Cache* cache) {
+    //domain stores <synonym.name, domain> pair.
+    for (pql::Synonym& synonym : synonyms) {
+      std::unordered_set<int> domain_set = cache->GetAllEntity(synonym.GetDeclaration());
+      std::vector<int> domain_list(std::begin(domain_set), std::end(domain_set));
+      domain.insert({ synonym.GetName(), domain_list });
+    }
+  }
+
+  bool compareClause(std::shared_ptr<pql_clause::Clause> c1, std::shared_ptr<pql_clause::Clause> c2) {
+    int c1_size = c1->GetInvovledSynonyms().size();
+    int c2_size = c2->GetInvovledSynonyms().size();
     
-    return final_table;
+    if (c1 < c2) {
+      return true;
+    }
+
+    if (c2 < c1) {
+      return true;
+    }
+
+    //At this point, both size are the same
+    return c1->GetPriority() < c2->GetPriority();
+  }
+
+  void CreateTablesForConnectedComponent(std::vector<pql::Synonym>& used_synonyms, 
+      std::unordered_map<std::string, std::vector<int>>& domain, std::vector<pql_table::InterTable>& tables) {
+    for (auto& synonym : used_synonyms) {
+      tables.push_back(pql_table::InterTable(synonym.GetName(), domain[synonym.GetName()]));
+    }
+  }
+
+  void Solver::SolveConnectedComponent(std::vector<pql::Synonym>& used_synonyms, std::vector<std::shared_ptr<pql_clause::Clause>>& clauses) {
+    std::unordered_map<std::string, std::vector<int>> domain;
+    std::vector<pql_table::Predicate> predicates;
+    std::vector<pql_table::InterTable> tables;
+
+    GetAllDomain(used_synonyms, domain, cache_);
+
+    //Create an InterTable for each synonym used here
+    CreateTablesForConnectedComponent(used_synonyms, domain, tables);
+
+    //Sort all clauses
+    std::sort(clauses.begin(), clauses.end(), compareClause);
+
+    //Evaluate all clause
+    for (auto& clause : clauses) {
+      clause->Evaluate(*cache_, domain, predicates);
+    }
+
+    //Consume all predicates
+    for (pql_table::Predicate& pred : predicates) {
+      Consume(pred, tables);
+    }
+
+    AddConnectedComponentTable(tables[0]);
   }
 
   pql_table::InterTable Solver::Solve() {
-   
+    Ufds ufds(&query_->GetAllUsedSynonyms(), &query_->GetClauses());
     
+    std::vector<std::vector<pql::Synonym>> syn_groups = std::move(ufds.GetSynGroups());
+    std::vector<std::vector<std::shared_ptr<pql_clause::Clause>>> clause_groups = std::move(ufds.GetClauseGroups());
+    std::unordered_set<std::string> syn_invovled_in_clause_set = std::move(ufds.GetSynInvovledInClause());
 
-    /*for (pql_table::Predicate& pred : *predicates_) {
-      Consume(pred);
-    }*/
+    AddTablesForSynonymNotInClause(syn_invovled_in_clause_set);
 
-    return ExtractResult();
+    for (int idx = 0; idx < syn_groups.size(); idx++) {
+      SolveConnectedComponent(syn_groups[idx], clause_groups[idx]);
+    }
+
+    return MergeComponents(tables_);
   }
 }

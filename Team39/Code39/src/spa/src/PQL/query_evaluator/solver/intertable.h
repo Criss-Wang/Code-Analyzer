@@ -15,7 +15,7 @@ namespace pql_table {
       std::vector<std::vector<int>> rows_;
     
     public:
-      InterTable(pql::Synonym& synonym, std::vector<int>& int_list);
+      InterTable(std::string syn_name, std::vector<int>& int_list);
 
       InterTable(std::vector<std::string>& header, std::vector<std::vector<int>>& rows);
 
