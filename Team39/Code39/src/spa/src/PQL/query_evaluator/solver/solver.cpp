@@ -275,6 +275,10 @@ namespace pql_solver {
       SolveConnectedComponent(syn_groups[idx], clause_groups[idx]);
     }
 
+    if (query_->GetBoolean()) {
+      throw pql_exceptions::TrueResultException();
+    }
+
     return MergeComponents(tables_);
   }
 }
