@@ -243,9 +243,8 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         stmt_lst = {};
 
         cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-        cfg::CFG::GenerateCfg(cfg_tokens);
-        // TODO: change return type of GenerateCfg to CFG
-        //pkb.AddCfg(CFG::GenerateCfg(cfg_tokens));
+        cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
+        pkb.AddCfg(make_shared<cfg::CFG>(cfg));
 
       }
       
@@ -324,9 +323,8 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
   proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-  cfg::CFG::GenerateCfg(cfg_tokens);
-  // TODO: change return type of GenerateCfg to CFG
-  //pkb.AddCfg(CFG::GenerateCfg(cfg_tokens));
+  cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
+  pkb.AddCfg(make_shared<cfg::CFG>(cfg));
 
   if (curly_bracket_count != 0 || if_else_stmts != 0) {
     throw InvalidSyntaxException();
