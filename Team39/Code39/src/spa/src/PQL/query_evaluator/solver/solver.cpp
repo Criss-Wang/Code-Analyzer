@@ -59,13 +59,18 @@ namespace pql_solver {
   }
 
   void Ufds::Group() {
-    for (auto& clause : *clauses_) {
+    syn_groups_.push_back(std::vector<pql::Synonym>());
+    clause_groups_.push_back(std::vector<std::shared_ptr<pql_clause::Clause>>());
+
+    for (auto clause : *clauses_) {
       std::vector<std::string> syn_invovled = clause->GetInvovledSynonyms();
 
       if (syn_invovled.size() == 0) {
-      
+        clause_groups_[GROUP_INDEX_WITH_NO_SYN].push_back(clause);
       } else if (syn_invovled.size() == 1) {
-      
+        std::string first_syn = syn_invovled[0];
+        int index = name_to_idx_map_[first_syn];
+
       } else {
         
       }
