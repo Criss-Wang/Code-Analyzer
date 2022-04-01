@@ -93,7 +93,6 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
   int if_else_stmts = 0;
   bool is_new_container = true;
 
-
   for (auto token = begin(tokens_lst); token != end(tokens_lst); ++token) {
     if (token->text_ == "}") {
 
@@ -243,6 +242,12 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         stmt_lst = {};
 
         cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
+
+        // TODO: Remove debug statements
+        for (int i = 0; i < cfg_tokens.size(); i++) {
+          cfg_tokens.at(i).print();
+        }
+
         cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
         pkb.AddCfg(make_shared<cfg::CFG>(cfg));
 
@@ -257,6 +262,13 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
       parent = {};
       children = {};
       children.push({});
+      while_stmt_num;
+      if_stmt_num;
+      next_stmt_nums_for_if = {};
+      is_prev_stmt_if = false;
+      is_prev_stmt_while = false;
+
+      vector<int> next_stmt_nums_for_if = {};
 
     } else if (token->text_ == "while" || token->text_ == "if") {
       stmt_num += 1;
@@ -316,6 +328,12 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
   proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
+
+  // TODO: Remove debug statements
+  for (int i = 0; i < cfg_tokens.size(); i++) {
+    cfg_tokens.at(i).print();
+  }
+
   cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
   pkb.AddCfg(make_shared<cfg::CFG>(cfg));
 
