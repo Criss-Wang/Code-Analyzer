@@ -58,6 +58,9 @@ namespace pql {
         select_clause_parsed = true;
         declarations_parsed = true;
       } else if (keyword == "such" && select_clause_parsed) {
+        if (ps.Peek() != ' ') {
+          throw ParseException();
+        }
         ps.EatWhiteSpaces();
         ps.Expect("that");
         ps.EatWhiteSpaces();

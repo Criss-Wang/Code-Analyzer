@@ -70,8 +70,6 @@ TEST_CASE("Invalid queries") {
     RequireSyntaxInvalidQuery(invalid_queries_dir + "2_test2.txt"); //First letter of Select keyword not in capital letter
     RequireSyntaxInvalidQuery(invalid_queries_dir + "2_test3.txt"); //Missing space between such that
     RequireSyntaxInvalidQuery(invalid_queries_dir + "2_test4.txt"); //Misspelled keyword for relationship
-    RequireSyntaxInvalidQuery(invalid_queries_dir + "2_test5.txt"); //BOOLEAN spelled wrongly
-    RequireSyntaxInvalidQuery(invalid_queries_dir + "2_test6.txt"); //BOOLEAN keyword not in capital letters
   }
 
   SECTION("Select clause contains synonyms that are not declared") {
@@ -86,10 +84,10 @@ TEST_CASE("Invalid queries") {
 
   SECTION("With Modifies and Uses such that the second argument is not a variable") {
     RequireSemanticsInvalidQuery(invalid_queries_dir + "5_test1.txt"); //Modifies(s, s1)
-    RequireSemanticsInvalidQuery(invalid_queries_dir + "5_test2.txt"); //Modifies(s, 3)
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "5_test2.txt"); //Modifies(s, 3)
     RequireSyntaxInvalidQuery(invalid_queries_dir + "5_test3.txt"); //Modifies(s, "10")
     RequireSemanticsInvalidQuery(invalid_queries_dir + "5_test4.txt"); //Uses(s, s1)
-    RequireSemanticsInvalidQuery(invalid_queries_dir + "5_test5.txt"); //Uses(s, 3)
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "5_test5.txt"); //Uses(s, 3)
     RequireSyntaxInvalidQuery(invalid_queries_dir + "5_test6.txt"); //Uses(s, "10")
   }
 

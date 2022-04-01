@@ -22,13 +22,13 @@ namespace pql {
   }
 
   bool IsInteger(const std::string& s) {
-    std::stringstream ssm;
-    ssm << s;
-    if (s.length() > 1 && ssm.get() == '0') {
+    if (s.length() > 1 && s[0] == '0') {
       return false;
     }
-    if (!pql::IsDigit(ssm.get())) {
+    for (int i = 0; i < s.length(); i++) {
+      if (!pql::IsDigit(s[i])) {
         return false;
+      }
     }
     return true;
   }
