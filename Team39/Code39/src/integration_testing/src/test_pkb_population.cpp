@@ -44,7 +44,6 @@ TEST_CASE("Read/print statements for Population") {
     RelListTable modifies_table = *pkb.GetModifiesStmtToVariablesTable();
     REQUIRE(modifies_table.GetTableSize() == 1);
     REQUIRE(modifies_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
-
   }
 
   SECTION("1_test2") {
@@ -102,6 +101,11 @@ TEST_CASE("Read/print statements for Population") {
     RelListTable uses_table = *pkb.GetUsesStmtToVariablesTable();
     REQUIRE(uses_table.GetTableSize() == 1);
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
+
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 2);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3});
   }
 
   SECTION("1_test4") {
@@ -143,6 +147,14 @@ TEST_CASE("Read/print statements for Population") {
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x09")});
     REQUIRE(uses_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "read")});
     REQUIRE(uses_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "z")});
+
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 5);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3});
+    REQUIRE(next_table.GetValueByKey(3) == vector<int>{4});
+    REQUIRE(next_table.GetValueByKey(4) == vector<int>{5});
+    REQUIRE(next_table.GetValueByKey(5) == vector<int>{6});
   }
 }
 
@@ -217,6 +229,11 @@ TEST_CASE("Read/print/assign statments for Population") {
     REQUIRE(uses_table.GetTableSize() == 2);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y"), pkb.GetIndexByString(IndexTableType::kVarIndex, "z")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
+
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 2);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3});
   }
 
   SECTION("2_test3") {
@@ -259,6 +276,11 @@ TEST_CASE("Read/print/assign statments for Population") {
     REQUIRE(uses_table.GetTableSize() == 2);
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y"), pkb.GetIndexByString(IndexTableType::kVarIndex, "t")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y")});
+
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 2);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3});
   }
 
   SECTION("2_test4") {
@@ -310,6 +332,13 @@ TEST_CASE("Read/print/assign statments for Population") {
     REQUIRE(uses_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y")});
     REQUIRE(uses_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "z"), pkb.GetIndexByString(IndexTableType::kVarIndex, "y")});
 
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 5);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3});
+    REQUIRE(next_table.GetValueByKey(3) == vector<int>{4});
+    REQUIRE(next_table.GetValueByKey(4) == vector<int>{5});
+    REQUIRE(next_table.GetValueByKey(5) == vector<int>{6});
   }
 }
 
@@ -366,6 +395,12 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     REQUIRE(uses_table.GetValueByKey(1) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y"), pkb.GetIndexByString(IndexTableType::kVarIndex, "z")});
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
+
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 3);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3, 5});
+    REQUIRE(next_table.GetValueByKey(3) == vector<int>{4});
   }
 
   SECTION("3_test2") {
@@ -417,6 +452,12 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x"), pkb.GetIndexByString(IndexTableType::kVarIndex, "y"), pkb.GetIndexByString(IndexTableType::kVarIndex, "z")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y"), pkb.GetIndexByString(IndexTableType::kVarIndex, "z")});
     REQUIRE(uses_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
+
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 3);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3, 4});
+    REQUIRE(next_table.GetValueByKey(3) == vector<int>{2});
   }
 
   SECTION("3_test3") {
@@ -476,6 +517,15 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     REQUIRE(uses_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y")});
     REQUIRE(uses_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y"), pkb.GetIndexByString(IndexTableType::kVarIndex, "t")});
     REQUIRE(uses_table.GetValueByKey(7) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
+
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 6);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2, 3});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{4});
+    REQUIRE(next_table.GetValueByKey(3) == vector<int>{4});
+    REQUIRE(next_table.GetValueByKey(4) == vector<int>{5, 6});
+    REQUIRE(next_table.GetValueByKey(5) == vector<int>{4});
+    REQUIRE(next_table.GetValueByKey(6) == vector<int>{7});
   }
 
   SECTION("3_test4") {
@@ -536,10 +586,20 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Population
     REQUIRE(uses_table.GetValueByKey(5) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y")});
     REQUIRE(uses_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "z"), pkb.GetIndexByString(IndexTableType::kVarIndex, "y")});
     REQUIRE(uses_table.GetValueByKey(7) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
+
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 7);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3});
+    REQUIRE(next_table.GetValueByKey(3) == vector<int>{4});
+    REQUIRE(next_table.GetValueByKey(4) == vector<int>{5, 7});
+    REQUIRE(next_table.GetValueByKey(5) == vector<int>{6});
+    REQUIRE(next_table.GetValueByKey(6) == vector<int>{8});
+    REQUIRE(next_table.GetValueByKey(7) == vector<int>{8});
   }
 }
 
-/*
+
 TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population") {
 
   SECTION("4_test1") {
@@ -596,6 +656,14 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
     REQUIRE(uses_table.GetValueByKey(2) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x"), pkb.GetIndexByString(IndexTableType::kVarIndex, "y")});
     REQUIRE(uses_table.GetValueByKey(3) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x"), pkb.GetIndexByString(IndexTableType::kVarIndex, "y")});
     REQUIRE(uses_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
+
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 5);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3});
+    REQUIRE(next_table.GetValueByKey(3) == vector<int>{4, 5});
+    REQUIRE(next_table.GetValueByKey(4) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(5) == vector<int>{2});
   }
   
   SECTION("4_test2") {
@@ -665,6 +733,18 @@ TEST_CASE("Read/print/assign/if/while statments (2 level nesting) for Population
     REQUIRE(uses_table.GetValueByKey(7) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y")});
     REQUIRE(uses_table.GetValueByKey(8) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
     REQUIRE(uses_table.GetValueByKey(9) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
+
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 9);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3, 7});
+    REQUIRE(next_table.GetValueByKey(3) == vector<int>{4});
+    REQUIRE(next_table.GetValueByKey(4) == vector<int>{5, 9});
+    REQUIRE(next_table.GetValueByKey(5) == vector<int>{6});
+    REQUIRE(next_table.GetValueByKey(6) == vector<int>{4});
+    REQUIRE(next_table.GetValueByKey(7) == vector<int>{8});
+    REQUIRE(next_table.GetValueByKey(8) == vector<int>{9});
+    REQUIRE(next_table.GetValueByKey(9) == vector<int>{10});
   }
 }
 
@@ -737,6 +817,18 @@ TEST_CASE("Read/print/assign/if/while statments (3 level nesting) for Population
     REQUIRE(uses_table.GetValueByKey(8) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y")});
     REQUIRE(uses_table.GetValueByKey(9) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y"), pkb.GetIndexByString(IndexTableType::kVarIndex, "t")});
     REQUIRE(uses_table.GetValueByKey(10) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x")});
+
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 9);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2, 9});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3});
+    REQUIRE(next_table.GetValueByKey(3) == vector<int>{4, 5});
+    REQUIRE(next_table.GetValueByKey(4) == vector<int>{8});
+    REQUIRE(next_table.GetValueByKey(5) == vector<int>{6});
+    REQUIRE(next_table.GetValueByKey(6) == vector<int>{7, 8});
+    REQUIRE(next_table.GetValueByKey(7) == vector<int>{6});
+    REQUIRE(next_table.GetValueByKey(8) == vector<int>{1});
+    REQUIRE(next_table.GetValueByKey(9) == vector<int>{10});
   }
 }
 
@@ -793,6 +885,12 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(uses_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "t")});
     REQUIRE(uses_table.GetValueByKey(4) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "t")});
     
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 4);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3});
+    REQUIRE(next_table.GetValueByKey(3) == vector<int>{4});
+    REQUIRE(next_table.GetValueByKey(5) == vector<int>{6});
   }
 
   SECTION("6_test2") {
@@ -851,6 +949,13 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(uses_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y"), pkb.GetIndexByString(IndexTableType::kVarIndex, "f"), pkb.GetIndexByString(IndexTableType::kVarIndex, "proc3")});
     REQUIRE(uses_table.GetValueByKey(8) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "y"), pkb.GetIndexByString(IndexTableType::kVarIndex, "f"), pkb.GetIndexByString(IndexTableType::kVarIndex, "proc3")});
 
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 5);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3});
+    REQUIRE(next_table.GetValueByKey(4) == vector<int>{5});
+    REQUIRE(next_table.GetValueByKey(5) == vector<int>{6});
+    REQUIRE(next_table.GetValueByKey(7) == vector<int>{8});
   }
 
   SECTION("6_test3") {
@@ -909,6 +1014,12 @@ TEST_CASE("Read/print/assign/call statments for Population") {
     REQUIRE(uses_table.GetValueByKey(6) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "x"), pkb.GetIndexByString(IndexTableType::kVarIndex, "proc1"), pkb.GetIndexByString(IndexTableType::kVarIndex, "procedure")});
     REQUIRE(uses_table.GetValueByKey(8) == vector<int>{pkb.GetIndexByString(IndexTableType::kVarIndex, "proc1"), pkb.GetIndexByString(IndexTableType::kVarIndex, "procedure")});
 
+    RelListTable next_table = *pkb.GetNextTable();
+    REQUIRE(next_table.GetTableSize() == 5);
+    REQUIRE(next_table.GetValueByKey(1) == vector<int>{2});
+    REQUIRE(next_table.GetValueByKey(2) == vector<int>{3});
+    REQUIRE(next_table.GetValueByKey(4) == vector<int>{5});
+    REQUIRE(next_table.GetValueByKey(5) == vector<int>{6});
+    REQUIRE(next_table.GetValueByKey(7) == vector<int>{8});
   }
 }
-*/
