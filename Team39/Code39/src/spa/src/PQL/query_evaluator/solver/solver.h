@@ -38,8 +38,11 @@ namespace pql_solver {
       std::vector<int> rank_;
       std::unordered_map<int, std::vector<std::shared_ptr<pql_clause::Clause>>> syn_to_clauses_map_;
       std::unordered_map<std::string, int> name_to_idx_map_;
+      std::unordered_map<int, pql::Synonym*> idx_to_syn_map_;
       std::vector<pql::Synonym>* synonyms_;
       std::vector<std::shared_ptr<pql_clause::Clause>>* clauses_;
+      std::vector<std::vector<pql::Synonym>> syn_groups_;
+      std::vector<std::vector<std::shared_ptr<pql_clause::Clause>>> clause_groups_;
 
     public:
       Ufds(std::vector<pql::Synonym>* synonyms, std::vector<std::shared_ptr<pql_clause::Clause>>* clauses);
@@ -47,5 +50,10 @@ namespace pql_solver {
       int Find(int idx);
 
       int Union(int i, int j);
+
+      void Group();
+
+      std::pair<std::vector<std::vector<pql::Synonym>>,
+          std::vector<std::vector<std::shared_ptr<pql_clause::Clause>>>> GetGroupings();
   };
 }

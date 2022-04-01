@@ -3,10 +3,10 @@
 #include <unordered_map>
 #include <unordered_set>
 
-
 #include "solver.h"
 #include "../query_evaluator_exceptions.h"
 
+#define GROUP_INDEX_WITH_NO_SYN 0
 
 namespace pql_solver {
   Ufds::Ufds(std::vector<pql::Synonym>* synonyms, std::vector<std::shared_ptr<pql_clause::Clause>>* clauses) {
@@ -17,6 +17,7 @@ namespace pql_solver {
       parent_.push_back(i);
       rank_.push_back(0);
       name_to_idx_map_[(*synonyms)[i].GetName()] = i;
+      idx_to_syn_map_[i] = &(*synonyms)[i];
     }
   }
 
@@ -48,12 +49,32 @@ namespace pql_solver {
         }
       }
 
+      //add the clauses of the children to the parent's vector
       syn_to_clauses_map_[to_be_insert].insert(syn_to_clauses_map_[to_be_insert].end(),
             syn_to_clauses_map_[to_be_delete].begin(), syn_to_clauses_map_[to_be_delete].end());
       syn_to_clauses_map_[to_be_delete].clear();
     }
 
     return to_be_insert;
+  }
+
+  void Ufds::Group() {
+    for (auto& clause : *clauses_) {
+      std::vector<std::string> syn_invovled = clause->GetInvovledSynonyms();
+
+      if (syn_invovled.size() == 0) {
+      
+      } else if (syn_invovled.size() == 1) {
+      
+      } else {
+        
+      }
+    }
+  }
+
+  std::pair<std::vector<std::vector<pql::Synonym>>,
+      std::vector<std::vector<std::shared_ptr<pql_clause::Clause>>>> Ufds::GetGroupings() {
+  
   }
 
   Solver::Solver(pql::Query* query, pql_cache::Cache* cache) {
