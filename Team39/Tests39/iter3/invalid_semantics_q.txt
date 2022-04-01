@@ -1,0 +1,100 @@
+1 - Invalid read stmt for Uses
+read r;
+Select BOOLEAN such that Uses(r, "z")
+FALSE
+5000
+2 - Invalid print stmt for Modifies
+print p;
+Select BOOLEAN such that Modifies(p, "z")
+FALSE
+5000
+3 - Invalid Underscore for Uses
+print p;
+Select BOOLEAN such that Uses(_, "z")
+FALSE
+5000
+4 - Invalid Underscore for Modifies
+print p;
+Select BOOLEAN such that Modifies(_, "z")
+FALSE
+5000
+5 - Variable not declared 
+stmt s;
+Select BOOLEAN such that Uses(s, z)
+FALSE
+5000
+6 - Variable not declared 
+stmt s;
+Select BOOLEAN such that Next(12, 6) and Uses(s, "print") and Modifies(r, "z")
+FALSE
+5000
+7 - Semantically invalid undeclared variable v
+if ifs;
+Select BOOLEAN pattern ifs (v, _, _)
+FALSE
+5000
+8 - Semantically invalid undeclared while stmt
+while w;
+Select BOOLEAN pattern w1 ("we", _)
+FALSE
+5000
+9 - Semantically invalid use of Next
+stmt s;
+Select BOOLEAN such that Next(s, s)
+FALSE
+5000
+10 - Invalid explicit and
+assign a; if ifs1, ifs2; while w;
+Select BOOLEAN such that Parent(ifs1, a) and a ("x", _ )
+FALSE
+5000
+11 - Invalid with clause
+variable v; procedure p; assign a;
+Select BOOLEAN such that Modifies(p, v) with p.procName = a.stmt#
+FALSE
+5000
+12 - Invalid Parent is not container stmt
+stmt s; assign a;
+Select BOOLEAN such that Parent*(a, s1)
+FALSE
+5000
+13 - Invalid attributes
+procedure p; print pn;
+Select <p.stmt#, pn.varName> such that Uses(pn, "print")
+
+5000
+14 - Invalid with clause
+stmt s;
+Select BOOLEAN such that Uses(s, "while") with s.stmt# = 1000
+FALSE
+5000
+15 - Invalid with clause
+stmt s; procedure p;
+Select BOOLEAN such that Uses(s, "while") with p.procName = "   procedure   "
+FALSE
+5000
+16 - Invalid if pattern
+print ifs;
+Select BOOLEAN pattern ifs ("read", _, _)
+FALSE
+5000
+17 - Synonym must be declared once
+while w, w;
+Select BOOLEAN pattern w (_, _)
+FALSE
+5000
+18 - Synonym must be declared once
+while w; while w;
+Select BOOLEAN pattern w (_, _)
+FALSE
+5000
+19 - Invalid argument in Uses
+print p; read r;
+Select BOOLEAN such that Uses(p, r)
+FALSE
+5000
+20 - Invalid argument in Modifies
+read r; assign a;
+Select BOOLEAN such that Uses(r, a)
+FALSE
+5000
