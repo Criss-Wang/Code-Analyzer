@@ -1,0 +1,113 @@
+procedure p1 {
+	read a;
+	print a;
+	condition = 20;
+	while_condition = 10;
+
+	x = x * 3 + y;
+	y = a + b;
+	z = x * y;
+	last_boss = x * y * z * 2;
+
+	if (condition == 1) then {
+		while (while_condition > condition) {
+			print a;
+			a = b + c + d;
+			b = c * 2;
+			d = 3;
+			call p2;
+			if (a < 2) then {
+				c = a * 2;
+				b = c + z * 3;
+			} else {
+				print c;
+				call p3;
+				while (c != 0) {
+					f = a * b * c * d;
+					g = z * g;
+					call p3;
+					call p4;
+				}
+			}
+		}
+		d = z * 2 + d;
+	} else {
+		if (d != 2) then {
+			x = a * 3;
+			call p3;
+		} else {
+			z = y * x;
+		}
+	}
+}
+
+procedure p2 {
+	last_boss = a * 2 * b * c;
+	read print;
+	print read;
+
+	if (last_boss == 2) then {
+		if (last_boss == 3) then {
+			if (last_boss == 4) then {
+				z = last_boss + 3 * 2;
+				large = 111;
+				print large;
+			} else {
+				if (last_boss == 5) then {
+					if (last_boss == 6) then {
+						while_condition = a * c * z;
+						if (last_boss == 8) then {
+							while_condition = 1234123;
+						} else {
+							straw = king * 3;
+						}
+						print print;
+						read read;
+
+					} else {
+						print otherwise;
+					}
+				} else {
+					print confusing;
+					while (confused == 0) {
+						going = a * b * c;
+						merry = c * last_boss * d;
+						if (last_boss == 7) then {
+							print here;
+							a = 2;
+							call p4;
+							call p3;
+						} else {
+							a = 3;
+						}
+						b = 40 * x;
+						b = b * 2;
+					}
+				}
+			}
+		} else {
+			print lost;
+		}
+	} else {
+		x = z * 2;
+		y = a * 3;
+		y = z * a * y;
+		next = z * 3;
+		affects = next * b * c * x;
+	}
+}
+
+procedure p3 {
+	straw = hat * 2 * a;
+	while (straw != king) {
+		going = a * b * x * y * z * d;
+		call p4;
+		print help;
+	}
+	affects = affects * star * next;
+}
+
+procedure p4 {
+	going = 1;
+	merry = 2;
+}
