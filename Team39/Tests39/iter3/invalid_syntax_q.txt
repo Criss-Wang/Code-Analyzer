@@ -104,8 +104,8 @@ Select BOOLEAN such that Modifies(p, v) with p.procName = "		  "
 
 5000
 22 - Invalid tuple
-variable v; procedure p;
-Select <BOOLEAN> such that Modifies(p, v)
+assign a;
+Select <BOOLEAN> such that Follows(a, 4)
 
 5000
 23 - Invalid tuple
@@ -131,5 +131,10 @@ Select BOOLEAN pattern ifs ("read", _)
 27 - Invalid number of arguments for while pattern
 while w;
 Select BOOLEAN pattern w ("while", _, _)
+
+5000
+28 - Invalid Affects
+stmt s, s1;
+Select BOOLEAN such that Affect(s, s1)
 
 5000

@@ -98,3 +98,23 @@ read r; assign a;
 Select BOOLEAN such that Uses(r, a)
 FALSE
 5000
+21 - Invalid Affects
+stmt s;
+Select BOOLEAN such that Affects(s, s1)
+FALSE
+5000
+22 - Invalid Affects
+stmt s, s1;
+Select BOOLEAN such that Affects(_, s1) 
+FALSE
+5000
+23 - Invalid Affects
+stmt s, s1;
+Select BOOLEAN such that Affects(_, _) 
+FALSE
+5000
+24 - Invalid Affects
+stmt s, s1;
+Select BOOLEAN such that Affects(s, "s1") 
+FALSE
+5000
