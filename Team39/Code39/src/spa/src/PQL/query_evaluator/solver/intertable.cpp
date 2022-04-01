@@ -195,7 +195,7 @@ namespace pql_table {
 		return InterTable(new_header, new_rows);
 	}
 
-	bool InterTable::equal(InterTable& t) {
+	bool InterTable::equal(InterTable t) {
 		if (GetColNum() != t.GetColNum() || GetRowNum() != t.GetRowNum()) {
 			return false;
 		}
