@@ -63,12 +63,12 @@ procedure p; print pn;
 Select <p.stmt#, pn.varName> such that Uses(pn, "print")
 
 5000
-14 - Invalid with clause
+14 - Invalid stmt num in with clause
 stmt s;
-Select BOOLEAN such that Uses(s, "while") with s . stmt# = 1000
+Select BOOLEAN such that Uses(s, "while") with s.stmt# = 1000
 FALSE
 5000
-15 - Invalid with clause
+15 - Invalid with clause uses varName for procedure
 stmt s; procedure p;
 Select BOOLEAN such that Uses(s, "while") with p.varName = "procedure"
 FALSE
@@ -105,25 +105,15 @@ FALSE
 5000
 22 - Invalid Affects
 stmt s, s1;
-Select BOOLEAN such that Affects(_, s1) 
-FALSE
-5000
-23 - Invalid Affects
-stmt s, s1;
-Select BOOLEAN such that Affects(_, _) 
-FALSE
-5000
-24 - Invalid Affects
-stmt s, s1;
 Select BOOLEAN such that Affects(s, "s1") 
 FALSE
 5000
-25 - Synonym BOOLEAN is declared more than once
+23 - Synonym BOOLEAN is declared more than once
 stmt BOOLEAN; variable BOOLEAN; 
 Select BOOLEAN 
 
 5000
-26 - Synonym s is declared more than once
+24 - Synonym s is declared more than once
 stmt s; variable s;
 Select BOOLEAN
 FALSE

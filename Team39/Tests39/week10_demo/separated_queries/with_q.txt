@@ -8,7 +8,7 @@ stmt s; constant c;
 Select <s, c> such that Uses(s, "while") with s. stmt# = c .value
 2 2, 9 9
 5000
-25 - Find read, print statemnet that modfiy/uses same variable
+25 - Find read, print statement that modify or uses same variable
 read r; print p;
 Select <r.varName, r, p.stmt#> with r.varName=p.varName
 z 1 19, procedure 20 5 

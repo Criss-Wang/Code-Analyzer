@@ -6,7 +6,7 @@ TRUE
 2 - Valid synonym return
 stmt s;
 Select s such that Next(12, 6) and Uses(s, "print")
-2, 6, 7, 9, 12, 15, 17, 19, 20
+2, 6, 7, 9, 12, 15, 17, 19, 20, 21, 22
 5000
 3 - Valid tuple return 
 assign a; while w;
