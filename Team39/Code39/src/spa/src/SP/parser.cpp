@@ -193,6 +193,12 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
               // Add the last stmt num in then/else container and stmt num of while to Next Table
               last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, while_stmt_num.top());
               is_prev_stmt_if = false;
+            } else if (is_prev_stmt_while) {
+              while_stmt_num.pop();
+              // Add the stmt num of while and next stmt nums to Next Table
+              vector<int> next_stmt_nums = { previous_stmt_num + 1, while_stmt_num.top() };
+              pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, next_stmt_nums);
+              is_prev_stmt_while = false;
             } else {
               // Add the last stmt num in container and stmt num of while to Next Table
               pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, vector<int>{ while_stmt_num.top() });
