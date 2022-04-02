@@ -48,3 +48,8 @@ TRUE
 Select BOOLEAN with 1000000000000000000 = 1000000000000000000
 TRUE
 5000
+11 - Meaningless query
+
+Select BOOLEAN with "Abc" = "Abc"
+TRUE
+5000

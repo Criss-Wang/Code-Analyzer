@@ -103,38 +103,48 @@ variable v; procedure p;
 Select BOOLEAN such that Modifies(p, v) with p.procName = "		  "
 
 5000
-22 - Invalid tuple
+22 - Invalid with clause
+stmt s; procedure p;
+Select BOOLEAN such that Uses(s, "while") with p.procName = procedure
+
+5000
+23 - Invalid tuple
 assign a;
 Select <BOOLEAN> such that Follows(a, 4)
 
 5000
-23 - Invalid tuple
+24 - Invalid tuple
 variable v; procedure p;
 Select < > such that Modifies(p, v)
 
 5000
-24 - TODO Test empty tuple with no space inside but will crash autotester
+25 - TODO Test empty tuple with no space inside but will crash autotester
 variable v; procedure p;
 Select < > such that Modifies(p, v)
 
 5000
-25 - Invalid tuple
+26 - Invalid tuple
 variable v; procedure p;
 Select <v>.varName such that Modifies(p, v)
 
 5000
-26 - Invalid number of arguments for if pattern
+27 - Invalid number of arguments for if pattern
 if ifs;
 Select BOOLEAN pattern ifs ("read", _)
 
 5000
-27 - Invalid number of arguments for while pattern
+28 - Invalid number of arguments for while pattern
 while w;
-Select BOOLEAN pattern w ("while", _, _)
+Select BOOLEAN pattern w ( "while" , _ , _ )
 
 5000
-28 - Invalid Affects
+29 - Invalid Affects
 stmt s, s1;
 Select BOOLEAN such that Affect(s, s1)
+
+5000
+30 - Invalid token
+procedure p;
+Select BOOLEAN such that p.procName = "01abc"
 
 5000

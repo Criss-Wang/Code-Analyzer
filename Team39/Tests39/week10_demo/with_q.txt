@@ -1,21 +1,21 @@
 23 - Valid synonym return with with clause
 stmt s; constant c;
-Select s such that Uses(s, "while") with s.stmt# = c.value
+Select s such that Uses(s, "while") with s.stmt# = c . value
 2, 9
 5000
 24 - Valid tuple return with with clause
 stmt s; constant c;
-Select <s, c> such that Uses(s, "while") with s.stmt# = c.value
+Select <s, c> such that Uses(s, "while") with s. stmt# = c .value
 2 2, 9 9
 5000
 25 - Find read, print statemnet that modfiy/uses same variable
 read r; print p;
-Select <r.varName, r, p.stmt#> with r.varName = p.varName
+Select <r.varName, r, p.stmt#> with r.varName=p.varName
 z 1 19, procedure 20 5 
 5000
 26 - Valid boolean return with with clause 
 stmt s; procedure p;
-Select BOOLEAN such that Uses(s, "while") with p.procName = "procedure"
+Select BOOLEAN such that Uses(s, "while") with p.procName = "  procedure  "
 TRUE
 5000
 27 - Syntactically invalid with clause
