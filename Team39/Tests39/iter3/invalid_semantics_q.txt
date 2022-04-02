@@ -43,9 +43,9 @@ stmt s;
 Select BOOLEAN such that Next(s, s)
 FALSE
 5000
-10 - Invalid explicit and
-assign a; if ifs1, ifs2; while w;
-Select BOOLEAN such that Parent(ifs1, a) and a ("x", _ )
+10 - Semantically invalid use of Next
+stmt s;
+Select BOOLEAN such that Next(s1, s2)
 FALSE
 5000
 11 - Invalid with clause

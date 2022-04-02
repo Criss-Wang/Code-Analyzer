@@ -148,3 +148,8 @@ procedure p;
 Select BOOLEAN such that p.procName = "01abc"
 
 5000
+31 - Invalid explicit and
+assign a; if ifs1, ifs2; while w;
+Select BOOLEAN such that Parent(ifs1, a) and a ("x", _ )
+
+5000
