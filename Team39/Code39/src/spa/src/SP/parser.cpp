@@ -32,7 +32,6 @@ void populateNextRelationship(stack<int> previous, Pkb& pkb, int stmt_num) {
   if (!previous.empty() && stmt_num != previous.top()) {
     // Add previous stmt num and current stmt num to NextTable
     pkb.AddInfoToTable(TableIdentifier::kNext, previous.top(), vector<int>{ stmt_num });
-    //cout << "Next: (" << previous.top() << " ," << stmt_num << ")" << endl;
   }
 }
 
@@ -44,19 +43,39 @@ stack<vector<int>> populateParentRelationship(stack<int> parent, stack<vector<in
   return children;
 }
 
-stack<int> populateNextRelationshipForIf(stack<int> last_stmt_nums_in_if, Pkb& pkb, int stmt_num) {
+stack<vector<pair<int, int>>> populateNextRelationshipForIf(stack<vector<pair<int, int>>> last_stmts_in_if, Pkb& pkb, int stmt_num) {
   // Add the last stmt num in then/else container and current stmt num to Next Table
-  pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), vector<int>{ stmt_num });
-  //cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
+  vector<pair<int, int>> last_stmts = last_stmts_in_if.top();
+  for (int i = 0; i < last_stmts.size(); i++) {
+    if (last_stmts.at(i).second == 0) {
+      pkb.AddInfoToTable(TableIdentifier::kNext, last_stmts.at(i).first, vector<int>{ stmt_num });
+    } else {
+      vector<int> stmt_nums = { last_stmts.at(i).second, stmt_num };
+      pkb.AddInfoToTable(TableIdentifier::kNext, last_stmts.at(i).first, stmt_nums);
+    }
+  }
+  last_stmts_in_if.pop();
+  return last_stmts_in_if;
+}
 
-  last_stmt_nums_in_if.pop();
-
-  pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), vector<int>{ stmt_num });
-  //cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
-
-  last_stmt_nums_in_if.pop();
-
-  return last_stmt_nums_in_if;
+void PopulateNextRelationshipForWhile(stack<int>& while_stmt_num, stack<vector<pair<int, int>>>& last_stmt_nums_in_if, bool& is_prev_stmt_while, Pkb& pkb) {
+  if (is_prev_stmt_while) {
+    // No stmt after while loop, add stmt num of while and first stmt num in container to Next Table
+    pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), vector<int>{while_stmt_num.top() + 1});
+    while_stmt_num.pop();
+    is_prev_stmt_while = false;
+  } else {
+    // Find all while loops still waiting for next stmt and add them to Next Table
+    while (!last_stmt_nums_in_if.empty()) {
+      for (int i = 0; i < last_stmt_nums_in_if.top().size(); i++) {
+        pair<int, int> stmt = last_stmt_nums_in_if.top().at(i);
+        if (stmt.second != 0) {
+          pkb.AddInfoToTable(TableIdentifier::kNext, stmt.first, vector<int>{stmt.second});
+        }
+      }
+      last_stmt_nums_in_if.pop();
+    }
+  }
 }
 
 Parser::Parser(const std::string& input, Pkb& pkb) {
@@ -82,17 +101,14 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
   // Stores relevant stmt num for Next relationship
   stack<int> while_stmt_num;
   stack<int> if_stmt_num;
-  stack<int> last_stmt_nums_in_if;
+  stack<vector<pair<int, int>>> last_stmt_nums_in_if;
   bool is_prev_stmt_if = false;
   bool is_prev_stmt_while = false;
-  vector<int> next_stmt_nums_for_if = {};
-  vector<int> next_stmt_nums_for_while = {};
 
   // 1st round of sytax validation which involves curly brackets
   int curly_bracket_count = 0;
   int if_else_stmts = 0;
   bool is_new_container = true;
-
 
   for (auto token = begin(tokens_lst); token != end(tokens_lst); ++token) {
     if (token->text_ == "}") {
@@ -116,21 +132,25 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         token++;
         is_new_container = true;
 
-        int next_stmt_num = stmt_num + 1;
-        previous.push(next_stmt_num);
+        int next_stmt_num_in_else = stmt_num + 1;
+        previous.push(next_stmt_num_in_else);
         cfg_tokens.push_back(CFGToken(CFGTokenType::kThenEnd, 0));
 
-        // Add the next stmt num in 'else' container and stmt num of if to Next Table
-        next_stmt_nums_for_if.push_back(next_stmt_num);
-        pkb.AddInfoToTable(TableIdentifier::kNext, if_stmt_num.top(), next_stmt_nums_for_if);
-        //cout << "Next: (" << if_stmt_num.top() << " ," << next_stmt_num << ")" << endl;
+        // Add the next stmt num in 'else' and 'then' container and stmt num of if to Next Table
+        int next_stmt_num_in_then = if_stmt_num.top() + 1;
+        pkb.AddInfoToTable(TableIdentifier::kNext, if_stmt_num.top(), vector<int>{next_stmt_num_in_then, next_stmt_num_in_else});
 
         if_stmt_num.pop();
 
-        last_stmt_nums_in_if.push(previous_stmt_num);
         if (is_prev_stmt_while) {
+          last_stmt_nums_in_if.top().push_back({ previous_stmt_num, previous_stmt_num + 1 });
           while_stmt_num.pop();
           is_prev_stmt_while = false;
+        } else if (is_prev_stmt_if) {
+          last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 });
+          is_prev_stmt_if = false;
+        } else {
+          last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 });
         }
 
       } else {
@@ -145,24 +165,26 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
           children.pop();
         }
 
-        if (end_tokens.empty() && is_prev_stmt_while) {
-          // No stmt after while loop, add stmt num of while and first stmt num in container to Next Table
-          pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), next_stmt_nums_for_while);
-          //cout << "Next: (" << while_stmt_num.top() << " ," << next_stmt_nums_for_while.at(0) << ")" << endl;
-          while_stmt_num.pop();
-          is_prev_stmt_while = false;
+        if (end_tokens.empty()) {
+          PopulateNextRelationshipForWhile(while_stmt_num, last_stmt_nums_in_if, is_prev_stmt_while, pkb);
         }
 
         if (!end_tokens.empty()) {
           if (end_tokens.top() == "if") {
             cfg_tokens.push_back(CFGToken(CFGTokenType::kElseEnd, 0));
-            last_stmt_nums_in_if.push(previous_stmt_num);
-            is_prev_stmt_if = true;
 
             if (is_prev_stmt_while) {
+              last_stmt_nums_in_if.top().push_back({ previous_stmt_num, previous_stmt_num + 1 });
               while_stmt_num.pop();
               is_prev_stmt_while = false;
+            } else if (is_prev_stmt_if) {
+              last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 });
+              is_prev_stmt_if = false;
+            } else {
+              last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 });
             }
+
+            is_prev_stmt_if = true;
 
           } else if (end_tokens.top() == "while") {
             cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileEnd, 0));
@@ -174,7 +196,6 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
             } else {
               // Add the last stmt num in container and stmt num of while to Next Table
               pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, vector<int>{ while_stmt_num.top() });
-              //cout << "Next: (" << previous_stmt_num << " ," << while_stmt_num.top() << ")" << endl;
             }
 
             is_prev_stmt_while = true;
@@ -197,12 +218,12 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
         is_prev_stmt_if = false;
       } else if (is_prev_stmt_while) {
-        next_stmt_nums_for_while.push_back(stmt_num);
+        vector<int> next_stmt_nums_for_while = { while_stmt_num.top() + 1, stmt_num };
         // Add stmt num of while and next stmt num to Next Table
         pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), next_stmt_nums_for_while);
-        //cout << "Next: (" << while_stmt_num.top() << " ," << stmt_num << ")" << endl;
         while_stmt_num.pop();
         is_prev_stmt_while = false;
+        next_stmt_nums_for_while = {};
       } else {
         populateNextRelationship(previous, pkb, stmt_num);
       }
@@ -229,7 +250,6 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
       }
 
     } else if (token->text_ == "procedure") {
-      //cout << "proc" << endl;
       is_new_container = true;
       vector<Token> tokens;
       while (token->type_ != TokenType::LEFT_CURLY && token != end(tokens_lst) - 1) {
@@ -243,9 +263,9 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         stmt_lst = {};
 
         cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-        cfg::CFG::GenerateCfg(cfg_tokens);
-        // TODO: change return type of GenerateCfg to CFG
-        //pkb.AddCfg(CFG::GenerateCfg(cfg_tokens));
+
+        cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
+        pkb.AddCfg(make_shared<cfg::CFG>(cfg));
 
       }
       
@@ -258,6 +278,11 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
       parent = {};
       children = {};
       children.push({});
+      while_stmt_num = {};
+      if_stmt_num = {};
+      last_stmt_nums_in_if = {};
+      is_prev_stmt_if = false;
+      is_prev_stmt_while = false;
 
     } else if (token->text_ == "while" || token->text_ == "if") {
       stmt_num += 1;
@@ -272,10 +297,9 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
         is_prev_stmt_if = false;
       } else if (is_prev_stmt_while) {
-        next_stmt_nums_for_while.push_back(stmt_num);
+        vector<int> next_stmt_nums_for_while = { while_stmt_num.top() + 1, stmt_num };
         // Add stmt num of while and next stmt num to Next Table
         pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), next_stmt_nums_for_while);
-        //cout << "Next: (" << while_stmt_num.top() << " ," << stmt_num << ")" << endl;
         while_stmt_num.pop();
         is_prev_stmt_while = false;
       } else {
@@ -293,11 +317,6 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         cfg_tokens.push_back(CFGToken(CFGTokenType::kWhile, stmt_num));
         end_tokens.push("while");
 
-        // Add the stmt num of while and next stmt num to Next Table
-        int next_stmt_num = stmt_num + 1;
-        next_stmt_nums_for_while = { next_stmt_num };
-        //cout << "Next: (" << stmt_num << " ," << next_stmt_num << ")" << endl;
-
         while_stmt_num.push(stmt_num);
 
       } else {
@@ -307,12 +326,8 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         cfg_tokens.push_back(CFGToken(CFGTokenType::kIf, stmt_num));
         end_tokens.push("if");
 
-        // Add the stmt num of if and next stmt num to Next Table
-        int next_stmt_num = stmt_num + 1;
-        next_stmt_nums_for_if = { next_stmt_num };
-        //cout << "Next: (" << stmt_num << " ," << next_stmt_num << ")" << endl;
-
         if_stmt_num.push(stmt_num);
+        last_stmt_nums_in_if.push({});
       }
 
       curly_bracket_count += 1;
@@ -324,9 +339,9 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
   proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-  cfg::CFG::GenerateCfg(cfg_tokens);
-  // TODO: change return type of GenerateCfg to CFG
-  //pkb.AddCfg(CFG::GenerateCfg(cfg_tokens));
+
+  cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
+  pkb.AddCfg(make_shared<cfg::CFG>(cfg));
 
   if (curly_bracket_count != 0 || if_else_stmts != 0) {
     throw InvalidSyntaxException();

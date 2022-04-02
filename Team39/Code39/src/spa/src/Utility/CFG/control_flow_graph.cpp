@@ -24,7 +24,7 @@ namespace cfg {
     }
   }
 
-  std::shared_ptr<GraphNode> CFG::GenerateCfg(vector<CFGToken>& tokens) {
+  CFG CFG::GenerateCfg(vector<CFGToken>& tokens) {
     //We are guranteed that the size of tokens will be >= 3
     //Since it contains Start and End node, and stmtLst must contain at least one statement
     shared_ptr<GraphNode> head = make_shared<GraphNode>(NodeType::START);
@@ -35,7 +35,7 @@ namespace cfg {
     for (int index = 1; index < tokens.size(); index++) {
       if (tokens[index].type_ == CFGTokenType::kWhile) {
         shared_ptr<GraphNode> while_node = make_shared<GraphNode>(tokens[index]);
-      
+
         Connect(curr, while_node);
         stack.push(while_node);
         curr = while_node;
@@ -70,12 +70,12 @@ namespace cfg {
         Connect(curr, next_node);
         Connect(next_node, while_node);
         curr = while_node;
-  
+
       } else if (tokens[index].type_ == CFGTokenType::kElseEnd) {
         shared_ptr<GraphNode> then_node = stack.top();
         stack.pop();
         shared_ptr<GraphNode> next_node = make_shared<GraphNode>(NodeType::IFEND);
-     
+
         //connect the last node in then stmtlst and else stmtlst to the next_node
         Connect(then_node, next_node);
         Connect(curr, next_node);
@@ -96,6 +96,6 @@ namespace cfg {
       }
     }
 
-    return head;
+    return CFG(head);
   }
 }
