@@ -140,7 +140,7 @@ Select BOOLEAN pattern w ( "while" , _ , _ )
 5000
 29 - Invalid Affects
 stmt s, s1;
-Select BOOLEAN such that Affect(s, s1)
+Select BOOLEAN such that Affects *(s, s1)
 
 5000
 30 - Invalid token
