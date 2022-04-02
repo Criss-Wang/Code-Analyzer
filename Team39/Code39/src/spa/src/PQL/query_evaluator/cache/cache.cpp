@@ -9,10 +9,6 @@
 using namespace std;
 
 namespace pql_cache {
-  /*-------------------------------------------------------API for domain---------------------------------------------------------*/
-  unordered_set<int> Cache::GetAllEntity(const EntityIdentifier entity_identifier) {
-    return pkb_->GetAllEntity(entity_identifier);
-  }
 
   /*----------------------------------------------------API for attribute------------------------------------------------------------*/
   int Cache::GetIndexByString(IndexTableType index_table_type, const string& entity_name) {
@@ -390,14 +386,14 @@ namespace pql_cache {
 
         unordered_map<int, unordered_set<int>> last_modified_table_else = last_modified_table;
         //we push this copy for else branch later
-        last_modified_stack.push(last_modified_table_else);
+        last_modified_stack.push(move(last_modified_table_else));
         ptr_stack.push(curr);
         curr = curr->GetNext();
 
       } else if (curr->GetNodeType() == cfg::NodeType::WHILE) {
         //make a copy
         unordered_map<int, unordered_set<int>> before_last_modified_table = last_modified_table;
-        last_modified_stack.push(before_last_modified_table);
+        last_modified_stack.push(move(before_last_modified_table));
         ptr_stack.push(curr);
         curr = curr->GetNext();
 
@@ -406,7 +402,7 @@ namespace pql_cache {
         unordered_map<int, unordered_set<int>> last_modified_table_else = move(last_modified_stack.top());
         last_modified_stack.pop();
         //store the current LMT to be merge after else branch is finish
-        last_modified_stack.push(last_modified_table);
+        last_modified_stack.push(move(last_modified_table));
         //we do a move here since moving is faster than copying and last_modified_table_else will not be reference anymore
         last_modified_table = move(last_modified_table_else);
         
