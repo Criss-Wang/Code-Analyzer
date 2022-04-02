@@ -103,14 +103,14 @@ procedure p2 {
 procedure p3 {
 	straw = hat * 2 * a;
 	while (straw != king) {
-		going = a * b * x * y * z * d;
+		going = a * b * straw;
 		call p4;
 		print help;
 	}
-	affects = affects * star * next;
+	affects = affects * straw * going;
 }
 
 procedure p4 {
 	going = 1;
-	merry = 2;
+	merry = going * 2;
 }
