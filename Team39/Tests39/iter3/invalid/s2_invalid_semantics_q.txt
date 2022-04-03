@@ -38,83 +38,98 @@ while w;
 Select BOOLEAN pattern w1 ("we", _)
 FALSE
 5000
-9 - Semantically invalid use of Next
-stmt s;
-Select BOOLEAN such that Next(s, s)
-FALSE
-5000
-10 - Semantically invalid use of Next
+9 - Semantically invalid undeclared synonyms 
 stmt s;
 Select BOOLEAN such that Next(s1, s2)
 FALSE
 5000
-11 - Invalid with clause
+10 - Invalid with clause
 variable v; procedure p; assign a;
 Select BOOLEAN such that Modifies(p, v) with p.procName = a.stmt#
 FALSE
 5000
-12 - Invalid Parent is not container stmt
+11 - Invalid Parent is not container stmt
 stmt s; assign a;
 Select BOOLEAN such that Parent*(a, s1)
 FALSE
 5000
-13 - Invalid attributes
+12 - Invalid attributes
 procedure p; print pn;
 Select <p.stmt#, pn.varName> such that Uses(pn, "print")
 
 5000
-14 - Invalid stmt num in with clause
+13 - Invalid stmt num in with clause
 stmt s;
 Select BOOLEAN such that Uses(s, "while") with s.stmt# = 1000
 FALSE
 5000
-15 - Invalid with clause uses varName for procedure
+14 - Invalid with clause uses varName for procedure
 stmt s; procedure p;
 Select BOOLEAN such that Uses(s, "while") with p.varName = "procedure"
 FALSE
 5000
-16 - Invalid if pattern
+15 - Invalid if pattern
 print ifs;
 Select BOOLEAN pattern ifs ("read", _, _)
 FALSE
 5000
-17 - Synonym must be declared once
+16 - Synonym must be declared once
 while w, w;
 Select BOOLEAN pattern w (_, _)
 FALSE
 5000
-18 - Synonym must be declared once
-while w; while w;
-Select BOOLEAN pattern w (_, _)
-FALSE
-5000
-19 - Invalid argument in Uses
+17 - Invalid argument in Uses
 print p; read r;
 Select BOOLEAN such that Uses(p, r)
 FALSE
 5000
-20 - Invalid argument in Modifies
+18 - Invalid argument in Modifies
 read r; assign a;
 Select BOOLEAN such that Uses(r, a)
 FALSE
 5000
-21 - Invalid Affects
+19 - Invalid Affects
 stmt s;
 Select BOOLEAN such that Affects(s, s1)
 FALSE
 5000
-22 - Invalid Affects
+20 - Invalid Affects
 stmt s, s1;
 Select BOOLEAN such that Affects(s, "s1") 
 FALSE
 5000
-23 - Synonym BOOLEAN is declared more than once
+21 - Synonym BOOLEAN is declared more than once
 stmt BOOLEAN; variable BOOLEAN; 
 Select BOOLEAN 
 
 5000
-24 - Synonym s is declared more than once
+22 - Synonym s is declared more than once
 stmt s; variable s;
 Select BOOLEAN
 FALSE
+5000
+23 - Semantically invalid attribute
+assign a; while w;
+Select <a.varName, w> such that Next(a, w)
+
+5000
+24 - Semantically invalid attribute
+procedure p; while w;
+Select <p.stmt#, w>
+
+5000
+25 - Semantically invalid attribute
+while w; call cl;
+Select <cl.value, w>
+
+5000
+26 - Semantically invalid pattern
+procedure p;
+Select p pattern p(_, _)
+
+5000
+27 - Semantically invalid Affects
+stmt s, s1;
+Select BOOLEAN such that Affects *(s, s1)
+
 5000
