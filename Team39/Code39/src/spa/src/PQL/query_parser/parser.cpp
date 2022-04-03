@@ -115,6 +115,7 @@ namespace pql {
       Parser::query.SetBoolean(false);
     } else {
       std::string name = ps.ParseName();
+      ps.EatWhiteSpaces();
       if (ps.Peek() == '.') {
         ps.Next(); 
         attribute = ps.ParseAttribute();
@@ -137,8 +138,10 @@ namespace pql {
 
   void Parser::ParseTuple() {
     ps.Consume();
+    ps.EatWhiteSpaces();
     while (ps.Peek() != '>') {
       std::string name = ps.ParseName();
+      ps.EatWhiteSpaces();
       if (ps.Peek() == '.') {
         ps.Next();
         std::string attr = ps.ParseAttribute();
@@ -146,10 +149,11 @@ namespace pql {
       } else {
         Parser::query.AddResultSynonym(name);
       }
-
+      ps.EatWhiteSpaces();
       if (ps.Peek() == ',') {
         ps.Next();
       }
+      ps.EatWhiteSpaces();
     }
     ps.Consume();
   }
@@ -187,6 +191,7 @@ namespace pql {
 
   void Parser::ParsePattern() {
     std::string synonym = ps.ParseName();
+    Parser::query.AddUsedSynonym(synonym);
     auto pattern = Parser::ParsePatternSyntax();
     std::string left = std::get<INDEX_OF_LEFT>(pattern);
     std::vector<EntityIdentifier> domain = std::get<INDEX_OF_DOMAIN>(pattern);
