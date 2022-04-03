@@ -223,7 +223,7 @@ namespace pql {
     ps.EatWhiteSpaces();
     if (ps.Peek() == '\"') {
       ps.Consume();
-      ps.ParseExpression(Parser::query);
+      expression = ps.ParseExpression(Parser::query);
       ps.Expect("\"");
       ps.EatWhiteSpaces();
       ps.Expect(")");
