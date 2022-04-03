@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <ctype.h>
 
 #include "tokenizer.h"
 
@@ -15,125 +16,73 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
   Token current_token;
 
   for (char curr_char : sourceProgram) {
-
-    switch (curr_char) {
-      // Digits
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-        if (current_token.type_ == TokenType::OPERATOR) {
-          EndToken(current_token, tokens_list);
-        }
-
-        if (current_token.type_ == TokenType::WHITESPACE) {
-          current_token.type_ = TokenType::DIGIT;
-        } else if (current_token.type_ == TokenType::DIGIT || current_token.type_ == TokenType::INTEGER) {
-          current_token.type_ = TokenType::INTEGER;
-        }
-        current_token.text_.append(1, curr_char);
-        break;
-
-      // Brackets
-      case '{':
-        if (current_token.type_ != TokenType::WHITESPACE) {
-          EndToken(current_token, tokens_list);
-        }
-
-        current_token.type_ = TokenType::LEFT_CURLY;
-        current_token.text_.append(1, curr_char);
+    if (isdigit(curr_char)) { // Digits 0-9
+      if (current_token.type_ == TokenType::OPERATOR) {
         EndToken(current_token, tokens_list);
-        break;
+      }
+      if (current_token.type_ == TokenType::WHITESPACE) {
+        current_token.type_ = TokenType::DIGIT;
+      } else if (current_token.type_ == TokenType::DIGIT || current_token.type_ == TokenType::INTEGER) {
+        current_token.type_ = TokenType::INTEGER;
+      }
+      current_token.text_.append(1, curr_char);
 
-      case '}':
-        if (current_token.type_ != TokenType::WHITESPACE) {
-          EndToken(current_token, tokens_list);
-        }
+    } else if (IsLeftCurlyBracket(curr_char)) {
+      EndToken(current_token, tokens_list);
+      current_token.type_ = TokenType::LEFT_CURLY;
+      current_token.text_.append(1, curr_char);
+      EndToken(current_token, tokens_list);
 
-        current_token.type_ = TokenType::RIGHT_CURLY;
-        current_token.text_.append(1, curr_char);
+    } else if (IsRightCurlyBracket(curr_char)) {
+      EndToken(current_token, tokens_list);
+      current_token.type_ = TokenType::RIGHT_CURLY;
+      current_token.text_.append(1, curr_char);
+      EndToken(current_token, tokens_list);
+
+    } else if (IsLeftParen(curr_char)) {
+      EndToken(current_token, tokens_list);
+      current_token.type_ = TokenType::LEFT_PAREN;
+      current_token.text_.append(1, curr_char);
+      EndToken(current_token, tokens_list);
+
+    } else if (IsRightParen(curr_char)) {
+      EndToken(current_token, tokens_list);
+      current_token.type_ = TokenType::RIGHT_PAREN;
+      current_token.text_.append(1, curr_char);
+      EndToken(current_token, tokens_list);
+
+    } else if (IsWhitespace(curr_char)) {
+      EndToken(current_token, tokens_list);
+
+    } else if (IsOperator(curr_char)) {
+      if (current_token.type_ != TokenType::OPERATOR) {
         EndToken(current_token, tokens_list);
-        break;
+      }
+      current_token.type_ = TokenType::OPERATOR;
+      current_token.text_.append(1, curr_char);
 
-      case '(':
-        if (current_token.type_ != TokenType::WHITESPACE) {
-          EndToken(current_token, tokens_list);			
-        }
+    } else if (IsSemicolon(curr_char)) {
+      EndToken(current_token, tokens_list);
+      current_token.type_ = TokenType::SEMICOLON;
+      current_token.text_.append(1, curr_char);
+      EndToken(current_token, tokens_list);
 
-        current_token.type_ = TokenType::LEFT_PAREN;
-        current_token.text_.append(1, curr_char);
+    } else if (isalpha(curr_char)) { // Letters 
+      if (current_token.type_ == TokenType::OPERATOR) {
         EndToken(current_token, tokens_list);
-        break;
+      }
 
-      case ')':
-        if (current_token.type_ != TokenType::WHITESPACE) {
-          EndToken(current_token, tokens_list);
-        }
-
-        current_token.type_ = TokenType::RIGHT_PAREN;
+      if (current_token.type_ == TokenType::WHITESPACE) {
+        current_token.type_ = TokenType::LETTER;
         current_token.text_.append(1, curr_char);
-        EndToken(current_token, tokens_list);
-        break;
-
-      // Space and tab
-      case ' ':
-      case '	': 
-      case '\n':
-        EndToken(current_token, tokens_list);
-        break;
-
-      // Operators
-      case '+':
-      case '-':
-      case '*':
-      case '/':
-      case '%':
-      case '=':
-      case '<':
-      case '>':
-      case '!':
-      case '&':
-      case '|':
-        if (current_token.type_ != TokenType::OPERATOR) {
-          EndToken(current_token, tokens_list);
-        }
-        current_token.type_ = TokenType::OPERATOR;
+      } else if (current_token.type_ == TokenType::LETTER || current_token.type_ == TokenType::NAME) {
+        current_token.type_ = TokenType::NAME;
         current_token.text_.append(1, curr_char);
-        break;
-
-      // Semicolon
-      case ';':
-        if (current_token.type_ != TokenType::WHITESPACE) {
-          EndToken(current_token, tokens_list);
-        }
-
-        current_token.type_ = TokenType::SEMICOLON;
-        current_token.text_.append(1, curr_char);
-        EndToken(current_token, tokens_list);
-        break;
-
-      // Letters
-      default:
-        if (current_token.type_ == TokenType::OPERATOR) {
-          EndToken(current_token, tokens_list);
-        }
-
-        if (current_token.type_ == TokenType::WHITESPACE) {
-          current_token.type_ = TokenType::LETTER;
-          current_token.text_.append(1, curr_char);
-        } else if (current_token.type_ == TokenType::LETTER || current_token.type_ == TokenType::NAME) {
-          current_token.type_ = TokenType::NAME;
-          current_token.text_.append(1, curr_char);
-        } else if (current_token.type_ == TokenType::DIGIT || current_token.type_ == TokenType::INTEGER) {
-          is_syntax_error = true;
-        } 
-        break;
+      } else if (current_token.type_ == TokenType::DIGIT || current_token.type_ == TokenType::INTEGER) {
+        is_syntax_error = true;
+      }
+    } else {
+      is_syntax_error = true;
     }
   }
 
@@ -147,7 +96,6 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
 
 // Resets current token to WHITESPACE
 void Tokenizer::EndToken(Token &token, vector<Token> &tokens_list) {
-
   if (token.type_ != TokenType::WHITESPACE) {
     tokens_list.push_back(token);
   }
@@ -157,7 +105,7 @@ void Tokenizer::EndToken(Token &token, vector<Token> &tokens_list) {
 }
 
 void Token::print() {
-  string text = ", \"" + text_;
+  string text = ", \"" + text_ + "\"";
   switch (this->type_) {
     case TokenType::WHITESPACE:
       cout << "Whitespace" << text << endl;
