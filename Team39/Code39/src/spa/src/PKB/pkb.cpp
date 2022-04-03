@@ -210,13 +210,13 @@ const unordered_map<pql::RelationshipTypes, TableType> type_map_ = {
 };
 
 // Relationships APIs
-bool Pkb::IsRelationshipHolds(const pql::RelationshipTypes rel_types, const int key, const int value) {
+bool Pkb::IsRelationshipHolds(const pql::RelationshipTypes rel_type, const int key, const int value) {
   try {
-    if (type_map_.at(rel_types) == TableType::kRelSimple) {
+    if (type_map_.at(rel_type) == TableType::kRelSimple) {
       const shared_ptr<RelTable> table = GetFollowsTable();
       return value == table->GetValueByKey(key);
     }
-    const GetTableFn table_getter = list_table_map_.at(rel_types);
+    const GetTableFn table_getter = list_table_map_.at(rel_type);
     const shared_ptr<RelListTable> table = (this->*table_getter)();
     vector<int> value_list = table->GetValueByKey(key);
     return find(value_list.begin(), value_list.end(), value) != value_list.end();
@@ -225,32 +225,32 @@ bool Pkb::IsRelationshipHolds(const pql::RelationshipTypes rel_types, const int 
   }
 }
 
-bool Pkb::IsRelationshipExists(const pql::RelationshipTypes rel_types) {
-  if (type_map_.at(rel_types) == TableType::kRelSimple) {
+bool Pkb::IsRelationshipExists(const pql::RelationshipTypes rel_type) {
+  if (type_map_.at(rel_type) == TableType::kRelSimple) {
     const shared_ptr<RelTable> table = GetFollowsTable();
     return table->GetTableSize() > 0;
   }
-  const GetTableFn table_getter = list_table_map_.at(rel_types);
+  const GetTableFn table_getter = list_table_map_.at(rel_type);
   const shared_ptr<RelListTable> table = (this->*table_getter)();
   return table->GetTableSize() > 0;
 }
 
-vector<int> Pkb::GetRelFirstArgument(const pql::RelationshipTypes rel_types, const int second_arg_idx) {
+vector<int> Pkb::GetRelFirstArgument(const pql::RelationshipTypes rel_type, const int second_arg_idx) {
   try {
-    if (type_map_.at(rel_types) == TableType::kRelSimple) {
+    if (type_map_.at(rel_type) == TableType::kRelSimple) {
       const shared_ptr<RelTable> table = GetFollowsBeforeTable();
       return { table->GetValueByKey(second_arg_idx) };
     }
-    if (type_map_.at(rel_types) == TableType::kRelList) {
-      const GetTableFn table_getter = reverse_table_map_.at(rel_types);
+    if (type_map_.at(rel_type) == TableType::kRelList) {
+      const GetTableFn table_getter = reverse_table_map_.at(rel_type);
       const shared_ptr<RelListTable> table = (this->*table_getter)();
       auto res = table->GetValueByKey(second_arg_idx);
-      if (rel_types == pql::RelationshipTypes::kParent) {
+      if (rel_type == pql::RelationshipTypes::kParent) {
         return {res[0]};
       }
       return res;
     }
-    const GetInverseTableFn table_getter = mod_use_reverse_table_map_.at(rel_types);
+    const GetInverseTableFn table_getter = mod_use_reverse_table_map_.at(rel_type);
     const shared_ptr<RelListReverseTable> table = (this->*table_getter)();
     return table->GetValueByKey(second_arg_idx);
   } catch (exception& e) {
@@ -258,13 +258,13 @@ vector<int> Pkb::GetRelFirstArgument(const pql::RelationshipTypes rel_types, con
   }
 }
 
-vector<int> Pkb::GetRelSecondArgument(const pql::RelationshipTypes rel_types, const int first_arg_idx) {
+vector<int> Pkb::GetRelSecondArgument(const pql::RelationshipTypes rel_type, const int first_arg_idx) {
   try {
-    if (type_map_.at(rel_types) == TableType::kRelSimple) {
+    if (type_map_.at(rel_type) == TableType::kRelSimple) {
       const shared_ptr<RelTable> table = GetFollowsTable();
       return { table->GetValueByKey(first_arg_idx) };
     }
-    const GetTableFn table_getter = list_table_map_.at(rel_types);
+    const GetTableFn table_getter = list_table_map_.at(rel_type);
     const shared_ptr<RelListTable> table = (this->*table_getter)();
     return  table->GetValueByKey(first_arg_idx);
   } catch (exception& e) {
@@ -272,18 +272,27 @@ vector<int> Pkb::GetRelSecondArgument(const pql::RelationshipTypes rel_types, co
   }
 }
 
-vector<pair<int, int>> Pkb::GetRelArgumentPairs(const pql::RelationshipTypes rel_types) {
+vector<pair<int, int>> Pkb::GetRelArgumentPairs(const pql::RelationshipTypes rel_type) {
   try {
-    if (type_map_.at(rel_types) == TableType::kRelSimple) {
+    if (argument_pairs_table_->KeyExistsInTable(rel_type)) {
+      return argument_pairs_table_->GetValueByKey(rel_type);
+    }
+
+    if (type_map_.at(rel_type) == TableType::kRelSimple) {
       vector<pair<int, int>> result;
       for (const auto& [key, val] : GetFollowsTable()->GetKeyValueLst()) {
         result.emplace_back(make_pair(key, val));
       }
+
+      argument_pairs_table_->AddKeyValuePair(rel_type, result);
       return result;
     }
-    const GetTableFn table_getter = list_table_map_.at(rel_types);
+
+    const GetTableFn table_getter = list_table_map_.at(rel_type);
     const shared_ptr<RelListTable> table = (this->*table_getter)();
-    return UnfoldResults<shared_ptr<RelListTable>>(table);
+    vector<pair<int, int>> result = UnfoldResults<shared_ptr<RelListTable>>(table);
+    argument_pairs_table_->AddKeyValuePair(rel_type, result);
+    return result;
   } catch (exception& e) {
     return vector<pair<int, int>>{};
   }
@@ -558,7 +567,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -585,7 +594,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -602,7 +611,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -627,7 +636,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const int key, 
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -648,7 +657,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -664,7 +673,7 @@ bool Pkb::AddInfoToTable(const TableIdentifier table_identifier, const string& k
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddInfoToTableException(static_cast<int>(table_identifier), e.what());
+    throw AddKeyValuePairException(static_cast<int>(table_identifier), e.what());
   }
 }
 
@@ -707,7 +716,7 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const int ent
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddEntityToSetException(static_cast<int>(entity_identifier), e.what());
+    throw AddEntityException(static_cast<int>(entity_identifier), e.what());
   }
 }
 
@@ -728,7 +737,7 @@ bool Pkb::AddEntityToSet(const EntityIdentifier entity_identifier, const string&
         throw InvalidIdentifierException();
     }
   } catch (exception& e) {
-    throw AddEntityToSetException(static_cast<int>(entity_identifier), e.what());
+    throw AddEntityException(static_cast<int>(entity_identifier), e.what());
   }
 }
 

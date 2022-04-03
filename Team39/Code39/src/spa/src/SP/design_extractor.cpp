@@ -1,6 +1,5 @@
 #include "../PKB/pkb.h"
 #include "./design_extractor.h"
-#include "../Utility/helper.h"
 
 using namespace std;
 

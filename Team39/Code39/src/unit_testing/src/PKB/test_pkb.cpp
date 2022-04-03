@@ -15,10 +15,10 @@ TEST_CASE("Populating Assign Table") {
   }
 
   SECTION("Add invalid item into table") {
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kAssign, 2, 2), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kAssign, 2, 2), AddKeyValuePairException);
 
     string str;
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kAssign, 2, str), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kAssign, 2, str), AddKeyValuePairException);
   }
 }
 
@@ -31,10 +31,10 @@ TEST_CASE("Populating Constant Table") {
   }
 
   SECTION("Add invalid item into table") {
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kConstant, 2, "invalid"), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kConstant, 2, "invalid"), AddKeyValuePairException);
 
     string str;
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kConstant, 2, str), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kConstant, 2, str), AddKeyValuePairException);
   }
 }
 
@@ -48,10 +48,10 @@ TEST_CASE("Populating If Table") {
   }
 
   SECTION("Add invalid item into table") {
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kIf, 1, 1), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kIf, 1, 1), AddKeyValuePairException);
 
     vector<string> vec = {};
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kIf, 2, vec), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kIf, 2, vec), AddKeyValuePairException);
   }
 }
 
@@ -66,13 +66,13 @@ TEST_CASE("Populating Follows and FollowsBefore Table") {
   }
 
   SECTION("Add invalid item into table") {
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kFollows, 1, vector<int>{2, 3, 4}), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kFollows, 1, vector<int>{2, 3, 4}), AddKeyValuePairException);
 
     string str;
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kFollows, 2, str), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kFollows, 2, str), AddKeyValuePairException);
 
     int negative_number = -1;
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kFollows, 3, negative_number), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kFollows, 3, negative_number), AddKeyValuePairException);
   }
 
   SECTION("Test API for PQL side for FollowsTable") {
@@ -109,13 +109,13 @@ TEST_CASE("Populating Parent and Child Table") {
   }
 
   SECTION("Add invalid item into table") {
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kParent, 1, 2), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kParent, 1, 2), AddKeyValuePairException);
 
     string str;
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kParent, 2, str), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kParent, 2, str), AddKeyValuePairException);
 
     vector<int> empty_vector = {};
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kParent, 3, empty_vector), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kParent, 3, empty_vector), AddKeyValuePairException);
   }
 
   SECTION("Test API for PQL side for ParentTable") {
@@ -155,10 +155,10 @@ TEST_CASE("Populating Calls Table") {
   }
 
   SECTION("Add invalid item into table") {
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kCalls, 1, 2), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kCalls, 1, 2), AddKeyValuePairException);
 
     vector<string> empty_vector = {};
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kCalls, "p100", empty_vector), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kCalls, "p100", empty_vector), AddKeyValuePairException);
   }
 
   int p1_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, "p1");
@@ -205,13 +205,13 @@ TEST_CASE("Populating ModifiesProcToVariables and ModifiesVariableToProcs Table"
   }
 
   SECTION("Add invalid item into table") {
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, 1, 2), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, 1, 2), AddKeyValuePairException);
 
     string str;
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, 2, str), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, 2, str), AddKeyValuePairException);
 
     vector<string> empty_vector = {};
-    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p4", empty_vector), AddInfoToTableException);
+    CHECK_THROWS_AS(pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, "p4", empty_vector), AddKeyValuePairException);
   }
 }
 
@@ -414,7 +414,7 @@ TEST_CASE("Add Integer Entity") {
   }
 
   SECTION("Add invalid entity into set") {
-    CHECK_THROWS_AS(pkb.AddEntityToSet(EntityIdentifier::kStmt, "invalid"), AddEntityToSetException);
+    CHECK_THROWS_AS(pkb.AddEntityToSet(EntityIdentifier::kStmt, "invalid"), AddEntityException);
   }
 }
 
@@ -466,7 +466,7 @@ TEST_CASE("Add String Entity") {
   }
 
   SECTION("Add invalid entity into set") {
-    CHECK_THROWS_AS(pkb.AddEntityToSet(EntityIdentifier::kProc, 123), AddEntityToSetException);
+    CHECK_THROWS_AS(pkb.AddEntityToSet(EntityIdentifier::kProc, 123), AddEntityException);
   }
 }
 
@@ -504,4 +504,3 @@ TEST_CASE("Entity Attribute Operations") {
     REQUIRE(stmt_res.empty());
   }
 }
-
