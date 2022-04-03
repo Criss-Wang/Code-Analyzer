@@ -153,7 +153,7 @@ namespace pql_solver {
       //both synonyms are in different table, can use mergeAndFilter
       //need to remove the second table because it is already merged to the first table
       tables[first_index] = std::move(tables[first_index].MergeAndFilter(tables[second_index], pred));
-      tables_.erase(tables_.begin() + second_index);
+      tables.erase(tables.begin() + second_index);
     } else {
       //both synonyms are in the same table, can only use filter
       tables[first_index] = std::move(tables[first_index].Filter(pred));
@@ -213,7 +213,7 @@ namespace pql_solver {
     }
   }
 
-  bool compareClause(std::shared_ptr<pql_clause::Clause> c1, std::shared_ptr<pql_clause::Clause> c2) {
+  static bool CompareClause(const std::shared_ptr<pql_clause::Clause>& c1, const std::shared_ptr<pql_clause::Clause>& c2) {
     int c1_size = c1->GetInvovledSynonyms().size();
     int c2_size = c2->GetInvovledSynonyms().size();
     
@@ -222,7 +222,7 @@ namespace pql_solver {
     }
 
     if (c2 < c1) {
-      return true;
+      return false;
     }
 
     //At this point, both size are the same
@@ -243,20 +243,25 @@ namespace pql_solver {
 
     GetAllDomain(used_synonyms, domain, cache_);
 
-    //Create an InterTable for each synonym used here
-    CreateTablesForConnectedComponent(used_synonyms, domain, tables);
-
     //Sort all clauses
-    std::sort(clauses.begin(), clauses.end(), compareClause);
+    std::sort(clauses.begin(), clauses.end(), CompareClause);
 
     //Evaluate all clause
     for (auto& clause : clauses) {
       clause->Evaluate(*cache_, domain, predicates);
     }
 
+    //Create an InterTable for each synonym used here
+    CreateTablesForConnectedComponent(used_synonyms, domain, tables);
+
     //Consume all predicates
     for (pql_table::Predicate& pred : predicates) {
       Consume(pred, tables);
+    }
+
+    if (used_synonyms.empty()) {
+      //this is for group index 0 where there is no synonym invovled (which there are no tables)
+      return;
     }
 
     AddConnectedComponentTable(tables[0]);
