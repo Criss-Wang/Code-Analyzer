@@ -27,6 +27,7 @@ namespace pql {
   class Query {
     private:
       std::vector <pql::Synonym> declarations;
+      //an unordered_map would be a more efficient data structure because the order doesnt matter
       std::map <std::string, pql::Synonym> synonyms;
       std::vector <pql::Synonym> used_synonyms;
       std::vector <pql::AttrRef> attr_refs;

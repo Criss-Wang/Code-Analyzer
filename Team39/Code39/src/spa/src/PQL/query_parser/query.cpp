@@ -215,7 +215,7 @@ namespace pql {
       case RelationshipTypes::kAffectsT:
         return std::make_shared<pql_clause::AffectsTClause>(left, is_synonym_left, right, is_synonym_right);
       default:
-        throw pql_exceptions::EmptyDomainException();
+        return nullptr;
     }
   }
   
@@ -223,13 +223,21 @@ namespace pql {
     Query::is_semantically_valid = false;
   }
 
+  //The naming can be more specific such as IsValidRelationship
   bool Query::IsValid(RelationshipTypes r, const std::string& left, const std::string& right) {
     std::unordered_set<EntityIdentifier> left_domains = pql::left_synonym_domains.at(r);
     std::unordered_set<EntityIdentifier> right_domains = pql::right_synonym_domains.at(r);
+
+    //This is similar with line 250 - 262, might want to have a function to abstract this out
     if (Query::SynonymDeclared(left)) {
       if (left_domains.find(Query::synonyms.at(left).GetDeclaration()) == left_domains.end()) {
         return false;
       }
+      
+      //The condition is too long, consider to give it a name
+      //e.g. bool is_modifiesS = r == RelationshipTypes::kModifiesS
+      //e.g. bool is_left_print = Query::synonyms.at(left).GetDeclaration() == EntityIdentifier::kPrint
+      //e.g. bool is_left_modifiesS_print = is_modifiesS && is_left_print
       if ((r == RelationshipTypes::kModifiesS && Query::synonyms.at(left).GetDeclaration() == EntityIdentifier::kPrint) ||
           (r == RelationshipTypes::kUsesS && Query::synonyms.at(left).GetDeclaration() == EntityIdentifier::kRead)) {
         return false;
@@ -258,6 +266,9 @@ namespace pql {
       }
     }
 
+    //this boolean is too long
+    //since Query::SynonymDeclared(left) is used twice, can just store the value as a variable
+    //What is this boolean checking 
     return (Query::SynonymDeclared(left) || left == "_" || pql::IsIdent(left) || pql::IsInteger(left)) &&
         (Query::SynonymDeclared(right) || right == "_" || pql::IsIdent(right) || pql::IsInteger(right));
   }
@@ -297,6 +308,7 @@ namespace pql {
   }
   
   void Query::AddResultSynonym(const std::string &name) {
+    //Can follow the code pratice below
     if (Query::SynonymDeclared(name)) {
       Query::AddUsedSynonym(name);
       Query::AddAttrRef(Query::synonyms.at(name));
@@ -306,6 +318,25 @@ namespace pql {
   }
 
   void Query::AddResultSynonym(const std::string& name, const std::string& attribute) {
+    /*
+    It would be better to make the happy path prominent. For example,
+
+    if (!IsAttrStringValid(attribute)) {
+      throw ParseException();
+    }
+
+    if (!Query::SynonymDeclared(name)){
+      Query::SetSemanticallyInvalid();
+      return; //remember to exit the function to prevent execute the later codes
+    }
+
+    //The happy path is not idented, which makes it clearer to read
+    Query::AddUsedSynonym(name);
+    AttrIdentifier attr = attributeMap.at(attribute);
+    Query::AddAttrRef(Query::synonyms.at(name), attr);
+
+    */
+
     if (Query::SynonymDeclared(name) && IsAttrStringValid(attribute)) {
       Query::AddUsedSynonym(name);
       AttrIdentifier attr = attributeMap.at(attribute);
@@ -354,6 +385,7 @@ namespace pql {
   }
 
   void Query::AddAttrRef(Synonym& s, AttrIdentifier attr) {
+    //can follow the happy path code practice
     if (IsAttrValidForSyn(s, attr)) {
       AttrRef attr_ref = AttrRef(s, attr);
       Query::attr_refs.push_back(attr_ref);
@@ -368,14 +400,15 @@ namespace pql {
 
   void Query::AddSuchThatClause(RelationshipTypes r, std::string &left, std::string &right, bool is_synonym_left, bool is_synonym_right) {
     if (Query::IsValid(r, left, right)) {
+      //The two if stataments are similar 
       if (!is_synonym_left && IsIdent(left)) {
         left.erase(0, 1);
-        int left_len = left.length();
+        size_t left_len = left.length();
         left.erase(left_len - 1, 1);
       }
       if (!is_synonym_right && IsIdent(right)) {
         right.erase(0, 1);
-        int right_len = right.length();
+        size_t right_len = right.length();
         right.erase(right_len - 1, 1);
       }
       Query::clauses.push_back(GenerateClause(r, left, right, is_synonym_left, is_synonym_right));
@@ -386,14 +419,37 @@ namespace pql {
 
   void Query::AddPattern(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact) {
     bool is_synonym_left = Query::SynonymDeclared(left);
+    
+    /* Happy path:
+    if (is_synonym_left && Query::synonyms.at(left).GetDeclaration() != EntityIdentifier::kVariable) {
+      Query::SetSemanticallyInvalid();
+      return;
+    }
+
+    if (IsIdent(left)) {
+      left.erase(0, 1);
+      size_t left_len = left.length();
+      left.erase(left_len - 1, 1);
+    }
+    if (syn_entity == EntityIdentifier::kAssign) {
+      Query::clauses.push_back(std::make_shared<pql_clause::AssignPatternClause>(synonym, left, is_synonym_left, expression, exact));
+    } else if (syn_entity == EntityIdentifier::kWhile) {
+      Query::clauses.push_back(std::make_shared<pql_clause::WhilePatternClause>(synonym, left, is_synonym_left));
+    } else if (syn_entity == EntityIdentifier::kIf) {
+      Query::clauses.push_back(std::make_shared<pql_clause::IfPatternClause>(synonym, left, is_synonym_left));
+    }
+    */
+
     if (is_synonym_left && Query::synonyms.at(left).GetDeclaration() != EntityIdentifier::kVariable) {
       Query::SetSemanticallyInvalid();
     } else {
       if (IsIdent(left)) {
         left.erase(0, 1);
-        int left_len = left.length();
+        size_t left_len = left.length();
         left.erase(left_len - 1, 1);
       }
+
+      //The factory function can be used here (similar to such that clause) 
       if (syn_entity == EntityIdentifier::kAssign) {
         Query::clauses.push_back(std::make_shared<pql_clause::AssignPatternClause>(synonym, left, is_synonym_left, expression, exact));
       } else if (syn_entity == EntityIdentifier::kWhile) {
