@@ -225,6 +225,9 @@ namespace pql {
 
   //The naming can be more specific such as IsValidRelationship
   bool Query::IsValid(RelationshipTypes r, const std::string& left, const std::string& right) {
+    //bool is_left_valid = || || || ||
+    //if (!is_left_valid) throw ParseException()
+
     std::unordered_set<EntityIdentifier> left_domains = pql::left_synonym_domains.at(r);
     std::unordered_set<EntityIdentifier> right_domains = pql::right_synonym_domains.at(r);
 

@@ -208,7 +208,7 @@ namespace pql {
     std::vector<EntityIdentifier> domain = std::get<INDEX_OF_DOMAIN>(pattern);
     std::string expression = std::get<INDEX_OF_EXPRESSION>(pattern);
     bool is_exact = std::get<INDEX_OF_EXACT>(pattern);
-   
+    
     if (Parser::query.IsAssignSynonym(synonym) && std::find(domain.begin(), domain.end(), EntityIdentifier::kAssign) != domain.end()) {
       Parser::query.AddPattern(EntityIdentifier::kAssign, synonym, left, expression, is_exact);
     } else if (Parser::query.IsWhileSynonym(synonym) && std::find(domain.begin(), domain.end(), EntityIdentifier::kWhile) != domain.end()) {
@@ -319,7 +319,6 @@ namespace pql {
     std::string entity;
     int type = ATTR_REF;
     if (Parser::query.SynonymDeclared(ref)) {
-      //Will the current synonym be added to the used_synonyms
       ps.ExpectChar('.');
       std::string attr = ps.ParseAttribute();
       if (!Query::IsAttrStringValid(attr)) {
