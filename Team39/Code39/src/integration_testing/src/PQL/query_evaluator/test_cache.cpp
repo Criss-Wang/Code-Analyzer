@@ -134,7 +134,7 @@ Pkb InitializePkb1() {
     CFGToken(CFGTokenType::kEnd, 0)
   });
   
-  shared_ptr<cfg::GraphNode> head = cfg::CFG::GenerateCfg(tokens);
+  shared_ptr<cfg::GraphNode> head = cfg::CFG::GenerateCfg(tokens).GetHead();
   shared_ptr<cfg::CFG> cfg = make_shared<cfg::CFG>(head);
   pkb.AddCfg(cfg);
 
@@ -161,7 +161,7 @@ TEST_CASE("Checks the correctness of constructing Affects relationship") {
     CFGToken(CFGTokenType::kEnd, 0)
     });
   
-  shared_ptr<cfg::GraphNode> head = cfg::CFG::GenerateCfg(tokens);
+  shared_ptr<cfg::GraphNode> head = cfg::CFG::GenerateCfg(tokens).GetHead();
   pql_cache::Cache cache(&pkb1);
 
 

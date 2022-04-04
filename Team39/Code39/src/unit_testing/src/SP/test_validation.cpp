@@ -184,3 +184,12 @@ TEST_CASE("Iteration 2 test cases") {
 
   }
 }
+
+TEST_CASE("Iteration 3 test cases") {
+
+  SECTION("Valid Programs") {
+
+    RequireValid(valid_dir + "zw_source.txt");
+
+  }
+}

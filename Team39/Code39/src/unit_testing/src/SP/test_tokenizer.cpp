@@ -1,5 +1,6 @@
 #include "SP/tokenizer.h"
 #include "SP/validator.h"
+#include "SP/sp_exceptions.h"
 #include "catch.hpp"
 
 #include <iostream>
@@ -16,13 +17,12 @@ TEST_CASE("Valid tokenizer output") {
   vector<Token> expected_tokens;
 
   SECTION("Digits and integer") {
-    source_prog = "1 23 045";
+    source_prog = "1 23";
     actual_tokens = tokenizer.parse(source_prog);
 
     Token token1{ TokenType::DIGIT, "1"};
     Token token2{ TokenType::INTEGER, "23"};
-    Token token3{ TokenType::INTEGER, "045"};
-    expected_tokens = { token1, token2, token3 };
+    expected_tokens = { token1, token2 };
 
     REQUIRE(expected_tokens == actual_tokens);
   }
@@ -100,11 +100,11 @@ TEST_CASE("Valid tokenizer output") {
   }
 
   SECTION("Procedure with assign statement") {
-    source_prog = "procedure procName { x = y + 2; }";
+    source_prog = "procedure proc1Name { x = y + 2; }";
     actual_tokens = tokenizer.parse(source_prog);
 
     Token token1{ TokenType::NAME, "procedure"};
-    Token token2{ TokenType::NAME, "procName"};
+    Token token2{ TokenType::NAME, "proc1Name"};
     Token token3{ TokenType::LEFT_CURLY, "{"};
     Token token4{ TokenType::LETTER, "x"};
     Token token5{ TokenType::OPERATOR, "="};
@@ -589,13 +589,14 @@ TEST_CASE("Invalid tokenizer output") {
   Tokenizer tokenizer;
   string source_prog;
   vector<Token> actual_tokens;
-  vector<Token> expected_tokens;
 
   SECTION("Invalid name of digits followed by letters") {
     source_prog = "procedure procName { print 123myInt; }";
-    actual_tokens = tokenizer.parse(source_prog);
-    expected_tokens = { };
-
-    REQUIRE(expected_tokens == actual_tokens);
+    try {
+      actual_tokens = tokenizer.parse(source_prog);
+      REQUIRE(0 == 1);
+    } catch (InvalidSyntaxException) {
+      REQUIRE(1 == 1);
+    }
   }
 }
