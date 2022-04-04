@@ -1,1 +1,2 @@
-Select <>
+stmt s, s1;
+Select <> such that Follows(s, s1) with s.stmt# = 1
