@@ -177,6 +177,11 @@ TEST_CASE("Invalid queries") {
     RequireSemanticsInvalidQuery(invalid_queries_dir + "17_test1.txt"); //pattern p(_, _)
     RequireSemanticsInvalidQuery(invalid_queries_dir + "17_test2.txt"); //pattern p(_, _, _)
   }
+
+  SECTION("Empty Select tuple") {
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "18_test1.txt");
+    RequireSyntaxInvalidQuery(invalid_queries_dir + "18_test2.txt");
+  }
 }
 
 TEST_CASE("Valid queries") {

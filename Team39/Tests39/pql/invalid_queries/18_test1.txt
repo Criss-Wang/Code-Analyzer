@@ -1,0 +1,2 @@
+print p;
+Select p pattern p(_, _)
