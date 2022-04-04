@@ -7,7 +7,7 @@ procedure p1 {
 	x = x * 3 + y;
 	y = a + b;
 	z = x * y;
-	last_boss = x * y * z * 2;
+	last = x * y * z * 2;
 
 	if (condition == 1) then {
 		while (while_condition > condition) {
@@ -42,21 +42,21 @@ procedure p1 {
 }
 
 procedure p2 {
-	last_boss = a * 2 * b * c;
+	last = a * 2 * b * c;
 	read print;
 	print read;
 
-	if (last_boss == 2) then {
-		if (last_boss == 3) then {
-			if (last_boss == 4) then {
-				z = last_boss + 3 * 2;
+	if (last == 2) then {
+		if (last == 3) then {
+			if (last == 4) then {
+				z = last + 3 * 2;
 				large = 111;
 				print large;
 			} else {
-				if (last_boss == 5) then {
-					if (last_boss == 6) then {
+				if (last == 5) then {
+					if (last == 6) then {
 						while_condition = a * c * z;
-						if (last_boss == 8) then {
+						if (last == 8) then {
 							while_condition = 1234123;
 						} else {
 							straw = king * 3;
@@ -71,8 +71,8 @@ procedure p2 {
 					print confusing;
 					while (confused == 0) {
 						going = a * b * c;
-						merry = c * last_boss * d;
-						if (last_boss == 7) then {
+						merry = c * last * d;
+						if (last == 7) then {
 							print here;
 							a = 2;
 							call p4;
