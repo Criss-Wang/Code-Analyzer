@@ -137,6 +137,7 @@ namespace pql {
   }
 
   void Parser::ParseTuple() {
+    int tuple_elem_count = 0;
     ps.Consume();
     ps.EatWhiteSpaces();
     while (ps.Peek() != '>') {
@@ -150,12 +151,16 @@ namespace pql {
         Parser::query.AddResultSynonym(name);
       }
       ps.EatWhiteSpaces();
+      tuple_elem_count++;
       if (ps.Peek() == ',') {
         ps.Next();
       }
       ps.EatWhiteSpaces();
     }
     ps.Consume();
+    if (tuple_elem_count == 0) {
+      throw ParseException();
+    }
   }
 
   void Parser::ParseRelationship() {
