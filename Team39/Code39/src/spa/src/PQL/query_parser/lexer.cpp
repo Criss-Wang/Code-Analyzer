@@ -167,8 +167,7 @@ namespace pql {
         s << ParserState::Next();
         bracket_count--;
       } else {
-        q.SetSemanticallyInvalid();
-        break;
+        throw ParseException();
       }
 
       // Set expected_next bool
@@ -186,8 +185,7 @@ namespace pql {
       } else if (IsCloseBracket(curr_char)) {
         expected_next = IsOperator(next_char) || IsCloseBracket(next_char);
       } else {
-        q.SetSemanticallyInvalid();
-        break;
+        throw ParseException();
       }
     }
 
@@ -195,16 +193,8 @@ namespace pql {
       s >> expression;
       return expression;
     } else {
-      q.SetSemanticallyInvalid();
+      throw ParseException();
     }
-
-    while (ParserState::Peek() != '\\') {
-      ParserState::Next();
-    }
-
-    return "";
   }
-
-
 
 }
