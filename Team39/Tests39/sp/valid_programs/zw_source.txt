@@ -2,15 +2,15 @@ procedure p1 {
 	read a;
 	print a;
 	condition = 20;
-	while_condition = 10;
+	whilecondition = 10;
 
 	x = x * 3 + y;
 	y = a + b;
 	z = x * y;
-	last_boss = x * y * z * 2;
+	lastboss = x * y * z * 2;
 
 	if (condition == 1) then {
-		while (while_condition > condition) {
+		while (whilecondition > condition) {
 			print a;
 			a = b + c + d;
 			b = c * 2;
@@ -42,22 +42,22 @@ procedure p1 {
 }
 
 procedure p2 {
-	last_boss = a * 2 * b * c;
+	lastboss = a * 2 * b * c;
 	read print;
 	print read;
 
-	if (last_boss == 2) then {
-		if (last_boss == 3) then {
-			if (last_boss == 4) then {
-				z = last_boss + 3 * 2;
+	if (lastboss == 2) then {
+		if (lastboss == 3) then {
+			if (lastboss == 4) then {
+				z = lastboss + 3 * 2;
 				large = 111;
 				print large;
 			} else {
-				if (last_boss == 5) then {
-					if (last_boss == 6) then {
-						while_condition = a * c * z;
-						if (last_boss == 8) then {
-							while_condition = 1234123;
+				if (lastboss == 5) then {
+					if (lastboss == 6) then {
+						whilecondition = a * c * z;
+						if (lastboss == 8) then {
+							whilecondition = 1234123;
 						} else {
 							straw = king * 3;
 						}
@@ -71,8 +71,8 @@ procedure p2 {
 					print confusing;
 					while (confused == 0) {
 						going = a * b * c;
-						merry = c * last_boss * d;
-						if (last_boss == 7) then {
+						merry = c * lastboss * d;
+						if (lastboss == 7) then {
 							print here;
 							a = 2;
 							call p4;

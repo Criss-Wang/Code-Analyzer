@@ -28,3 +28,28 @@ print BOOLEAN;
 Select BOOLEAN 
 5, 7, 10, 19
 5000
+7 - Meaningless query
+assign a;
+Select BOOLEAN with 1 = a.stmt#
+TRUE
+5000
+8 - Meaningless query
+assign a;
+Select BOOLEAN with a.stmt# = 1
+TRUE
+5000
+9 - Meaningless query
+
+Select BOOLEAN with 12 = 12
+TRUE
+5000
+10 - Meaningless query
+
+Select BOOLEAN with 1000000000000000000 = 1000000000000000000
+TRUE
+5000
+11 - Meaningless query
+
+Select BOOLEAN with "Abc" = "Abc"
+TRUE
+5000

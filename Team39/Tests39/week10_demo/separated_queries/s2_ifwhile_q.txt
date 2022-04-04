@@ -1,6 +1,6 @@
 1 - Valid if pattern
 if ifs;
-Select ifs pattern ifs (_ , _, _)
+Select ifs pattern ifs ( _ , _ , _ )
 2, 9, 17
 5000
 2 - Valid if pattern with variable 
@@ -55,7 +55,7 @@ Select <ifs, a> such that Parent(ifs, a) pattern ifs(_ , _ , _) and w ( v, _) an
 5000
 12 - Multiple pattern clauses with fixed variables
 if ifs1, ifs2; assign a; while w; variable v;
-Select <ifs1, w, a, v, ifs2> such that Parent(ifs1, w) pattern ifs( "read" , _ , _) pattern w ( v, _) and a ( "while" , _ ) such that Parent (w, ifs2) 
+Select <ifs1, w, a, v, ifs2> such that Parent(ifs1, w) pattern ifs1( "read" , _ , _) pattern w ( v, _) and a ( "while" , _ ) such that Parent (w, ifs2) 
 2 6 8 while 9
 5000
 13 - Select control variables of ifs
