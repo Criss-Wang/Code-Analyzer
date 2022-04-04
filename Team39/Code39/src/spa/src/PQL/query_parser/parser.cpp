@@ -319,6 +319,7 @@ namespace pql {
     std::string entity;
     int type = ATTR_REF;
     if (Parser::query.SynonymDeclared(ref)) {
+      //Will the current synonym be added to the used_synonyms
       ps.ExpectChar('.');
       std::string attr = ps.ParseAttribute();
       if (!Query::IsAttrStringValid(attr)) {
