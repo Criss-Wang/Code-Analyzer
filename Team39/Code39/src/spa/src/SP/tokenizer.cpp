@@ -6,12 +6,12 @@
 #include <ctype.h>
 
 #include "tokenizer.h"
+#include "sp_exceptions.h"
 
 using namespace std; 
 
 // Tokenizes a given source program  
 vector<Token> Tokenizer::parse(const string& sourceProgram) {
-  bool is_syntax_error = false;
   vector<Token> tokens_list;
   Token current_token;
 
@@ -79,19 +79,15 @@ vector<Token> Tokenizer::parse(const string& sourceProgram) {
         current_token.type_ = TokenType::NAME;
         current_token.text_.append(1, curr_char);
       } else if (current_token.type_ == TokenType::DIGIT || current_token.type_ == TokenType::INTEGER) {
-        is_syntax_error = true;
+        throw InvalidSyntaxException();
       }
     } else {
-      is_syntax_error = true;
+      throw InvalidSyntaxException();
     }
   }
-
-  if (is_syntax_error) {
-    return {};
-  } else {
-    EndToken(current_token, tokens_list);
-    return tokens_list;
-  }
+  
+  EndToken(current_token, tokens_list);
+  return tokens_list;
 }
 
 // Resets current token to WHITESPACE
@@ -105,7 +101,7 @@ void Tokenizer::EndToken(Token &token, vector<Token> &tokens_list) {
 }
 
 void Token::print() {
-  string text = ", \"" + text_ + "\"";
+  string text = ", \"" + text_;
   switch (this->type_) {
     case TokenType::WHITESPACE:
       cout << "Whitespace" << text << endl;
