@@ -3,6 +3,7 @@
 #include <utility>
 #include <vector>
 #include <map>
+#include <memory>
 #include <string>
 #include <exception>
 #include <optional>
@@ -27,10 +28,15 @@ namespace pql {
 
   class AttrRef {
     private:
-      Synonym* synonym_;
+      std::shared_ptr<Synonym> synonym_;
       AttrIdentifier attribute_;
     public:
-      AttrRef(Synonym& s, AttrIdentifier attribute) : synonym_(&s), attribute_(attribute) {};
+      AttrRef(std::shared_ptr<Synonym> s, AttrIdentifier attribute) : synonym_(s), attribute_(attribute) {};
+
+      AttrRef(Synonym& s, AttrIdentifier attribute) {
+        synonym_ = std::make_shared<Synonym>(s);
+        attribute_ = attribute;
+      }
 
       AttrIdentifier GetAttrIdentifier();
 

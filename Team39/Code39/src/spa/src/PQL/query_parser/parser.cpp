@@ -249,7 +249,7 @@ namespace pql {
       ps.EatWhiteSpaces();
       if (ps.Peek() == '\"') {
         ps.Consume();
-        ps.ParseExpression(Parser::query);
+        expression = ps.ParseExpression(Parser::query);
         ps.Expect("\"");
         ps.EatWhiteSpaces();
         ps.Expect("_");
@@ -325,9 +325,9 @@ namespace pql {
       if (!Query::IsAttrStringValid(attr)) {
         throw ParseException();
       }
-      Synonym synonym = Parser::query.GetSynonymByName(ref);
+      std::shared_ptr<Synonym> synonym = std::make_shared<Synonym>(Parser::query.GetSynonymByName(ref));
       AttrIdentifier attribute = GetAttributeByString(attr);
-      if (!Query::IsAttrValidForSyn(synonym, attribute)) {
+      if (!Query::IsAttrValidForSyn(*synonym, attribute)) {
         Parser::query.SetSemanticallyInvalid();
       }
       attr_ref = std::make_shared<AttrRef>(synonym, attribute);
