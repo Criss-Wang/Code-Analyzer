@@ -2,7 +2,7 @@ procedure p1 {
 	read a;
 	print a;
 	condition = 20;
-	while_condition = 10;
+	hello = 10;
 
 	x = x * 3 + y;
 	y = a + b;
@@ -10,7 +10,7 @@ procedure p1 {
 	last = x * y * z * 2;
 
 	if (condition == 1) then {
-		while (while_condition > condition) {
+		while (hello > condition) {
 			print a;
 			a = b + c + d;
 			b = c * 2;
@@ -55,9 +55,9 @@ procedure p2 {
 			} else {
 				if (last == 5) then {
 					if (last == 6) then {
-						while_condition = a * c * z;
+						hello = a * c * z;
 						if (last == 8) then {
-							while_condition = 1234123;
+							hello = 1234123;
 						} else {
 							straw = king * 3;
 						}
