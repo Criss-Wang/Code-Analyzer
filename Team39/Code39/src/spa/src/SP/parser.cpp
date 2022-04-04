@@ -273,9 +273,6 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
         cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
         pkb.AddCfg(make_shared<cfg::CFG>(cfg));
-        for (CFGToken t : cfg_tokens) {
-          t.print();
-        }
 
         // reset values for next procedure
         cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
@@ -351,9 +348,7 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
   cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
   pkb.AddCfg(make_shared<cfg::CFG>(cfg));
-  for (CFGToken t : cfg_tokens) {
-    t.print();
-  }
+
   if (curly_bracket_count != 0 || if_else_stmts != 0) {
     throw InvalidSyntaxException();
   }
