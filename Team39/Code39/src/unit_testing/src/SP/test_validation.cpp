@@ -13,6 +13,7 @@ void RequireValid(string path) {
   if (!input_file.is_open()) {
     cerr << "Could not open the file " << endl;
   } else {
+    cout << path << endl;
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     Pkb pkb;
     Pkb pkb1;
@@ -28,6 +29,7 @@ void RequireInvalidSyntax(string path) {
   if (!input_file.is_open()) {
     cerr << "Could not open the file " << endl;
   } else {
+    cout << path << endl;
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     try {
       Pkb pkb;
@@ -45,6 +47,7 @@ void RequireInvalidSemantic(string path) {
   if (!input_file.is_open()) {
     cerr << "Could not open the file " << endl;
   } else {
+    cout << path << endl;
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     Pkb pkb;
     Pkb pkb1;
@@ -190,6 +193,7 @@ TEST_CASE("Iteration 3 test cases") {
   SECTION("Valid Programs") {
 
     RequireValid(valid_dir + "zw_source.txt");
+    RequireValid(valid_dir + "zl_source.txt");
 
   }
 }

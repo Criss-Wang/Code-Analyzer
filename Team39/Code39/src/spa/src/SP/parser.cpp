@@ -264,6 +264,7 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
       }
 
       if (!proc_tokens.empty()) {
+        // create Procedure and cfg for previous procedure
         proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
         proc_tokens = {};
         stmt_lst = {};
@@ -272,23 +273,25 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
         cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
         pkb.AddCfg(make_shared<cfg::CFG>(cfg));
+        for (CFGToken t : cfg_tokens) {
+          t.print();
+        }
 
+        // reset values for next procedure
+        cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
+        previous = {};
+        parent = {};
+        children = {};
+        children.push({});
+        while_stmt_num = {};
+        if_stmt_num = {};
+        last_stmt_nums_in_if = {};
+        is_prev_stmt_if = false;
+        is_prev_stmt_while = false;
       }
       
       proc_tokens = tokens;
       curly_bracket_count += 1;
-
-      // reset values for next procedure
-      cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
-      previous = {};
-      parent = {};
-      children = {};
-      children.push({});
-      while_stmt_num = {};
-      if_stmt_num = {};
-      last_stmt_nums_in_if = {};
-      is_prev_stmt_if = false;
-      is_prev_stmt_while = false;
 
     } else if (token->text_ == "while" || token->text_ == "if") {
       stmt_num += 1;
@@ -348,7 +351,9 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
   cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
   pkb.AddCfg(make_shared<cfg::CFG>(cfg));
-
+  for (CFGToken t : cfg_tokens) {
+    t.print();
+  }
   if (curly_bracket_count != 0 || if_else_stmts != 0) {
     throw InvalidSyntaxException();
   }

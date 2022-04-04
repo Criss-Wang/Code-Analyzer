@@ -8,72 +8,188 @@
 
 using namespace std;
 
-TEST_CASE("TEST GenerateCfg function") {
-  vector<CFGToken> tokens({
-    CFGToken(),
-    CFGToken(CFGTokenType::kAssign, 1),
-    CFGToken(CFGTokenType::kAssign, 2),
-    CFGToken(CFGTokenType::kWhile, 3),
-    CFGToken(CFGTokenType::kAssign, 4),
-    CFGToken(CFGTokenType::kCall, 5),
-    CFGToken(CFGTokenType::kAssign, 6),
-    CFGToken(CFGTokenType::kWhileEnd, 0),
-    CFGToken(CFGTokenType::kIf, 7),
-    CFGToken(CFGTokenType::kAssign, 8),
-    CFGToken(CFGTokenType::kThenEnd, 0),
-    CFGToken(CFGTokenType::kAssign, 9),
-    CFGToken(CFGTokenType::kElseEnd, 0),
-    CFGToken(CFGTokenType::kAssign, 10),
-    CFGToken(CFGTokenType::kAssign, 11),
-    CFGToken(CFGTokenType::kAssign, 12),
-    CFGToken(CFGTokenType::kEnd, 0)
-  });
+TEST_CASE("Read/print statements") {
 
-  vector<CFGToken> tokens1({
-    CFGToken(),
-    CFGToken(CFGTokenType::kWhile, 19),
-    CFGToken(CFGTokenType::kIf, 20),
-    CFGToken(CFGTokenType::kAssign, 21),
-    CFGToken(CFGTokenType::kThenEnd, 0),
-    CFGToken(CFGTokenType::kAssign, 22),
-    CFGToken(CFGTokenType::kElseEnd, 0),
-    CFGToken(CFGTokenType::kWhileEnd, 0),
-    CFGToken(CFGTokenType::kEnd, 0),
-  });
-
-  vector<CFGToken> tokens2({
-    CFGToken(CFGTokenType::kStart, 0),
-    CFGToken(CFGTokenType::kWhile, 1),
-    CFGToken(CFGTokenType::kWhile, 2),
-    CFGToken(CFGTokenType::kAssign, 3),
-    CFGToken(CFGTokenType::kWhileEnd, 0),
-    CFGToken(CFGTokenType::kWhileEnd, 0),
-    CFGToken(CFGTokenType::kEnd, 0),
-  });
-
-  vector<CFGToken> tokens3({
-      CFGToken(),
-      CFGToken(CFGTokenType::kAssign, 10),
-      CFGToken(CFGTokenType::kAssign, 11),
-      CFGToken(CFGTokenType::kAssign, 12),
-      CFGToken(CFGTokenType::kCall, 13),
-      CFGToken(CFGTokenType::kWhile, 14),
-      CFGToken(CFGTokenType::kAssign, 15),
-      CFGToken(CFGTokenType::kAssign, 16),
-      CFGToken(CFGTokenType::kAssign, 17),
-      CFGToken(CFGTokenType::kCall, 18),
-      CFGToken(CFGTokenType::kWhileEnd, 0),
-      CFGToken(CFGTokenType::kIf, 19),
-      CFGToken(CFGTokenType::kAssign, 20),
-      CFGToken(CFGTokenType::kThenEnd, 0),
-      CFGToken(CFGTokenType::kAssign, 21),
-      CFGToken(CFGTokenType::kAssign, 22),
-      CFGToken(CFGTokenType::kElseEnd, 0),
-      CFGToken(CFGTokenType::kAssign, 23),
-      CFGToken(CFGTokenType::kPrint, 24),
-      CFGToken(CFGTokenType::kPrint, 25),
+  SECTION("1_test4") {
+    vector<CFGToken> tokens = {
+      CFGToken(CFGTokenType::kStart, 0),
+      CFGToken(CFGTokenType::kRead, 1),
+      CFGToken(CFGTokenType::kRead, 2),
+      CFGToken(CFGTokenType::kPrint, 3),
+      CFGToken(CFGTokenType::kPrint, 4),
+      CFGToken(CFGTokenType::kRead, 5),
+      CFGToken(CFGTokenType::kPrint, 6),
       CFGToken(CFGTokenType::kEnd, 0)
-   });
+    };
 
-    shared_ptr<cfg::GraphNode> head = cfg::CFG::GenerateCfg(tokens3).GetHead();
+    cfg::CFG cfg = cfg::CFG::GenerateCfg(tokens);
+    REQUIRE(1 == 1);
+  }
+}
+
+TEST_CASE("Read/print/assign statements") {
+
+  SECTION("2_test4") {
+    vector<CFGToken> tokens = {
+      CFGToken(CFGTokenType::kStart, 0),
+      CFGToken(CFGTokenType::kRead, 1),
+      CFGToken(CFGTokenType::kAssign, 2),
+      CFGToken(CFGTokenType::kPrint, 3),
+      CFGToken(CFGTokenType::kRead, 4),
+      CFGToken(CFGTokenType::kAssign, 5),
+      CFGToken(CFGTokenType::kAssign, 6),
+      CFGToken(CFGTokenType::kEnd, 0)
+    };
+
+    cfg::CFG cfg = cfg::CFG::GenerateCfg(tokens);
+    REQUIRE(1 == 1);
+  }
+}
+
+TEST_CASE("Read/print/assign/if/while statments (1 level nesting)") {
+
+  SECTION("3_test1") {
+    vector<CFGToken> tokens = {
+      CFGToken(CFGTokenType::kStart, 0),
+      CFGToken(CFGTokenType::kAssign, 1),
+      CFGToken(CFGTokenType::kIf, 2),
+      CFGToken(CFGTokenType::kPrint, 3),
+      CFGToken(CFGTokenType::kRead, 4),
+      CFGToken(CFGTokenType::kThenEnd, 0),
+      CFGToken(CFGTokenType::kAssign, 5),
+      CFGToken(CFGTokenType::kElseEnd, 0),
+      CFGToken(CFGTokenType::kEnd, 0)
+    };
+
+    cfg::CFG cfg = cfg::CFG::GenerateCfg(tokens);
+    REQUIRE(0 == 1);
+  }
+
+  SECTION("3_test2") {
+    vector<CFGToken> tokens = {
+      CFGToken(CFGTokenType::kStart, 0),
+      CFGToken(CFGTokenType::kAssign, 1),
+      CFGToken(CFGTokenType::kIf, 2),
+      CFGToken(CFGTokenType::kPrint, 3),
+      CFGToken(CFGTokenType::kRead, 4),
+      CFGToken(CFGTokenType::kThenEnd, 0),
+      CFGToken(CFGTokenType::kAssign, 5),
+      CFGToken(CFGTokenType::kElseEnd, 0),
+      CFGToken(CFGTokenType::kEnd, 0)
+    };
+
+    cfg::CFG cfg = cfg::CFG::GenerateCfg(tokens);
+    REQUIRE(0 == 1);
+  }
+
+  SECTION("3_test3") {
+    vector<CFGToken> tokens = {
+      CFGToken(CFGTokenType::kStart, 0),
+      CFGToken(CFGTokenType::kIf, 1),
+      CFGToken(CFGTokenType::kRead, 2),
+      CFGToken(CFGTokenType::kThenEnd, 0),
+      CFGToken(CFGTokenType::kRead, 3),
+      CFGToken(CFGTokenType::kElseEnd, 0),
+      CFGToken(CFGTokenType::kWhile, 4),
+      CFGToken(CFGTokenType::kPrint, 5),
+      CFGToken(CFGTokenType::kWhileEnd, 0),
+      CFGToken(CFGTokenType::kAssign, 6),
+      CFGToken(CFGTokenType::kAssign, 7),
+      CFGToken(CFGTokenType::kEnd, 0)
+    };
+
+    cfg::CFG cfg = cfg::CFG::GenerateCfg(tokens);
+    REQUIRE(0 == 1);
+  }
+
+  SECTION("3_test4") {
+    vector<CFGToken> tokens = {
+      CFGToken(CFGTokenType::kStart, 0),
+      CFGToken(CFGTokenType::kRead, 1),
+      CFGToken(CFGTokenType::kAssign, 2),
+      CFGToken(CFGTokenType::kPrint, 3),
+      CFGToken(CFGTokenType::kIf, 4),
+      CFGToken(CFGTokenType::kAssign, 5),
+      CFGToken(CFGTokenType::kAssign, 6),
+      CFGToken(CFGTokenType::kThenEnd, 0),
+      CFGToken(CFGTokenType::kPrint, 7),
+      CFGToken(CFGTokenType::kElseEnd, 0),
+      CFGToken(CFGTokenType::kRead, 8),
+      CFGToken(CFGTokenType::kEnd, 0)
+    };
+
+    cfg::CFG cfg = cfg::CFG::GenerateCfg(tokens);
+    REQUIRE(0 == 1);
+  }
+}
+
+TEST_CASE("Read/print/assign/if/while statments (2 level nesting)") {
+
+  SECTION("4_test1") {
+    vector<CFGToken> tokens = {
+      CFGToken(CFGTokenType::kStart, 0),
+      CFGToken(CFGTokenType::kAssign, 1),
+      CFGToken(CFGTokenType::kWhile, 2),
+      CFGToken(CFGTokenType::kIf, 3),
+      CFGToken(CFGTokenType::kPrint, 4),
+      CFGToken(CFGTokenType::kThenEnd, 0),
+      CFGToken(CFGTokenType::kRead, 5),
+      CFGToken(CFGTokenType::kElseEnd, 0),
+      CFGToken(CFGTokenType::kWhileEnd, 0),
+      CFGToken(CFGTokenType::kEnd, 0)
+    };
+
+    cfg::CFG cfg = cfg::CFG::GenerateCfg(tokens);
+    REQUIRE(0 == 1);
+  }
+
+  SECTION("4_test2") {
+    vector<CFGToken> tokens = {
+      CFGToken(CFGTokenType::kStart, 0),
+      CFGToken(CFGTokenType::kRead, 1),
+      CFGToken(CFGTokenType::kIf, 2),
+      CFGToken(CFGTokenType::kAssign, 3),
+      CFGToken(CFGTokenType::kWhile, 4),
+      CFGToken(CFGTokenType::kAssign, 5),
+      CFGToken(CFGTokenType::kPrint, 6),
+      CFGToken(CFGTokenType::kWhileEnd, 0),
+      CFGToken(CFGTokenType::kThenEnd, 0),
+      CFGToken(CFGTokenType::kPrint, 7),
+      CFGToken(CFGTokenType::kAssign, 8),
+      CFGToken(CFGTokenType::kElseEnd, 0),
+      CFGToken(CFGTokenType::kPrint, 9),
+      CFGToken(CFGTokenType::kAssign, 10),
+      CFGToken(CFGTokenType::kEnd, 0)
+    };
+
+    cfg::CFG cfg = cfg::CFG::GenerateCfg(tokens);
+    REQUIRE(0 == 1);
+  }
+}
+
+TEST_CASE("Read/print/assign/if/while statments (3 level nesting)") {
+
+  SECTION("5_test1") {
+    vector<CFGToken> tokens = {
+      CFGToken(CFGTokenType::kStart, 0),
+      CFGToken(CFGTokenType::kWhile, 1),
+      CFGToken(CFGTokenType::kRead, 2),
+      CFGToken(CFGTokenType::kIf, 3),
+      CFGToken(CFGTokenType::kAssign, 4),
+      CFGToken(CFGTokenType::kThenEnd, 0),
+      CFGToken(CFGTokenType::kAssign, 5),
+      CFGToken(CFGTokenType::kWhile, 6),
+      CFGToken(CFGTokenType::kRead, 7),
+      CFGToken(CFGTokenType::kWhileEnd, 0),
+      CFGToken(CFGTokenType::kElseEnd, 0),
+      CFGToken(CFGTokenType::kPrint, 8),
+      CFGToken(CFGTokenType::kWhileEnd, 0),
+      CFGToken(CFGTokenType::kAssign, 9),
+      CFGToken(CFGTokenType::kPrint, 10),
+      CFGToken(CFGTokenType::kEnd, 0)
+    };
+
+    cfg::CFG cfg = cfg::CFG::GenerateCfg(tokens);
+    REQUIRE(0 == 1);
+  }
 }
