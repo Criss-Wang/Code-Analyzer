@@ -147,7 +147,11 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
           while_stmt_num.pop();
           is_prev_stmt_while = false;
         } else if (is_prev_stmt_if) {
-          last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 });
+          vector<pair<int, int>> last_stmts = last_stmt_nums_in_if.top();
+          last_stmt_nums_in_if.pop();
+          for (pair<int, int> s : last_stmts) {
+            last_stmt_nums_in_if.top().push_back(s);
+          }
           is_prev_stmt_if = false;
         } else {
           last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 });
@@ -178,7 +182,11 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
               while_stmt_num.pop();
               is_prev_stmt_while = false;
             } else if (is_prev_stmt_if) {
-              last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 });
+              vector<pair<int, int>> last_stmts = last_stmt_nums_in_if.top();
+              last_stmt_nums_in_if.pop();
+              for (pair<int, int> s : last_stmts) {
+                last_stmt_nums_in_if.top().push_back(s);
+              }
               is_prev_stmt_if = false;
             } else {
               last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 });

@@ -191,6 +191,7 @@ TEST_CASE("Iteration 3 test cases") {
 
     RequireValid(valid_dir + "zw_source.txt");
     RequireValid(valid_dir + "zl_source.txt");
+    RequireValid(valid_dir + "patrick_source.txt");
 
   }
 }
