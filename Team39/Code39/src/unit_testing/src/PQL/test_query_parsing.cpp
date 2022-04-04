@@ -11,7 +11,6 @@ void RequireSyntaxInvalidQuery(std::string path) {
   } else {
     std::string query = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
     pql::Parser parser = pql::Parser(query);
-    parser.Parse();
     CHECK_THROWS_AS(parser.Parse(), pql::ParseException);
   }
 }
