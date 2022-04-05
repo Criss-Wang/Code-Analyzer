@@ -5,6 +5,7 @@ ConditionalExpression::ConditionalExpression(std::vector<Token>& tokens) {
 
   vector<TokenType> expected_types = { TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN, TokenType::NOT_OPERATOR };
   vector<string> rel_operators = { ">", "<", "==", "!=", ">=", "<=" };
+  vector<string> expected_operators = { "*", "/", "+", "-", "%" };
 
   // keep track of number of brackets
   int paren_count = 0;
@@ -32,8 +33,13 @@ ConditionalExpression::ConditionalExpression(std::vector<Token>& tokens) {
     }
 
     bool check_type_ = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);
+    bool check_operator = true;
 
-    if (!check_type_) {
+    if (token_type == TokenType::OPERATOR) {
+      check_operator = find(begin(expected_operators), end(expected_operators), token->text_) != end(expected_operators);
+    }
+
+    if (!check_type_ || !check_operator) {
       throw InvalidSyntaxException();
     }
 
@@ -47,10 +53,11 @@ ConditionalExpression::ConditionalExpression(std::vector<Token>& tokens) {
 
       paren_count += 1;
 
-    } else if (token_type == TokenType::RIGHT_PAREN) { // expects cond operator after right paren
+    } else if (token_type == TokenType::RIGHT_PAREN) { // expects cond/rel/normal operator or right paren after right paren
       expected_types.push_back(TokenType::COND_OPERATOR);
       expected_types.push_back(TokenType::RIGHT_PAREN);
       expected_types.push_back(TokenType::OPERATOR);
+      expected_types.push_back(TokenType::REL_OPERATOR);
 
       paren_count -= 1;
 

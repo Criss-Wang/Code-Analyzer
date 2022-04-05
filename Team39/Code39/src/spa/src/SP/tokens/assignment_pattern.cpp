@@ -47,7 +47,7 @@ AssignmentPattern::AssignmentPattern(std::vector<Token>& tokens) {
         paren_count += 1;
       }
 
-    } else if (token_type == TokenType::RIGHT_PAREN) { // expects operator after right paren
+    } else if (token_type == TokenType::RIGHT_PAREN) { // expects operator or right paren after right paren
       expected_types.push_back(TokenType::OPERATOR);
       expected_types.push_back(TokenType::RIGHT_PAREN);
 
