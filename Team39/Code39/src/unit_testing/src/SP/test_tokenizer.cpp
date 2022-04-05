@@ -1,5 +1,4 @@
 #include "SP/tokenizer.h"
-#include "SP/validator.h"
 #include "catch.hpp"
 
 #include <iostream>

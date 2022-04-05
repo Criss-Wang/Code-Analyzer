@@ -1,7 +1,6 @@
 #include "../../spa/src/Utility/CFG/control_flow_graph.h"
 #include "../../spa/src/Utility/CFG/cfg_token.h"
 #include "SP/tokenizer.h"
-#include "SP/populator.h"
 
 #include <fstream>
 #include "catch.hpp"

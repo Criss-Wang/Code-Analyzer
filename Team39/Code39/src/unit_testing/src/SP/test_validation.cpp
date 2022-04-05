@@ -1,5 +1,4 @@
 #include "SP/parser.h"
-#include "SP/validator.h"
 #include "SP/sp_exceptions.h"
 #include "PKB/pkb.h"
 
