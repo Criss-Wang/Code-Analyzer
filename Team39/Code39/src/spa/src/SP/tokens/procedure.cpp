@@ -21,7 +21,7 @@ Procedure::Procedure(vector<Token>& tokens, vector<shared_ptr<Stmt>>& stmt_lst) 
   }
 
   const int kIndexOfProcName = 1;
-  if (tokens.at(kIndexOfProcName).type_ != TokenType::NAME) {
+  if (tokens.at(kIndexOfProcName).type_ != TokenType::NAME && tokens.at(kIndexOfProcName).type_ != TokenType::LETTER) {
     throw InvalidSyntaxException();
   }
   proc_name_ = tokens.at(kIndexOfProcName).text_;

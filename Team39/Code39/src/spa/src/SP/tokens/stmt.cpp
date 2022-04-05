@@ -16,7 +16,7 @@ AssignStmt::AssignStmt(std::vector<Token>& tokens, int stmt_num) {
   const int kIndexOfLhsVar = 0;
   const int kIndexOfFirstRhsVar = 2;
 
-  if (tokens.at(kIndexOfLhsVar).type_ != TokenType::NAME) {
+  if (tokens.at(kIndexOfLhsVar).type_ != TokenType::NAME && tokens.at(kIndexOfLhsVar).type_ != TokenType::LETTER) {
     throw InvalidSyntaxException();
   }
   lhs_var_ = tokens.at(kIndexOfLhsVar).text_;
@@ -57,7 +57,7 @@ ReadStmt::ReadStmt(std::vector<Token>& tokens, int stmt_num) {
   stmt_num_ = stmt_num;
 
   const int kIndexOfVar = 1;
-  if (tokens.at(kIndexOfVar).type_ != TokenType::NAME) {
+  if (tokens.at(kIndexOfVar).type_ != TokenType::NAME && tokens.at(kIndexOfVar).type_ != TokenType::LETTER) {
     throw InvalidSyntaxException();
   }
   read_var_ = tokens.at(kIndexOfVar).text_;
@@ -90,7 +90,7 @@ PrintStmt::PrintStmt(std::vector<Token>& tokens, int stmt_num) {
   stmt_num_ = stmt_num;
 
   const int kIndexOfVar = 1;
-  if (tokens.at(kIndexOfVar).type_ != TokenType::NAME) {
+  if (tokens.at(kIndexOfVar).type_ != TokenType::NAME && tokens.at(kIndexOfVar).type_ != TokenType::LETTER) {
     throw InvalidSyntaxException();
   }
   print_var_ = tokens.at(kIndexOfVar).text_;
@@ -225,7 +225,7 @@ CallStmt::CallStmt(std::vector<Token>& tokens, int stmt_num) {
   stmt_num_ = stmt_num;
 
   const int kIndexOfCalledProc = 1;
-  if (tokens.at(kIndexOfCalledProc).type_ != TokenType::NAME) {
+  if (tokens.at(kIndexOfCalledProc).type_ != TokenType::NAME && tokens.at(kIndexOfCalledProc).type_ != TokenType::LETTER) {
     throw InvalidSyntaxException();
   }
   called_proc_ = tokens.at(kIndexOfCalledProc).text_;
