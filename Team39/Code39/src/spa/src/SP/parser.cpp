@@ -429,8 +429,6 @@ void Parser::Validate() {
   vector<vector<string>> called_procedures_set = {};
 
   for (Procedure proc : proc_lst_) {
-    proc.Validate();
-
     procedures.push_back(proc.GetProcName());
     called_procedures_set.push_back(proc.GetCalledProcedures());
   }

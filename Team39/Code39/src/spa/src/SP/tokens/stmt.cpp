@@ -15,6 +15,10 @@ AssignStmt::AssignStmt(std::vector<Token>& tokens, int stmt_num) {
 
   const int kIndexOfLhsVar = 0;
   const int kIndexOfFirstRhsVar = 2;
+
+  if (tokens.at(kIndexOfLhsVar).type_ != TokenType::NAME) {
+    throw InvalidSyntaxException();
+  }
   lhs_var_ = tokens.at(kIndexOfLhsVar).text_;
 
   vector<Token>::const_iterator pattern_start = tokens.begin() + kIndexOfFirstRhsVar;
@@ -29,13 +33,6 @@ vector<string> AssignStmt::GetVar() {
      v.push_back(var);
   }
   return v;
-}
-
-void AssignStmt::Validate() {
-  bool is_valid_lhs = isalpha(lhs_var_[0]);
-  if (!is_valid_lhs) {
-    throw InvalidSyntaxException();
-  }
 }
 
 void AssignStmt::PopulateEntities(Pkb& pkb) {
@@ -58,19 +55,16 @@ ReadStmt::ReadStmt(std::vector<Token>& tokens, int stmt_num) {
     throw InvalidSyntaxException();
   }
   stmt_num_ = stmt_num;
+
   const int kIndexOfVar = 1;
+  if (tokens.at(kIndexOfVar).type_ != TokenType::NAME) {
+    throw InvalidSyntaxException();
+  }
   read_var_ = tokens.at(kIndexOfVar).text_;
 }
 
 vector<string> ReadStmt::GetVar() {
   return { read_var_ };
-}
-
-void ReadStmt::Validate() {
-  bool is_valid = isalpha(read_var_[0]);
-  if (!is_valid) {
-    throw InvalidSyntaxException();
-  }
 }
 
 void ReadStmt::PopulateEntities(Pkb& pkb) {
@@ -94,19 +88,16 @@ PrintStmt::PrintStmt(std::vector<Token>& tokens, int stmt_num) {
     throw InvalidSyntaxException();
   }
   stmt_num_ = stmt_num;
+
   const int kIndexOfVar = 1;
+  if (tokens.at(kIndexOfVar).type_ != TokenType::NAME) {
+    throw InvalidSyntaxException();
+  }
   print_var_ = tokens.at(kIndexOfVar).text_;
 }
 
 vector<string> PrintStmt::GetVar() {
   return { print_var_ };
-}
-
-void PrintStmt::Validate() {
-  bool is_valid = isalpha(print_var_[0]);
-  if (!is_valid) {
-    throw InvalidSyntaxException();
-  }
 }
 
 void PrintStmt::PopulateEntities(Pkb& pkb) {
@@ -232,19 +223,16 @@ CallStmt::CallStmt(std::vector<Token>& tokens, int stmt_num) {
     throw InvalidSyntaxException();
   }
   stmt_num_ = stmt_num;
+
   const int kIndexOfCalledProc = 1;
+  if (tokens.at(kIndexOfCalledProc).type_ != TokenType::NAME) {
+    throw InvalidSyntaxException();
+  }
   called_proc_ = tokens.at(kIndexOfCalledProc).text_;
 }
 
 vector<string> CallStmt::GetVar() {
   return { called_proc_ };
-}
-
-void CallStmt::Validate() {
-  bool is_valid = isalpha(called_proc_[0]);
-  if (!is_valid) {
-    throw InvalidSyntaxException();
-  }
 }
 
 void CallStmt::PopulateEntities(Pkb& pkb) {

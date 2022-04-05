@@ -13,7 +13,6 @@ class Procedure {
     std::string GetProcName();
     vector<string> GetCalledProcedures();
 
-    void Validate();
     void PopulateEntities(Pkb& pkb);
 
   private:
@@ -22,6 +21,4 @@ class Procedure {
     vector<string> called_procedures_ = {};
     vector<string> modifies_p_ = {};
     vector<string> uses_p_ = {};
-    vector<int> right_curly_brackets_ = {};
-    vector<int> else_stmt_ = {};
 };

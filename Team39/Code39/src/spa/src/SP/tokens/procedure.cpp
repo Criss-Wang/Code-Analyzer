@@ -17,10 +17,13 @@ Procedure::Procedure(vector<Token>& tokens, vector<shared_ptr<Stmt>>& stmt_lst) 
   int expected_size = 2;
 
   if (tokens.size() != expected_size) {
-
     throw InvalidSyntaxException();
   }
+
   const int kIndexOfProcName = 1;
+  if (tokens.at(kIndexOfProcName).type_ != TokenType::NAME) {
+    throw InvalidSyntaxException();
+  }
   proc_name_ = tokens.at(kIndexOfProcName).text_;
   stmt_lst_ = stmt_lst;
 
@@ -50,17 +53,6 @@ std::string Procedure::GetProcName() {
 
 vector<string> Procedure::GetCalledProcedures() {
   return called_procedures_;
-}
-
-void Procedure::Validate() {
-  bool is_valid = isalpha(proc_name_[0]);
-  if (!is_valid) {
-    throw InvalidSyntaxException();
-  }
-
-  for (shared_ptr<Stmt> stmt : stmt_lst_) {
-    (*stmt).Validate();
-  }
 }
 
 void Procedure::PopulateEntities(Pkb& pkb) {

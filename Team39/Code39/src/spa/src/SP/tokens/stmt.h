@@ -15,7 +15,6 @@ class Stmt {
     int GetStmtNum();
     virtual vector<string> GetVar() { return {}; };
 
-    virtual void Validate() { };
     virtual void PopulateEntities(Pkb& pkb) { };
 
   protected:
@@ -29,7 +28,6 @@ class AssignStmt : public Stmt {
 
     vector<string> GetVar();
 
-    void Validate();
     void PopulateEntities(Pkb& pkb);
 
   private:
@@ -44,7 +42,6 @@ class ReadStmt : public Stmt {
 
     vector<string> GetVar();
 
-    void Validate();
     void PopulateEntities(Pkb& pkb);
 
   private:
@@ -58,7 +55,6 @@ class PrintStmt : public Stmt {
 
     vector<string> GetVar();
 
-    void Validate();
     void PopulateEntities(Pkb& pkb);
 
   private:
@@ -98,7 +94,6 @@ class CallStmt : public Stmt {
 
     vector<string> GetVar();
 
-    void Validate();
     void PopulateEntities(Pkb& pkb);
 
   private:
