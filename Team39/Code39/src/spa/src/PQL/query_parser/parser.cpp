@@ -258,6 +258,7 @@ namespace pql {
         domain.push_back(EntityIdentifier::kAssign);
       } else if (ps.Peek() == ')') {
         ps.Consume();
+        expression = "_";
         domain.push_back(EntityIdentifier::kAssign);
         domain.push_back(EntityIdentifier::kWhile);
       } else {
