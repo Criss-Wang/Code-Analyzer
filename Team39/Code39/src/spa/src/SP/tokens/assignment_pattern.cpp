@@ -1,6 +1,14 @@
 #include "assignment_pattern.h"
 #include "SP/sp_exceptions.h"
 
+const map<TokenType, vector<TokenType>> ExpectedNextTokenTypeMap = {
+  { TokenType::NAME, {TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
+  { TokenType::INTEGER, {TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
+  { TokenType::LEFT_PAREN, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN} },
+  { TokenType::RIGHT_PAREN, {TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
+  { TokenType::OPERATOR, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN } }
+};
+
 AssignmentPattern::AssignmentPattern(std::vector<Token>& tokens) {
 
   int paren_count = 0;
@@ -36,32 +44,20 @@ AssignmentPattern::AssignmentPattern(std::vector<Token>& tokens) {
       throw InvalidSyntaxException();
     }
 
-    expected_types = {};
+    expected_types = ExpectedNextTokenTypeMap.at(token_type);
 
-    if (token_type == TokenType::OPERATOR || token_type == TokenType::LEFT_PAREN) { // expects variable, integer or left paren after operator/left paren
-      expected_types.push_back(TokenType::NAME);
-      expected_types.push_back(TokenType::INTEGER);
-      expected_types.push_back(TokenType::LEFT_PAREN);
+    if (token_type == TokenType::LEFT_PAREN) {
+      paren_count += 1;
 
-      if (token_type == TokenType::LEFT_PAREN) {
-        paren_count += 1;
-      }
-
-    } else if (token_type == TokenType::RIGHT_PAREN) { // expects operator or right paren after right paren
-      expected_types.push_back(TokenType::OPERATOR);
-      expected_types.push_back(TokenType::RIGHT_PAREN);
-
+    } else if (token_type == TokenType::RIGHT_PAREN) {
       paren_count -= 1;
 
-    } else if (token_type == TokenType::NAME || token_type == TokenType::INTEGER) { // expects operator or right paren after variable or integer
-      expected_types.push_back(TokenType::OPERATOR);
-      expected_types.push_back(TokenType::RIGHT_PAREN);
+    } else if (token_type == TokenType::NAME && find(begin(vars_), end(vars_), token->text_) == end(vars_)) {
+      vars_.push_back(token->text_);
 
-      if (token_type == TokenType::NAME && find(begin(vars_), end(vars_), token->text_) == end(vars_)) {
-        vars_.push_back(token->text_);
-      } else if (token_type == TokenType::INTEGER && find(begin(constants_), end(constants_), stoi(token->text_)) == end(constants_)) {
-        constants_.push_back(stoi(token->text_));
-      }
+    } else if (token_type == TokenType::INTEGER && find(begin(constants_), end(constants_), stoi(token->text_)) == end(constants_)) {
+      constants_.push_back(stoi(token->text_));
+
     }
   }
 

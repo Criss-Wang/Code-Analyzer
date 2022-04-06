@@ -1,6 +1,17 @@
 #include "conditional_expr.h"
 #include "SP/sp_exceptions.h"
 
+const map<TokenType, vector<TokenType>> ExpectedNextTokenTypeMap = {
+  { TokenType::NAME, {TokenType::REL_OPERATOR, TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
+  { TokenType::INTEGER, {TokenType::REL_OPERATOR, TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
+  { TokenType::LEFT_PAREN, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN, TokenType::NOT_OPERATOR} },
+  { TokenType::RIGHT_PAREN, {TokenType::COND_OPERATOR, TokenType::RIGHT_PAREN, TokenType::OPERATOR, TokenType::REL_OPERATOR} },
+  { TokenType::NOT_OPERATOR, {TokenType::LEFT_PAREN} },
+  { TokenType::COND_OPERATOR, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN } },
+  { TokenType::REL_OPERATOR, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN } },
+  { TokenType::OPERATOR, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN } }
+};
+
 ConditionalExpression::ConditionalExpression(std::vector<Token>& tokens) {
 
   vector<TokenType> expected_types = { TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN, TokenType::NOT_OPERATOR };
@@ -45,48 +56,27 @@ ConditionalExpression::ConditionalExpression(std::vector<Token>& tokens) {
       throw InvalidSyntaxException();
     }
 
-    expected_types = {};
+    expected_types = ExpectedNextTokenTypeMap.at(token_type);
 
-    if (token_type == TokenType::LEFT_PAREN) { // expects variable, integer or left paren after left paren
-      expected_types.push_back(TokenType::NAME);
-      expected_types.push_back(TokenType::INTEGER);
-      expected_types.push_back(TokenType::LEFT_PAREN);
-      expected_types.push_back(TokenType::NOT_OPERATOR);
+    if (token_type == TokenType::LEFT_PAREN) {
 
       paren_count += 1;
 
-    } else if (token_type == TokenType::RIGHT_PAREN) { // expects cond/rel/normal operator or right paren after right paren
-      expected_types.push_back(TokenType::COND_OPERATOR);
-      expected_types.push_back(TokenType::RIGHT_PAREN);
-      expected_types.push_back(TokenType::OPERATOR);
-      expected_types.push_back(TokenType::REL_OPERATOR);
-
+    } else if (token_type == TokenType::RIGHT_PAREN) {
       paren_count -= 1;
 
-    } else if (token_type == TokenType::NOT_OPERATOR) { // expects left paren after not operator
-      expected_types.push_back(TokenType::LEFT_PAREN);
+    } else if (token_type == TokenType::NAME && find(begin(vars_), end(vars_), token->text_) == end(vars_)) {
+      vars_.push_back(token->text_);
 
-    } else if (token_type == TokenType::NAME || token_type == TokenType::INTEGER) { // expects rel operator or right paren after variable or integer
-      expected_types.push_back(TokenType::REL_OPERATOR);
-      expected_types.push_back(TokenType::RIGHT_PAREN);
-      expected_types.push_back(TokenType::OPERATOR);
+    } else if (token_type == TokenType::INTEGER && find(begin(constants_), end(constants_), stoi(token->text_)) == end(constants_)) {
+      constants_.push_back(stoi(token->text_));
 
-      if (token_type == TokenType::NAME && find(begin(vars_), end(vars_), token->text_) == end(vars_)) {
-        vars_.push_back(token->text_);
-      } else if (token_type == TokenType::INTEGER && find(begin(constants_), end(constants_), stoi(token->text_)) == end(constants_)) {
-        constants_.push_back(stoi(token->text_));
-      }
+    } else if (token_type == TokenType::REL_OPERATOR) {
+      rel_op_count += 1;
 
-    } else if (token_type == TokenType::COND_OPERATOR || token_type == TokenType::REL_OPERATOR || token_type == TokenType::OPERATOR) { // expected name, int or left after operator
-      expected_types.push_back(TokenType::NAME);
-      expected_types.push_back(TokenType::INTEGER);
-      expected_types.push_back(TokenType::LEFT_PAREN);
+    } else if (token_type == TokenType::COND_OPERATOR) {
+      cond_op_count += 1;
 
-      if (token_type == TokenType::REL_OPERATOR) {
-        rel_op_count += 1;
-      } else if (token_type == TokenType::COND_OPERATOR) {
-        cond_op_count += 1;
-      }
     }
   }
 

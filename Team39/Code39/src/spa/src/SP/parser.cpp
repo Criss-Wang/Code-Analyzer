@@ -11,39 +11,39 @@
 #define INDEX_OF_EQUAL_OP 1
 
 
-stack<int> populateFollowsRelationship(stack<int> previous, Pkb& pkb, int stmt_num) {
+void PopulateFollowsRelationship(stack<int>& previous, Pkb& pkb, int& stmt_num) {
 
   if (!previous.empty()) {
     if (stmt_num == previous.top()) {
-      return previous;
+      return;
     } else {
       // Add previous stmt num and current stmt num to FollowsTable
       pkb.AddInfoToTable(TableIdentifier::kFollows, previous.top(), stmt_num);
       previous.pop();
     }
   }
-
   previous.push(stmt_num);
 
-  return previous;
 }
 
-void populateNextRelationship(stack<int> previous, Pkb& pkb, int stmt_num) {
-  if (!previous.empty() && stmt_num != previous.top()) {
-    // Add previous stmt num and current stmt num to NextTable
-    pkb.AddInfoToTable(TableIdentifier::kNext, previous.top(), vector<int>{ stmt_num });
-  }
-}
-
-stack<vector<int>> populateParentRelationship(stack<int> parent, stack<vector<int>> children, int stmt_num) {
+void AddChild(stack<int>& parent, stack<vector<int>>& children, int& stmt_num) {
   if (!parent.empty()) {
     children.top().push_back(stmt_num);
   }
-
-  return children;
 }
 
-stack<vector<pair<int, int>>> populateNextRelationshipForIf(stack<vector<pair<int, int>>> last_stmts_in_if, Pkb& pkb, int stmt_num) {
+void PopulateParentRelationship(stack<int>& parent, stack<vector<int>>& children, Pkb& pkb) {
+  if (!parent.empty()) {
+    // Add parent stmt num and current stmt num to ParentTable
+    if (!children.top().empty()) {
+      pkb.AddInfoToTable(TableIdentifier::kParent, parent.top(), children.top());
+    }
+    parent.pop();
+    children.pop();
+  }
+}
+
+void PopulateNextRelationshipForIf(stack<vector<pair<int, int>>>& last_stmts_in_if, Pkb& pkb, int& stmt_num) {
   // Add the last stmt num in then/else container and current stmt num to Next Table
   vector<pair<int, int>> last_stmts = last_stmts_in_if.top();
   for (int i = 0; i < last_stmts.size(); i++) {
@@ -55,26 +55,87 @@ stack<vector<pair<int, int>>> populateNextRelationshipForIf(stack<vector<pair<in
     }
   }
   last_stmts_in_if.pop();
-  return last_stmts_in_if;
 }
 
 void PopulateNextRelationshipForWhile(stack<int>& while_stmt_num, stack<vector<pair<int, int>>>& last_stmt_nums_in_if, bool& is_prev_stmt_while, Pkb& pkb) {
   if (is_prev_stmt_while) {
+    const int kNextStmtNum = while_stmt_num.top() + 1;
     // No stmt after while loop, add stmt num of while and first stmt num in container to Next Table
-    pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), vector<int>{while_stmt_num.top() + 1});
+    pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), vector<int>{kNextStmtNum});
+    while_stmt_num.pop();
+    is_prev_stmt_while = false;
+  }
+
+  // Find all while loops in if containers which are still waiting for next stmt and add them to Next Table
+  while (!last_stmt_nums_in_if.empty()) {
+    for (int i = 0; i < last_stmt_nums_in_if.top().size(); i++) {
+      pair<int, int> stmt = last_stmt_nums_in_if.top().at(i);
+      if (stmt.second != 0) {
+        pkb.AddInfoToTable(TableIdentifier::kNext, stmt.first, vector<int>{stmt.second});
+      }
+    }
+    last_stmt_nums_in_if.pop();
+  }
+}
+
+void PopulateNextRelationship(stack<int>& previous, Pkb& pkb, int& stmt_num, stack<vector<pair<int, int>>>& last_stmt_nums_in_if,
+  stack<int>& while_stmt_num, bool& is_prev_stmt_if, bool& is_prev_stmt_while) {
+
+  if (is_prev_stmt_if) {
+    PopulateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
+    is_prev_stmt_if = false;
+  } else if (is_prev_stmt_while) {
+    const int kNextStmtNum = while_stmt_num.top() + 1;
+    vector<int> next_stmt_nums_for_while = { kNextStmtNum, stmt_num };
+    // Add stmt num of while and next stmt num to Next Table
+    pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), next_stmt_nums_for_while);
     while_stmt_num.pop();
     is_prev_stmt_while = false;
   } else {
-    // Find all while loops still waiting for next stmt and add them to Next Table
-    while (!last_stmt_nums_in_if.empty()) {
-      for (int i = 0; i < last_stmt_nums_in_if.top().size(); i++) {
-        pair<int, int> stmt = last_stmt_nums_in_if.top().at(i);
-        if (stmt.second != 0) {
-          pkb.AddInfoToTable(TableIdentifier::kNext, stmt.first, vector<int>{stmt.second});
-        }
-      }
-      last_stmt_nums_in_if.pop();
+    if (!previous.empty() && stmt_num != previous.top()) {
+      // Add previous stmt num and current stmt num to NextTable
+      pkb.AddInfoToTable(TableIdentifier::kNext, previous.top(), vector<int>{ stmt_num });
     }
+  }
+}
+
+void UpdateNextRelForIfInIf(bool& is_prev_stmt_while, bool& is_prev_stmt_if, stack<vector<pair<int, int>>>& last_stmt_nums_in_if,
+  int& previous_stmt_num, stack<int>& while_stmt_num) {
+
+  if (is_prev_stmt_while) {
+    const int kNextStmtNum = previous_stmt_num + 1;
+    last_stmt_nums_in_if.top().push_back({ previous_stmt_num, kNextStmtNum });
+    while_stmt_num.pop();
+    is_prev_stmt_while = false;
+  } else if (is_prev_stmt_if) {
+    vector<pair<int, int>> last_stmts = last_stmt_nums_in_if.top();
+    last_stmt_nums_in_if.pop();
+    for (pair<int, int> s : last_stmts) {
+      last_stmt_nums_in_if.top().push_back(s);
+    }
+    is_prev_stmt_if = false;
+  } else {
+    last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 }); // 0 is used to represent that the stmt is not while
+  }
+}
+
+void UpdateNextRelForIfInWhile(bool& is_prev_stmt_while, bool& is_prev_stmt_if, stack<vector<pair<int, int>>>& last_stmt_nums_in_if,
+  int& previous_stmt_num, stack<int>& while_stmt_num, Pkb& pkb) {
+
+  if (is_prev_stmt_if) {
+    // Add the last stmt num in then/else container and stmt num of while to Next Table
+    PopulateNextRelationshipForIf(last_stmt_nums_in_if, pkb, while_stmt_num.top());
+    is_prev_stmt_if = false;
+  } else if (is_prev_stmt_while) {
+    while_stmt_num.pop();
+    // Add the stmt num of while and next stmt num to Next Table
+    const int kNextStmtNum = previous_stmt_num + 1;
+    vector<int> next_stmt_nums = { kNextStmtNum, while_stmt_num.top() };
+    pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, next_stmt_nums);
+    is_prev_stmt_while = false;
+  } else {
+    // Add the last stmt num in container and stmt num of while to Next Table
+    pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, vector<int>{ while_stmt_num.top() });
   }
 }
 
@@ -142,82 +203,34 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
         if_stmt_num.pop();
 
-        if (is_prev_stmt_while) {
-          last_stmt_nums_in_if.top().push_back({ previous_stmt_num, previous_stmt_num + 1 });
-          while_stmt_num.pop();
-          is_prev_stmt_while = false;
-        } else if (is_prev_stmt_if) {
-          vector<pair<int, int>> last_stmts = last_stmt_nums_in_if.top();
-          last_stmt_nums_in_if.pop();
-          for (pair<int, int> s : last_stmts) {
-            last_stmt_nums_in_if.top().push_back(s);
-          }
-          is_prev_stmt_if = false;
-        } else {
-          last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 });
-        }
+        UpdateNextRelForIfInIf(is_prev_stmt_while, is_prev_stmt_if, last_stmt_nums_in_if, previous_stmt_num, while_stmt_num);
+        continue;
 
-      } else {
-        curly_bracket_count -= 1;
-
-        if (!parent.empty()) {
-          // Add parent stmt num and current stmt num to ParentTable
-          if (!children.top().empty()) {
-            pkb.AddInfoToTable(TableIdentifier::kParent, parent.top(), children.top());
-          }
-          parent.pop();
-          children.pop();
-        }
-
-        if (end_tokens.empty()) {
-          PopulateNextRelationshipForWhile(while_stmt_num, last_stmt_nums_in_if, is_prev_stmt_while, pkb);
-        }
-
-        if (!end_tokens.empty()) {
-          if (end_tokens.top() == "if") {
-            cfg_tokens.push_back(CFGToken(CFGTokenType::kElseEnd, 0));
-
-            if (is_prev_stmt_while) {
-              last_stmt_nums_in_if.top().push_back({ previous_stmt_num, previous_stmt_num + 1 });
-              while_stmt_num.pop();
-              is_prev_stmt_while = false;
-            } else if (is_prev_stmt_if) {
-              vector<pair<int, int>> last_stmts = last_stmt_nums_in_if.top();
-              last_stmt_nums_in_if.pop();
-              for (pair<int, int> s : last_stmts) {
-                last_stmt_nums_in_if.top().push_back(s);
-              }
-              is_prev_stmt_if = false;
-            } else {
-              last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 });
-            }
-
-            is_prev_stmt_if = true;
-
-          } else if (end_tokens.top() == "while") {
-            cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileEnd, 0));
-
-            if (is_prev_stmt_if) {
-              // Add the last stmt num in then/else container and stmt num of while to Next Table
-              last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, while_stmt_num.top());
-              is_prev_stmt_if = false;
-            } else if (is_prev_stmt_while) {
-              while_stmt_num.pop();
-              // Add the stmt num of while and next stmt nums to Next Table
-              vector<int> next_stmt_nums = { previous_stmt_num + 1, while_stmt_num.top() };
-              pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, next_stmt_nums);
-              is_prev_stmt_while = false;
-            } else {
-              // Add the last stmt num in container and stmt num of while to Next Table
-              pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, vector<int>{ while_stmt_num.top() });
-            }
-
-            is_prev_stmt_while = true;
-          }
-          end_tokens.pop();
-
-        }
       }
+      curly_bracket_count -= 1;
+
+      PopulateParentRelationship(parent, children, pkb);
+
+      if (end_tokens.empty()) {
+        PopulateNextRelationshipForWhile(while_stmt_num, last_stmt_nums_in_if, is_prev_stmt_while, pkb);
+
+      } else if (!end_tokens.empty() && end_tokens.top() == "if") {
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kElseEnd, 0));
+
+        UpdateNextRelForIfInIf(is_prev_stmt_while, is_prev_stmt_if, last_stmt_nums_in_if, previous_stmt_num, while_stmt_num);
+
+        is_prev_stmt_if = true;
+        end_tokens.pop();
+
+      } else if (!end_tokens.empty() && end_tokens.top() == "while") {
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileEnd, 0));
+
+        UpdateNextRelForIfInWhile(is_prev_stmt_while, is_prev_stmt_if, last_stmt_nums_in_if, previous_stmt_num, while_stmt_num, pkb);
+
+        is_prev_stmt_while = true;
+        end_tokens.pop();
+        }
+
     } else if (token != end(tokens_lst) - 1 && (next(token, 1)->text_ == "=" || token->text_ == "read" 
       || token->text_ == "print" || token->text_ == "call")) {
       stmt_num += 1;
@@ -228,22 +241,10 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         token++;
       }
 
-      if (is_prev_stmt_if) {
-        last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
-        is_prev_stmt_if = false;
-      } else if (is_prev_stmt_while) {
-        vector<int> next_stmt_nums_for_while = { while_stmt_num.top() + 1, stmt_num };
-        // Add stmt num of while and next stmt num to Next Table
-        pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), next_stmt_nums_for_while);
-        while_stmt_num.pop();
-        is_prev_stmt_while = false;
-        next_stmt_nums_for_while = {};
-      } else {
-        populateNextRelationship(previous, pkb, stmt_num);
-      }
+      PopulateNextRelationship(previous, pkb, stmt_num, last_stmt_nums_in_if, while_stmt_num, is_prev_stmt_if, is_prev_stmt_while);
 
-      children = populateParentRelationship(parent, children, stmt_num);
-      previous = populateFollowsRelationship(previous, pkb, stmt_num);
+      AddChild(parent, children, stmt_num);
+      PopulateFollowsRelationship(previous, pkb, stmt_num);
 
       if (tokens.at(INDEX_OF_EQUAL_OP).text_ == "=") {
         stmt_lst.push_back(make_shared<AssignStmt>(AssignStmt(tokens, stmt_num)));
@@ -307,21 +308,10 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         token++;
       }
 
-      if (is_prev_stmt_if) {
-        last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
-        is_prev_stmt_if = false;
-      } else if (is_prev_stmt_while) {
-        vector<int> next_stmt_nums_for_while = { while_stmt_num.top() + 1, stmt_num };
-        // Add stmt num of while and next stmt num to Next Table
-        pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), next_stmt_nums_for_while);
-        while_stmt_num.pop();
-        is_prev_stmt_while = false;
-      } else {
-        populateNextRelationship(previous, pkb, stmt_num);
-      }
+      PopulateNextRelationship(previous, pkb, stmt_num, last_stmt_nums_in_if, while_stmt_num, is_prev_stmt_if, is_prev_stmt_while);
 
-      children = populateParentRelationship(parent, children, stmt_num);
-      previous = populateFollowsRelationship(previous, pkb, stmt_num);
+      AddChild(parent, children, stmt_num);
+      PopulateFollowsRelationship(previous, pkb, stmt_num);
       parent.push(stmt_num);
       children.push({});
       previous.push(stmt_num + 1);
