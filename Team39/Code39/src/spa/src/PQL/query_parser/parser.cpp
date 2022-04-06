@@ -58,6 +58,9 @@ namespace pql {
         select_clause_parsed = true;
         declarations_parsed = true;
       } else if (keyword == "such" && select_clause_parsed) {
+        if (ps.Peek() != ' ') {
+          throw ParseException();
+        }
         ps.EatWhiteSpaces();
         ps.Expect("that");
         ps.EatWhiteSpaces();
@@ -112,6 +115,7 @@ namespace pql {
       Parser::query.SetBoolean(false);
     } else {
       std::string name = ps.ParseName();
+      ps.EatWhiteSpaces();
       if (ps.Peek() == '.') {
         ps.Next(); 
         attribute = ps.ParseAttribute();
@@ -133,9 +137,12 @@ namespace pql {
   }
 
   void Parser::ParseTuple() {
+    int tuple_elem_count = 0;
     ps.Consume();
+    ps.EatWhiteSpaces();
     while (ps.Peek() != '>') {
       std::string name = ps.ParseName();
+      ps.EatWhiteSpaces();
       if (ps.Peek() == '.') {
         ps.Next();
         std::string attr = ps.ParseAttribute();
@@ -143,12 +150,17 @@ namespace pql {
       } else {
         Parser::query.AddResultSynonym(name);
       }
-
+      ps.EatWhiteSpaces();
+      tuple_elem_count++;
       if (ps.Peek() == ',') {
         ps.Next();
       }
+      ps.EatWhiteSpaces();
     }
     ps.Consume();
+    if (tuple_elem_count == 0) {
+      throw ParseException();
+    }
   }
 
   void Parser::ParseRelationship() {
@@ -184,6 +196,7 @@ namespace pql {
 
   void Parser::ParsePattern() {
     std::string synonym = ps.ParseName();
+    Parser::query.AddUsedSynonym(synonym);
     auto pattern = Parser::ParsePatternSyntax();
     std::string left = std::get<INDEX_OF_LEFT>(pattern);
     std::vector<EntityIdentifier> domain = std::get<INDEX_OF_DOMAIN>(pattern);
@@ -215,7 +228,7 @@ namespace pql {
     ps.EatWhiteSpaces();
     if (ps.Peek() == '\"') {
       ps.Consume();
-      ps.ParseExpression(Parser::query);
+      expression = ps.ParseExpression(Parser::query);
       ps.Expect("\"");
       ps.EatWhiteSpaces();
       ps.Expect(")");

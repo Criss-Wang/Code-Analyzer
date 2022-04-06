@@ -62,25 +62,25 @@ class UpdateIndexTableException final : public exception {
     }
 };
 
-class AddInfoToTableException final : public exception {
+class AddKeyValuePairException final : public exception {
   private:
     string message;
 
   public:
-    AddInfoToTableException(int table_identifier, string error_message)
-      : message("Failed to add info to table " + to_string(table_identifier) + ". " + error_message) {}
+    AddKeyValuePairException(int table_identifier, string error_message)
+      : message("Failed to add key value pair to table " + to_string(table_identifier) + ". " + error_message) {}
 
     const char* what() const throw() {
       return message.c_str();
     }
 };
 
-class AddEntityToSetException final : public exception {
+class AddEntityException final : public exception {
   private:
     string message;
 
   public:
-    AddEntityToSetException(int entity_identifier, string error_message)
+    AddEntityException(int entity_identifier, string error_message)
       : message("Failed to add entity to set " + to_string(entity_identifier) + ". " + error_message) {}
 
     const char* what() const throw() {

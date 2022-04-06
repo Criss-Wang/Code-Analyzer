@@ -40,4 +40,44 @@ class Tokenizer {
 
   private:
     void EndToken(Token& token, vector<Token>& tokens);
+
+    bool IsOperator(char curr_char) {
+      return curr_char == '+'
+        || curr_char == '-'
+        || curr_char == '*'
+        || curr_char == '/'
+        || curr_char == '%'
+        || curr_char == '='
+        || curr_char == '<'
+        || curr_char == '>'
+        || curr_char == '!'
+        || curr_char == '&'
+        || curr_char == '|';
+    }
+
+    bool IsWhitespace(char curr_char) {
+      return curr_char == ' '
+        || curr_char == '	'
+        || curr_char == '\n';
+    }
+
+    bool IsLeftParen(char curr_char) {
+      return curr_char == '(';
+    }
+
+    bool IsRightParen(char curr_char) {
+      return curr_char == ')';
+    }
+
+    bool IsLeftCurlyBracket(char curr_char) {
+      return curr_char == '{';
+    }
+
+    bool IsRightCurlyBracket(char curr_char) {
+      return curr_char == '}';
+    }
+
+    bool IsSemicolon(char curr_char) {
+      return curr_char == ';';
+    }
 };
