@@ -7,8 +7,10 @@ ConditionalExpression::ConditionalExpression(std::vector<Token>& tokens) {
   vector<string> rel_operators = { ">", "<", "==", "!=", ">=", "<=" };
   vector<string> expected_operators = { "*", "/", "+", "-", "%" };
 
-  // keep track of number of brackets
+  // keep track of number of brackets, rel_op and cond_op
   int paren_count = 0;
+  int rel_op_count = 0;
+  int cond_op_count = 0;
 
   for (auto token = begin(tokens); token != end(tokens); ++token) {
 
@@ -79,10 +81,16 @@ ConditionalExpression::ConditionalExpression(std::vector<Token>& tokens) {
       expected_types.push_back(TokenType::NAME);
       expected_types.push_back(TokenType::INTEGER);
       expected_types.push_back(TokenType::LEFT_PAREN);
+
+      if (token_type == TokenType::REL_OPERATOR) {
+        rel_op_count += 1;
+      } else if (token_type == TokenType::COND_OPERATOR) {
+        cond_op_count += 1;
+      }
     }
   }
 
-  if (paren_count != 0) {
+  if (paren_count != 0 || (rel_op_count -1) != cond_op_count) {
     throw InvalidSyntaxException();
   }
 }

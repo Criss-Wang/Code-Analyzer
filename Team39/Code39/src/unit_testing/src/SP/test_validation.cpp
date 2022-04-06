@@ -114,6 +114,7 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation
     RequireInvalidSyntax(invalid_dir + "3_test1.txt");
     RequireInvalidSyntax(invalid_dir + "3_test2.txt");
     RequireInvalidSyntax(invalid_dir + "3_test3.txt");
+    RequireInvalidSyntax(invalid_dir + "3_test4.txt");
 
   }
 }
