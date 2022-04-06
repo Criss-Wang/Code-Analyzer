@@ -28,14 +28,8 @@ void RequireInvalidSyntax(string path) {
     cerr << "Could not open the file " << endl;
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-    try {
-      Pkb pkb;
-      Parser parser(input, pkb);
-      parser.Validate();
-      REQUIRE(0 == 1);
-    } catch (InvalidSyntaxException) {
-      REQUIRE(1 == 1);
-    }
+    Pkb pkb;
+    REQUIRE_THROWS_AS(Parser(input, pkb), InvalidSyntaxException);
   }
 }
 
