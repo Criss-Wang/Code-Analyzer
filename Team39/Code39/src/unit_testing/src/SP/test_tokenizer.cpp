@@ -10,14 +10,14 @@
 using namespace std;
 
 TEST_CASE("Valid tokenizer output") {
-  Tokenizer tokenizer;
   string source_prog;
   vector<Token> actual_tokens;
   vector<Token> expected_tokens;
 
   SECTION("Digits and integer") {
     source_prog = "1 23";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::DIGIT, "1"};
     Token token2{ TokenType::INTEGER, "23"};
@@ -28,7 +28,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Letters and names") {
     source_prog = "x read myInt123";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::LETTER, "x"};
     Token token2{ TokenType::NAME, "read"};
@@ -40,7 +41,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Brackets") {
     source_prog = "( ) { }";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::LEFT_PAREN, "("};
     Token token2{ TokenType::RIGHT_PAREN, ")"};
@@ -53,7 +55,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Operators and semicolon") {
     source_prog = "A + B - C * D / E % F = G < H > I ;"; // To avoid syntax error exception
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::LETTER, "A"};
     Token token2{ TokenType::OPERATOR, "+"};
@@ -81,7 +84,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with read and print statements") {
     source_prog = "procedure procName { read x; print print; }";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure"};
     Token token2{ TokenType::NAME, "procName"};
@@ -100,7 +104,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with assign statement") {
     source_prog = "procedure proc1Name { x = y + 2; }";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure"};
     Token token2{ TokenType::NAME, "proc1Name"};
@@ -119,7 +124,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Same procedure name, variable name and terminal") {
     source_prog = "procedure read { read read; read = read + 1; }";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure"};
     Token token2{ TokenType::NAME, "read"};
@@ -142,7 +148,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with whitespaces") {
     source_prog = "procedure     procName   {    read       x    ;      }";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure"};
     Token token2{ TokenType::NAME, "procName"};
@@ -158,7 +165,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with newline") {
     source_prog = "procedure procName \n { read read;\n}";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure"};
     Token token2{ TokenType::NAME, "procName"};
@@ -174,7 +182,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Stmt with brackets") {
     source_prog = "procedure procName {x = y + (5 + z);}";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure"};
     Token token2{ TokenType::NAME, "procName"};
@@ -198,7 +207,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Stmt with brackets") {
     source_prog = "procedure procedure {x = y + (5 + (z + 5));}";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure"};
     Token token2{ TokenType::NAME, "procedure"};
@@ -226,7 +236,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with ifs") {
     source_prog = "procedure procedure { if (x = 1) then { read read; } else { print print; }";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure"};
     Token token2{ TokenType::NAME, "procedure"};
@@ -257,7 +268,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with while") {
     source_prog = "procedure procName { while (x = 1) { read x; x = x + 1; } }";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure"};
     Token token2{ TokenType::NAME, "procName"};
@@ -288,7 +300,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with ifs followed by while") {
     source_prog = "procedure procedure { if (x = 1) then { read read; } else { print print; } while (x = 1) { read x; x = x + 1; } }";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure"};
     Token token2{ TokenType::NAME, "procedure"};
@@ -339,7 +352,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with while followed by ifs") {
     source_prog = "procedure procedure { while (x = 1) { read x; x = x + 1; } if (x = 1) then { read read; } else { print print; } }";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure"};
     Token token2{ TokenType::NAME, "procedure"};
@@ -390,7 +404,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with ifs nested in while") {
     source_prog = "procedure procedure { while (s = 0) { if (x = 2) then { read read; } else { print print; } } }";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure" };
     Token token2{ TokenType::NAME, "procedure" };
@@ -431,7 +446,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with while nested in ifs") {
     source_prog = "procedure procedure {if (x == 2) then { while (s == 0) { read s;} }else{ while (s == 0) { read s; } }}";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure" };
     Token token2{ TokenType::NAME, "procedure" };
@@ -481,7 +497,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with two-symbol operator in cond expr and rel expr") {
     source_prog = "x==0; x >=0; x<= 0; x != 0; x && y; x || y; !(x == 0);";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::LETTER, "x" };
     Token token2{ TokenType::OPERATOR, "==" };
@@ -523,7 +540,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with two-symbol operator in while stmt") {
     source_prog = "procedure procedure {while !(x >= 0) {x = y;}}";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType:: NAME, "procedure" };
     Token token2{ TokenType::NAME, "procedure" };
@@ -550,7 +568,8 @@ TEST_CASE("Valid tokenizer output") {
 
   SECTION("Procedure with else var") {
     source_prog = "procedure procedure { if (else = if) then { then = 1; } else { else = 3; }}";
-    actual_tokens = tokenizer.parse(source_prog);
+    Tokenizer tokenizer = Tokenizer(source_prog);
+    actual_tokens = tokenizer.tokens_list_;
 
     Token token1{ TokenType::NAME, "procedure" };
     Token token2{ TokenType::NAME, "procedure" };
@@ -585,14 +604,12 @@ TEST_CASE("Valid tokenizer output") {
 }
 
 TEST_CASE("Invalid tokenizer output") {
-  Tokenizer tokenizer;
   string source_prog;
-  vector<Token> actual_tokens;
 
   SECTION("Invalid name of digits followed by letters") {
     source_prog = "procedure procName { print 123myInt; }";
     try {
-      actual_tokens = tokenizer.parse(source_prog);
+      Tokenizer tokenizer = Tokenizer(source_prog);
       REQUIRE(0 == 1);
     } catch (InvalidSyntaxException) {
       REQUIRE(1 == 1);
