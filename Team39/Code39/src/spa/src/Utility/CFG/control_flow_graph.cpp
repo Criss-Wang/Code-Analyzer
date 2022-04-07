@@ -98,4 +98,8 @@ namespace cfg {
 
     return CFG(head);
   }
+
+  bool CFG::equal(CFG& cfg) {
+    return start_node_->equal(*cfg.start_node_);
+  }
 }

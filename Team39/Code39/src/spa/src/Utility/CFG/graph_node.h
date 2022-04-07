@@ -50,6 +50,8 @@ namespace cfg {
       int GetEnd();
 
       EntityIdentifier GetStmtType(int stmt_num);
+
+      bool equal(GraphNode& node);
   };
 }
 
