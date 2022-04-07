@@ -33,7 +33,7 @@ namespace cfg {
     public:
       ~GraphNode() = default;
 
-      GraphNode(NodeType type);
+      GraphNode(NodeType type, int stmt_num);
 
       GraphNode(CFGToken& token);
  
