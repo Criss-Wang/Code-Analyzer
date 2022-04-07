@@ -79,7 +79,7 @@ void PopulateParentRelationship(stack<int>& parent, stack<vector<int>>& children
 
 void PopulateNextRelationshipForIf(stack<vector<pair<int, int>>>& last_stmts_in_if, Pkb& pkb, int& stmt_num) {
   // Add the last stmt num in then/else container and current stmt num to Next Table
-  vector<pair<int, int>> last_stmts = last_stmts_in_if.top();
+  vector<pair<int, int>> last_stmts = move(last_stmts_in_if.top());
   for (int i = 0; i < last_stmts.size(); i++) {
     if (last_stmts.at(i).second == 0) {
       pkb.AddInfoToTable(TableIdentifier::kNext, last_stmts.at(i).first, vector<int>{ stmt_num });
@@ -142,7 +142,7 @@ void UpdateNextRelForIfInIf(bool& is_prev_stmt_while, bool& is_prev_stmt_if, sta
     while_stmt_num.pop();
     is_prev_stmt_while = false;
   } else if (is_prev_stmt_if) {
-    vector<pair<int, int>> last_stmts = last_stmt_nums_in_if.top();
+    vector<pair<int, int>> last_stmts = move(last_stmt_nums_in_if.top());
     last_stmt_nums_in_if.pop();
     for (pair<int, int> s : last_stmts) {
       last_stmt_nums_in_if.top().push_back(s);
