@@ -17,5 +17,4 @@ class Parser {
   private:
     Tokenizer tokenizer_ = Tokenizer("");
     vector<Procedure> proc_lst_ = {};
-    vector<vector<string>> called_procedures_set_ = {};
 };

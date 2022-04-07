@@ -52,11 +52,11 @@ AssignmentPattern::AssignmentPattern(std::vector<Token>& tokens) {
     } else if (token_type == TokenType::RIGHT_PAREN) {
       paren_count -= 1;
 
-    } else if (token_type == TokenType::NAME && find(begin(vars_), end(vars_), token->text_) == end(vars_)) {
-      vars_.push_back(token->text_);
+    } else if (token_type == TokenType::NAME) {
+      vars_.insert(token->text_);
 
-    } else if (token_type == TokenType::INTEGER && find(begin(constants_), end(constants_), stoi(token->text_)) == end(constants_)) {
-      constants_.push_back(stoi(token->text_));
+    } else if (token_type == TokenType::INTEGER) {
+      constants_.insert(stoi(token->text_));
 
     }
   }
@@ -66,7 +66,7 @@ AssignmentPattern::AssignmentPattern(std::vector<Token>& tokens) {
   }
 }
 
-vector<string> AssignmentPattern::GetVars() {
+unordered_set<string> AssignmentPattern::GetVars() {
   return vars_;
 }
 
@@ -87,12 +87,20 @@ void AssignmentPattern::PopulateEntities(Pkb& pkb, int stmt_num) {
 
   if (!constants_.empty()) {
     // Add stmt num and rhs constants to Constant Table
-    pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, constants_);
+    vector<int> constants;
+    for (int c : constants_) {
+      constants.push_back(c);
+    }
+    pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, constants);
   }
 
   if (!vars_.empty()) {
     // Add stmt num and vector of rhs variables into Uses Table
-    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_);
+    vector<string> vars;
+    for (string v : vars_) {
+      vars.push_back(v);
+    }
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars);
   }
 
 }

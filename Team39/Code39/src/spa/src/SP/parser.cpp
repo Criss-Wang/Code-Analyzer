@@ -10,6 +10,40 @@
 #define INDEX_OF_STMT_TYPE 0
 #define INDEX_OF_EQUAL_OP 1
 
+const unordered_set<string> ReadPrintCallSet = { "read", "print", "call" };
+
+//This is for assgin, call, print, read stmt only
+shared_ptr<Stmt> GenerateStmtEntity(vector<Token>& stmt_tokens, int stmt_num) {
+  if (stmt_tokens.at(INDEX_OF_EQUAL_OP).text_ == "=") {
+    return make_shared<AssignStmt>(stmt_tokens, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "read") {
+    return make_shared<ReadStmt>(stmt_tokens, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "print") {
+    return make_shared<PrintStmt>(stmt_tokens, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "call") {
+    return make_shared<CallStmt>(stmt_tokens, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "while") {
+    return make_shared<WhileStmt>(stmt_tokens, stmt_num);
+  } else {
+    return make_shared<IfStmt>(stmt_tokens, stmt_num);
+  }
+}
+
+CFGToken GenerateCfgTokens(vector<Token>& stmt_tokens, int stmt_num) {
+  if (stmt_tokens.at(INDEX_OF_EQUAL_OP).text_ == "=") {
+    return CFGToken(CFGTokenType::kAssign, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "read") {
+    return CFGToken(CFGTokenType::kRead, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "print") {
+    return CFGToken(CFGTokenType::kPrint, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "call") {
+    return CFGToken(CFGTokenType::kCall, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "while") {
+    return CFGToken(CFGTokenType::kWhile, 0);;
+  } else {
+    return CFGToken(CFGTokenType::kIf, 0);
+  }
+}        
 
 void PopulateFollowsRelationship(stack<int>& previous, Pkb& pkb, int& stmt_num) {
 
@@ -141,7 +175,7 @@ void UpdateNextRelForIfInWhile(bool& is_prev_stmt_while, bool& is_prev_stmt_if, 
 
 Parser::Parser(const std::string& input, Pkb& pkb) {
 
-  vector<Token> tokens_lst = tokenizer_.parse(input);
+  vector<Token> tokens_lst = move(tokenizer_.parse(input));
 
   vector<Token> proc_tokens = {};
   vector<shared_ptr<Stmt>> stmt_lst = {};
@@ -172,7 +206,7 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
   bool is_new_container = true;
 
   for (auto token = begin(tokens_lst); token != end(tokens_lst); ++token) {
-    if (token->text_ == "}") {
+    if (token->type_ == TokenType::RIGHT_CURLY) {
 
       if (is_new_container) {
         throw InvalidSyntaxException();
@@ -184,13 +218,12 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         previous.pop();
       }
 
-      bool has_two_more_tokens = token != end(tokens_lst) - 1 && token != end(tokens_lst) - 2;
-      bool is_else_stmt = has_two_more_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == TokenType::LEFT_CURLY;
+      bool has_at_least_two_tokens = token != end(tokens_lst) - 1 && token != end(tokens_lst) - 2;
+      bool is_else_stmt = has_at_least_two_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == TokenType::LEFT_CURLY;
       
       if (is_else_stmt) {
         if_else_stmts -= 1;
-        token++;
-        token++;
+        token += 2;
         is_new_container = true;
 
         int next_stmt_num_in_else = stmt_num + 1;
@@ -207,29 +240,31 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         continue;
 
       }
+
       curly_bracket_count -= 1;
 
       PopulateParentRelationship(parent, children, pkb);
 
       if (end_tokens.empty()) {
         PopulateNextRelationshipForWhile(while_stmt_num, last_stmt_nums_in_if, is_prev_stmt_while, pkb);
+        continue;
 
-      } else if (!end_tokens.empty() && end_tokens.top() == "if") {
+      } 
+      
+      if (end_tokens.top() == "if") {
         cfg_tokens.push_back(CFGToken(CFGTokenType::kElseEnd, 0));
-
         UpdateNextRelForIfInIf(is_prev_stmt_while, is_prev_stmt_if, last_stmt_nums_in_if, previous_stmt_num, while_stmt_num);
 
         is_prev_stmt_if = true;
         end_tokens.pop();
 
-      } else if (!end_tokens.empty() && end_tokens.top() == "while") {
+      } else if (end_tokens.top() == "while") {
         cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileEnd, 0));
-
         UpdateNextRelForIfInWhile(is_prev_stmt_while, is_prev_stmt_if, last_stmt_nums_in_if, previous_stmt_num, while_stmt_num, pkb);
 
         is_prev_stmt_while = true;
         end_tokens.pop();
-        }
+      }
 
     } else if (token != end(tokens_lst) - 1 && (next(token, 1)->text_ == "=" || token->text_ == "read" 
       || token->text_ == "print" || token->text_ == "call")) {
@@ -246,58 +281,8 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
       AddChild(parent, children, stmt_num);
       PopulateFollowsRelationship(previous, pkb, stmt_num);
 
-      if (tokens.at(INDEX_OF_EQUAL_OP).text_ == "=") {
-        stmt_lst.push_back(make_shared<AssignStmt>(AssignStmt(tokens, stmt_num)));
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kAssign, stmt_num));
-
-      } else if (tokens.at(INDEX_OF_STMT_TYPE).text_ == "read") {
-        stmt_lst.push_back(make_shared<ReadStmt>(ReadStmt(tokens, stmt_num)));
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kRead, stmt_num));
-
-      } else if (tokens.at(INDEX_OF_STMT_TYPE).text_ == "print") {
-        stmt_lst.push_back(make_shared<PrintStmt>(PrintStmt(tokens, stmt_num)));
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kPrint, stmt_num));
-
-      } else {
-        stmt_lst.push_back(make_shared<CallStmt>(CallStmt(tokens, stmt_num)));
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kCall, stmt_num));
-
-      }
-
-    } else if (token->text_ == "procedure") {
-      is_new_container = true;
-      vector<Token> tokens;
-      while (token->type_ != TokenType::LEFT_CURLY && token != end(tokens_lst) - 1) {
-        tokens.push_back(*token);
-        token++;
-      }
-
-      if (!proc_tokens.empty()) {
-        // create Procedure and cfg for previous procedure
-        proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
-        proc_tokens = {};
-        stmt_lst = {};
-
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-
-        cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
-        pkb.AddCfg(make_shared<cfg::CFG>(cfg));
-
-        // reset values for next procedure
-        cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
-        previous = {};
-        parent = {};
-        children = {};
-        children.push({});
-        while_stmt_num = {};
-        if_stmt_num = {};
-        last_stmt_nums_in_if = {};
-        is_prev_stmt_if = false;
-        is_prev_stmt_while = false;
-      }
-      
-      proc_tokens = tokens;
-      curly_bracket_count += 1;
+      stmt_lst.push_back(move(GenerateStmtEntity(tokens, stmt_num)));
+      cfg_tokens.push_back(move(GenerateCfgTokens(tokens, stmt_num)));
 
     } else if (token->text_ == "while" || token->text_ == "if") {
       stmt_num += 1;
@@ -316,24 +301,58 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
       children.push({});
       previous.push(stmt_num + 1);
 
+      stmt_lst.push_back(move(GenerateStmtEntity(tokens, stmt_num)));
+      cfg_tokens.push_back(move(GenerateCfgTokens(tokens, stmt_num)));
+
       if (tokens.at(INDEX_OF_STMT_TYPE).text_ == "while") {
-        stmt_lst.push_back(make_shared<WhileStmt>(WhileStmt(tokens, stmt_num)));
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kWhile, stmt_num));
         end_tokens.push("while");
 
         while_stmt_num.push(stmt_num);
 
       } else {
-        stmt_lst.push_back(make_shared<IfStmt>(IfStmt(tokens, stmt_num)));
         if_else_stmts += 1;
 
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kIf, stmt_num));
         end_tokens.push("if");
 
         if_stmt_num.push(stmt_num);
         last_stmt_nums_in_if.push({});
       }
 
+      curly_bracket_count += 1;
+
+    } else if (token->text_ == "procedure") {
+      is_new_container = true;
+      vector<Token> tokens;
+      while (token->type_ != TokenType::LEFT_CURLY && token != end(tokens_lst) - 1) {
+        tokens.push_back(*token);
+        token++;
+      }
+
+      if (!proc_tokens.empty()) {
+        // create Procedure and cfg for previous procedure
+        proc_lst_.push_back(move(Procedure(proc_tokens, stmt_lst)));
+        proc_tokens = {};
+        stmt_lst = {};
+
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
+
+        cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
+        pkb.AddCfg(make_shared<cfg::CFG>(move(cfg)));
+
+        // reset values for next procedure
+        cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
+        previous = {};
+        parent = {};
+        children = {};
+        children.push({});
+        while_stmt_num = {};
+        if_stmt_num = {};
+        last_stmt_nums_in_if = {};
+        is_prev_stmt_if = false;
+        is_prev_stmt_while = false;
+      }
+
+      proc_tokens = tokens;
       curly_bracket_count += 1;
 
     } else {
@@ -345,7 +364,7 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
 
   cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
-  pkb.AddCfg(make_shared<cfg::CFG>(cfg));
+  pkb.AddCfg(make_shared<cfg::CFG>(move(cfg)));
 
   if (curly_bracket_count != 0 || if_else_stmts != 0) {
     throw InvalidSyntaxException();
@@ -420,7 +439,11 @@ void Parser::Validate() {
 
   for (Procedure proc : proc_lst_) {
     procedures.push_back(proc.GetProcName());
-    called_procedures_set.push_back(proc.GetCalledProcedures());
+    vector<string> calls;
+    for (string call : proc.GetCalledProcedures()) {
+      calls.push_back(call);
+    }
+    called_procedures_set.push_back(calls);
   }
 
   ValidateProcedureCalls(procedures, called_procedures_set);

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "PKB/pkb.h"
 #include "SP/tokenizer.h"
@@ -13,7 +14,8 @@ class Stmt {
     virtual ~Stmt() = default;
 
     int GetStmtNum();
-    virtual vector<string> GetVar() { return {}; };
+    virtual string GetVar() { return ""; };
+    virtual unordered_set<string> GetVars() { return {}; };
 
     virtual void PopulateEntities(Pkb& pkb) { };
 
@@ -26,7 +28,8 @@ class AssignStmt : public Stmt {
     ~AssignStmt() = default;
     AssignStmt(std::vector<Token>& tokens, int stmt_num);
 
-    vector<string> GetVar();
+    string GetVar();
+    unordered_set<string> GetVars();
 
     void PopulateEntities(Pkb& pkb);
 
@@ -40,7 +43,7 @@ class ReadStmt : public Stmt {
     ~ReadStmt() = default;
     ReadStmt(std::vector<Token>& tokens, int stmt_num);
 
-    vector<string> GetVar();
+    string GetVar();
 
     void PopulateEntities(Pkb& pkb);
 
@@ -53,7 +56,7 @@ class PrintStmt : public Stmt {
     ~PrintStmt() = default;
     PrintStmt(std::vector<Token>& tokens, int stmt_num);
 
-    vector<string> GetVar();
+    string GetVar();
 
     void PopulateEntities(Pkb& pkb);
 
@@ -66,7 +69,7 @@ class IfStmt : public Stmt {
     ~IfStmt() = default;
     IfStmt(std::vector<Token>& tokens, int stmt_num);
 
-    vector<string> GetVar();
+    unordered_set<string> GetVars();
 
     void PopulateEntities(Pkb& pkb);
 
@@ -79,7 +82,7 @@ class WhileStmt : public Stmt {
     ~WhileStmt() = default;
     WhileStmt(std::vector<Token>& tokens, int stmt_num);
 
-    vector<string> GetVar();
+    unordered_set<string> GetVars();
 
     void PopulateEntities(Pkb& pkb);
 
@@ -92,7 +95,7 @@ class CallStmt : public Stmt {
     ~CallStmt() = default;
     CallStmt(std::vector<Token>& tokens, int stmt_num);
 
-    vector<string> GetVar();
+    string GetVar();
 
     void PopulateEntities(Pkb& pkb);
 
