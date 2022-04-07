@@ -2,7 +2,7 @@
 #include "PKB/pkb.h"
 #include "SP/tokenizer.h"
 
-#include <vector>
+#include <unordered_set>
 
 class AssignmentPattern {
   public:
@@ -10,12 +10,12 @@ class AssignmentPattern {
     AssignmentPattern() { };
     AssignmentPattern(std::vector<Token>& tokens);
 
-    vector<string> GetVars();
+    unordered_set<string> GetVars();
 
     void PopulateEntities(Pkb& pkb, int stmt_num);
 
   private:
-    vector<string> vars_ = {};
-    vector<int> constants_ = {};
+    unordered_set<string> vars_ = {};
+    unordered_set<int> constants_ = {};
     string pattern_ = "";
 };

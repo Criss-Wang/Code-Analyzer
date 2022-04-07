@@ -1,13 +1,27 @@
 #include "conditional_expr.h"
 #include "SP/sp_exceptions.h"
 
+const map<TokenType, vector<TokenType>> ExpectedNextTokenTypeMap = {
+  { TokenType::NAME, {TokenType::REL_OPERATOR, TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
+  { TokenType::INTEGER, {TokenType::REL_OPERATOR, TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
+  { TokenType::LEFT_PAREN, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN, TokenType::NOT_OPERATOR} },
+  { TokenType::RIGHT_PAREN, {TokenType::COND_OPERATOR, TokenType::RIGHT_PAREN, TokenType::OPERATOR, TokenType::REL_OPERATOR} },
+  { TokenType::NOT_OPERATOR, {TokenType::LEFT_PAREN} },
+  { TokenType::COND_OPERATOR, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN } },
+  { TokenType::REL_OPERATOR, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN } },
+  { TokenType::OPERATOR, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN } }
+};
+
 ConditionalExpression::ConditionalExpression(std::vector<Token>& tokens) {
 
   vector<TokenType> expected_types = { TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN, TokenType::NOT_OPERATOR };
   vector<string> rel_operators = { ">", "<", "==", "!=", ">=", "<=" };
+  vector<string> expected_operators = { "*", "/", "+", "-", "%" };
 
-  // keep track of number of brackets
+  // keep track of number of brackets, rel_op and cond_op
   int paren_count = 0;
+  int rel_op_count = 0;
+  int cond_op_count = 0;
 
   for (auto token = begin(tokens); token != end(tokens); ++token) {
 
@@ -32,55 +46,46 @@ ConditionalExpression::ConditionalExpression(std::vector<Token>& tokens) {
     }
 
     bool check_type_ = find(begin(expected_types), end(expected_types), token_type) != end(expected_types);
+    bool check_operator = true;
 
-    if (!check_type_) {
+    if (token_type == TokenType::OPERATOR) {
+      check_operator = find(begin(expected_operators), end(expected_operators), token->text_) != end(expected_operators);
+    }
+
+    if (!check_type_ || !check_operator) {
       throw InvalidSyntaxException();
     }
 
-    expected_types = {};
+    expected_types = ExpectedNextTokenTypeMap.at(token_type);
 
-    if (token_type == TokenType::LEFT_PAREN) { // expects variable, integer or left paren after left paren
-      expected_types.push_back(TokenType::NAME);
-      expected_types.push_back(TokenType::INTEGER);
-      expected_types.push_back(TokenType::LEFT_PAREN);
-      expected_types.push_back(TokenType::NOT_OPERATOR);
+    if (token_type == TokenType::LEFT_PAREN) {
 
       paren_count += 1;
 
-    } else if (token_type == TokenType::RIGHT_PAREN) { // expects cond operator after right paren
-      expected_types.push_back(TokenType::COND_OPERATOR);
-      expected_types.push_back(TokenType::RIGHT_PAREN);
-      expected_types.push_back(TokenType::OPERATOR);
-
+    } else if (token_type == TokenType::RIGHT_PAREN) {
       paren_count -= 1;
 
-    } else if (token_type == TokenType::NOT_OPERATOR) { // expects left paren after not operator
-      expected_types.push_back(TokenType::LEFT_PAREN);
+    } else if (token_type == TokenType::NAME) {
+      vars_.insert(token->text_);
 
-    } else if (token_type == TokenType::NAME || token_type == TokenType::INTEGER) { // expects rel operator or right paren after variable or integer
-      expected_types.push_back(TokenType::REL_OPERATOR);
-      expected_types.push_back(TokenType::RIGHT_PAREN);
-      expected_types.push_back(TokenType::OPERATOR);
+    } else if (token_type == TokenType::INTEGER) {
+      constants_.insert(stoi(token->text_));
 
-      if (token_type == TokenType::NAME && find(begin(vars_), end(vars_), token->text_) == end(vars_)) {
-        vars_.push_back(token->text_);
-      } else if (token_type == TokenType::INTEGER && find(begin(constants_), end(constants_), stoi(token->text_)) == end(constants_)) {
-        constants_.push_back(stoi(token->text_));
-      }
+    } else if (token_type == TokenType::REL_OPERATOR) {
+      rel_op_count += 1;
 
-    } else if (token_type == TokenType::COND_OPERATOR || token_type == TokenType::REL_OPERATOR || token_type == TokenType::OPERATOR) { // expected name, int or left after operator
-      expected_types.push_back(TokenType::NAME);
-      expected_types.push_back(TokenType::INTEGER);
-      expected_types.push_back(TokenType::LEFT_PAREN);
+    } else if (token_type == TokenType::COND_OPERATOR) {
+      cond_op_count += 1;
+
     }
   }
 
-  if (paren_count != 0) {
+  if (paren_count != 0 || (rel_op_count -1) != cond_op_count) {
     throw InvalidSyntaxException();
   }
 }
 
-vector<string> ConditionalExpression::GetVars() {
+unordered_set<string> ConditionalExpression::GetVars() {
   return vars_;
 }
 
@@ -98,12 +103,20 @@ void ConditionalExpression::PopulateEntities(Pkb& pkb, int stmt_num) {
 
   if (!constants_.empty()) {
     // Add stmt num and constants in cond expr into Constant Table
-    pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, constants_);
+    vector<int> constants;
+    for (int c : constants_) {
+      constants.push_back(c);
+    }
+    pkb.AddInfoToTable(TableIdentifier::kConstant, stmt_num, constants);
   }
 
   if (!vars_.empty()) {
     // Add stmt num and variables in cond expr into Uses Table
-    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars_);
+    vector<string> vars;
+    for (string v : vars_) {
+      vars.push_back(v);
+    }
+    pkb.AddInfoToTable(TableIdentifier::kUsesStmtToVar, stmt_num, vars);
   }
 
 }

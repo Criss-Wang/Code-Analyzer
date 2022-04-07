@@ -1,5 +1,4 @@
 #include "SP/parser.h"
-#include "SP/validator.h"
 #include "SP/sp_exceptions.h"
 #include "PKB/pkb.h"
 
@@ -29,14 +28,8 @@ void RequireInvalidSyntax(string path) {
     cerr << "Could not open the file " << endl;
   } else {
     string input = string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-    try {
-      Pkb pkb;
-      Parser parser(input, pkb);
-      parser.Validate();
-      REQUIRE(0 == 1);
-    } catch (InvalidSyntaxException) {
-      REQUIRE(1 == 1);
-    }
+    Pkb pkb;
+    REQUIRE_THROWS_AS(Parser(input, pkb), InvalidSyntaxException);
   }
 }
 
@@ -121,6 +114,7 @@ TEST_CASE("Read/print/assign/if/while statments (1 level nesting) for Validation
     RequireInvalidSyntax(invalid_dir + "3_test1.txt");
     RequireInvalidSyntax(invalid_dir + "3_test2.txt");
     RequireInvalidSyntax(invalid_dir + "3_test3.txt");
+    RequireInvalidSyntax(invalid_dir + "3_test4.txt");
 
   }
 }
@@ -190,6 +184,17 @@ TEST_CASE("Iteration 3 test cases") {
   SECTION("Valid Programs") {
 
     RequireValid(valid_dir + "zw_source.txt");
+    RequireValid(valid_dir + "zl_source.txt");
+    RequireValid(valid_dir + "patrick_source.txt");
+    RequireValid(valid_dir + "gj_source.txt");
+    RequireValid(valid_dir + "7_test1.txt");
+    RequireValid(valid_dir + "7_test2.txt");
+  }
 
+  SECTION("Invalid conditional expressions") {
+    RequireInvalidSyntax(invalid_dir + "7_test1.txt");
+    RequireInvalidSyntax(invalid_dir + "7_test2.txt");
+    RequireInvalidSyntax(invalid_dir + "7_test3.txt");
+    RequireInvalidSyntax(invalid_dir + "7_test4.txt");
   }
 }

@@ -1,0 +1,7 @@
+procedure assign {
+	if (!x >= 3) then {
+		print x;
+	} else {
+		print y;
+	}
+}

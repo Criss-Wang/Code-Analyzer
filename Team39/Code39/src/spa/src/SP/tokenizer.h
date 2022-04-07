@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 using namespace std;
 
@@ -36,23 +37,17 @@ class Token {
 
 class Tokenizer {
   public:
+    Tokenizer(const std::string& sourceProgram);
+    vector<Token> tokens_list_;
     vector<Token> parse(const string& sourceProgram);
 
   private:
     void EndToken(Token& token, vector<Token>& tokens);
 
+    unordered_set<char> operators = { '+', '-', '*', '/', '%', '=', '<', '>', '!', '&', '|' };
+
     bool IsOperator(char curr_char) {
-      return curr_char == '+'
-        || curr_char == '-'
-        || curr_char == '*'
-        || curr_char == '/'
-        || curr_char == '%'
-        || curr_char == '='
-        || curr_char == '<'
-        || curr_char == '>'
-        || curr_char == '!'
-        || curr_char == '&'
-        || curr_char == '|';
+      return (operators.find(curr_char) != operators.end());
     }
 
     bool IsWhitespace(char curr_char) {

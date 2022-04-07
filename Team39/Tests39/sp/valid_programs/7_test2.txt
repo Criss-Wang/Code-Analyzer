@@ -1,0 +1,62 @@
+procedure proc1 {
+	while (x == 3) {
+		while (y % 2 <= 3) {
+			while ((q < 2) || (q < 3)) {
+				if (p <= 22112) then {
+					if (p == 0) then {
+						if ((1 > 8 * q) && (3 <= 2)) then {
+							w = q + p;
+							print w;
+						} else {
+							while (q == 33) {
+								q = 3 + w;
+							}
+						}
+					} else {
+						while ((p - 3) == 0) {
+							while (!(p * 2 * 3 / 3 / 9 == 3)) {
+								p = q * w;
+							}
+						}
+					}
+				} else {
+					if (p * 122 / 9 == 3) then {
+						while (r % 3 != 3) {
+							if (q == p) then {
+								ww = p;
+							} else {
+								q = w * p;
+							}
+						}
+						if ((p == 3) && (q == 3)) || ((!(w == 5)) && (m == 6)) then {
+							while (p % q < 0) {
+								w = p - q;
+							}
+						} else {
+							while (1 == op) {
+								read w;
+							}
+						}
+					} else {
+						if ((p * m) >= 33) then {
+							while (p - 3 - 3 < 33){
+								w = p - q;
+							}
+						} else {
+							while (1 == op) {
+								read w;
+							}
+						}
+						while ((q % 5) != 22) {
+							if ((p / 3) == q) then {
+								print q;
+							} else {
+								read q;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
