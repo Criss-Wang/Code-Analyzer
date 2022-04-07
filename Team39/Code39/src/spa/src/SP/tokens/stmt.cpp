@@ -1,13 +1,16 @@
 #include "stmt.h"
 #include "SP/sp_exceptions.h"
 
+#define STMT_TOKENS_SIZE 2
+#define INDEX_OF_VAR 1
+
 int Stmt::GetStmtNum() {
   return stmt_num_;
 }
 
 AssignStmt::AssignStmt(std::vector<Token>& tokens, int stmt_num) {
-  int min_size = 3;
-  if (tokens.size() < min_size) {
+  const int kMinSize = 3;
+  if (tokens.size() < kMinSize) {
     throw InvalidSyntaxException();
   }
 
@@ -15,6 +18,10 @@ AssignStmt::AssignStmt(std::vector<Token>& tokens, int stmt_num) {
 
   const int kIndexOfLhsVar = 0;
   const int kIndexOfFirstRhsVar = 2;
+
+  if (tokens.at(kIndexOfLhsVar).type_ != TokenType::NAME && tokens.at(kIndexOfLhsVar).type_ != TokenType::LETTER) {
+    throw InvalidSyntaxException();
+  }
   lhs_var_ = tokens.at(kIndexOfLhsVar).text_;
 
   vector<Token>::const_iterator pattern_start = tokens.begin() + kIndexOfFirstRhsVar;
@@ -23,19 +30,12 @@ AssignStmt::AssignStmt(std::vector<Token>& tokens, int stmt_num) {
   rhs_pattern_ = AssignmentPattern(pattern);
 }
 
-vector<string> AssignStmt::GetVar() {
-  vector<string> v = { lhs_var_ };
-  for (auto var : rhs_pattern_.GetVars()) {
-     v.push_back(var);
-  }
-  return v;
+string AssignStmt::GetVar() {
+  return lhs_var_;
 }
 
-void AssignStmt::Validate() {
-  bool is_valid_lhs = isalpha(lhs_var_[0]);
-  if (!is_valid_lhs) {
-    throw InvalidSyntaxException();
-  }
+unordered_set<string> AssignStmt::GetVars() {
+  return rhs_pattern_.GetVars();
 }
 
 void AssignStmt::PopulateEntities(Pkb& pkb) {
@@ -53,24 +53,20 @@ void AssignStmt::PopulateEntities(Pkb& pkb) {
 }
 
 ReadStmt::ReadStmt(std::vector<Token>& tokens, int stmt_num) {
-  int expected_size = 2;
-  if (tokens.size() != expected_size) {
+
+  if (tokens.size() != STMT_TOKENS_SIZE) {
     throw InvalidSyntaxException();
   }
   stmt_num_ = stmt_num;
-  const int kIndexOfVar = 1;
-  read_var_ = tokens.at(kIndexOfVar).text_;
-}
 
-vector<string> ReadStmt::GetVar() {
-  return { read_var_ };
-}
-
-void ReadStmt::Validate() {
-  bool is_valid = isalpha(read_var_[0]);
-  if (!is_valid) {
+  if (tokens.at(INDEX_OF_VAR).type_ != TokenType::NAME && tokens.at(INDEX_OF_VAR).type_ != TokenType::LETTER) {
     throw InvalidSyntaxException();
   }
+  read_var_ = tokens.at(INDEX_OF_VAR).text_;
+}
+
+string ReadStmt::GetVar() {
+  return read_var_;
 }
 
 void ReadStmt::PopulateEntities(Pkb& pkb) {
@@ -89,24 +85,20 @@ void ReadStmt::PopulateEntities(Pkb& pkb) {
 }
 
 PrintStmt::PrintStmt(std::vector<Token>& tokens, int stmt_num) {
-  int expected_size = 2;
-  if (tokens.size() != expected_size) {
+
+  if (tokens.size() != STMT_TOKENS_SIZE) {
     throw InvalidSyntaxException();
   }
   stmt_num_ = stmt_num;
-  const int kIndexOfVar = 1;
-  print_var_ = tokens.at(kIndexOfVar).text_;
-}
 
-vector<string> PrintStmt::GetVar() {
-  return { print_var_ };
-}
-
-void PrintStmt::Validate() {
-  bool is_valid = isalpha(print_var_[0]);
-  if (!is_valid) {
+  if (tokens.at(INDEX_OF_VAR).type_ != TokenType::NAME && tokens.at(INDEX_OF_VAR).type_ != TokenType::LETTER) {
     throw InvalidSyntaxException();
   }
+  print_var_ = tokens.at(INDEX_OF_VAR).text_;
+}
+
+string PrintStmt::GetVar() {
+  return print_var_;
 }
 
 void PrintStmt::PopulateEntities(Pkb& pkb) {
@@ -127,8 +119,8 @@ void PrintStmt::PopulateEntities(Pkb& pkb) {
 IfStmt::IfStmt(std::vector<Token>& tokens, int stmt_num) {
   stmt_num_ = stmt_num;
 
-  int min_stmt_size = 7;
-  if (tokens.size() < min_stmt_size) {
+  const int kMinStmtSize = 7; // "if", "(", "1", "==", "1", ")" "then"
+  if (tokens.size() < kMinStmtSize) {
     throw InvalidSyntaxException();
   }
 
@@ -139,7 +131,7 @@ IfStmt::IfStmt(std::vector<Token>& tokens, int stmt_num) {
 
   bool check_left_paren = tokens.at(kIndexOfLeftParen).type_ == TokenType::LEFT_PAREN;
   bool check_right_paren = tokens.at(kIndexOfRightParen).type_ == TokenType::RIGHT_PAREN;
-  bool check_then_keyword = tokens.at(kIndexOfThen).type_ == TokenType::NAME && tokens.at(kIndexOfThen).text_ == "then";
+  bool check_then_keyword = tokens.at(kIndexOfThen).text_ == "then";
 
   bool is_valid = check_left_paren && check_right_paren && check_then_keyword;
 
@@ -155,7 +147,7 @@ IfStmt::IfStmt(std::vector<Token>& tokens, int stmt_num) {
 
 }
 
-vector<string> IfStmt::GetVar() {
+unordered_set<string> IfStmt::GetVars() {
   return cond_expr_.GetVars();
 }
 
@@ -167,19 +159,23 @@ void IfStmt::PopulateEntities(Pkb& pkb) {
   cond_expr_.PopulateEntities(pkb, stmt_num_);
 
   if (!cond_expr_.GetVars().empty()) {
+    vector<string> vars;
+    for (string v : cond_expr_.GetVars()) {
+      vars.push_back(v);
+    }
     // Add stmt num and variables in cond expr into If Table
-    pkb.AddInfoToTable(TableIdentifier::kIf, stmt_num_, cond_expr_.GetVars());
+    pkb.AddInfoToTable(TableIdentifier::kIf, stmt_num_, vars);
 
     // Add stmt num and cond expr into if_pattern_to_stmt Table
-    pkb.AddInfoToTable(TableIdentifier::kIfPattern, stmt_num_, cond_expr_.GetVars());
+    pkb.AddInfoToTable(TableIdentifier::kIfPattern, stmt_num_, vars);
   }
 }
 
 WhileStmt::WhileStmt(std::vector<Token>& tokens, int stmt_num) {
   stmt_num_ = stmt_num;
 
-  int min_stmt_size = 6;
-  if (tokens.size() < min_stmt_size) {
+  const int kMinStmtSize = 6; // "while", "(", "1", "==", "1", ")"
+  if (tokens.size() < kMinStmtSize) {
     throw InvalidSyntaxException();
   }
 
@@ -205,7 +201,7 @@ WhileStmt::WhileStmt(std::vector<Token>& tokens, int stmt_num) {
 
 }
 
-vector<string> WhileStmt::GetVar() {
+unordered_set<string> WhileStmt::GetVars() {
   return cond_expr_.GetVars();
 }
 
@@ -217,11 +213,15 @@ void WhileStmt::PopulateEntities(Pkb& pkb) {
   cond_expr_.PopulateEntities(pkb, stmt_num_);
 
   if (!cond_expr_.GetVars().empty()) {
+    vector<string> vars;
+    for (string v : cond_expr_.GetVars()) {
+      vars.push_back(v);
+    }
     // Add stmt num and variables in cond expr into While Table
-    pkb.AddInfoToTable(TableIdentifier::kWhile, stmt_num_, cond_expr_.GetVars());
+    pkb.AddInfoToTable(TableIdentifier::kWhile, stmt_num_, vars);
 
     // Add stmt num and cond expr into while_pattern_to_stmt Table
-    pkb.AddInfoToTable(TableIdentifier::kWhilePattern, stmt_num_, cond_expr_.GetVars());
+    pkb.AddInfoToTable(TableIdentifier::kWhilePattern, stmt_num_, vars);
   }
 
 }
@@ -232,19 +232,15 @@ CallStmt::CallStmt(std::vector<Token>& tokens, int stmt_num) {
     throw InvalidSyntaxException();
   }
   stmt_num_ = stmt_num;
-  const int kIndexOfCalledProc = 1;
-  called_proc_ = tokens.at(kIndexOfCalledProc).text_;
-}
 
-vector<string> CallStmt::GetVar() {
-  return { called_proc_ };
-}
-
-void CallStmt::Validate() {
-  bool is_valid = isalpha(called_proc_[0]);
-  if (!is_valid) {
+  if (tokens.at(INDEX_OF_VAR).type_ != TokenType::NAME && tokens.at(INDEX_OF_VAR).type_ != TokenType::LETTER) {
     throw InvalidSyntaxException();
   }
+  called_proc_ = tokens.at(INDEX_OF_VAR).text_;
+}
+
+string CallStmt::GetVar() {
+  return called_proc_;
 }
 
 void CallStmt::PopulateEntities(Pkb& pkb) {
