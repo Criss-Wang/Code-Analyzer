@@ -186,6 +186,14 @@ TEST_CASE("Iteration 3 test cases") {
     RequireValid(valid_dir + "zw_source.txt");
     RequireValid(valid_dir + "zl_source.txt");
     RequireValid(valid_dir + "patrick_source.txt");
+    RequireValid(valid_dir + "7_test1.txt");
+    RequireValid(valid_dir + "7_test2.txt");
+  }
 
+  SECTION("Invalid conditional expressions") {
+    RequireInvalidSyntax(invalid_dir + "7_test1.txt");
+    RequireInvalidSyntax(invalid_dir + "7_test2.txt");
+    RequireInvalidSyntax(invalid_dir + "7_test3.txt");
+    RequireInvalidSyntax(invalid_dir + "7_test4.txt");
   }
 }
