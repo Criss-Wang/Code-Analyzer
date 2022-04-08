@@ -5,25 +5,25 @@
 
 namespace pql {
   char ParserState::Peek() {
-    return (char) ss.peek();
+    return (char) ss_.peek();
   }
 
   char ParserState::Next() {
-    return (char) ss.get();
+    return (char) ss_.get();
   }
 
   bool ParserState::IsEOF() {
-    return (ss.peek() == END_OF_FILE);
+    return (ss_.peek() == END_OF_FILE);
   }
 
   void ParserState::EatWhiteSpaces() {
-    while (ss.peek() == ' ' || ss.peek() == '\n' || ss.peek() == '\r' || ss.peek() == '\t' || ss.peek() == '\0') {
-      ss.get();
+    while (ss_.peek() == ' ' || ss_.peek() == '\n' || ss_.peek() == '\r' || ss_.peek() == '\t' || ss_.peek() == '\0') {
+      ss_.get();
     }
   }
 
   void ParserState::Consume() {
-    ss.get();
+    ss_.get();
   }
 
   char ParserState::ExpectLetter() {
@@ -47,7 +47,7 @@ namespace pql {
     std::stringstream ssm;
     ssm << s;
     while (ssm.peek() != END_OF_FILE) {
-      char ss_char = (char) ss.get();
+      char ss_char = (char) ss_.get();
       char ssm_char = (char)ssm.get();
       if (ss_char != ssm_char) {
         throw ParseException();

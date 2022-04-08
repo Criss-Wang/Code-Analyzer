@@ -14,10 +14,10 @@
 namespace pql {
   class Synonym {
     private:
-      std::string name;
-      EntityIdentifier declaration;
+      std::string name_;
+      EntityIdentifier declaration_;
     public:
-      Synonym(std::string name, EntityIdentifier declaration) : name(std::move(name)), declaration(declaration) {};
+      Synonym(std::string name, EntityIdentifier declaration) : name_(std::move(name)), declaration_(declaration) {};
 
       std::string GetName();
 
@@ -31,7 +31,7 @@ namespace pql {
       std::shared_ptr<Synonym> synonym_;
       AttrIdentifier attribute_;
     public:
-      AttrRef(std::shared_ptr<Synonym> s, AttrIdentifier attribute) : synonym_(s), attribute_(attribute) {};
+      AttrRef(std::shared_ptr<Synonym> s, AttrIdentifier attribute) : synonym_(std::move(s)), attribute_(attribute) {};
 
       AttrRef(Synonym& s, AttrIdentifier attribute) {
         synonym_ = std::make_shared<Synonym>(s);

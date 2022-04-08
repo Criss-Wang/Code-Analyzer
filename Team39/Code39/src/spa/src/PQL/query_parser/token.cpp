@@ -1,20 +1,19 @@
 #include <utility>
 
 #include "token.h"
-#include "query.h"
 
 namespace pql {
 
   std::string Synonym::GetName() {
-    return Synonym::name;
+    return name_;
   }
 
   EntityIdentifier Synonym::GetDeclaration() {
-    return Synonym::declaration;
+    return declaration_;
   }
 
   bool Synonym::equal(const Synonym &s) {
-    return Synonym::name == s.name && Synonym::declaration == s.declaration;
+    return name_ == s.name_ && Synonym::declaration_ == s.declaration_;
   }
 
   std::string AttrRef::GetSynName() {

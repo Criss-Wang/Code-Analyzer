@@ -11,10 +11,10 @@ namespace pql {
 
   class ParserState {
     private:
-      std::stringstream ss;
+      std::stringstream ss_;
     public:
       explicit ParserState(const std::string& input) {
-        ss << input;
+        ss_ << input;
       }
 
       char Peek();
@@ -48,11 +48,11 @@ namespace pql {
 
   class Parser {
     private:
-      ParserState ps;
-      Query query;
+      ParserState ps_;
+      Query query_;
     public:
       /*Constructor for Parser*/
-      explicit Parser(const std::string& input) : ps(input), query(Query()) {};
+      explicit Parser(const std::string& input) : ps_(input), query_(Query()) {};
 
       void Parse();
 

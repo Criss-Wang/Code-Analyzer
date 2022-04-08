@@ -32,13 +32,13 @@ namespace pql {
     
   class Query {
     private:
-      std::vector <pql::Synonym> declarations;
-      std::unordered_map <std::string, pql::Synonym> synonyms;
-      std::vector <pql::Synonym> used_synonyms;
-      std::vector <pql::AttrRef> attr_refs;
-      std::vector <std::shared_ptr<pql_clause::Clause>> clauses;
-      bool is_boolean = true;
-      bool is_semantically_valid = true;
+      std::vector <pql::Synonym> declarations_;
+      std::unordered_map <std::string, pql::Synonym> synonyms_;
+      std::vector <pql::Synonym> used_synonyms_;
+      std::vector <pql::AttrRef> attr_refs_;
+      std::vector <std::shared_ptr<pql_clause::Clause>> clauses_;
+      bool is_boolean_ = true;
+      bool is_semantically_valid_ = true;
     public:
       void SetSemanticallyInvalid();
 

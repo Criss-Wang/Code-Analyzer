@@ -30,12 +30,8 @@ namespace pql {
     if (s.length() > 1 && s[0] == '0') {
       return false;
     }
-    for (int i = 0; i < s.length(); i++) {
-      if (!pql::IsDigit(s[i])) {
-        return false;
-      }
-    }
-    return true;
+
+    return std::all_of(s.begin(), s.end(), pql::IsDigit);
   }
 
   bool IsOperator(char c) {
@@ -282,18 +278,18 @@ namespace pql {
   }
   
   void Query::SetSemanticallyInvalid() {
-    Query::is_semantically_valid = false;
+    Query::is_semantically_valid_ = false;
   }
 
   bool Query::IsValidRelationshipArgument(const std::string& argument, std::unordered_set<EntityIdentifier> *domain) {
-    if (Query::SynonymDeclared(argument) && WithinUnorderedSet(domain, Query::synonyms.at(argument).GetDeclaration())) {
+    if (Query::SynonymDeclared(argument) && !WithinUnorderedSet(domain, synonyms_.at(argument).GetDeclaration())) {
       return false;
     } else {
+      bool entity_invalid = (pql::IsIdent(argument) && !WithinUnorderedSet(domain, EntityIdentifier::kIdent)) ||
+          (pql::IsInteger(argument) && !WithinUnorderedSet(domain, EntityIdentifier::kStmtNumber));
       if (argument == "_" && WithinUnorderedSet(domain, EntityIdentifier::kWildcard)) {
         return false;
-      } else if (pql::IsIdent(argument) && WithinUnorderedSet(domain, EntityIdentifier::kIdent)) {
-        throw ParseException();
-      } else if (pql::IsInteger(argument) && WithinUnorderedSet(domain, EntityIdentifier::kStmtNumber)) {
+      } else if (entity_invalid) {
         throw ParseException();
       }
     }
@@ -316,11 +312,11 @@ namespace pql {
   }
 
   bool Query::SynonymDeclared(const std::string &name) {
-    return synonyms.find(name) != synonyms.end();
+    return synonyms_.find(name) != synonyms_.end();
   }
 
   std::shared_ptr<Synonym> Query::GetSynonymByName(const std::string &name) {
-    return std::make_shared<Synonym>(synonyms.at(name));
+    return std::make_shared<Synonym>(synonyms_.at(name));
   }
   
   bool Query::IsAttrStringValid(const std::string& attribute) {
@@ -328,15 +324,15 @@ namespace pql {
   }
 
   bool Query::IsAssignSynonym(const std::string &name) {
-    return Query::SynonymDeclared(name) && synonyms.at(name).GetDeclaration() == EntityIdentifier::kAssign;
+    return Query::SynonymDeclared(name) && synonyms_.at(name).GetDeclaration() == EntityIdentifier::kAssign;
   }
 
   bool Query::IsWhileSynonym(const std::string &name) {
-    return Query::SynonymDeclared(name) && synonyms.at(name).GetDeclaration() == EntityIdentifier::kWhile;
+    return Query::SynonymDeclared(name) && synonyms_.at(name).GetDeclaration() == EntityIdentifier::kWhile;
   }
 
   bool Query::IsIfSynonym(const std::string &name) {
-    return Query::SynonymDeclared(name) && synonyms.at(name).GetDeclaration() == EntityIdentifier::kIf;
+    return Query::SynonymDeclared(name) && synonyms_.at(name).GetDeclaration() == EntityIdentifier::kIf;
   }
 
   void Query::AddSynonym(EntityIdentifier d, const std::string &name) {
@@ -344,8 +340,8 @@ namespace pql {
       Query::SetSemanticallyInvalid();
     } else {
       pql::Synonym sm = Synonym(name, d);
-      Query::declarations.push_back(sm);
-      Query::synonyms.insert(std::pair<std::string, pql::Synonym>(name, sm));
+      declarations_.push_back(sm);
+      synonyms_.insert(std::pair<std::string, pql::Synonym>(name, sm));
     }
   }
   
@@ -356,7 +352,7 @@ namespace pql {
     }
 
     Query::AddUsedSynonym(name);
-    Query::AddAttrRef(Query::synonyms.at(name));
+    Query::AddAttrRef(synonyms_.at(name));
   }
 
   void Query::AddResultSynonym(const std::string& name, const std::string& attribute) {
@@ -371,12 +367,12 @@ namespace pql {
 
     Query::AddUsedSynonym(name);
     AttrIdentifier attr = attributeMap.at(attribute);
-    Query::AddAttrRef(Query::synonyms.at(name), attr);
+    Query::AddAttrRef(synonyms_.at(name), attr);
   }
 
   bool Query::IsProcedure(const std::string &name) {
     if (Query::SynonymDeclared(name)) {
-      return Query::synonyms.at(name).GetDeclaration() == EntityIdentifier::kProc;
+      return synonyms_.at(name).GetDeclaration() == EntityIdentifier::kProc;
     }
     return false;
   }
@@ -388,23 +384,23 @@ namespace pql {
     }
 
     // check if the synonym is already used
-    for (pql::Synonym s: Query::used_synonyms) {
-      if (s.equal(Query::synonyms.at(name))) {
+    for (pql::Synonym s: used_synonyms_) {
+      if (s.equal(synonyms_.at(name))) {
         return;
       }
     }
 
-    Query::used_synonyms.push_back(Query::synonyms.at(name));
+    used_synonyms_.push_back(synonyms_.at(name));
   }
 
   std::vector<pql::Synonym> Query::GetAllUsedSynonyms() {
-    return Query::used_synonyms;
+    return used_synonyms_;
   }
   
   void Query::AddAttrRef(Synonym& s) {
     AttrIdentifier attr = defaultAttrMap.at(s.GetDeclaration()); 
     AttrRef attr_ref = AttrRef(s, attr);
-    Query::attr_refs.push_back(attr_ref);
+    attr_refs_.push_back(attr_ref);
   }
 
   bool Query::IsAttrValidForSyn(Synonym& s, AttrIdentifier attr) {
@@ -420,11 +416,11 @@ namespace pql {
     }
 
     AttrRef attr_ref = AttrRef(s, attr);
-    Query::attr_refs.push_back(attr_ref);
+    attr_refs_.push_back(attr_ref);
   }
 
   std::vector<pql::AttrRef> Query::GetAttrRef() {
-    return Query::attr_refs;
+    return attr_refs_;
   }
 
   void Query::AddSuchThatClause(RelationshipTypes r, std::string &left, std::string &right, bool is_synonym_left, bool is_synonym_right) {
@@ -436,20 +432,20 @@ namespace pql {
     left = RemoveQuotationMarks(left);
     right = RemoveQuotationMarks(right);
 
-    Query::clauses.push_back(GenerateSuchThatClause(r, left, right, is_synonym_left, is_synonym_right));
+    clauses_.push_back(GenerateSuchThatClause(r, left, right, is_synonym_left, is_synonym_right));
   }
 
   void Query::AddPattern(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact) {
     bool is_synonym_left = Query::SynonymDeclared(left);
 
-    if (is_synonym_left && Query::synonyms.at(left).GetDeclaration() != EntityIdentifier::kVariable) {
+    if (is_synonym_left && synonyms_.at(left).GetDeclaration() != EntityIdentifier::kVariable) {
       Query::SetSemanticallyInvalid();
       return;
     }
 
     left = RemoveQuotationMarks(left);
 
-    Query::clauses.push_back(GeneratePatternClause(syn_entity, synonym, left, is_synonym_left, expression, exact));
+    clauses_.push_back(GeneratePatternClause(syn_entity, synonym, left, is_synonym_left, expression, exact));
   }
 
   int GetWithArgumentDomain(std::tuple<std::shared_ptr<AttrRef>, std::string, int>* argument) {
@@ -472,25 +468,25 @@ namespace pql {
       Query::SetSemanticallyInvalid();
       return;
     }
-    Query::clauses.push_back(
+    clauses_.push_back(
       std::make_shared<pql_clause::WithClause>(std::get<INDEX_OF_ATTR_REF>(left), std::get<INDEX_OF_ENTITY>(left),
           std::get<INDEX_OF_TYPE>(left) == ATTR_REF,std::get<INDEX_OF_ATTR_REF>(right),
           std::get<INDEX_OF_ENTITY>(right), std::get<INDEX_OF_TYPE>(right) == ATTR_REF));
   }
 
   std::vector <std::shared_ptr<pql_clause::Clause>> Query::GetClauses() {
-    return Query::clauses;
+    return clauses_;
   }
 
   void Query::SetBoolean(bool b) {
-    Query::is_boolean = b;
+    is_boolean_ = b;
   }
 
   bool Query::GetBoolean() const {
-    return Query::is_boolean;
+    return is_boolean_;
   }
 
   bool Query::IsSemanticallyValid() const {
-    return Query::is_semantically_valid;
+    return is_semantically_valid_;
   }
 }
