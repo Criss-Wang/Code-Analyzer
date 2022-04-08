@@ -54,27 +54,22 @@ namespace pql {
         Parser::ParseSelect();
         select_clause_parsed = true;
         declarations_parsed = true;
-      } else if (keyword == "such" && select_clause_parsed) {
-        if (ps_.Peek() != ' ') {
-          throw ParseException();
-        }
-        ps_.EatWhiteSpaces();
-        ps_.Expect("that");
-        Parser::ParseRelationship();
-        current_clause = IS_SUCH_THAT;
-      } else if (keyword == "pattern" && select_clause_parsed) {
-        Parser::ParsePattern();
-        current_clause = IS_PATTERN;
-      } else if (keyword == "with" && select_clause_parsed) {
-        Parser::ParseWith();
-        current_clause = IS_WITH;
-      } else if (keyword == "and" && select_clause_parsed) {
-        if (current_clause == IS_SUCH_THAT) {
+      } else if (select_clause_parsed) {
+        if (keyword == "such") {
+          ps_.ExpectChar(' ');
+          ps_.EatWhiteSpaces();
+          ps_.Expect("that");
           Parser::ParseRelationship();
-        } else if (current_clause == IS_PATTERN) {
+          current_clause = IS_SUCH_THAT;
+        } else if (keyword == "pattern" || (keyword == "and" && current_clause == IS_PATTERN)) {
           Parser::ParsePattern();
-        } else if (current_clause == IS_WITH) {
+          current_clause = IS_PATTERN;
+        } else if (keyword == "with" || (keyword == "and" && current_clause == IS_WITH)) {
           Parser::ParseWith();
+          current_clause = IS_WITH;
+        } else if (keyword == "and " && current_clause == IS_SUCH_THAT) {
+          Parser::ParseRelationship();
+          current_clause = IS_SUCH_THAT;
         } else {
           throw ParseException();
         }
