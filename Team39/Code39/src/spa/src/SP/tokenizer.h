@@ -75,4 +75,12 @@ class Tokenizer {
     bool IsSemicolon(char curr_char) {
       return curr_char == ';';
     }
+
+    void AddCharTokenToList(char curr_char, TokenType token_type, Token& current_token, vector<Token>& tokens_list);
+
+    void AddDigitTokenToList(char curr_char, Token& current_token, vector<Token>& tokens_list);
+
+    void AddLetterTokenToList(char curr_char, Token& current_token, vector<Token>& tokens_list);
+
+    void AddOperatorTokenToList(char curr_char, Token& current_token, vector<Token>& tokens_list);
 };
