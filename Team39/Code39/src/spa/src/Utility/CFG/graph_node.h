@@ -33,7 +33,7 @@ namespace cfg {
     public:
       ~GraphNode() = default;
 
-      GraphNode(NodeType type);
+      GraphNode(NodeType type, int stmt_num);
 
       GraphNode(CFGToken& token);
  
@@ -50,6 +50,8 @@ namespace cfg {
       int GetEnd();
 
       EntityIdentifier GetStmtType(int stmt_num);
+
+      bool equal(GraphNode& node);
   };
 }
 

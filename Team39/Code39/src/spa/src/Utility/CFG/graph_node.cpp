@@ -9,10 +9,6 @@
 using namespace std;
 
 namespace cfg {
-  //Set of token type that does not have a statement number
-  const unordered_set<NodeType> NodeTypeWithoutStmtNumSet = 
-    { NodeType::START, NodeType::END, NodeType::IFEND, NodeType::THENEND, NodeType::WHILEEND };
-
   //Map valid statment types to EntityIdentifier
   const unordered_map<CFGTokenType, EntityIdentifier> NodeTypeToEntityIdentifierMap{
     {CFGTokenType::kAssign, EntityIdentifier::kAssign}, 
@@ -24,14 +20,10 @@ namespace cfg {
   };
 
   //This constructor will be called to create nodes without stmt number only
-  GraphNode::GraphNode(NodeType type) {
-    /*if (NodeTypeWithoutStmtNumSet.find(type) == NodeTypeWithoutStmtNumSet.end()) {
-      throw exception();
-    }*/
-
+  GraphNode::GraphNode(NodeType type, int stmt_num) {
     type_ = type;
-    start_ = 0;
-    end_ = 0;
+    start_ = stmt_num;
+    end_ = stmt_num;
     next_node_ = nullptr;
     alternative_node_ = nullptr;
   }
@@ -82,5 +74,39 @@ namespace cfg {
 
   EntityIdentifier GraphNode::GetStmtType(int stmt_num) {
     return stmt_type_[stmt_num];
+  }
+
+  bool Helper(GraphNode& n1, GraphNode& n2, unordered_set<int>& visited) {
+    bool is_attribute_equal = n1.type_ == n2.type_ && n1.start_ == n2.start_ && n1.end_ == n2.end_ && n1.stmt_type_ == n2.stmt_type_;
+    //both must be nullptr or not nullptr at the same time
+    bool is_next_node_same = (!n1.next_node_ && !n2.next_node_) || (n1.next_node_ && n2.next_node_); 
+    bool is_alternative_node_same = (!n1.alternative_node_ && !n2.alternative_node_) || (n1.alternative_node_ && n2.alternative_node_);
+
+    if (!is_attribute_equal || !is_next_node_same || !is_alternative_node_same) {
+      return false;
+    }
+
+    visited.insert(n1.GetStart());
+
+    if (n1.next_node_ && visited.find(n1.next_node_->GetStart()) == visited.end()) {
+      if (!Helper(*n1.next_node_, *n2.next_node_, visited)) {
+        return false;
+      }
+    }
+
+    if (n1.alternative_node_ && visited.find(n1.alternative_node_->GetStart()) == visited.end()) {
+      if (!Helper(*n1.alternative_node_, *n2.alternative_node_, visited)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool GraphNode::equal(GraphNode& node) {
+    //We use the start to represent the node, since each node will have a unique start_stmt
+    unordered_set<int> visited;
+
+    return Helper(*this, node, visited);
   }
 }
