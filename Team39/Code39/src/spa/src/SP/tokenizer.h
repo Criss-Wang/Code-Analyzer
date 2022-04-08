@@ -27,8 +27,6 @@ class Token {
   public:
     TokenType type_ { TokenType::WHITESPACE }; // Initialised to WHITESPACE
     string text_ = "";
-    
-    void print();
 
     bool operator==(const Token& t) const {
       return t.type_ == this->type_ && t.text_ == this->text_;
