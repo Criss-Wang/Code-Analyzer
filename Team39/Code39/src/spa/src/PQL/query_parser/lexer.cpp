@@ -1,7 +1,6 @@
-#pragma once
-#define END_OF_FILE -1
-
 #include "parser.h"
+
+#define END_OF_FILE -1
 
 namespace pql {
   char ParserState::Peek() {

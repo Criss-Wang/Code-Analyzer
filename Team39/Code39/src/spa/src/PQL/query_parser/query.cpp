@@ -1,17 +1,17 @@
-#define ATTR_REF -1
-#define IDENT -2
-#define INTEGER -3
-#define INDEX_OF_ATTR_REF 0
-#define INDEX_OF_ENTITY 1
-#define INDEX_OF_TYPE 2
+#include <unordered_set>
+#include <string>
 
 #include "query.h"
 #include "../query_evaluator/clause/such_that_clause.h"
 #include "../query_evaluator/clause/with_clause.h"
 #include "../query_evaluator/clause/pattern_clause.h"
 
-#include <unordered_set>
-#include <string>
+#define ATTR_REF -1
+#define IDENT -2
+#define INTEGER -3
+#define INDEX_OF_ATTR_REF 0
+#define INDEX_OF_ENTITY 1
+#define INDEX_OF_TYPE 2
 
 namespace pql {
   bool IsLetter(char c) {

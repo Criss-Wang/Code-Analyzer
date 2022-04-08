@@ -1,3 +1,9 @@
+#include <iostream>
+#include <stdexcept>
+#include <string>
+
+#include "parser.h"
+
 #define NO_CURRENT_CLAUSE 0
 #define IS_SUCH_THAT 1
 #define IS_PATTERN 2
@@ -9,12 +15,6 @@
 #define INDEX_OF_DOMAIN 1
 #define INDEX_OF_EXPRESSION 2
 #define INDEX_OF_EXACT 3
-
-#include <iostream>
-#include <stdexcept>
-#include <string>
-
-#include "parser.h"
 
 namespace pql {
   std::vector<std::string> Parser::GetSynonyms() {
