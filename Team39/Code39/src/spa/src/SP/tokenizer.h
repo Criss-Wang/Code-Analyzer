@@ -27,8 +27,6 @@ class Token {
   public:
     TokenType type_ { TokenType::WHITESPACE }; // Initialised to WHITESPACE
     string text_ = "";
-    
-    void print();
 
     bool operator==(const Token& t) const {
       return t.type_ == this->type_ && t.text_ == this->text_;
@@ -37,9 +35,9 @@ class Token {
 
 class Tokenizer {
   public:
+    Tokenizer() = default;
     Tokenizer(const std::string& sourceProgram);
     vector<Token> tokens_list_;
-    vector<Token> parse(const string& sourceProgram);
 
   private:
     void EndToken(Token& token, vector<Token>& tokens);
@@ -75,4 +73,12 @@ class Tokenizer {
     bool IsSemicolon(char curr_char) {
       return curr_char == ';';
     }
+
+    void AddCharTokenToList(char curr_char, TokenType token_type, Token& current_token, vector<Token>& tokens_list);
+
+    void AddDigitTokenToList(char curr_char, Token& current_token, vector<Token>& tokens_list);
+
+    void AddLetterTokenToList(char curr_char, Token& current_token, vector<Token>& tokens_list);
+
+    void AddOperatorTokenToList(char curr_char, Token& current_token, vector<Token>& tokens_list);
 };
