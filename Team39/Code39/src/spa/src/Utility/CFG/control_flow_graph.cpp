@@ -7,7 +7,7 @@
 using namespace std;
 
 namespace cfg {
-  CFG::CFG(shared_ptr<GraphNode>& head) {
+  CFG::CFG(shared_ptr<GraphNode> head) {
     start_node_ = head;
   }
 
@@ -27,7 +27,7 @@ namespace cfg {
   CFG CFG::GenerateCfg(vector<CFGToken>& tokens) {
     //We are guranteed that the size of tokens will be >= 3
     //Since it contains Start and End node, and stmtLst must contain at least one statement
-    shared_ptr<GraphNode> head = make_shared<GraphNode>(NodeType::START);
+    shared_ptr<GraphNode> head = make_shared<GraphNode>(NodeType::START, 0);
     shared_ptr<GraphNode> curr = head;
     //stack stores the latest if/while node
     stack<shared_ptr<GraphNode>> stack;
@@ -51,7 +51,7 @@ namespace cfg {
       } else if (tokens[index].type_ == CFGTokenType::kThenEnd) {
         shared_ptr<GraphNode> if_node = stack.top();
         stack.pop();
-        shared_ptr<GraphNode> then_end_node = make_shared<GraphNode>(NodeType::THENEND);
+        shared_ptr<GraphNode> then_end_node = make_shared<GraphNode>(NodeType::THENEND, 0);
 
         Connect(curr, then_end_node);
         //The then_end_node is pushed to the stack because will need to connect it with if_end_node when else branch is done
@@ -64,7 +64,7 @@ namespace cfg {
         shared_ptr<GraphNode> while_node = stack.top();
         stack.pop();
 
-        shared_ptr<GraphNode> next_node = make_shared<GraphNode>(NodeType::WHILEEND);
+        shared_ptr<GraphNode> next_node = make_shared<GraphNode>(NodeType::WHILEEND, 0);
 
         //points curr to while_node
         Connect(curr, next_node);
@@ -74,7 +74,7 @@ namespace cfg {
       } else if (tokens[index].type_ == CFGTokenType::kElseEnd) {
         shared_ptr<GraphNode> then_node = stack.top();
         stack.pop();
-        shared_ptr<GraphNode> next_node = make_shared<GraphNode>(NodeType::IFEND);
+        shared_ptr<GraphNode> next_node = make_shared<GraphNode>(NodeType::IFEND, 0);
 
         //connect the last node in then stmtlst and else stmtlst to the next_node
         Connect(then_node, next_node);
@@ -82,7 +82,7 @@ namespace cfg {
         curr = next_node;
 
       } else if (tokens[index].type_ == CFGTokenType::kEnd) {
-        shared_ptr<GraphNode> end_node = make_shared<GraphNode>(NodeType::END);
+        shared_ptr<GraphNode> end_node = make_shared<GraphNode>(NodeType::END, 0);
         Connect(curr, end_node);
       } else if (curr->GetNodeType() != NodeType::STMT) {
         //The token type can only be stmt node up to this point
@@ -97,5 +97,9 @@ namespace cfg {
     }
 
     return CFG(head);
+  }
+
+  bool CFG::equal(CFG& cfg) {
+    return start_node_->equal(*cfg.start_node_);
   }
 }

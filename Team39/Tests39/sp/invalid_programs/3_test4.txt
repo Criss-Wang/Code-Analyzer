@@ -1,6 +1,6 @@
 procedure procName {
 	x = y + (5 + z);
-	if (x != 4) then { {
+	if (x != 4 > 9) then {
 		print x;
 		read z;
 	} else {
@@ -9,4 +9,4 @@ procedure procName {
 	while (f==f) {
 		read y;
 	}
-} }
+}
