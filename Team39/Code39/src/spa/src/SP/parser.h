@@ -15,6 +15,6 @@ class Parser {
     void Populate(Pkb& pkb);
 
   private:
-    Tokenizer tokenizer_ = Tokenizer("");
+    Tokenizer tokenizer_;
     vector<Procedure> proc_lst_ = {};
 };

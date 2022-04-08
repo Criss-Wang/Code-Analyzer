@@ -52,11 +52,6 @@ Tokenizer::Tokenizer(const std::string& source_program) {
   tokens_list_ = tokens_list;
 }
 
-vector<Token> Tokenizer::parse(const string& source_program) {
-  Tokenizer tokenizer = Tokenizer(source_program);
-  return tokenizer.tokens_list_;
-}
-
 void Tokenizer::AddCharTokenToList(char curr_char, TokenType token_type,
                                     Token& current_token, vector<Token>& tokens_list) {
   EndToken(current_token, tokens_list);

@@ -35,9 +35,9 @@ class Token {
 
 class Tokenizer {
   public:
+    Tokenizer() = default;
     Tokenizer(const std::string& sourceProgram);
     vector<Token> tokens_list_;
-    vector<Token> parse(const string& sourceProgram);
 
   private:
     void EndToken(Token& token, vector<Token>& tokens);
