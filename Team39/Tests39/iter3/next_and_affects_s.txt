@@ -1,0 +1,116 @@
+procedure p1 {
+	read a;
+	print a;
+	condition = 20;
+	hello = 10;
+
+	x = x * 3 + y;
+	y = a + b;
+	z = x * y;
+	last = x * y * z * 2;
+
+	if (condition == 1) then {
+		while (hello > condition) {
+			print a;
+			a = b + c + d;
+			b = c * 2;
+			d = 3;
+			call p2;
+			if (a < 2) then {
+				c = a * 2;
+				b = c + z * 3;
+			} else {
+				print c;
+				call p3;
+				while (c != 0) {
+					f = a * b * c * d;
+					g = z * g;
+					call p3;
+					call p4;
+				}
+			}
+		}
+		d = z * 2 + d;
+	} else {
+		if (d != 2) then {
+			x = a * 3;
+			call p3;
+		} else {
+			z = y * x;
+		}
+	}
+}
+
+procedure p2 {
+	last = a * 2 * b * c;
+	read print;
+	print read;
+
+	if (last == 2) then {
+		if (last == 3) then {
+			if (last == 4) then {
+				z = last + 3 * 2;
+				large = 111;
+				print large;
+			} else {
+				if (last == 5) then {
+					if (last == 6) then {
+						hello = a * c * z;
+						if (last == 8) then {
+							hello = 1234123;
+						} else {
+							straw = king * 3;
+						}
+						print print;
+						read read;
+
+					} else {
+						print otherwise;
+					}
+				} else {
+					print confusing;
+					while (confused == 0) {
+						going = a * b * c;
+						merry = c * last * d;
+						if (last == 7) then {
+							print here;
+							a = 2;
+							call p4;
+							call p3;
+						} else {
+							a = 3;
+							while (awesome == 100) {
+								going = merry * a * c;
+							}
+						}
+						b = 40 * x;
+						b = b * 2;
+					}
+				}
+			}
+		} else {
+			print lost;
+		}
+	} else {
+		x = z * 2;
+		y = a * 3;
+		y = z * a * y;
+		next = z * 3;
+		affects = next * b * c * x;
+	}
+}
+
+procedure p3 {
+	straw = hat * 2 * a;
+	while (straw != king) {
+		going = a * b * straw;
+		call p4;
+		print help;
+	}
+	affects = affects * straw * going;
+}
+
+procedure p4 {
+	going = 1;
+	merry = going * 2;
+}
