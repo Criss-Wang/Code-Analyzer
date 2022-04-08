@@ -58,7 +58,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class FollowsTClause : public SuchThatClause {
@@ -70,7 +72,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class ParentClause : public SuchThatClause {
@@ -82,7 +86,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class ParentTClause : public SuchThatClause {
@@ -94,7 +100,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class UsesSClause : public SuchThatClause {
@@ -106,7 +114,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class ModifiesSClause : public SuchThatClause {
@@ -118,7 +128,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class UsesPClause : public SuchThatClause {
@@ -130,7 +142,9 @@ namespace pql_clause {
 
   public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class ModifiesPClause : public SuchThatClause {
@@ -142,7 +156,9 @@ namespace pql_clause {
 
   public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class CallsClause : public SuchThatClause {
@@ -154,7 +170,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class CallsTClause : public SuchThatClause {
@@ -166,7 +184,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class NextClause : public SuchThatClause {
@@ -178,7 +198,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class NextTClause : public SuchThatClause {
@@ -190,7 +212,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class AffectsClause : public SuchThatClause {
@@ -202,7 +226,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 
   class AffectsTClause : public SuchThatClause {
@@ -214,6 +240,8 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
   };
 }
