@@ -60,6 +60,8 @@ namespace pql {
 
       std::vector<std::string> GetSynonyms();
 
+      void ParseAttrRef();
+
       void ParseSelect();
 
       void ParseTuple();
@@ -68,7 +70,7 @@ namespace pql {
 
       void ParsePattern();
 
-      std::tuple<std::string, std::vector<EntityIdentifier>, std::string, bool> ParsePatternSyntax();
+      std::tuple<std::string, std::unordered_set<EntityIdentifier>, std::string, bool> ParsePatternSyntax();
 
       void ParseWith();
 

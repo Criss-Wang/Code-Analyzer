@@ -1,6 +1,7 @@
 #include <utility>
 
 #include "token.h"
+#include "query.h"
 
 namespace pql {
 

@@ -2,7 +2,7 @@
 
 #include <utility>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include <string>
 #include <exception>
@@ -73,7 +73,7 @@ namespace pql {
     kWith,
   };
 
-  const std::map<std::string, EntityIdentifier> declarationMap {
+  const std::unordered_map<std::string, EntityIdentifier> declarationMap {
     {"stmt",      EntityIdentifier::kStmt},
     {"read",      EntityIdentifier::kRead},
     {"print",     EntityIdentifier::kPrint},
@@ -86,7 +86,7 @@ namespace pql {
     {"procedure", EntityIdentifier::kProc}
   };
 
-  const std::map<std::string, RelationshipTypes> relationshipMap {
+  const std::unordered_map<std::string, RelationshipTypes> relationshipMap {
       {"Follows",   kFollows},
       {"Follows*",  kFollowsT},
       {"Parent",    kParent},

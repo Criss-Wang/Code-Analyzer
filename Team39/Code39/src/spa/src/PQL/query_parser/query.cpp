@@ -1,12 +1,17 @@
+#define ATTR_REF -1
+#define IDENT -2
+#define INTEGER -3
+#define INDEX_OF_ATTR_REF 0
+#define INDEX_OF_ENTITY 1
+#define INDEX_OF_TYPE 2
+
 #include "query.h"
 #include "../query_evaluator/clause/such_that_clause.h"
 #include "../query_evaluator/clause/with_clause.h"
 #include "../query_evaluator/clause/pattern_clause.h"
 
-#include <map>
 #include <unordered_set>
 #include <string>
-#include <sstream>
 
 namespace pql {
   bool IsLetter(char c) {
@@ -51,6 +56,20 @@ namespace pql {
     return c == '#';
   }
 
+  template <typename T>
+  bool WithinUnorderedSet(std::unordered_set<T>* set, T t) {
+    return set->find(t) != set->end();
+  }
+
+  std::string RemoveQuotationMarks(std::string& ident) {
+    if (IsIdent(ident)) {
+      ident.erase(0, 1);
+      size_t len = ident.length();
+      ident.erase(len - 1, 1);
+    }
+    return ident;
+  }
+
   std::unordered_set<EntityIdentifier> stmts({
     EntityIdentifier::kStmt,
     EntityIdentifier::kAssign,
@@ -69,7 +88,7 @@ namespace pql {
     EntityIdentifier::kWildcard
   });
 
-  std::unordered_set<EntityIdentifier> uses_and_modifies_left_domain ({
+  std::unordered_set<EntityIdentifier> uses_and_modifies_p_left_domain ({
     EntityIdentifier::kProc,
     EntityIdentifier::kIdent
   });
@@ -86,15 +105,37 @@ namespace pql {
     EntityIdentifier::kStmtNumber,
   });
 
-  const std::map<pql::RelationshipTypes, std::unordered_set<EntityIdentifier>> left_synonym_domains {
+  std::unordered_set<EntityIdentifier> modifies_s_left_domain({
+    EntityIdentifier::kStmt,
+    EntityIdentifier::kAssign,
+    EntityIdentifier::kIf,
+    EntityIdentifier::kWhile,
+    EntityIdentifier::kCall,
+    EntityIdentifier::kRead,
+    EntityIdentifier::kWildcard,
+    EntityIdentifier::kStmtNumber
+  });
+
+  std::unordered_set<EntityIdentifier> uses_s_left_domain({
+    EntityIdentifier::kStmt,
+    EntityIdentifier::kAssign,
+    EntityIdentifier::kIf,
+    EntityIdentifier::kWhile,
+    EntityIdentifier::kCall,
+    EntityIdentifier::kPrint,
+    EntityIdentifier::kWildcard,
+    EntityIdentifier::kStmtNumber
+  });
+
+  const std::unordered_map<pql::RelationshipTypes, std::unordered_set<EntityIdentifier>> left_synonym_domains {
     {kFollows, stmts},
     {kFollowsT, stmts},
     {kParent, stmts},
     {kParentT, stmts},
-    {kUsesS, stmts},
-    {kUsesP, uses_and_modifies_left_domain},
-    {kModifiesS, stmts},
-    {kModifiesP, uses_and_modifies_left_domain},
+    {kUsesS, uses_s_left_domain},
+    {kUsesP, uses_and_modifies_p_left_domain},
+    {kModifiesS, modifies_s_left_domain},
+    {kModifiesP, uses_and_modifies_p_left_domain},
     {kCalls, procs},
     {kCallsT, procs},
     {kNext, stmts},
@@ -103,7 +144,7 @@ namespace pql {
     {kAffectsT, assign}
   };
 
-  const std::map<pql::RelationshipTypes, std::unordered_set<EntityIdentifier>> right_synonym_domains {
+  const std::unordered_map<pql::RelationshipTypes, std::unordered_set<EntityIdentifier>> right_synonym_domains {
     {kFollows, stmts},
     {kFollowsT, stmts},
     {kParent, stmts},
@@ -120,14 +161,14 @@ namespace pql {
     {kAffectsT, assign}
   };
   
-  const std::map<std::string, AttrIdentifier> attributeMap{
+  const std::unordered_map<std::string, AttrIdentifier> attributeMap{
     {"value",      AttrIdentifier::kValue},
     {"stmt#",      AttrIdentifier::kStmtNum},
     {"varName",    AttrIdentifier::kVarName},
     {"procName",   AttrIdentifier::kProcName}
   };
 
-  const std::map<EntityIdentifier, AttrIdentifier> defaultAttrMap{
+  const std::unordered_map<EntityIdentifier, AttrIdentifier> defaultAttrMap{
     {EntityIdentifier::kProc,      AttrIdentifier::kProcName},
     {EntityIdentifier::kVariable,  AttrIdentifier::kVarName},
     {EntityIdentifier::kConstant,  AttrIdentifier::kValue},
@@ -166,7 +207,7 @@ namespace pql {
     AttrIdentifier::kStmtNum
   });
 
-  const std::map<EntityIdentifier, std::unordered_set<AttrIdentifier>> validAttrMap{
+  const std::unordered_map<EntityIdentifier, std::unordered_set<AttrIdentifier>> validAttrMap{
     {EntityIdentifier::kProc,     valid_attr_proc},
     {EntityIdentifier::kVariable, valid_attr_var},
     {EntityIdentifier::kConstant, valid_attr_const},
@@ -179,11 +220,18 @@ namespace pql {
     {EntityIdentifier::kStmt,     valid_attr_stmt}
   };
 
+  std::unordered_map<AttrIdentifier, int> attrDomain {
+      {AttrIdentifier::kValue, INTEGER},
+      {AttrIdentifier::kVarName, IDENT},
+      {AttrIdentifier::kProcName, IDENT},
+      {AttrIdentifier::kStmtNum, INTEGER}
+  };
+
   AttrIdentifier GetAttributeByString(const std::string& attr) {
     return attributeMap.at(attr);
   }
 
-  std::shared_ptr<pql_clause::Clause> GenerateClause(RelationshipTypes relationship,
+  std::shared_ptr<pql_clause::Clause> GenerateSuchThatClause(RelationshipTypes relationship,
                                                      std::string &left, std::string &right, bool is_synonym_left, bool is_synonym_right) {
     switch (relationship) {
       case RelationshipTypes::kFollows:
@@ -218,70 +266,61 @@ namespace pql {
         return nullptr;
     }
   }
+
+  std::shared_ptr<pql_clause::Clause> GeneratePatternClause(EntityIdentifier syn_entity, std::string& synonym, std::string& left, bool is_synonym_left,
+                                                            std::string& expression, bool exact) {
+    switch(syn_entity) {
+      case EntityIdentifier::kAssign:
+        return std::make_shared<pql_clause::AssignPatternClause>(synonym, left, is_synonym_left, expression, exact);
+      case EntityIdentifier::kWhile:
+        return std::make_shared<pql_clause::WhilePatternClause>(synonym, left, is_synonym_left);
+      case EntityIdentifier::kIf:
+        return std::make_shared<pql_clause::IfPatternClause>(synonym, left, is_synonym_left);
+      default:
+        return nullptr;
+    }
+  }
   
   void Query::SetSemanticallyInvalid() {
     Query::is_semantically_valid = false;
   }
 
-  //The naming can be more specific such as IsValidRelationship
-  bool Query::IsValid(RelationshipTypes r, const std::string& left, const std::string& right) {
-    //bool is_left_valid = || || || ||
-    //if (!is_left_valid) throw ParseException()
+  bool Query::IsValidRelationshipArgument(const std::string& argument, std::unordered_set<EntityIdentifier> *domain) {
+    if (Query::SynonymDeclared(argument) && WithinUnorderedSet(domain, Query::synonyms.at(argument).GetDeclaration())) {
+      return false;
+    } else {
+      if (argument == "_" && WithinUnorderedSet(domain, EntityIdentifier::kWildcard)) {
+        return false;
+      } else if (pql::IsIdent(argument) && WithinUnorderedSet(domain, EntityIdentifier::kIdent)) {
+        throw ParseException();
+      } else if (pql::IsInteger(argument) && WithinUnorderedSet(domain, EntityIdentifier::kStmtNumber)) {
+        throw ParseException();
+      }
+    }
+
+    return true;
+  }
+
+  bool Query::IsValidRelationship(RelationshipTypes r, const std::string& left, const std::string& right) {
+    bool is_left_valid = Query::SynonymDeclared(left) || left == "_" || pql::IsIdent(left) || pql::IsInteger(left);
+    bool is_right_valid = Query::SynonymDeclared(right) || right == "_" || pql::IsIdent(right) || pql::IsInteger(right);
+
+    if (!(is_left_valid && is_right_valid)) {
+      return false;
+    }
 
     std::unordered_set<EntityIdentifier> left_domains = pql::left_synonym_domains.at(r);
     std::unordered_set<EntityIdentifier> right_domains = pql::right_synonym_domains.at(r);
 
-    //This is similar with line 250 - 262, might want to have a function to abstract this out
-    if (Query::SynonymDeclared(left)) {
-      if (left_domains.find(Query::synonyms.at(left).GetDeclaration()) == left_domains.end()) {
-        return false;
-      }
-      
-      //The condition is too long, consider to give it a name
-      //e.g. bool is_modifiesS = r == RelationshipTypes::kModifiesS
-      //e.g. bool is_left_print = Query::synonyms.at(left).GetDeclaration() == EntityIdentifier::kPrint
-      //e.g. bool is_left_modifiesS_print = is_modifiesS && is_left_print
-      if ((r == RelationshipTypes::kModifiesS && Query::synonyms.at(left).GetDeclaration() == EntityIdentifier::kPrint) ||
-          (r == RelationshipTypes::kUsesS && Query::synonyms.at(left).GetDeclaration() == EntityIdentifier::kRead)) {
-        return false;
-      }
-    } else {
-      if (left == "_" && left_domains.find(EntityIdentifier::kWildcard) == left_domains.end()) {
-        return false;
-      } else if (pql::IsIdent(left) && left_domains.find(EntityIdentifier::kIdent) == left_domains.end()) {
-        throw ParseException();
-      } else if (pql::IsInteger(left) && left_domains.find(EntityIdentifier::kStmtNumber) == left_domains.end()) {
-        throw ParseException();
-      }
-    }
-
-    if (Query::SynonymDeclared(right)) {
-      if (right_domains.find(Query::synonyms.at(right).GetDeclaration()) == right_domains.end()) {
-        return false;
-      }
-    } else {
-      if (right == "_" && right_domains.find(EntityIdentifier::kWildcard) == right_domains.end()) {
-        return false;
-      } else if (pql::IsIdent(right) && right_domains.find(EntityIdentifier::kIdent) == right_domains.end()) {
-        throw ParseException();
-      } else if (pql::IsInteger(right) && right_domains.find(EntityIdentifier::kStmtNumber) == right_domains.end()) {
-        throw ParseException();
-      }
-    }
-
-    //this boolean is too long
-    //since Query::SynonymDeclared(left) is used twice, can just store the value as a variable
-    //What is this boolean checking 
-    return (Query::SynonymDeclared(left) || left == "_" || pql::IsIdent(left) || pql::IsInteger(left)) &&
-        (Query::SynonymDeclared(right) || right == "_" || pql::IsIdent(right) || pql::IsInteger(right));
+    return IsValidRelationshipArgument(left, &left_domains) && IsValidRelationshipArgument(right, &right_domains);
   }
 
   bool Query::SynonymDeclared(const std::string &name) {
     return synonyms.find(name) != synonyms.end();
   }
 
-  Synonym Query::GetSynonymByName(const std::string &name) {
-    return synonyms.at(name);
+  std::shared_ptr<Synonym> Query::GetSynonymByName(const std::string &name) {
+    return std::make_shared<Synonym>(synonyms.at(name));
   }
   
   bool Query::IsAttrStringValid(const std::string& attribute) {
@@ -311,44 +350,28 @@ namespace pql {
   }
   
   void Query::AddResultSynonym(const std::string &name) {
-    //Can follow the code pratice below
-    if (Query::SynonymDeclared(name)) {
-      Query::AddUsedSynonym(name);
-      Query::AddAttrRef(Query::synonyms.at(name));
-    } else {
+    if (!Query::SynonymDeclared(name)) {
       Query::SetSemanticallyInvalid();
+      return;
     }
+
+    Query::AddUsedSynonym(name);
+    Query::AddAttrRef(Query::synonyms.at(name));
   }
 
   void Query::AddResultSynonym(const std::string& name, const std::string& attribute) {
-    /*
-    It would be better to make the happy path prominent. For example,
-
     if (!IsAttrStringValid(attribute)) {
       throw ParseException();
     }
 
     if (!Query::SynonymDeclared(name)){
       Query::SetSemanticallyInvalid();
-      return; //remember to exit the function to prevent execute the later codes
+      return;
     }
 
-    //The happy path is not idented, which makes it clearer to read
     Query::AddUsedSynonym(name);
     AttrIdentifier attr = attributeMap.at(attribute);
     Query::AddAttrRef(Query::synonyms.at(name), attr);
-
-    */
-
-    if (Query::SynonymDeclared(name) && IsAttrStringValid(attribute)) {
-      Query::AddUsedSynonym(name);
-      AttrIdentifier attr = attributeMap.at(attribute);
-      Query::AddAttrRef(Query::synonyms.at(name), attr);
-    } else if (!IsAttrStringValid(attribute)) {
-      throw ParseException();
-    } else {
-      Query::SetSemanticallyInvalid();
-    }
   }
 
   bool Query::IsProcedure(const std::string &name) {
@@ -363,11 +386,14 @@ namespace pql {
       Query::SetSemanticallyInvalid();
       return;
     }
+
+    // check if the synonym is already used
     for (pql::Synonym s: Query::used_synonyms) {
       if (s.equal(Query::synonyms.at(name))) {
         return;
       }
     }
+
     Query::used_synonyms.push_back(Query::synonyms.at(name));
   }
 
@@ -384,17 +410,17 @@ namespace pql {
   bool Query::IsAttrValidForSyn(Synonym& s, AttrIdentifier attr) {
     EntityIdentifier entity_id = s.GetDeclaration();
     std::unordered_set<AttrIdentifier> expected_attrs = validAttrMap.at(entity_id);
-    return expected_attrs.find(attr) != expected_attrs.end();
+    return WithinUnorderedSet(&expected_attrs, attr);
   }
 
   void Query::AddAttrRef(Synonym& s, AttrIdentifier attr) {
-    //can follow the happy path code practice
-    if (IsAttrValidForSyn(s, attr)) {
-      AttrRef attr_ref = AttrRef(s, attr);
-      Query::attr_refs.push_back(attr_ref);
-    } else {
+    if (!IsAttrValidForSyn(s, attr)) {
       Query::SetSemanticallyInvalid();
+      return;
     }
+
+    AttrRef attr_ref = AttrRef(s, attr);
+    Query::attr_refs.push_back(attr_ref);
   }
 
   std::vector<pql::AttrRef> Query::GetAttrRef() {
@@ -402,72 +428,54 @@ namespace pql {
   }
 
   void Query::AddSuchThatClause(RelationshipTypes r, std::string &left, std::string &right, bool is_synonym_left, bool is_synonym_right) {
-    if (Query::IsValid(r, left, right)) {
-      //The two if stataments are similar 
-      if (!is_synonym_left && IsIdent(left)) {
-        left.erase(0, 1);
-        size_t left_len = left.length();
-        left.erase(left_len - 1, 1);
-      }
-      if (!is_synonym_right && IsIdent(right)) {
-        right.erase(0, 1);
-        size_t right_len = right.length();
-        right.erase(right_len - 1, 1);
-      }
-      Query::clauses.push_back(GenerateClause(r, left, right, is_synonym_left, is_synonym_right));
-    } else {
+    if (!Query::IsValidRelationship(r, left, right)) {
       Query::SetSemanticallyInvalid();
+      return;
     }
+
+    left = RemoveQuotationMarks(left);
+    right = RemoveQuotationMarks(right);
+
+    Query::clauses.push_back(GenerateSuchThatClause(r, left, right, is_synonym_left, is_synonym_right));
   }
 
   void Query::AddPattern(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact) {
     bool is_synonym_left = Query::SynonymDeclared(left);
-    
-    /* Happy path:
+
     if (is_synonym_left && Query::synonyms.at(left).GetDeclaration() != EntityIdentifier::kVariable) {
       Query::SetSemanticallyInvalid();
       return;
     }
 
-    if (IsIdent(left)) {
-      left.erase(0, 1);
-      size_t left_len = left.length();
-      left.erase(left_len - 1, 1);
-    }
-    if (syn_entity == EntityIdentifier::kAssign) {
-      Query::clauses.push_back(std::make_shared<pql_clause::AssignPatternClause>(synonym, left, is_synonym_left, expression, exact));
-    } else if (syn_entity == EntityIdentifier::kWhile) {
-      Query::clauses.push_back(std::make_shared<pql_clause::WhilePatternClause>(synonym, left, is_synonym_left));
-    } else if (syn_entity == EntityIdentifier::kIf) {
-      Query::clauses.push_back(std::make_shared<pql_clause::IfPatternClause>(synonym, left, is_synonym_left));
-    }
-    */
+    left = RemoveQuotationMarks(left);
 
-    if (is_synonym_left && Query::synonyms.at(left).GetDeclaration() != EntityIdentifier::kVariable) {
-      Query::SetSemanticallyInvalid();
-    } else {
-      if (IsIdent(left)) {
-        left.erase(0, 1);
-        size_t left_len = left.length();
-        left.erase(left_len - 1, 1);
-      }
-
-      //The factory function can be used here (similar to such that clause) 
-      if (syn_entity == EntityIdentifier::kAssign) {
-        Query::clauses.push_back(std::make_shared<pql_clause::AssignPatternClause>(synonym, left, is_synonym_left, expression, exact));
-      } else if (syn_entity == EntityIdentifier::kWhile) {
-        Query::clauses.push_back(std::make_shared<pql_clause::WhilePatternClause>(synonym, left, is_synonym_left));
-      } else if (syn_entity == EntityIdentifier::kIf) {
-        Query::clauses.push_back(std::make_shared<pql_clause::IfPatternClause>(synonym, left, is_synonym_left));
-      }
-    }
+    Query::clauses.push_back(GeneratePatternClause(syn_entity, synonym, left, is_synonym_left, expression, exact));
   }
 
-  void Query::AddWith(std::shared_ptr<AttrRef> left_attr, std::string left_entity, bool is_attr_ref_left,
-               std::shared_ptr<AttrRef> right_attr, std::string right_entity, bool is_attr_ref_right) {
+  int GetWithArgumentDomain(std::tuple<std::shared_ptr<AttrRef>, std::string, int>* argument) {
+    int domain;
+    if (std::get<INDEX_OF_TYPE>(*argument) == ATTR_REF) {
+      domain = attrDomain.at(std::get<INDEX_OF_ATTR_REF>(*argument)->GetAttrIdentifier());
+    } else {
+      domain = std::get<INDEX_OF_TYPE>(*argument);
+    }
+
+    return domain;
+  }
+
+  bool IsValidWith(std::tuple<std::shared_ptr<AttrRef>, std::string, int>& left, std::tuple<std::shared_ptr<AttrRef>, std::string, int>& right) {
+    return GetWithArgumentDomain(&left) == GetWithArgumentDomain(&right);
+  }
+
+  void Query::AddWith(std::tuple<std::shared_ptr<AttrRef>, std::string, int>& left, std::tuple<std::shared_ptr<AttrRef>, std::string, int>& right) {
+    if (!IsValidWith(left, right)) {
+      Query::SetSemanticallyInvalid();
+      return;
+    }
     Query::clauses.push_back(
-      std::make_shared<pql_clause::WithClause>(
-          left_attr, left_entity, is_attr_ref_left, right_attr, right_entity, is_attr_ref_right));
+      std::make_shared<pql_clause::WithClause>(std::get<INDEX_OF_ATTR_REF>(left), std::get<INDEX_OF_ENTITY>(left),
+          std::get<INDEX_OF_TYPE>(left) == ATTR_REF,std::get<INDEX_OF_ATTR_REF>(right),
+          std::get<INDEX_OF_ENTITY>(right), std::get<INDEX_OF_TYPE>(right) == ATTR_REF));
   }
 
   std::vector <std::shared_ptr<pql_clause::Clause>> Query::GetClauses() {
