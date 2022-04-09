@@ -107,7 +107,7 @@ namespace pql_table {
 		std::unordered_set<std::pair<int, int>, hash_pair_fn> 
 				pair_domain(pred.allowed_pairs_.begin(), pred.allowed_pairs_.end());
 
-		for (int index = 0; index < rows_.size(); index++) {
+		for (int index = 0; index < rows_.size(); index++) { // review: can consider using range-based for loop ( for(auto& row: rows_){} )
 			std::pair<int, int> cur_pair(rows_[index][first_syn_col_index], rows_[index][second_syn_col_index]);
 			std::unordered_set<std::pair<int, int>>::iterator iter;
 			iter = pair_domain.find(cur_pair);

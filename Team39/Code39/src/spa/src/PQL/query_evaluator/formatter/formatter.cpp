@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "formatter.h"
-#include "../../../Utility/entity.h"
+#include "../../../Utility/entity.h" // review: unused include
 
 namespace pql_formatter {
   Formatter::Formatter(pql_cache::Cache* cache) {
@@ -20,7 +20,7 @@ namespace pql_formatter {
       int col_num_in_table = table.FindSynCol(syn_name);
 
       for (int index = 0; index < table.GetRowNum(); index++) {
-        std::string cur_string = "";
+        std::string cur_string = ""; // review: redundant initialization
 
         if (attribute == AttrIdentifier::kValue || attribute == AttrIdentifier::kStmtNum) {
           cur_string = std::to_string(table.rows_[index][col_num_in_table]);
@@ -37,7 +37,7 @@ namespace pql_formatter {
                                : cache_->GetStringByIndex(IndexTableType::kVar, name_index);
         }
 
-        if (result_string[index] != "") {
+        if (result_string[index] != "") { // review: can use !result_string[index].empty
           result_string[index] += " ";
         }
 

@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 #include "with_clause.h"
-#include "../query_evaluator_exceptions.h"
+#include "../query_evaluator_exceptions.h" // review: unused include
 
 #define INVALID_INDEX -1
 #define ENTITY 0
@@ -191,7 +191,7 @@ namespace pql_clause {
     std::unordered_map<std::string, std::vector<int>>* curr_map = is_left_map_smaller ? &left_attr_ent_map : &right_attr_ent_map;
     std::unordered_map<std::string, std::vector<int>>* other_map = !is_left_map_smaller ? &left_attr_ent_map : &right_attr_ent_map;
 
-    for (auto curr_it = curr_map->begin(); 
+    for (auto curr_it = curr_map->begin(); // review: can use range-based for loop (ex. for(auto& curr_it: *curr_map){} )
         curr_it != curr_map->end(); curr_it++) {
       std::string curr_attr_val = curr_it->first;
 
