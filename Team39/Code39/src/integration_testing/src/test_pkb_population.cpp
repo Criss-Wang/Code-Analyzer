@@ -26,6 +26,7 @@ TEST_CASE("Read/print statements for Population") {
 
   SECTION("1_test1") {
     Pkb pkb = parse(populate_dir + "1_test1.txt");
+    Pkb pkb2 = parse(populate_dir + "source-nesting.txt");
 
     // check entity sets
     unordered_set<int> expected_proc = { pkb.GetIndexByString(IndexTableType::kProcIndex, "procName") };
