@@ -206,6 +206,7 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
   bool is_new_container = true;
 
   for (auto token = begin(tokens_lst); token != end(tokens_lst); ++token) {
+
     if (token->type_ == TokenType::RIGHT_CURLY) {
 
       if (is_new_container) {

@@ -15,7 +15,6 @@ class ConditionalExpression {
     void PopulateEntities(Pkb& pkb, int stmt_num);
 
   private:
-    int stmt_num_ = -1;
     unordered_set<string> vars_ = {};
     unordered_set<int> constants_ = {};
 };

@@ -3,39 +3,37 @@
 
 #define STMT_TOKENS_SIZE 2
 #define INDEX_OF_VAR 1
+#define INDEX_OF_LHS_VAR 0
+#define INDEX_OF_RHS_VAR 2
+#define MIN_SIZE_OF_ASSIGN 3
+#define MIN_SIZE_OF_IF 7
+#define MIN_SIZE_OF_WHILE 6
 
 int Stmt::GetStmtNum() {
   return stmt_num_;
 }
 
 AssignStmt::AssignStmt(std::vector<Token>& tokens, int stmt_num) {
-  const int kMinSize = 3;
-  if (tokens.size() < kMinSize) {
+  if (tokens.size() < MIN_SIZE_OF_ASSIGN) {
     throw InvalidSyntaxException();
   }
 
   stmt_num_ = stmt_num;
 
-  const int kIndexOfLhsVar = 0;
-  const int kIndexOfFirstRhsVar = 2;
-
-  if (tokens.at(kIndexOfLhsVar).type_ != TokenType::NAME && tokens.at(kIndexOfLhsVar).type_ != TokenType::LETTER) {
+  if (tokens.at(INDEX_OF_LHS_VAR).type_ != TokenType::NAME && tokens.at(INDEX_OF_LHS_VAR).type_ != TokenType::LETTER) {
     throw InvalidSyntaxException();
   }
-  lhs_var_ = tokens.at(kIndexOfLhsVar).text_;
+  lhs_var_ = tokens.at(INDEX_OF_LHS_VAR).text_;
 
-  vector<Token>::const_iterator pattern_start = tokens.begin() + kIndexOfFirstRhsVar;
+  vector<Token>::const_iterator pattern_start = tokens.begin() + INDEX_OF_RHS_VAR;
   vector<Token>::const_iterator pattern_end = tokens.end();
   vector<Token> pattern(pattern_start, pattern_end);
   rhs_pattern_ = AssignmentPattern(pattern);
 }
 
-string AssignStmt::GetVar() {
-  return lhs_var_;
-}
-
-unordered_set<string> AssignStmt::GetVars() {
-  return rhs_pattern_.GetVars();
+void AssignStmt::PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures) {
+  uses_p.merge(rhs_pattern_.GetVars());
+  modifies_p.insert(lhs_var_);
 }
 
 void AssignStmt::PopulateEntities(Pkb& pkb) {
@@ -65,8 +63,8 @@ ReadStmt::ReadStmt(std::vector<Token>& tokens, int stmt_num) {
   read_var_ = tokens.at(INDEX_OF_VAR).text_;
 }
 
-string ReadStmt::GetVar() {
-  return read_var_;
+void ReadStmt::PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures) {
+  modifies_p.insert(read_var_);
 }
 
 void ReadStmt::PopulateEntities(Pkb& pkb) {
@@ -97,8 +95,8 @@ PrintStmt::PrintStmt(std::vector<Token>& tokens, int stmt_num) {
   print_var_ = tokens.at(INDEX_OF_VAR).text_;
 }
 
-string PrintStmt::GetVar() {
-  return print_var_;
+void PrintStmt::PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures) {
+  uses_p.insert(print_var_);
 }
 
 void PrintStmt::PopulateEntities(Pkb& pkb) {
@@ -119,8 +117,8 @@ void PrintStmt::PopulateEntities(Pkb& pkb) {
 IfStmt::IfStmt(std::vector<Token>& tokens, int stmt_num) {
   stmt_num_ = stmt_num;
 
-  const int kMinStmtSize = 7; // "if", "(", "1", "==", "1", ")" "then"
-  if (tokens.size() < kMinStmtSize) {
+  // "if", "(", "1", "==", "1", ")", "then"
+  if (tokens.size() < MIN_SIZE_OF_IF) {
     throw InvalidSyntaxException();
   }
 
@@ -147,8 +145,8 @@ IfStmt::IfStmt(std::vector<Token>& tokens, int stmt_num) {
 
 }
 
-unordered_set<string> IfStmt::GetVars() {
-  return cond_expr_.GetVars();
+void IfStmt::PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures) {
+  uses_p.merge(cond_expr_.GetVars());
 }
 
 void IfStmt::PopulateEntities(Pkb& pkb) {
@@ -174,8 +172,8 @@ void IfStmt::PopulateEntities(Pkb& pkb) {
 WhileStmt::WhileStmt(std::vector<Token>& tokens, int stmt_num) {
   stmt_num_ = stmt_num;
 
-  const int kMinStmtSize = 6; // "while", "(", "1", "==", "1", ")"
-  if (tokens.size() < kMinStmtSize) {
+  // "while", "(", "1", "==", "1", ")"
+  if (tokens.size() < MIN_SIZE_OF_WHILE) {
     throw InvalidSyntaxException();
   }
 
@@ -201,8 +199,8 @@ WhileStmt::WhileStmt(std::vector<Token>& tokens, int stmt_num) {
 
 }
 
-unordered_set<string> WhileStmt::GetVars() {
-  return cond_expr_.GetVars();
+void WhileStmt::PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures) {
+  uses_p.merge(cond_expr_.GetVars());
 }
 
 void WhileStmt::PopulateEntities(Pkb& pkb) {
@@ -239,8 +237,8 @@ CallStmt::CallStmt(std::vector<Token>& tokens, int stmt_num) {
   called_proc_ = tokens.at(INDEX_OF_VAR).text_;
 }
 
-string CallStmt::GetVar() {
-  return called_proc_;
+void CallStmt::PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures) {
+  called_procedures.insert(called_proc_);
 }
 
 void CallStmt::PopulateEntities(Pkb& pkb) {
