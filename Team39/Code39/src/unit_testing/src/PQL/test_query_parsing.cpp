@@ -219,6 +219,7 @@ TEST_CASE("Valid queries") {
 
   SECTION("With Select, such that and pattern clause with expression") {
     RequireValidQuery(valid_queries_dir + "5_test4.txt", 1, 2, 3);
+    RequireValidQuery(valid_queries_dir + "5_test5.txt", 1, 1, 2);
   }
 
   SECTION("With Select clause with synonym and attribute") {
