@@ -19,6 +19,8 @@ namespace pql_table {
 
       InterTable(std::vector<std::string>& header, std::vector<std::vector<int>>& rows);
 
+      InterTable(std::vector<std::string>&& header, std::vector<std::vector<int>>&& rows);
+
     public:
       int GetColNum();
 
