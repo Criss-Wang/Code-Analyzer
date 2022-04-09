@@ -56,7 +56,6 @@ namespace pql {
         declarations_parsed = true;
       } else if (select_clause_parsed) {
         if (keyword == "such") {
-          ps_.ExpectChar(' ');
           ps_.EatWhiteSpaces();
           ps_.Expect("that");
           Parser::ParseRelationship();
@@ -67,7 +66,7 @@ namespace pql {
         } else if (keyword == "with" || (keyword == "and" && current_clause == IS_WITH)) {
           Parser::ParseWith();
           current_clause = IS_WITH;
-        } else if (keyword == "and " && current_clause == IS_SUCH_THAT) {
+        } else if (keyword == "and" && current_clause == IS_SUCH_THAT) {
           Parser::ParseRelationship();
           current_clause = IS_SUCH_THAT;
         } else {

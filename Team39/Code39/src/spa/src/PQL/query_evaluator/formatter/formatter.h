@@ -14,5 +14,7 @@ namespace pql_formatter {
 
     public:
       std::vector<std::string> FormatRawInput(pql_table::InterTable& table, std::vector<pql::AttrRef>& return_syns);
+
+      std::string GetStringForProcNameAndVarName(int entity, EntityIdentifier ent_type, AttrIdentifier attr_type);
   };
 }
