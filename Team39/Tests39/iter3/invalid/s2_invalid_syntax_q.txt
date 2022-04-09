@@ -110,12 +110,12 @@ Select <v>.varName such that Modifies(p, v)
 5000
 23 - Invalid number of arguments for if pattern
 if ifs;
-Select BOOLEAN pattern ifs ("read", _)
+Select BOOLEAN pattern ifs ("read", _, _, _)
 
 5000
 24 - Invalid number of arguments for while pattern
 while w;
-Select BOOLEAN pattern w ( "while" , _ , _ )
+Select BOOLEAN pattern w ( "while" , _ , _,)
 
 5000
 25 - Invalid token

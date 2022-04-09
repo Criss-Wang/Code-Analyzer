@@ -133,3 +133,13 @@ stmt s, s1;
 Select BOOLEAN such that Affects *(s, s1)
 
 5000
+28 - Invalid number of arguments for if pattern
+if ifs;
+Select BOOLEAN pattern ifs ("read", _)
+FALSE
+5000
+29 - Invalid number of arguments for while pattern
+while w;
+Select BOOLEAN pattern w ( "while" , _ , _ )
+FALSE
+5000

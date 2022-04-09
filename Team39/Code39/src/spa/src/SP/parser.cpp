@@ -174,8 +174,8 @@ void UpdateNextRelForIfInWhile(bool& is_prev_stmt_while, bool& is_prev_stmt_if, 
 }
 
 Parser::Parser(const std::string& input, Pkb& pkb) {
-
-  vector<Token> tokens_lst = move(tokenizer_.parse(input));
+  tokenizer_ = Tokenizer(input);
+  vector<Token> tokens_lst = move(tokenizer_.tokens_list_);
 
   vector<Token> proc_tokens = {};
   vector<shared_ptr<Stmt>> stmt_lst = {};
