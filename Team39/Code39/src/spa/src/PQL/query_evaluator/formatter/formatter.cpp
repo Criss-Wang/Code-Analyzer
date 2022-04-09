@@ -4,7 +4,6 @@
 #include "formatter.h"
 #include "../../../Utility/entity.h"
 
-#define EMPTY_STRING ""
 #define WHITESPACE " "
 
 namespace pql_formatter {
@@ -47,7 +46,7 @@ namespace pql_formatter {
           cur_string = move(GetStringForProcNameAndVarName(table.rows_[index][col_num_in_table], type, attribute));
         }
 
-        if (result_string[index] != EMPTY_STRING) {
+        if (!result_string[index].empty()) {
           result_string[index] += WHITESPACE;
         }
 

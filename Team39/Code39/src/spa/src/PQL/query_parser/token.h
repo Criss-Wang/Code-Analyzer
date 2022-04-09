@@ -2,7 +2,8 @@
 
 #include <utility>
 #include <vector>
-#include <map>
+#include <unordered_map>
+#include <memory>
 #include <string>
 #include <exception>
 #include <optional>
@@ -13,10 +14,10 @@
 namespace pql {
   class Synonym {
     private:
-      std::string name;
-      EntityIdentifier declaration;
+      std::string name_;
+      EntityIdentifier declaration_;
     public:
-      Synonym(std::string name, EntityIdentifier declaration) : name(std::move(name)), declaration(declaration) {};
+      Synonym(std::string name, EntityIdentifier declaration) : name_(std::move(name)), declaration_(declaration) {};
 
       std::string GetName();
 
@@ -27,10 +28,15 @@ namespace pql {
 
   class AttrRef {
     private:
-      Synonym* synonym_;
+      std::shared_ptr<Synonym> synonym_;
       AttrIdentifier attribute_;
     public:
-      AttrRef(Synonym& s, AttrIdentifier attribute) : synonym_(&s), attribute_(attribute) {};
+      AttrRef(std::shared_ptr<Synonym> s, AttrIdentifier attribute) : synonym_(std::move(s)), attribute_(attribute) {};
+
+      AttrRef(Synonym& s, AttrIdentifier attribute) {
+        synonym_ = std::make_shared<Synonym>(s);
+        attribute_ = attribute;
+      }
 
       AttrIdentifier GetAttrIdentifier();
 
@@ -67,7 +73,7 @@ namespace pql {
     kWith,
   };
 
-  const std::map<std::string, EntityIdentifier> declarationMap {
+  const std::unordered_map<std::string, EntityIdentifier> declarationMap {
     {"stmt",      EntityIdentifier::kStmt},
     {"read",      EntityIdentifier::kRead},
     {"print",     EntityIdentifier::kPrint},
@@ -80,7 +86,7 @@ namespace pql {
     {"procedure", EntityIdentifier::kProc}
   };
 
-  const std::map<std::string, RelationshipTypes> relationshipMap {
+  const std::unordered_map<std::string, RelationshipTypes> relationshipMap {
       {"Follows",   kFollows},
       {"Follows*",  kFollowsT},
       {"Parent",    kParent},

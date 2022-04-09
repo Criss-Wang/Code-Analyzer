@@ -4,7 +4,7 @@
 #include <stack>
 
 #include "cache.h"
-#include "../../../PKB/tables/table.h"
+#include "../../../PKB/tables/table.h" // review: unused include
 
 using namespace std;
 
