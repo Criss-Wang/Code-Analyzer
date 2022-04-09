@@ -148,3 +148,13 @@ assign assign;
 Select BOOLEAN pattern assign (_, "+")
 
 5000
+31 - Invalid Affects
+stmt s, s1;
+Select BOOLEAN such that Affects(s, "s1") 
+
+5000
+32 - Invalid Affects
+stmt s, s1;
+Select BOOLEAN such that Affects *(s, s1)
+
+5000
