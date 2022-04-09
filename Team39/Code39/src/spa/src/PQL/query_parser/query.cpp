@@ -97,6 +97,7 @@ namespace pql {
 
   std::unordered_set<EntityIdentifier> assign({
     EntityIdentifier::kAssign,
+    EntityIdentifier::kStmt,
     EntityIdentifier::kWildcard,
     EntityIdentifier::kStmtNumber,
   });
