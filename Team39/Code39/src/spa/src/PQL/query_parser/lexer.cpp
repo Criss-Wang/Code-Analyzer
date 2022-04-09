@@ -140,6 +140,10 @@ namespace pql {
   }
 
   std::string ParserState::IsValidExpression(Query& q) {
+    if (ParserState::Peek() == '\"') {
+      throw ParseException();
+    }
+
     std::stringstream s;
     std::string expression;
     int bracket_count = 0;
@@ -182,7 +186,7 @@ namespace pql {
       } else if (IsOperator(curr_char)) {
         expected_next = IsDigit(next_char) || IsLetter(next_char) || IsOpenBracket(next_char);
       } else if (IsOpenBracket(curr_char)) {
-        expected_next = IsDigit(next_char) || IsLetter(next_char);
+        expected_next = IsDigit(next_char) || IsLetter(next_char) || IsOpenBracket(next_char);
       } else if (IsCloseBracket(curr_char)) {
         expected_next = IsOperator(next_char) || IsCloseBracket(next_char);
       } else {
