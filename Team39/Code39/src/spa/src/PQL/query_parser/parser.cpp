@@ -56,7 +56,6 @@ namespace pql {
         declarations_parsed = true;
       } else if (select_clause_parsed) {
         if (keyword == "such") {
-          ps_.ExpectChar(' ');
           ps_.EatWhiteSpaces();
           ps_.Expect("that");
           Parser::ParseRelationship();
