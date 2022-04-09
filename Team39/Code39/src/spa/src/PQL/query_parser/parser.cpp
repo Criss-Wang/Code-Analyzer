@@ -119,13 +119,14 @@ namespace pql {
     int tuple_elem_count = 0;
     ps_.Consume();
     ps_.EatWhiteSpaces();
+    Parser::ParseAttrRef();
+    tuple_elem_count++;
     while (ps_.Peek() != '>') {
+      ps_.EatWhiteSpaces();
+      ps_.ExpectChar(',');
+      ps_.EatWhiteSpaces();
       Parser::ParseAttrRef();
       tuple_elem_count++;
-      if (ps_.Peek() == ',') {
-        ps_.Next();
-      }
-      ps_.EatWhiteSpaces();
     }
     ps_.Consume();
     if (tuple_elem_count == 0) {
