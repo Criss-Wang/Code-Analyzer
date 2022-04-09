@@ -28,15 +28,15 @@ if ifs; while w;
 Select BOOLEAN pattern w ("while", _) and ifs ("while", _, _) such that Parent(w, ifs) 
 TRUE
 5000
-7 - Syntactically invalid number of arguments for if pattern
-if ifs;
-Select BOOLEAN pattern ifs ("read", _)
+7 - Syntactically invalid number of arguments for while pattern
+while w;
+Select BOOLEAN pattern w ("while", _, _,_)
 
 5000
-8 - Syntactically invalid number of arguments for while pattern
+8 - Semantically invalid number of arguments for while pattern
 while w;
 Select BOOLEAN pattern w ("while", _, _)
-
+FALSE
 5000
 9 - Semantically invalid undeclared variable v
 if ifs;
@@ -86,7 +86,7 @@ TRUE
 18 - Valid synonym return
 stmt s;
 Select s such that Next(12, 6) and Uses(s, "print")
-2, 6, 7, 9, 12, 15, 17, 19, 20, 21, 22
+2, 6, 7, 9, 12, 15, 17, 19, 20
 5000
 19 - Valid tuple return 
 assign a; while w;
