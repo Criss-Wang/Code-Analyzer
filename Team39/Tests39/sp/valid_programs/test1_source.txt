@@ -1,0 +1,20 @@
+procedure procedure {
+      read read; 
+	if ((read == 0) || (print ==0) ) then { 
+	      x  = 10000; 
+		y = x * z * t + (5 + 4); 
+		print procedure;  
+	} else{
+		while (while!= 0) { 
+			print print; while = while + 1; 
+			if ((while == 0) &&(z > 9)) then{ 
+				print p; 
+				p = 289 * 444 + (f * cenX); 
+				print f; 
+			} else {
+				read xxxxx; 
+			}
+		}
+		xxxx = xy + (99 * (((4) + y) * 9));
+	} 
+}

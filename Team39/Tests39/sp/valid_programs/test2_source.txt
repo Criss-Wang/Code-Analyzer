@@ -1,0 +1,38 @@
+procedure modify {
+
+
+while (   awesome >                   20                       )
+
+
+
+
+
+{x = modify * 2;
+
+read y;
+
+y = modify * 2;
+
+if (ready == 10) then {
+
+x = z + (x + i) + z + c * (a - b / e) * (a % a);
+
+print x;
+
+} else {
+
+a = modifies * 2 + x + i;
+
+y = hello;
+
+ }
+
+b = modifies * 2;
+
+print b;
+
+read hello;
+
+}
+
+}
