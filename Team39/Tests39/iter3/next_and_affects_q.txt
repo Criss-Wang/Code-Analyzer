@@ -18,3 +18,13 @@ assign a1, a2;
 Select <a1, a2> such that Affects*(a1, a2)
 75 76, 69 71, 69 74, 5 7, 5 8, 5 30, 5 26, 6 7, 6 8, 6 30, 6 26, 7 8, 7 26, 14 22, 14 26, 14 12, 17 18, 17 12, 17 13, 17 22, 18 12, 23 23, 31 37, 31 52, 31 60, 52 60, 55 51, 58 60, 58 51, 61 62, 61 51, 62 51, 64 68, 65 66, 67 68
 5000
+5 - Affects with stmt synonym
+stmt s; assign a;
+Select BOOLEAN such that Affects(s, a)
+TRUE
+5000
+6 - Affects with stmt synonym
+stmt s, s1;
+Select BOOLEAN such that Affects(s, s1)
+TRUE
+5000
