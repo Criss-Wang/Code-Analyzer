@@ -4,6 +4,8 @@
 
 #include "../pkb_exceptions.h"
 
+using namespace std;
+
 /**
  * Template class for tables to record key value pairs
  * Apparently, the implementation must be defined in this file for templates and cannot be defined in .cpp files
@@ -30,32 +32,22 @@ class Table {
     }
 
     virtual bool AddKeyValuePair(T1 key, T2 value) {
-      try {
-        if (this->KeyExistsInTable(key)) {
-          throw KeyInUseException();
-        }
-        table_[key] = value;
-        if (table_[key] == value) {
-          return true;
-        }
+      if (this->KeyExistsInTable(key)) {
+        throw KeyInUseException();
+      }
+      table_[key] = move(value);
+      if (table_[key] == value) {
+        return true;
+      }
 
-        return false;
-      }
-      catch (KeyInUseException& e) {
-        throw e;
-      }
+      return false;
     }
 
     virtual T2 GetValueByKey(T1 key) {
-      try {
-        if (this->KeyExistsInTable(key)) {
-          return table_[key];
-        }
-        throw InvalidKeyException();
+      if (this->KeyExistsInTable(key)) {
+        return table_[key];
       }
-      catch (InvalidKeyException& e) {
-        throw e;
-      }
+      throw InvalidKeyException();
     }
 
     virtual vector<T1> GetKeyLst() {
@@ -80,9 +72,9 @@ class Table {
         if (!this->KeyExistsInTable(key)) {
           return AddKeyValuePair(key, value);
         }
-        table_[key] = value;
+        table_[key] = move(value);
         return true;
-      } catch (exception& e) {
+      } catch (InvalidKeyException& e) {
         throw UpdateKeyException();
       }
     }
