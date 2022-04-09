@@ -153,10 +153,10 @@ namespace pql {
       // Check that char is expected 
 
       if (IsDigit(next_char) && expected_next) {
-        s << ParserState::Next();
+        s << ParserState::ParseInteger();
         incomplete_operator = false;
       } else if (IsLetter(next_char) && expected_next) {
-        s << ParserState::Next();
+        s << ParserState::ParseName();
         incomplete_operator = false;
       } else if (IsOperator(next_char) && expected_next) {
         s << ParserState::Next();
