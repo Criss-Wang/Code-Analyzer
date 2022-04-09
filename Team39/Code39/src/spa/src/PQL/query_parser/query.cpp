@@ -469,6 +469,9 @@ namespace pql {
   }
 
   void Query::AddWith(std::tuple<std::shared_ptr<AttrRef>, std::string, int>& left, std::tuple<std::shared_ptr<AttrRef>, std::string, int>& right) {
+    if (!is_semantically_valid_) {
+      return;
+    }
     if (!IsValidWith(left, right)) {
       Query::SetSemanticallyInvalid();
       return;
