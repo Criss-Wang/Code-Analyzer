@@ -52,8 +52,8 @@ namespace pql_clause {
   class FollowsClause : public SuchThatClause {
   public:
       FollowsClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause{ left, is_synonym_left, right, is_synonym_right } { // review: std::move
-          type_ = pql::RelationshipTypes::kFollows;
+          SuchThatClause{ left, is_synonym_left, right, is_synonym_right } {
+        type_ = pql::RelationshipTypes::kFollows;
       }
 
     public:
@@ -66,8 +66,8 @@ namespace pql_clause {
   class FollowsTClause : public SuchThatClause {
     public:
       FollowsTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kFollowsT;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kFollowsT;
       }
 
     public:
@@ -80,8 +80,8 @@ namespace pql_clause {
   class ParentClause : public SuchThatClause {
     public:
       ParentClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kParent;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kParent;
       }
 
     public:
@@ -94,8 +94,8 @@ namespace pql_clause {
   class ParentTClause : public SuchThatClause {
     public:
       ParentTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kParentT;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kParentT;
       }
 
     public:
@@ -108,8 +108,8 @@ namespace pql_clause {
   class UsesSClause : public SuchThatClause {
     public:
       UsesSClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kUsesS;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kUsesS;
       }
 
     public:
@@ -122,8 +122,8 @@ namespace pql_clause {
   class ModifiesSClause : public SuchThatClause {
     public:
       ModifiesSClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kModifiesS;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kModifiesS;
       }
 
     public:
@@ -134,10 +134,10 @@ namespace pql_clause {
   };
 
   class UsesPClause : public SuchThatClause {
-  public:
+    public:
       UsesPClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kUsesP;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
+        type_ = pql::RelationshipTypes::kUsesP;
       }
 
   public:
@@ -148,10 +148,10 @@ namespace pql_clause {
   };
 
   class ModifiesPClause : public SuchThatClause {
-  public:
-    ModifiesPClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-        SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kModifiesP;
+    public:
+      ModifiesPClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kModifiesP;
       }
 
   public:
@@ -164,8 +164,8 @@ namespace pql_clause {
   class CallsClause : public SuchThatClause {
     public:
       CallsClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kCalls;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
+        type_ = pql::RelationshipTypes::kCalls;
       }
 
     public:
@@ -178,8 +178,8 @@ namespace pql_clause {
   class CallsTClause : public SuchThatClause {
     public:
       CallsTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kCallsT;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kCallsT;
       }
 
     public:
@@ -192,8 +192,8 @@ namespace pql_clause {
   class NextClause : public SuchThatClause {
     public:
       NextClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kNext;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kNext;
       }
 
     public:
@@ -206,8 +206,8 @@ namespace pql_clause {
   class NextTClause : public SuchThatClause {
     public:
       NextTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kNextT;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kNextT;
       }
 
     public:
@@ -220,8 +220,8 @@ namespace pql_clause {
   class AffectsClause : public SuchThatClause {
     public:
       AffectsClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kAffects;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kAffects;
       }
 
     public:
@@ -234,8 +234,8 @@ namespace pql_clause {
   class AffectsTClause : public SuchThatClause {
     public:
       AffectsTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { // review: std::move
-          type_ = pql::RelationshipTypes::kAffectsT;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kAffectsT;
       }
 
     public:
