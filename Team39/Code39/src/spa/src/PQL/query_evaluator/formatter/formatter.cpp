@@ -27,8 +27,7 @@ namespace pql_formatter {
   }
 
   std::vector<std::string> Formatter::FormatRawInput(pql_table::InterTable& table, std::vector<pql::AttrRef>& return_syns) {
-    std::vector<std::string> result_string;
-    result_string.reserve(table.GetRowNum());
+    std::vector<std::string> result_string(table.GetRowNum());
     
     //We add the synonym according to their position in return_syns_
     for (auto& attr_ref : return_syns) {
