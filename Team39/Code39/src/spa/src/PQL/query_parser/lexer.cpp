@@ -140,6 +140,10 @@ namespace pql {
   }
 
   std::string ParserState::IsValidExpression(Query& q) {
+    if (ParserState::Peek() == '\"') {
+      throw ParseException();
+    }
+
     std::stringstream s;
     std::string expression;
     int bracket_count = 0;
