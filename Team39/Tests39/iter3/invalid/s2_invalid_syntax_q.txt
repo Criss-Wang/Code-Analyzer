@@ -98,9 +98,9 @@ variable v; procedure p;
 Select < > such that Modifies(p, v)
 
 5000
-21 - TODO Test empty tuple with no space inside but will crash autotester
+21 - Invalid empty tuple
 variable v; procedure p;
-Select < > such that Modifies(p, v)
+Select <> such that Modifies(p, v)
 
 5000
 22 - Invalid tuple
@@ -156,5 +156,15 @@ Select BOOLEAN such that Affects(s, "s1")
 32 - Invalid Affects
 stmt s, s1;
 Select BOOLEAN such that Affects *(s, s1)
+
+5000
+33 - Invalid argument for stmtRef
+stmt s, s1;
+Select BOOLEAN such that Parent(s, "s1")
+
+5000
+34 - Invalid argument for stmtRef
+stmt s, s1;
+Select BOOLEAN such that Affects("s", s)
 
 5000

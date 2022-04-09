@@ -96,7 +96,7 @@ FALSE
 20 - Synonym BOOLEAN is declared more than once
 stmt BOOLEAN; variable BOOLEAN; 
 Select BOOLEAN 
-
+FALSE
 5000
 21 - Synonym s is declared more than once
 stmt s; variable s;
