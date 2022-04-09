@@ -4,6 +4,9 @@
 #include "formatter.h"
 #include "../../../Utility/entity.h"
 
+#define EMPTY_STRING ""
+#define WHITESPACE " "
+
 namespace pql_formatter {
   Formatter::Formatter(pql_cache::Cache* cache) {
     cache_ = cache;
@@ -25,7 +28,8 @@ namespace pql_formatter {
   }
 
   std::vector<std::string> Formatter::FormatRawInput(pql_table::InterTable& table, std::vector<pql::AttrRef>& return_syns) {
-    std::vector<std::string> result_string(table.GetRowNum());
+    std::vector<std::string> result_string;
+    result_string.reserve(table.GetRowNum());
     
     //We add the synonym according to their position in return_syns_
     for (auto& attr_ref : return_syns) {
@@ -35,7 +39,7 @@ namespace pql_formatter {
       int col_num_in_table = table.FindSynCol(syn_name);
 
       for (int index = 0; index < table.GetRowNum(); index++) {
-        std::string cur_string = "";
+        std::string cur_string;
 
         if (attribute == AttrIdentifier::kValue || attribute == AttrIdentifier::kStmtNum) {
           cur_string = std::to_string(table.rows_[index][col_num_in_table]);
@@ -43,8 +47,8 @@ namespace pql_formatter {
           cur_string = move(GetStringForProcNameAndVarName(table.rows_[index][col_num_in_table], type, attribute));
         }
 
-        if (result_string[index] != "") {
-          result_string[index] += " ";
+        if (result_string[index] != EMPTY_STRING) {
+          result_string[index] += WHITESPACE;
         }
 
         result_string[index] += cur_string;

@@ -40,13 +40,18 @@ namespace pql_table {
 		return -1;
 	}
 
+	//Return the columns that the index is inside valid_col_nums
 	InterTable InterTable::GetColsByIndices(std::vector<int>& valid_col_nums) {
 	  std::vector<std::string> new_header;
+		new_header.reserve(GetColNum());
 		std::vector<std::vector<int>> new_rows;
+		new_rows.reserve(GetRowNum());
 
 		//intialize new_rows to have the same size as rows_ with each new_row being an empty vector
 		for (int index = 0; index < rows_.size(); index++) {
-		  new_rows.push_back(std::vector<int>());
+		  std::vector<int> new_row;
+		  new_row.reserve(GetColNum());
+		  new_rows.push_back(move(new_row));
 		}
 
 		for (int& col_num : valid_col_nums) {
@@ -57,63 +62,66 @@ namespace pql_table {
 			}
 		}
 
-		return InterTable(new_header, new_rows).Deduplicate();
+		return InterTable(move(new_header), move(new_rows)).Deduplicate();
 	}
 
   InterTable InterTable::Deduplicate() {
 	  std::unordered_set<std::vector<int>, hash_vector_fn> s(rows_.begin(), rows_.end());
 		std::vector<std::vector<int>> new_rows(s.begin(), s.end());
 		std::vector<std::string> new_header(header_);
-		return InterTable(new_header, new_rows);
+		return InterTable(move(new_header), move(new_rows));
 	}
 
 	InterTable InterTable::Merge(InterTable& t1) {
-		std::vector<std::string> new_header(header_);
+	  int res_row_num = this->GetRowNum() * t1.GetRowNum();
+		int res_col_num = this->GetColNum() + t1.GetColNum();
 		
-		for (auto& syn : t1.header_) {
-			new_header.push_back(syn);
-		}
+		std::vector<std::string> new_header;
+		new_header.reserve(res_col_num);
+		
+		new_header.insert(new_header.end(), this->header_.begin(), this->header_.end());
+		new_header.insert(new_header.end(), t1.header_.begin(), t1.header_.end());
 
 		//apply a cross product between current rows and t1 rows
 		std::vector<std::vector<int>> new_rows;
+		new_rows.reserve(res_row_num);
 
 		std::for_each(this->rows_.begin(), this->rows_.end(),
 		  [&](auto& front_row) {
 				std::for_each(t1.rows_.begin(), t1.rows_.end(),
 				  [&](auto& back_row) {
 						std::vector<int> row_to_be_insert;
+						row_to_be_insert.reserve(res_row_num);
 
-						for (int& ele : front_row) {
-						  row_to_be_insert.push_back(ele);
-						}
+						row_to_be_insert.insert(row_to_be_insert.end(), front_row.begin(), front_row.end());
+						row_to_be_insert.insert(row_to_be_insert.end(), back_row.begin(), back_row.end());
 
-						for (int& ele : back_row) {
-						  row_to_be_insert.push_back(ele);
-						}
-
-						new_rows.push_back(row_to_be_insert);
+						new_rows.push_back(move(row_to_be_insert));
 					});
 			}
 		);
 
-		return InterTable(new_header, new_rows);
+		return InterTable(move(new_header), move(new_rows));
 	}
 	
 	InterTable InterTable::Filter(Predicate& pred) {
+		int max_row_num = std::max(GetRowNum(), pred.GetPredSize());
+
 		std::vector<std::string> new_header(header_);
+
 		std::vector<std::vector<int>> new_rows;
+		new_rows.reserve(max_row_num);
+
 		int first_syn_col_index = FindSynCol(pred.first_syn_);
 		int second_syn_col_index = FindSynCol(pred.second_syn_);
 		std::unordered_set<std::pair<int, int>, hash_pair_fn> 
 				pair_domain(pred.allowed_pairs_.begin(), pred.allowed_pairs_.end());
 
-		for (int index = 0; index < rows_.size(); index++) {
-			std::pair<int, int> cur_pair(rows_[index][first_syn_col_index], rows_[index][second_syn_col_index]);
-			std::unordered_set<std::pair<int, int>>::iterator iter;
-			iter = pair_domain.find(cur_pair);
+		for (auto& row : rows_) {
+			std::pair<int, int> cur_pair = std::make_pair(row[first_syn_col_index], row[second_syn_col_index]);
 
-			if (iter != pair_domain.end()) {
-			  new_rows.push_back(rows_[index]);
+			if (pair_domain.find(cur_pair) != pair_domain.end()) {
+			  new_rows.push_back(row);
 			}
 		}
 
@@ -121,7 +129,7 @@ namespace pql_table {
 		  throw pql_exceptions::EmptyTableException();
 		}
 
-		return InterTable(new_header, new_rows);
+		return InterTable(move(new_header), move(new_rows));
 	}
 		
 	std::unordered_map<int, std::vector<int>> GenerateIndexMap(std::vector<std::vector<int>>& rows, int col_index) {
@@ -155,8 +163,8 @@ namespace pql_table {
 		int second_syn_col_index = t1.FindSynCol(pred.second_syn_);
 
 		//The maps store element to a list of row indices that contain the element
-		std::unordered_map<int, std::vector<int>> first_syn_domain = GenerateIndexMap(rows_, first_syn_col_index);
-		std::unordered_map<int, std::vector<int>> second_syn_domain = GenerateIndexMap(t1.rows_, second_syn_col_index);
+		std::unordered_map<int, std::vector<int>> first_syn_domain = move(GenerateIndexMap(rows_, first_syn_col_index));
+		std::unordered_map<int, std::vector<int>> second_syn_domain = move(GenerateIndexMap(t1.rows_, second_syn_col_index));
 
 		for (auto& ele_pair : pred.allowed_pairs_) {
 		  std::unordered_map<int, std::vector<int>>::iterator it1;
