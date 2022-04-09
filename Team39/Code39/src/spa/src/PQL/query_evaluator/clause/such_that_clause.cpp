@@ -2,7 +2,6 @@
 #include <set>
 
 #include "such_that_clause.h"
-#include "../query_evaluator_exceptions.h" // review: unused include
 
 #define INVALID_INDEX -1
 #define WILDCARD 0

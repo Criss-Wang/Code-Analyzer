@@ -1,11 +1,8 @@
-#include <stdio.h> // review: unused include
-#include <iostream> // review: unused include
-#include <string> // review: unused include
+#include <string> 
 #include <optional>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
-#include <algorithm> // review: unused include
 
 #include "query_evaluator.h"
 #include "cache/cache.h"
@@ -50,9 +47,9 @@ namespace pql {
       
       return formatter.FormatRawInput(table, selected_syns);
 
-    } catch (pql_exceptions::TrueResultException e) { // review: should catch by reference [TrueResultException& e]
+    } catch (pql_exceptions::TrueResultException& e) {
       return BOOLEAN_TRUE_LIST;
-    } catch (pql_exceptions::EmptyResultException e) {   // review:  should catch by reference
+    } catch (pql_exceptions::EmptyResultException& e) {
       if (query.GetBoolean()) {
         return BOOLEAN_FALSE_LIST;
       }

@@ -11,9 +11,9 @@ namespace pql_clause {
     public:
       SuchThatClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
           Clause{} {
-        left_ = left; // review: consider use std::move(left) to avoid unnecessary copies (for all the attributes of type string)
+        left_ = move(left); 
         is_synonym_left_ = is_synonym_left;
-        right_ = right;
+        right_ = move(right);
         is_synonym_right_ = is_synonym_right;
       }
 
