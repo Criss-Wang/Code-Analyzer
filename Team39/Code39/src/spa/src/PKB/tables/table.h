@@ -35,7 +35,7 @@ class Table {
       if (this->KeyExistsInTable(key)) {
         throw KeyInUseException();
       }
-      table_[key] = move(value);
+      table_[key] = value;
       if (table_[key] == value) {
         return true;
       }
