@@ -23,8 +23,6 @@ class CFGToken {
 
     CFGToken(CFGTokenType type, int stmt_num);
 
-    void print();
-
   public:
     CFGTokenType type_;
     int stmt_num_;

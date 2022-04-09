@@ -14,9 +14,7 @@ class Stmt {
     virtual ~Stmt() = default;
 
     int GetStmtNum();
-    virtual string GetVar() { return ""; };
-    virtual unordered_set<string> GetVars() { return {}; };
-
+    virtual void PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures) { };
     virtual void PopulateEntities(Pkb& pkb) { };
 
   protected:
@@ -28,9 +26,7 @@ class AssignStmt : public Stmt {
     ~AssignStmt() = default;
     AssignStmt(std::vector<Token>& tokens, int stmt_num);
 
-    string GetVar();
-    unordered_set<string> GetVars();
-
+    void PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures);
     void PopulateEntities(Pkb& pkb);
 
   private:
@@ -43,8 +39,7 @@ class ReadStmt : public Stmt {
     ~ReadStmt() = default;
     ReadStmt(std::vector<Token>& tokens, int stmt_num);
 
-    string GetVar();
-
+    void PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures);
     void PopulateEntities(Pkb& pkb);
 
   private:
@@ -56,8 +51,7 @@ class PrintStmt : public Stmt {
     ~PrintStmt() = default;
     PrintStmt(std::vector<Token>& tokens, int stmt_num);
 
-    string GetVar();
-
+    void PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures);
     void PopulateEntities(Pkb& pkb);
 
   private:
@@ -69,8 +63,7 @@ class IfStmt : public Stmt {
     ~IfStmt() = default;
     IfStmt(std::vector<Token>& tokens, int stmt_num);
 
-    unordered_set<string> GetVars();
-
+    void PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures);
     void PopulateEntities(Pkb& pkb);
 
   private:
@@ -82,8 +75,7 @@ class WhileStmt : public Stmt {
     ~WhileStmt() = default;
     WhileStmt(std::vector<Token>& tokens, int stmt_num);
 
-    unordered_set<string> GetVars();
-
+    void PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures);
     void PopulateEntities(Pkb& pkb);
 
   private:
@@ -95,8 +87,7 @@ class CallStmt : public Stmt {
     ~CallStmt() = default;
     CallStmt(std::vector<Token>& tokens, int stmt_num);
 
-    string GetVar();
-
+    void PopulateRelationships(unordered_set<string>& uses_p, unordered_set<string>& modifies_p, unordered_set<string>& called_procedures);
     void PopulateEntities(Pkb& pkb);
 
   private:
