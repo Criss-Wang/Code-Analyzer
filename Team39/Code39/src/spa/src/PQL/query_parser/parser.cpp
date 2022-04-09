@@ -88,7 +88,7 @@ namespace pql {
   void Parser::ParseAttrRef() {
     std::string name = ps_.ParseName();
     ps_.EatWhiteSpaces();
-    if (name == "BOOLEAN" && query_.GetBoolean()) {
+    if (name == "BOOLEAN" && query_.GetBoolean() && !query_.SynonymDeclared(name)) {
       query_.SetBoolean(true);
     } else {
       query_.SetBoolean(false);
