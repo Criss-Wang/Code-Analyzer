@@ -72,16 +72,32 @@ namespace pql_table {
 		return InterTable(move(new_header), move(new_rows));
 	}
 
+	std::vector<std::string> GetHeaderFromTwoTables(InterTable& t1, InterTable& t2, int col_num) {
+    std::vector<std::string> header;
+		header.reserve(col_num);
+		
+		header.insert(header.end(), t1.header_.begin(), t1.header_.end());
+		header.insert(header.end(), t2.header_.begin(), t2.header_.end());
+
+		return header;
+	}
+
+	std::vector<int> MergeTwoRows(std::vector<int>& front_row, std::vector<int>& back_row, int col_num) {
+    std::vector<int> row_to_be_insert;
+		row_to_be_insert.reserve(col_num);
+
+		row_to_be_insert.insert(row_to_be_insert.end(), front_row.begin(), front_row.end());
+		row_to_be_insert.insert(row_to_be_insert.end(), back_row.begin(), back_row.end());
+
+		return row_to_be_insert;
+	}
+
 	InterTable InterTable::Merge(InterTable& t1) {
 	  int res_row_num = this->GetRowNum() * t1.GetRowNum();
 		int res_col_num = this->GetColNum() + t1.GetColNum();
 		
-		std::vector<std::string> new_header;
-		new_header.reserve(res_col_num);
+		std::vector<std::string> new_header = move(GetHeaderFromTwoTables(*this, t1, res_col_num));
 		
-		new_header.insert(new_header.end(), this->header_.begin(), this->header_.end());
-		new_header.insert(new_header.end(), t1.header_.begin(), t1.header_.end());
-
 		//apply a cross product between current rows and t1 rows
 		std::vector<std::vector<int>> new_rows;
 		new_rows.reserve(res_row_num);
@@ -90,13 +106,7 @@ namespace pql_table {
 		  [&](auto& front_row) {
 				std::for_each(t1.rows_.begin(), t1.rows_.end(),
 				  [&](auto& back_row) {
-						std::vector<int> row_to_be_insert;
-						row_to_be_insert.reserve(res_row_num);
-
-						row_to_be_insert.insert(row_to_be_insert.end(), front_row.begin(), front_row.end());
-						row_to_be_insert.insert(row_to_be_insert.end(), back_row.begin(), back_row.end());
-
-						new_rows.push_back(move(row_to_be_insert));
+						new_rows.push_back(move(MergeTwoRows(front_row, back_row, res_col_num)));
 					});
 			}
 		);
@@ -105,7 +115,7 @@ namespace pql_table {
 	}
 	
 	InterTable InterTable::Filter(Predicate& pred) {
-		int max_row_num = std::max(GetRowNum(), pred.GetPredSize());
+		int max_row_num = GetRowNum();
 
 		std::vector<std::string> new_header(header_);
 
@@ -152,13 +162,14 @@ namespace pql_table {
 	}
 
 	InterTable InterTable::MergeAndFilter(InterTable& t1, Predicate& pred) {
-		std::vector<std::string> new_header(header_);
+	  int res_row_num = this->GetRowNum() * t1.GetRowNum();
+		int res_col_num = this->GetColNum() + t1.GetColNum();
 
-		for (auto& syn : t1.header_) {
-			new_header.push_back(syn);
-		}
+	  std::vector<std::string> new_header = move(GetHeaderFromTwoTables(*this, t1, res_col_num));
 
 		std::vector<std::vector<int>> new_rows;
+		new_rows.reserve(res_row_num);
+
 		int first_syn_col_index = FindSynCol(pred.first_syn_);
 		int second_syn_col_index = t1.FindSynCol(pred.second_syn_);
 
@@ -167,31 +178,15 @@ namespace pql_table {
 		std::unordered_map<int, std::vector<int>> second_syn_domain = move(GenerateIndexMap(t1.rows_, second_syn_col_index));
 
 		for (auto& ele_pair : pred.allowed_pairs_) {
-		  std::unordered_map<int, std::vector<int>>::iterator it1;
-		  it1 = first_syn_domain.find(ele_pair.first);
-		  if (it1 == first_syn_domain.end()) {
-				continue;
-		  }
+		  if (first_syn_domain.find(ele_pair.first) == first_syn_domain.end()
+					|| second_syn_domain.find(ele_pair.second) == second_syn_domain.end()) {
+			  continue;
+			}
 
-		  std::unordered_map<int, std::vector<int>>::iterator it2;
-		  it2 = second_syn_domain.find(ele_pair.second);
-		  if (it2 == second_syn_domain.end()) {
-				continue;
-		  }
-
-		  for (int first_index : it1->second) {
-				for (int second_index : it2->second) {
-				  std::vector<int> row_to_be_insert;
-						
-				  for (auto& ele : rows_[first_index]) {
-						row_to_be_insert.push_back(ele);
-				  }
-
-				  for (auto& ele : t1.rows_[second_index]) {
-						row_to_be_insert.push_back(ele);
-				  }
-						
-				  new_rows.push_back(row_to_be_insert);
+			//only merge the rows that have pair inside allowed_pairs
+		  for (int first_index : first_syn_domain[ele_pair.first]) {
+				for (int second_index : second_syn_domain[ele_pair.second]) {
+					new_rows.push_back(move(MergeTwoRows(this->rows_[first_index], t1.rows_[second_index], res_col_num)));
 				}
 		  }
 		}
@@ -200,7 +195,7 @@ namespace pql_table {
 				throw pql_exceptions::EmptyTableException();
 		}
 
-		return InterTable(new_header, new_rows);
+		return InterTable(move(new_header), move(new_rows));
 	}
 
 	bool InterTable::equal(InterTable t) {
