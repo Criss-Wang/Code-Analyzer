@@ -1,2 +1,2 @@
-assign a;
+assign a; stmt s; variable v;
 Select a pattern a(_, "shoes + (pants * (sandals + 1) / (2 + (3 * ( (4 % 3) + 5) / (heels * 2 + (4 * 3))))) * shirt")
