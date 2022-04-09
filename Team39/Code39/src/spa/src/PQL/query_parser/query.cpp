@@ -281,25 +281,28 @@ namespace pql {
     Query::is_semantically_valid_ = false;
   }
 
-  bool Query::IsValidRelationshipArgument(const std::string& argument, std::unordered_set<EntityIdentifier> *domain) {
-    if (Query::SynonymDeclared(argument) && !WithinUnorderedSet(domain, synonyms_.at(argument).GetDeclaration())) {
+  bool Query::IsValidRelationshipArgument(const std::string& argument, bool is_synonym, std::unordered_set<EntityIdentifier> *domain) {
+    bool entity_invalid = (pql::IsIdent(argument) && !WithinUnorderedSet(domain, EntityIdentifier::kIdent)) ||
+                          (pql::IsInteger(argument) && !WithinUnorderedSet(domain, EntityIdentifier::kStmtNumber));
+
+    if (entity_invalid) {
+      throw ParseException();
+    }
+
+    if (argument == "_" && !WithinUnorderedSet(domain, EntityIdentifier::kWildcard)) {
       return false;
-    } else {
-      bool entity_invalid = (pql::IsIdent(argument) && !WithinUnorderedSet(domain, EntityIdentifier::kIdent)) ||
-          (pql::IsInteger(argument) && !WithinUnorderedSet(domain, EntityIdentifier::kStmtNumber));
-      if (argument == "_" && !WithinUnorderedSet(domain, EntityIdentifier::kWildcard)) {
-        return false;
-      } else if (entity_invalid) {
-        throw ParseException();
-      }
+    }
+
+    if (is_synonym && !WithinUnorderedSet(domain, synonyms_.at(argument).GetDeclaration())) {
+      return false;
     }
 
     return true;
   }
 
-  bool Query::IsValidRelationship(RelationshipTypes r, const std::string& left, const std::string& right) {
-    bool is_left_valid = Query::SynonymDeclared(left) || left == "_" || pql::IsIdent(left) || pql::IsInteger(left);
-    bool is_right_valid = Query::SynonymDeclared(right) || right == "_" || pql::IsIdent(right) || pql::IsInteger(right);
+  bool Query::IsValidRelationship(RelationshipTypes r, const std::string& left, bool is_synonym_left, const std::string& right, bool is_synonym_right) {
+    bool is_left_valid = is_synonym_left || left == "_" || pql::IsIdent(left) || pql::IsInteger(left);
+    bool is_right_valid = is_synonym_right || right == "_" || pql::IsIdent(right) || pql::IsInteger(right);
 
     if (!(is_left_valid && is_right_valid)) {
       return false;
@@ -308,7 +311,8 @@ namespace pql {
     std::unordered_set<EntityIdentifier> left_domains = pql::left_synonym_domains.at(r);
     std::unordered_set<EntityIdentifier> right_domains = pql::right_synonym_domains.at(r);
 
-    return IsValidRelationshipArgument(left, &left_domains) && IsValidRelationshipArgument(right, &right_domains);
+    return IsValidRelationshipArgument(left, is_synonym_left, &left_domains) &&
+      IsValidRelationshipArgument(right, is_synonym_right, &right_domains);
   }
 
   bool Query::SynonymDeclared(const std::string &name) {
@@ -424,7 +428,7 @@ namespace pql {
   }
 
   void Query::AddSuchThatClause(RelationshipTypes r, std::string &left, std::string &right, bool is_synonym_left, bool is_synonym_right) {
-    if (!Query::IsValidRelationship(r, left, right)) {
+    if (!Query::IsValidRelationship(r, left, is_synonym_left, right, is_synonym_right)) {
       Query::SetSemanticallyInvalid();
       return;
     }

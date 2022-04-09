@@ -43,9 +43,9 @@ namespace pql {
     public:
       void SetSemanticallyInvalid();
 
-      bool IsValidRelationshipArgument(const std::string& argument, std::unordered_set<EntityIdentifier> *domain);
+      bool IsValidRelationshipArgument(const std::string& argument, bool is_synonym, std::unordered_set<EntityIdentifier> *domain);
 
-      bool IsValidRelationship(RelationshipTypes relationship, const std::string& left, const std::string& right);
+      bool IsValidRelationship(RelationshipTypes relationship, const std::string& left, bool is_synonym_left, const std::string& right, bool is_synonym_right);
 
       bool SynonymDeclared(const std::string &name);
 
