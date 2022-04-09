@@ -4,9 +4,26 @@
 #include "formatter.h"
 #include "../../../Utility/entity.h"
 
+#define WHITESPACE " "
+
 namespace pql_formatter {
   Formatter::Formatter(pql_cache::Cache* cache) {
     cache_ = cache;
+  }
+
+  std::string Formatter::GetStringForProcNameAndVarName(int entity, EntityIdentifier ent_type, AttrIdentifier attr_type) {
+    //only left with procedure.procName, read.varName, call.procName, variable.varName and print.varName
+    std::string res;
+
+    if (ent_type == EntityIdentifier::kCall || ent_type == EntityIdentifier::kPrint || ent_type == EntityIdentifier::kRead) {
+      entity = cache_->GetStringAttribute(ent_type, entity);
+    }
+
+    res = attr_type == AttrIdentifier::kProcName 
+            ? cache_->GetStringByIndex(IndexTableType::kProc, entity)
+            : cache_->GetStringByIndex(IndexTableType::kVar , entity);
+
+    return res;
   }
 
   std::vector<std::string> Formatter::FormatRawInput(pql_table::InterTable& table, std::vector<pql::AttrRef>& return_syns) {
@@ -20,25 +37,16 @@ namespace pql_formatter {
       int col_num_in_table = table.FindSynCol(syn_name);
 
       for (int index = 0; index < table.GetRowNum(); index++) {
-        std::string cur_string = "";
+        std::string cur_string;
 
         if (attribute == AttrIdentifier::kValue || attribute == AttrIdentifier::kStmtNum) {
           cur_string = std::to_string(table.rows_[index][col_num_in_table]);
         } else {
-          //left procedure.procName, read.varName, call.procName, variable.varName and print.varName
-          int name_index = table.rows_[index][col_num_in_table];
-
-          if (type == EntityIdentifier::kCall || type == EntityIdentifier::kPrint || type == EntityIdentifier::kRead) {
-            name_index = cache_->GetStringAttribute(type, name_index);
-          }
-
-          cur_string = attribute == AttrIdentifier::kProcName 
-                               ? cache_->GetStringByIndex(IndexTableType::kProc, name_index)
-                               : cache_->GetStringByIndex(IndexTableType::kVar, name_index);
+          cur_string = move(GetStringForProcNameAndVarName(table.rows_[index][col_num_in_table], type, attribute));
         }
 
-        if (result_string[index] != "") {
-          result_string[index] += " ";
+        if (!result_string[index].empty()) {
+          result_string[index] += WHITESPACE;
         }
 
         result_string[index] += cur_string;

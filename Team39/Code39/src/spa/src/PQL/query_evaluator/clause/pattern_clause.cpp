@@ -13,7 +13,7 @@ namespace pql_clause {
     { pql::kIfPattern, TableIdentifier::kIfPattern }
   };
 
-  const map<int, EvaluateLeftFn> EvaluateLeftFnMap = {
+  const unordered_map<int, EvaluateLeftFn> EvaluateLeftFnMap = {
     { WILDCARD, &PatternClause::EvaluateLeftWildcard },
     { ENTITY, &PatternClause::EvaluateLeftEnt },
     { SYNONYM, &PatternClause::EvaluateLeftSyn }
