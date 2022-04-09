@@ -67,7 +67,7 @@ namespace pql {
         } else if (keyword == "with" || (keyword == "and" && current_clause == IS_WITH)) {
           Parser::ParseWith();
           current_clause = IS_WITH;
-        } else if (keyword == "and " && current_clause == IS_SUCH_THAT) {
+        } else if (keyword == "and" && current_clause == IS_SUCH_THAT) {
           Parser::ParseRelationship();
           current_clause = IS_SUCH_THAT;
         } else {

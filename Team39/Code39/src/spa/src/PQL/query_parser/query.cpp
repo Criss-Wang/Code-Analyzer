@@ -287,7 +287,7 @@ namespace pql {
     } else {
       bool entity_invalid = (pql::IsIdent(argument) && !WithinUnorderedSet(domain, EntityIdentifier::kIdent)) ||
           (pql::IsInteger(argument) && !WithinUnorderedSet(domain, EntityIdentifier::kStmtNumber));
-      if (argument == "_" && WithinUnorderedSet(domain, EntityIdentifier::kWildcard)) {
+      if (argument == "_" && !WithinUnorderedSet(domain, EntityIdentifier::kWildcard)) {
         return false;
       } else if (entity_invalid) {
         throw ParseException();
