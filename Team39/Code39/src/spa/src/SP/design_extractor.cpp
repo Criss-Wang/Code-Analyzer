@@ -3,19 +3,16 @@
 
 using namespace std;
 
-// Helper
 int Dfs(shared_ptr<RelListTable> table_to_refer, shared_ptr<RelListTable> table_to_update, int key) {
   if (table_to_update->KeyExistsInTable(key)) {
     return key;
   }
 
-  vector<int> children_lst;
-  try {
-    children_lst = table_to_refer->GetValueByKey(key);
-  } catch (InvalidKeyException& e) {
+  if (!table_to_refer->KeyExistsInTable(key)) {
     return key;
   }
 
+  vector<int> children_lst = table_to_refer->GetValueByKey(key);
   vector<int> ans;
   for (int child_key : children_lst) {
     int end_val = Dfs(table_to_refer, table_to_update, child_key);
@@ -66,7 +63,10 @@ void PopulateNestedModifiesOrUses(RelListTable& parent_star_table, Table<int, ve
     vector<int> tmp_lst(variables_lst);
 
     for (const int child_stmt: parent_star_table.GetValueByKey(parent_stmt)) {
-      if (!t.KeyExistsInTable(child_stmt)) continue;
+      if (!t.KeyExistsInTable(child_stmt)) {
+        continue;
+      }
+
       // Get the variables associated with the statement number
       vector<int> variables_lst_of_child_stmt = t.GetValueByKey(child_stmt);
 
@@ -77,7 +77,9 @@ void PopulateNestedModifiesOrUses(RelListTable& parent_star_table, Table<int, ve
       tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
     }
 
-    if (tmp_lst.empty()) return;
+    if (tmp_lst.empty()) {
+      return;
+    }
     bool success = t.UpdateKeyWithNewValue(parent_stmt, tmp_lst);
   }
 }
@@ -87,16 +89,24 @@ void PopulateReverseNestedModifiesOrUses(RelListTable& child_star_table, Table<i
     vector<int> stmts_lst = t.GetValueByKey(var);
     vector<int> tmp_lst(stmts_lst);
     for (const int stmt: stmts_lst) {
-      if (!child_star_table.KeyExistsInTable(stmt)) continue;
+      if (!child_star_table.KeyExistsInTable(stmt)) {
+        continue;
+      }
+
       const vector<int> parent_stmts_lst = child_star_table.GetValueByKey(stmt);
-      if (parent_stmts_lst.empty()) continue;
+      if (parent_stmts_lst.empty()) {
+        continue;
+      }
+
       tmp_lst.insert(tmp_lst.end(), parent_stmts_lst.begin(), parent_stmts_lst.end());
       // Remove duplicate elements
       sort(tmp_lst.begin(), tmp_lst.end());
       tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
     }
 
-    if (tmp_lst.empty()) return;
+    if (tmp_lst.empty()) {
+      return;
+    }
     bool success = t.UpdateKeyWithNewValue(var, tmp_lst);
   }
 }
@@ -105,32 +115,24 @@ void PopulateNestedModifiesPOrUsesP(RelListTable& calls_star_table, Table<int, v
   for (const int proc : t.GetKeyLst()) {
     // Get the variables
     vector<int> variables = {};
-    try {
+    if (t.KeyExistsInTable(proc)) {
       variables = t.GetValueByKey(proc);
-    } catch (InvalidKeyException& e) {
-      // This procedure does not modify or use any variables
-
     }
+
     int initial_variables_size = variables.size();
 
     // Check what other procedures are called
-    vector<int> called_procedures;
-    try {
-      called_procedures = calls_star_table.GetValueByKey(proc);
-    } catch (InvalidKeyException& e) {
-      // That means this procedure does not call any other procedures
+    if (!calls_star_table.KeyExistsInTable(proc)) {
       continue;
     }
 
+    vector<int> called_procedures = calls_star_table.GetValueByKey(proc);
     for (const int called_proc : called_procedures) {
       // Merge the vectors with new values
-    vector<int> new_variables;
-    try {
-      new_variables = t.GetValueByKey(called_proc);
-    } catch (InvalidKeyException& e) {
-      // Procedure does not modify or use any variables
-      continue;
-    }
+      if (!t.KeyExistsInTable(called_proc)) {
+        continue;
+      }
+      vector<int> new_variables = t.GetValueByKey(called_proc);
       variables.insert(variables.end(), new_variables.begin(), new_variables.end());
     }
     // Remove duplicate elements
@@ -152,11 +154,9 @@ void PopulateReverseNestedModifiesPOrUsesP(RelListTable& called_by_star_table, T
 
     for (const int proc : procedures) {
       // Check if the procedure is called by others
-      vector<int> callers;
-      try {
+      vector<int> callers = {};
+      if (called_by_star_table.KeyExistsInTable(proc)) {
         callers = called_by_star_table.GetValueByKey(proc);
-      } catch (InvalidKeyException& e) {
-        // That means the procedure is not called by any other procedures
       }
 
       // Merge the vectors with new values
@@ -183,43 +183,36 @@ void PopulateNestedModifiesSOrUsesSForCalls(EntityVarsTable caller_table, RelLis
     string proc = caller_table.GetValueByKey(call_stmt);
     int proc_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, proc);
     // Get the variables used in that procedure
-    vector<int> variables_idx;
-    try {
-       variables_idx = proc_to_variables_table.GetValueByKey(proc_idx);
-    } catch (InvalidKeyException& e) {
-      // No variables used or modified in the procedure
+    if (!proc_to_variables_table.KeyExistsInTable(proc_idx)) {
       continue;
     }
+
+    vector<int> variables_idx = proc_to_variables_table.GetValueByKey(proc_idx);
 
     // Update the statement to variables table
     t.AddKeyValuePair(call_stmt, variables_idx);
 
     // Check the parents and update the relevant statement with the new variables
-    vector<int> parents;
-    try {
-      parents = child_star_table.GetValueByKey(call_stmt);
-    } catch (InvalidKeyException& e) {
-      // Means the current statement does not have a parent
+    if (!child_star_table.KeyExistsInTable(call_stmt)) {
       continue;
     }
 
+    vector<int> parents = child_star_table.GetValueByKey(call_stmt);
+
     for (const int parent : parents) {
       // Try getting the variables associated with parent
+      if (!t.KeyExistsInTable(parent)) {
+        continue;
+      }
+      vector<int> parent_variables_idx = t.GetValueByKey(parent);
+
+      // Otherwise merge the vectors with new values
+      parent_variables_idx.insert(parent_variables_idx.end(), variables_idx.begin(), variables_idx.end());
+      // Remove duplicate elements
+      sort(parent_variables_idx.begin(), parent_variables_idx.end());
+      parent_variables_idx.erase(unique(parent_variables_idx.begin(), parent_variables_idx.end()), parent_variables_idx.end());
+
       try {
-        vector<int> parent_variables_idx;
-        try {
-          parent_variables_idx = t.GetValueByKey(parent);
-        } catch (InvalidKeyException& e) {
-          // Parent container does not use or modify any variables
-          continue;
-        }
-
-        // Otherwise merge the vectors with new values
-        parent_variables_idx.insert(parent_variables_idx.end(), variables_idx.begin(), variables_idx.end());
-        // Remove duplicate elements
-        sort(parent_variables_idx.begin(), parent_variables_idx.end());
-        parent_variables_idx.erase(unique(parent_variables_idx.begin(), parent_variables_idx.end()), parent_variables_idx.end());
-
         t.UpdateKeyWithNewValue(parent, parent_variables_idx);
       } catch (InvalidKeyException& e) {
         // Means that there are no variables associated with parent statement
@@ -238,13 +231,11 @@ void PopulateReverseNestedModifiesSOrUsesSForCalls(EntityVarsTable caller_table,
     string proc = caller_table.GetValueByKey(call_stmt);
     int proc_idx = pkb.GetIndexByString(IndexTableType::kProcIndex, proc);
     // Get the variables modified or used in that procedure
-    vector<int> variables_idx;
-    try {
-       variables_idx = proc_to_variables_table.GetValueByKey(proc_idx);
-    } catch (InvalidKeyException& e) {
-      // No variables used or modified in the procedure
+    if (!proc_to_variables_table.KeyExistsInTable(proc_idx)) {
       continue;
     }
+
+    vector<int> variables_idx = proc_to_variables_table.GetValueByKey(proc_idx);
 
     // Loop through the variables
     for (const int var_idx : variables_idx) {
@@ -262,13 +253,10 @@ void PopulateReverseNestedModifiesSOrUsesSForCalls(EntityVarsTable caller_table,
       t.UpdateKeyWithNewValue(var_idx, stmts_to_update);
 
       // Get the parents of the current call statement
-      vector<int> parents;
-      try {
-        parents = child_star_table.GetValueByKey(call_stmt);
-      } catch (InvalidKeyException& e) {
-        // This call statement does not have any parents
+      if (!child_star_table.KeyExistsInTable(call_stmt)) {
         continue;
       }
+      vector<int> parents = child_star_table.GetValueByKey(call_stmt);
 
       for (const int parent : parents) {
         if (find(stmts_to_update.begin(), stmts_to_update.end(), parent) == stmts_to_update.end()) {
