@@ -1,11 +1,8 @@
-#include <stdio.h>
-#include <iostream>
-#include <string>
+#include <string> 
 #include <optional>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
-#include <algorithm>
 
 #include "query_evaluator.h"
 #include "cache/cache.h"
@@ -50,9 +47,9 @@ namespace pql {
       
       return formatter.FormatRawInput(table, selected_syns);
 
-    } catch (pql_exceptions::TrueResultException e) {
+    } catch (pql_exceptions::TrueResultException& e) {
       return BOOLEAN_TRUE_LIST;
-    } catch (pql_exceptions::EmptyResultException e) {      
+    } catch (pql_exceptions::EmptyResultException& e) {
       if (query.GetBoolean()) {
         return BOOLEAN_FALSE_LIST;
       }

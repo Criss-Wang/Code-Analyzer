@@ -1,7 +1,9 @@
+#include <unordered_map>
+
 #include "assignment_pattern.h"
 #include "SP/sp_exceptions.h"
 
-const map<TokenType, vector<TokenType>> ExpectedNextTokenTypeMap = {
+const unordered_map<TokenType, vector<TokenType>> ExpectedNextTokenTypeMap = {
   { TokenType::NAME, {TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
   { TokenType::INTEGER, {TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
   { TokenType::LEFT_PAREN, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN} },

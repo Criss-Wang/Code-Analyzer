@@ -4,7 +4,6 @@
 #include <stack>
 
 #include "cache.h"
-#include "../../../PKB/tables/table.h"
 
 using namespace std;
 

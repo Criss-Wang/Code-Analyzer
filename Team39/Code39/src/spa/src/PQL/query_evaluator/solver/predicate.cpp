@@ -12,6 +12,10 @@ namespace pql_table {
     allowed_pairs_ = pairs;
   }
 
+  int Predicate::GetPredSize() {
+    return allowed_pairs_.size();
+  }
+
   bool Predicate::equal(Predicate& p) {
     if (first_syn_ != p.first_syn_ || second_syn_ != p.second_syn_) {
       return false;

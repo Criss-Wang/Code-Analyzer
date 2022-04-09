@@ -2,7 +2,6 @@
 #include <set>
 
 #include "such_that_clause.h"
-#include "../query_evaluator_exceptions.h"
 
 #define INVALID_INDEX -1
 #define WILDCARD 0
@@ -166,74 +165,4 @@ namespace pql_clause {
     EvaluateFn fn = EvaluateFnMap.at(left_type).at(right_type);
     (this->*fn)(cache, domain, predicates);
   }
-
-  void FollowsClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
-  void FollowsTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
-  void ParentClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
-  void ParentTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
-  void CallsClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
-  void CallsTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
-  void UsesSClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
-  void ModifiesSClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
-  void UsesPClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
-  void ModifiesPClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
-   void NextClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-     SuchThatClause::Evaluate(cache, domain, predicates);
-   }
-
-   void NextTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-     SuchThatClause::Evaluate(cache, domain, predicates);
-   }
-
-   void AffectsClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-     SuchThatClause::Evaluate(cache, domain, predicates);
-   }
-
-   void AffectsTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-     SuchThatClause::Evaluate(cache, domain, predicates);
-   }
 }
