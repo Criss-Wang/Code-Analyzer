@@ -22,6 +22,11 @@ namespace pql_table {
 		rows_ = rows;
 	}
 
+	InterTable::InterTable(std::vector<std::string>&& header, std::vector<std::vector<int>>&& rows) {
+	  header_ = header;
+		rows_ = rows;
+	}
+
 	int InterTable::GetColNum() {
 		return header_.size();
 	}
