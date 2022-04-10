@@ -78,7 +78,7 @@ void PopulateNestedModifiesOrUses(RelListTable& parent_star_table, Table<int, ve
     }
 
     if (tmp_lst.empty()) {
-      return;
+      continue;
     }
     bool success = t.UpdateKeyWithNewValue(parent_stmt, tmp_lst);
   }
@@ -105,7 +105,7 @@ void PopulateReverseNestedModifiesOrUses(RelListTable& child_star_table, Table<i
     }
 
     if (tmp_lst.empty()) {
-      return;
+      continue;
     }
     bool success = t.UpdateKeyWithNewValue(var, tmp_lst);
   }
