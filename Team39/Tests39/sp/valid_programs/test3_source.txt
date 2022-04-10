@@ -1,0 +1,24 @@
+procedure procedure { 
+	procedure = x + 1;				 
+	y = m1 + ak4n * y / (y-x);			 
+	while ((while>0) || (y == 2)) {				
+		if (!(if <= 69)) then {
+			print x;
+			read harryPoTtER;
+  			while(huElSE == 123){
+				a = a + 1;
+			}
+		} else {
+			X = (kay + haha) - y;
+			else = x * y / z;
+ 		}
+	}
+	read read;
+	figureSkate = y + 2000;
+	print print;
+	if (child != then) then {
+		print x;
+	} else {
+		print y;
+	}
+}

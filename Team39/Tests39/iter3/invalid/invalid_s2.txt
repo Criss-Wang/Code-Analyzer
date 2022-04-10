@@ -26,7 +26,7 @@ procedure k {
 	if ( !(telephone == bye) ) then 	{
 		x = 2 + xxxx;
 	} else {
-		while ( we = 2 ) {
+		while ( we == 2 ) {
 			print = (8 * d / (9 + (w % 3) - 1) + print);
 			while (Hello != 99) {
 				Bye = 3;

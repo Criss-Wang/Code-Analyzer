@@ -20,18 +20,7 @@ Procedure::Procedure(vector<Token>& tokens, vector<shared_ptr<Stmt>>& stmt_lst) 
   stmt_lst_ = move(stmt_lst);
 
   for (shared_ptr<Stmt> stmt : stmt_lst_) {
-    if (typeid(*stmt) == typeid(ReadStmt)) {
-      modifies_p_.insert((*stmt).GetVar());
-    } else if (typeid(*stmt) == typeid(PrintStmt)) {
-      uses_p_.insert((*stmt).GetVar());
-    } else if (typeid(*stmt) == typeid(IfStmt) || typeid(*stmt) == typeid(WhileStmt)) {
-      uses_p_.merge((*stmt).GetVars());
-    } else if (typeid(*stmt) == typeid(CallStmt)) {
-      called_procedures_.insert((*stmt).GetVar());
-    } else if (typeid(*stmt) == typeid(AssignStmt)) {
-      modifies_p_.insert((*stmt).GetVar());
-      uses_p_.merge((*stmt).GetVars());
-    }
+    stmt->PopulateRelationships(uses_p_, modifies_p_, called_procedures_);
   }
 }
 

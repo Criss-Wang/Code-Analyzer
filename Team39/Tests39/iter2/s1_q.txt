@@ -30,12 +30,12 @@ Select BOOLEAN
 5000
 7 - Meaningless query
 assign a;
-Select BOOLEAN with 1 = a.stmt#
+Select BOOLEAN with 3 = a.stmt#
 TRUE
 5000
 8 - Meaningless query
 assign a;
-Select BOOLEAN with a.stmt# = 1
+Select BOOLEAN with a.stmt# = 3
 TRUE
 5000
 9 - Meaningless query
@@ -158,8 +158,8 @@ stmt s; procedure p;
 Select BOOLEAN such that Uses(s, "while") with p.procName = s.stmt#
 FALSE
 5000
-33 - Semantically invalid with clause as p is not declared. TODO remove p declaration
-stmt s; procedure p;
+33 - Semantically invalid with clause as p is not declared.
+stmt s;
 Select BOOLEAN such that Uses(s, "while") with p.procName = "procedure"
 FALSE
 5000

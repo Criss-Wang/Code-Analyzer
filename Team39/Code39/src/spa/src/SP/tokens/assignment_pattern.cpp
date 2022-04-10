@@ -3,6 +3,9 @@
 #include "assignment_pattern.h"
 #include "SP/sp_exceptions.h"
 
+#define INDEX_OF_FIRST_DIGIT 0
+#define EXPECTED_PAREN_COUNT 0
+
 const unordered_map<TokenType, vector<TokenType>> ExpectedNextTokenTypeMap = {
   { TokenType::NAME, {TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
   { TokenType::INTEGER, {TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
@@ -10,6 +13,16 @@ const unordered_map<TokenType, vector<TokenType>> ExpectedNextTokenTypeMap = {
   { TokenType::RIGHT_PAREN, {TokenType::RIGHT_PAREN, TokenType::OPERATOR} },
   { TokenType::OPERATOR, {TokenType::NAME, TokenType::INTEGER, TokenType::LEFT_PAREN } }
 };
+
+TokenType GetTypeForAssigPattern(Token& token) {
+  if (token.type_ == TokenType::LETTER) {
+    return TokenType::NAME;
+  } else if (token.type_ == TokenType::DIGIT) {
+    return TokenType::INTEGER;
+  } else {
+    return token.type_;
+  }
+}
 
 AssignmentPattern::AssignmentPattern(std::vector<Token>& tokens) {
 
@@ -21,17 +34,9 @@ AssignmentPattern::AssignmentPattern(std::vector<Token>& tokens) {
   for (auto token = begin(tokens); token != end(tokens); ++token) {
     pattern_ += token->text_;
 
-    TokenType token_type;
+    TokenType token_type = GetTypeForAssigPattern(*token);
 
-    if (token->type_ == TokenType::LETTER) {
-      token_type = TokenType::NAME;
-    } else if (token->type_ == TokenType::DIGIT) {
-      token_type = TokenType::INTEGER;
-    } else {
-      token_type = token->type_;
-    }
-
-    if (token_type == TokenType::INTEGER && token->text_.size() > 1 && token->text_[0] == '0') {
+    if (token->type_ == TokenType::INTEGER && token->text_[INDEX_OF_FIRST_DIGIT] == '0') {
       throw InvalidSyntaxException();
     }
 
@@ -60,10 +65,12 @@ AssignmentPattern::AssignmentPattern(std::vector<Token>& tokens) {
     } else if (token_type == TokenType::INTEGER) {
       constants_.insert(stoi(token->text_));
 
+    } else {
+      continue;
     }
   }
 
-  if (paren_count != 0) {
+  if (paren_count != EXPECTED_PAREN_COUNT) {
     throw InvalidSyntaxException();
   }
 }
