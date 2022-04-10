@@ -7,6 +7,7 @@
 #define INVALID_INDEX -1
 #define ENTITY 0
 #define ATTR_REF 1
+#define HIGHEST_PRIORITY 0
 
 namespace pql_clause {
   typedef void (WithClause::* EvaluateFn)(pql_cache::Cache&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
@@ -34,6 +35,24 @@ namespace pql_clause {
       return h1 ^ h2;
     }
   };
+
+  std::vector<std::string> WithClause::GetInvovledSynonyms() {
+    std::vector<std::string> res;
+
+    if (is_attr_ref_left_) {
+      res.push_back(left_attr_->GetSynName());
+    }
+
+    if (is_attr_ref_right_) {
+      res.push_back(right_attr_->GetSynName());
+    }
+
+    return res;
+  }
+
+  int WithClause::GetPriority() {
+    return HIGHEST_PRIORITY;
+  }
 
   int GetArgumentType(bool is_attr_ref) {
       return is_attr_ref ? ATTR_REF : ENTITY;

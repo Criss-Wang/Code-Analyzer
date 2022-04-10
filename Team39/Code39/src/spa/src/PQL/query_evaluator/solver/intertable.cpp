@@ -10,8 +10,8 @@
 
 namespace pql_table {
 
-	InterTable::InterTable(pql::Synonym& synonym, std::vector<int>& int_list) {
-	  header_ = std::vector<std::string>({ synonym.GetName() });
+	InterTable::InterTable(std::string syn_name, std::vector<int>& int_list) {
+	  header_ = std::vector<std::string>({ syn_name });
 		for (int val : int_list) {
 			rows_.push_back(std::vector<int>({ val }));
 		}

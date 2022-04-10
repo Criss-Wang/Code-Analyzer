@@ -1,4 +1,5 @@
 #include "../../../../spa/src/PQL/query_evaluator/cache/cache.h"
+#include "../../../../spa/src/PQL/query_evaluator/cache/generator.h"
 #include "../../../../spa/src/PKB/pkb.h"
 #include "../../../../spa/src/Utility/CFG/control_flow_graph.h"
 #include "../../../../spa/src/SP/design_extractor.h"
@@ -25,7 +26,7 @@ TEST_CASE("Test MergeTable function in cache") {
 	};
 	
 	REQUIRE(dst != compare);
-	pql_cache::Cache::MergeTable(dst, src);
+	pql_cache::Generator::MergeTable(dst, src);
 	REQUIRE(dst == compare);
 }
 
@@ -162,14 +163,15 @@ TEST_CASE("Checks the correctness of constructing Affects relationship") {
     });
   
   shared_ptr<cfg::GraphNode> head = cfg::CFG::GenerateCfg(tokens).GetHead();
+  pkb1.AddCfg(make_shared<cfg::CFG>(head));
   pql_cache::Cache cache(&pkb1);
 
 
-  unordered_set<pair<int, int>, pql_cache::hash_pair_fn> affects_ans_set = { make_pair(1, 4), make_pair(4, 6), make_pair(5, 6), make_pair(6, 7),
+  unordered_set<pair<int, int>, hash_pair_fn> affects_ans_set = { make_pair(1, 4), make_pair(4, 6), make_pair(5, 6), make_pair(6, 7),
       make_pair(1, 7), make_pair(6, 8), make_pair(7, 8), make_pair(6, 5), make_pair(8, 5), make_pair(7, 6), make_pair(8, 6) };
 
   REQUIRE(cache.pair_cache_[pql::kAffects].empty()); //it is empty before the computation
-  cache.ComputeAffectsRelationship(*head);
+  cache.GenerateAffectsPairDomain(pql::RelationshipTypes::kAffects);
   REQUIRE(cache.pair_cache_[pql::kAffects] == affects_ans_set);
 }
 
@@ -188,7 +190,7 @@ TEST_CASE("Checks the correctness of PopulateStarRelationship to populate the St
     unordered_map<int, unordered_set<int>> next_star;
 
     REQUIRE(next_star != next_star_ans);
-    next_star = std::move(pql_cache::Cache::PopulateStarRelationship(next));
+    next_star = std::move(pql_cache::Generator::PopulateStarRelationship(next));
     REQUIRE(next_star == next_star_ans);
   }
 
@@ -205,7 +207,7 @@ TEST_CASE("Checks the correctness of PopulateStarRelationship to populate the St
     unordered_map<int, unordered_set<int>> affects_star;
 
     REQUIRE(affects_star != affects_star_ans);
-    affects_star = std::move(pql_cache::Cache::PopulateStarRelationship(affects));
+    affects_star = std::move(pql_cache::Generator::PopulateStarRelationship(affects));
     REQUIRE(affects_star == affects_star_ans);
   }
 }
@@ -238,7 +240,7 @@ TEST_CASE("Check the correctness on generating the tables for Next*") {
   }
 
   SECTION("Check Pair Relation domain") {
-    unordered_set<pair<int, int>, pql_cache::hash_pair_fn> next_star_pair_ans = {
+    unordered_set<pair<int, int>, hash_pair_fn> next_star_pair_ans = {
       make_pair(1, 2), make_pair(1, 3), make_pair(1, 4), make_pair(1, 5), make_pair(1, 6), make_pair(1, 7), make_pair(1, 8),
       make_pair(2, 2), make_pair(2, 3), make_pair(2, 4), make_pair(2, 5), make_pair(2, 6), make_pair(2, 7), make_pair(2, 8),
       make_pair(3, 2), make_pair(3, 3), make_pair(3, 4), make_pair(3, 5), make_pair(3, 6), make_pair(3, 7), make_pair(3, 8),
@@ -260,7 +262,7 @@ TEST_CASE("Check the correctness on generating the tables for Affect") {
   pql_cache::Cache cache(&pkb1);
 
   SECTION("Check Pair Relation domain") {
-    unordered_set<pair<int, int>, pql_cache::hash_pair_fn> affects_star_pair_ans = {
+    unordered_set<pair<int, int>, hash_pair_fn> affects_star_pair_ans = {
       make_pair(1, 4), make_pair(4, 6), make_pair(5, 6), make_pair(6, 7), make_pair(1, 7), make_pair(6, 8), 
       make_pair(7, 8), make_pair(6, 5), make_pair(8, 5), make_pair(7, 6), make_pair(8, 6)
     };
@@ -319,7 +321,7 @@ TEST_CASE("Check the correctness on generating the tables for Affects*") {
   }
 
   SECTION("Check Pair Relation domain") {
-    unordered_set<pair<int, int>, pql_cache::hash_pair_fn> affects_star_pair_ans = {
+    unordered_set<pair<int, int>, hash_pair_fn> affects_star_pair_ans = {
       make_pair(1, 4), make_pair(1, 5), make_pair(1, 6), make_pair(1, 7), make_pair(1, 8),
       make_pair(4, 5), make_pair(4, 6), make_pair(4, 7), make_pair(4, 8),
       make_pair(5, 5), make_pair(5, 6), make_pair(5, 7), make_pair(5, 8),

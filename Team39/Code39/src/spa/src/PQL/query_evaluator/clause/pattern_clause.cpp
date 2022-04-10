@@ -4,6 +4,7 @@
 #define WILDCARD 0
 #define ENTITY 1
 #define SYNONYM 2
+#define SECOND_HIGHEST_PRIORITY 1
 
 namespace pql_clause {
   typedef void (PatternClause::* EvaluateLeftFn)(pql_cache::Cache&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
@@ -18,6 +19,20 @@ namespace pql_clause {
     { ENTITY, &PatternClause::EvaluateLeftEnt },
     { SYNONYM, &PatternClause::EvaluateLeftSyn }
   };
+
+  std::vector<std::string> PatternClause::GetInvovledSynonyms() {
+    std::vector<std::string> res({pattern_synonym_name_});
+
+    if (is_synonym_left_) {
+      res.push_back(left_);
+    }
+
+    return res;
+  }
+
+  int PatternClause::GetPriority() {
+    return SECOND_HIGHEST_PRIORITY;
+  }
 
   void PatternClause::EvaluateLeftWildcard(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
@@ -78,7 +93,7 @@ namespace pql_clause {
 
   void PatternClause::EvaluateLeft(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
       std::vector<pql_table::Predicate>& predicates) {
-    int var_type = GetVarType(left_, is_synonymy_left_);
+    int var_type = GetVarType(left_, is_synonym_left_);
     EvaluateLeftFn fn = EvaluateLeftFnMap.at(var_type);
     (this->*fn)(cache, domain, predicates);
   }
