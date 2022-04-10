@@ -1,3 +1,9 @@
+#include <iostream>
+#include <stdexcept>
+#include <string>
+
+#include "parser.h"
+
 #define NO_CURRENT_CLAUSE 0
 #define IS_SUCH_THAT 1
 #define IS_PATTERN 2
@@ -5,32 +11,23 @@
 #define ATTR_REF -1
 #define IDENT -2
 #define INTEGER -3
-#define INDEX_OF_ATTR_REF 0
-#define INDEX_OF_ENTITY 1
-#define INDEX_OF_TYPE 2
 #define INDEX_OF_LEFT 0
 #define INDEX_OF_DOMAIN 1
 #define INDEX_OF_EXPRESSION 2
 #define INDEX_OF_EXACT 3
 
-#include <iostream>
-#include <stdexcept>
-#include <string>
-
-#include "parser.h"
-
 namespace pql {
   std::vector<std::string> Parser::GetSynonyms() {
     std::vector<std::string> synonyms;
-    while (ps.Peek() != ';') {
-      ps.EatWhiteSpaces();
-      synonyms.push_back(ps.ParseName());
-      ps.EatWhiteSpaces();
-      if (ps.Peek() == ',') {
-        ps.Consume();
+    while (ps_.Peek() != ';') {
+      ps_.EatWhiteSpaces();
+      synonyms.push_back(ps_.ParseName());
+      ps_.EatWhiteSpaces();
+      if (ps_.Peek() == ',') {
+        ps_.Consume();
       }
     }
-    ps.Consume();
+    ps_.Consume();
     return synonyms;
   }
 
@@ -38,11 +35,11 @@ namespace pql {
     bool select_clause_parsed = false;
     bool declarations_parsed = false;
     int current_clause = NO_CURRENT_CLAUSE;
-    while (!ps.IsEOF()) {
-      ps.EatWhiteSpaces();
+    while (!ps_.IsEOF()) {
+      ps_.EatWhiteSpaces();
       std::stringstream ks;
-      while (IsLetter(ps.Peek())) {
-        ks << ps.Next();
+      while (IsLetter(ps_.Peek())) {
+        ks << ps_.Next();
       }
       std::string keyword;
       ks >> keyword;
@@ -51,42 +48,27 @@ namespace pql {
           throw ParseException();
         }
         for (const std::string &s: Parser::GetSynonyms()) {
-          Parser::query.AddSynonym(*d, s);
+          query_.AddSynonym(*d, s);
         }
       } else if (keyword == "Select") {
         Parser::ParseSelect();
         select_clause_parsed = true;
         declarations_parsed = true;
-      } else if (keyword == "such" && select_clause_parsed) {
-        ps.EatWhiteSpaces();
-        ps.Expect("that");
-        ps.EatWhiteSpaces();
-        Parser::ParseRelationship();
-        ps.EatWhiteSpaces();
-        current_clause = IS_SUCH_THAT;
-      } else if (keyword == "pattern" && select_clause_parsed) {
-        ps.EatWhiteSpaces();
-        Parser::ParsePattern();
-        ps.EatWhiteSpaces();
-        current_clause = IS_PATTERN;
-      } else if (keyword == "with" && select_clause_parsed) {
-        ps.EatWhiteSpaces();
-        Parser::ParseWith();
-        ps.EatWhiteSpaces();
-        current_clause = IS_WITH;
-      } else if (keyword == "and" && select_clause_parsed) {
-        if (current_clause == IS_SUCH_THAT) {
-          ps.EatWhiteSpaces();
+      } else if (select_clause_parsed) {
+        if (keyword == "such") {
+          ps_.EatWhiteSpaces();
+          ps_.Expect("that");
           Parser::ParseRelationship();
-          ps.EatWhiteSpaces();
-        } else if (current_clause == IS_PATTERN) {
-          ps.EatWhiteSpaces();
+          current_clause = IS_SUCH_THAT;
+        } else if (keyword == "pattern" || (keyword == "and" && current_clause == IS_PATTERN)) {
           Parser::ParsePattern();
-          ps.EatWhiteSpaces();
-        } else if (current_clause == IS_WITH) {
-          ps.EatWhiteSpaces();
+          current_clause = IS_PATTERN;
+        } else if (keyword == "with" || (keyword == "and" && current_clause == IS_WITH)) {
           Parser::ParseWith();
-          ps.EatWhiteSpaces();
+          current_clause = IS_WITH;
+        } else if (keyword == "and" && current_clause == IS_SUCH_THAT) {
+          Parser::ParseRelationship();
+          current_clause = IS_SUCH_THAT;
         } else {
           throw ParseException();
         }
@@ -100,228 +82,210 @@ namespace pql {
   }
 
   pql::Query Parser::GetQuery() {
-    return Parser::query;
+    return query_;
+  }
+
+  void Parser::ParseAttrRef() {
+    std::string name = ps_.ParseName();
+    ps_.EatWhiteSpaces();
+    if (name == "BOOLEAN" && query_.GetBoolean() && !query_.SynonymDeclared(name)) {
+      query_.SetBoolean(true);
+    } else {
+      query_.SetBoolean(false);
+      if (ps_.Peek() == '.') {
+        ps_.Consume();
+        std::string attr = ps_.ParseAttribute();
+        query_.AddResultSynonym(name, attr);
+      } else {
+        query_.AddResultSynonym(name);
+      }
+    }
+    ps_.EatWhiteSpaces();
   }
 
   void Parser::ParseSelect() {
-    bool has_attribute = false;
     std::string attribute;
-    ps.EatWhiteSpaces();
-    if (ps.Peek() == '<') {
+    ps_.EatWhiteSpaces();
+    if (ps_.Peek() == '<') {
+      query_.SetBoolean(false); // make sure there is no BOOLEAN in the tuple
       Parser::ParseTuple();
-      Parser::query.SetBoolean(false);
     } else {
-      std::string name = ps.ParseName();
-      if (ps.Peek() == '.') {
-        ps.Next(); 
-        attribute = ps.ParseAttribute();
-        has_attribute = true; 
-      }
-      if (name == "BOOLEAN" && !Parser::query.SynonymDeclared(name)) {
-        Parser::query.SetBoolean(true);
-      } else if (Parser::query.SynonymDeclared(name) && has_attribute) {
-        Parser::query.AddResultSynonym(name, attribute);
-        Parser::query.SetBoolean(false);
-      } else if (Parser::query.SynonymDeclared(name) && !has_attribute) {
-        Parser::query.AddResultSynonym(name);
-        Parser::query.SetBoolean(false);
-      } else if (!Parser::query.SynonymDeclared(name)) {
-        Parser::query.SetSemanticallyInvalid();
-      }
+      Parser::ParseAttrRef();
     }
-    ps.EatWhiteSpaces();
   }
 
   void Parser::ParseTuple() {
-    ps.Consume();
-    while (ps.Peek() != '>') {
-      std::string name = ps.ParseName();
-      if (ps.Peek() == '.') {
-        ps.Next();
-        std::string attr = ps.ParseAttribute();
-        Parser::query.AddResultSynonym(name, attr);
-      } else {
-        Parser::query.AddResultSynonym(name);
-      }
-
-      if (ps.Peek() == ',') {
-        ps.Next();
-      }
+    int tuple_elem_count = 0;
+    ps_.Consume();
+    ps_.EatWhiteSpaces();
+    Parser::ParseAttrRef();
+    tuple_elem_count++;
+    while (ps_.Peek() != '>') {
+      ps_.EatWhiteSpaces();
+      ps_.ExpectChar(',');
+      ps_.EatWhiteSpaces();
+      Parser::ParseAttrRef();
+      tuple_elem_count++;
     }
-    ps.Consume();
+    ps_.Consume();
+    if (tuple_elem_count == 0) {
+      throw ParseException();
+    }
   }
 
   void Parser::ParseRelationship() {
     std::string relationship;
     std::stringstream ssm;
-    while (IsLetter(ps.Peek()) || ps.Peek() == '*') {
-      ssm << ps.Next();
+    ps_.EatWhiteSpaces();
+    while (IsLetter(ps_.Peek()) || ps_.Peek() == '*') {
+      ssm << ps_.Next();
     }
     ssm >> relationship;
-    ps.EatWhiteSpaces();
-    ps.Expect("(");
-    std::string left = ps.ParseRef(Parser::query);
-    ps.EatWhiteSpaces();
-    ps.Expect(",");
-    std::string right = ps.ParseRef(Parser::query);
-    ps.Expect(")");
+    ps_.EatWhiteSpaces();
+    ps_.Expect("(");
+    std::string left = ps_.ParseRef(query_);
+    ps_.EatWhiteSpaces();
+    ps_.Expect(",");
+    std::string right = ps_.ParseRef(query_);
+    ps_.Expect(")");
+    ps_.EatWhiteSpaces();
     if (relationship == "Uses" || relationship == "Modifies") {
       if (left == "_") {
-        Parser::query.SetSemanticallyInvalid();
+        query_.SetSemanticallyInvalid();
+        return;
       }
-      if (Parser::query.IsProcedure(left) || IsIdent(left)) {
+      if (query_.IsProcedure(left) || IsIdent(left)) {
         relationship.push_back('P');
       }
     }
+
     if (auto r = pql::GetRelationshipType(relationship)) {
-      bool is_synonym_left = Parser::query.SynonymDeclared(left);
-      bool is_synonym_right = Parser::query.SynonymDeclared(right);
-      Parser::query.AddSuchThatClause(*r, left, right, is_synonym_left, is_synonym_right);
+      bool is_synonym_left = query_.SynonymDeclared(left);
+      bool is_synonym_right = query_.SynonymDeclared(right);
+      query_.AddSuchThatClause(*r, left, right, is_synonym_left, is_synonym_right);
     } else {
       throw ParseException();
     }
   }
 
   void Parser::ParsePattern() {
-    std::string synonym = ps.ParseName();
+    std::string synonym = ps_.ParseName();
+    query_.AddUsedSynonym(synonym);
     auto pattern = Parser::ParsePatternSyntax();
+    ps_.EatWhiteSpaces();
     std::string left = std::get<INDEX_OF_LEFT>(pattern);
-    std::vector<EntityIdentifier> domain = std::get<INDEX_OF_DOMAIN>(pattern);
+    std::unordered_set<EntityIdentifier> domain = std::get<INDEX_OF_DOMAIN>(pattern);
     std::string expression = std::get<INDEX_OF_EXPRESSION>(pattern);
     bool is_exact = std::get<INDEX_OF_EXACT>(pattern);
-    if (Parser::query.IsAssignSynonym(synonym) && std::find(domain.begin(), domain.end(), EntityIdentifier::kAssign) != domain.end()) {
-      Parser::query.AddPattern(EntityIdentifier::kAssign, synonym, left, expression, is_exact);
-    } else if (Parser::query.IsWhileSynonym(synonym) && std::find(domain.begin(), domain.end(), EntityIdentifier::kWhile) != domain.end()) {
-      Parser::query.AddPattern(EntityIdentifier::kWhile, synonym, left, expression, is_exact);
-    } else if (Parser::query.IsIfSynonym(synonym) && std::find(domain.begin(), domain.end(), EntityIdentifier::kIf) != domain.end()) {
-      Parser::query.AddPattern(EntityIdentifier::kIf, synonym, left, expression, is_exact);
+    
+    if (query_.IsAssignSynonym(synonym) && WithinUnorderedSet(&domain, EntityIdentifier::kAssign)) {
+      query_.AddPattern(EntityIdentifier::kAssign, synonym, left, expression, is_exact);
+    } else if (query_.IsWhileSynonym(synonym) && WithinUnorderedSet(&domain, EntityIdentifier::kWhile)) {
+      query_.AddPattern(EntityIdentifier::kWhile, synonym, left, expression, is_exact);
+    } else if (query_.IsIfSynonym(synonym) && WithinUnorderedSet(&domain, EntityIdentifier::kIf)) {
+      query_.AddPattern(EntityIdentifier::kIf, synonym, left, expression, is_exact);
     } else {
-      Parser::query.SetSemanticallyInvalid();
+      query_.SetSemanticallyInvalid();
     }
   }
 
-  std::tuple<std::string, std::vector<EntityIdentifier>, std::string, bool> Parser::ParsePatternSyntax() {
+  // returns a tuple <left most argument of a pattern, entity domain for the pattern synonym, expression, expression is exact match boolean>
+  std::tuple<std::string, std::unordered_set<EntityIdentifier>, std::string, bool> Parser::ParsePatternSyntax() {
     std::string expression;
     bool is_exact = false;
-    std::vector<EntityIdentifier> domain;
-    ps.Expect("(");
-    ps.EatWhiteSpaces();
-    std::string left = ps.ParseRef(Parser::query);
+    std::unordered_set<EntityIdentifier> pattern_synonym_entity_domain;
+    ps_.Expect("(");
+    ps_.EatWhiteSpaces();
+    std::string left = ps_.ParseRef(query_);
     if (IsInteger(left)) {
       throw ParseException();
     }
-    ps.EatWhiteSpaces();
-    ps.Expect(",");
-    ps.EatWhiteSpaces();
-    if (ps.Peek() == '\"') {
-      ps.Consume();
-      ps.ParseExpression(Parser::query);
-      ps.Expect("\"");
-      ps.EatWhiteSpaces();
-      ps.Expect(")");
+    ps_.EatWhiteSpaces();
+    ps_.Expect(",");
+    ps_.EatWhiteSpaces();
+    if (ps_.Peek() == '\"') {
+      expression = ps_.ParseExpression(query_);
+      ps_.EatWhiteSpaces();
+      ps_.Expect(")");
       is_exact = true;
-      domain.push_back(EntityIdentifier::kAssign);
+      pattern_synonym_entity_domain.insert(EntityIdentifier::kAssign);
     } else {
-      ps.Expect("_");
-      ps.EatWhiteSpaces();
-      if (ps.Peek() == '\"') {
-        ps.Consume();
-        ps.ParseExpression(Parser::query);
-        ps.Expect("\"");
-        ps.EatWhiteSpaces();
-        ps.Expect("_");
-        ps.EatWhiteSpaces();
-        ps.Expect(")");
-        domain.push_back(EntityIdentifier::kAssign);
-      } else if (ps.Peek() == ')') {
-        ps.Consume();
-        domain.push_back(EntityIdentifier::kAssign);
-        domain.push_back(EntityIdentifier::kWhile);
+      ps_.Expect("_");
+      ps_.EatWhiteSpaces();
+      if (ps_.Peek() == '\"') {
+        expression = ps_.ParseExpression(query_);
+        ps_.EatWhiteSpaces();
+        ps_.Expect("_");
+        ps_.EatWhiteSpaces();
+        ps_.Expect(")");
+        pattern_synonym_entity_domain.insert(EntityIdentifier::kAssign);
+      } else if (ps_.Peek() == ')') {
+        ps_.Consume();
+        expression = "_";
+        pattern_synonym_entity_domain.insert(EntityIdentifier::kAssign);
+        pattern_synonym_entity_domain.insert(EntityIdentifier::kWhile);
       } else {
-        ps.Expect(",");
-        ps.EatWhiteSpaces();
-        ps.Expect("_");
-        ps.EatWhiteSpaces();
-        ps.Expect(")");
-        domain.push_back(EntityIdentifier::kIf);
+        ps_.Expect(",");
+        ps_.EatWhiteSpaces();
+        ps_.Expect("_");
+        ps_.EatWhiteSpaces();
+        ps_.Expect(")");
+        pattern_synonym_entity_domain.insert(EntityIdentifier::kIf);
       }
     }
-    return make_tuple(left, domain, expression, is_exact);
-  }
-
-  std::map<AttrIdentifier, int> attrDomain {
-    {AttrIdentifier::kValue, INTEGER},
-    {AttrIdentifier::kVarName, IDENT},
-    {AttrIdentifier::kProcName, IDENT},
-    {AttrIdentifier::kStmtNum, INTEGER}
-  };
-
-  bool IsValid(std::tuple<std::shared_ptr<AttrRef>, std::string, int>& left, std::tuple<std::shared_ptr<AttrRef>, std::string, int>& right) {
-    int left_domain;
-    if (std::get<INDEX_OF_TYPE>(left) == ATTR_REF) {
-      left_domain = attrDomain.at(std::get<INDEX_OF_ATTR_REF>(left)->GetAttrIdentifier());
-    } else {
-      left_domain = std::get<INDEX_OF_TYPE>(left);
-    }
-    int right_domain;
-    if (std::get<INDEX_OF_TYPE>(right) == ATTR_REF) {
-      right_domain = attrDomain.at(std::get<INDEX_OF_ATTR_REF>(right)->GetAttrIdentifier());
-    } else {
-      right_domain = std::get<INDEX_OF_TYPE>(right);
-    }
-    return (left_domain == right_domain);
+    return make_tuple(left, pattern_synonym_entity_domain, expression, is_exact);
   }
 
   void Parser::ParseWith() {
+    ps_.EatWhiteSpaces();
     auto left = Parser::ParseWithArgument();
-    ps.EatWhiteSpaces();
-    ps.ExpectChar('=');
-    ps.EatWhiteSpaces();
+    ps_.EatWhiteSpaces();
+
+    ps_.ExpectChar('=');
+
+    ps_.EatWhiteSpaces();
     auto right = Parser::ParseWithArgument();
-    if (IsValid(left, right)) {
-      Parser::query.AddWith(std::get<INDEX_OF_ATTR_REF>(left), std::get<INDEX_OF_ENTITY>(left),
-                std::get<INDEX_OF_TYPE>(left) == ATTR_REF,std::get<INDEX_OF_ATTR_REF>(right),
-                  std::get<INDEX_OF_ENTITY>(right), std::get<INDEX_OF_TYPE>(right) == ATTR_REF);
-    } else {
-      Parser::query.SetSemanticallyInvalid();
-    }
+    ps_.EatWhiteSpaces();
+
+    query_.AddWith(left, right);
   }
 
+  // returns a tuple <attr_ref_ptr, entity, type_of_the_argument>
   std::tuple<std::shared_ptr<AttrRef>, std::string, int> Parser::ParseWithArgument() {
-    std::string ref = ps.ParseRef(Parser::query);
+    std::string ref = ps_.ParseRef(query_);
     std::shared_ptr<AttrRef> attr_ref = nullptr;
     std::string entity;
     int type = ATTR_REF;
-    if (Parser::query.SynonymDeclared(ref)) {
-      ps.ExpectChar('.');
-      std::string attr = ps.ParseAttribute();
-      if (!Query::IsAttrStringValid(attr)) {
-        throw ParseException();
-      }
-      Synonym synonym = Parser::query.GetSynonymByName(ref);
-      AttrIdentifier attribute = GetAttributeByString(attr);
-      if (!Query::IsAttrValidForSyn(synonym, attribute)) {
-        Parser::query.SetSemanticallyInvalid();
-      }
-      attr_ref = std::make_shared<AttrRef>(synonym, attribute);
-    } else if (IsIdent(ref)){
-      ref.erase(0, 1);
-      int len = ref.length();
-      ref.erase(len - 1, 1);
-      entity = ref;
+    if (IsIdent(ref)){
+      entity = RemoveQuotationMarks(ref);
       type = IDENT;
     } else if (IsInteger(ref)) {
       entity = ref;
       type = INTEGER;
     } else {
-      //If it reaches here means that this is an undeclared synonym with attribute
-      Parser::query.SetSemanticallyInvalid();
-      ps.Expect(".");
-      std::string attr = ps.ParseAttribute();
+      ps_.Expect(".");
+      std::string attr = ps_.ParseAttribute();
       if (!Query::IsAttrStringValid(attr)) {
         throw ParseException();
       }
+
+      // check if the synonym is declared
+      // skip the attribute validation if the synonym is not declared
+      if (!query_.SynonymDeclared(ref)) {
+        query_.SetSemanticallyInvalid();
+        return make_tuple(attr_ref, entity, type);
+      }
+
+      std::shared_ptr<Synonym> synonym = query_.GetSynonymByName(ref);
+      AttrIdentifier attribute = GetAttributeByString(attr);
+
+      if (!Query::IsAttrValidForSyn(*synonym, attribute)) {
+        query_.SetSemanticallyInvalid();
+      }
+
+      attr_ref = std::make_shared<AttrRef>(synonym, attribute);
     }
+
     return make_tuple(attr_ref, entity, type);
   }
 

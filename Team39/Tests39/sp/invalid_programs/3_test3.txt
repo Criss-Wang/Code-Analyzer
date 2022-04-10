@@ -1,6 +1,6 @@
 procedure procName {
 	x = y + (5 + z);
-	if (x != 04) then { {
+	if (x != 4) then { {
 		print x;
 		read z;
 	} else {

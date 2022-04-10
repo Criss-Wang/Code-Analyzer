@@ -1,29 +1,28 @@
-#pragma once
-#define END_OF_FILE -1
-
 #include "parser.h"
+
+#define END_OF_FILE -1
 
 namespace pql {
   char ParserState::Peek() {
-    return (char) ss.peek();
+    return (char) ss_.peek();
   }
 
   char ParserState::Next() {
-    return (char) ss.get();
+    return (char) ss_.get();
   }
 
   bool ParserState::IsEOF() {
-    return (ss.peek() == END_OF_FILE);
+    return (ss_.peek() == END_OF_FILE);
   }
 
   void ParserState::EatWhiteSpaces() {
-    while (ss.peek() == ' ' || ss.peek() == '\n' || ss.peek() == '\r' || ss.peek() == '\t' || ss.peek() == '\0') {
-      ss.get();
+    while (ss_.peek() == ' ' || ss_.peek() == '\n' || ss_.peek() == '\r' || ss_.peek() == '\t' || ss_.peek() == '\0') {
+      ss_.get();
     }
   }
 
   void ParserState::Consume() {
-    ss.get();
+    ss_.get();
   }
 
   char ParserState::ExpectLetter() {
@@ -47,7 +46,7 @@ namespace pql {
     std::stringstream ssm;
     ssm << s;
     while (ssm.peek() != END_OF_FILE) {
-      char ss_char = (char) ss.get();
+      char ss_char = (char) ss_.get();
       char ssm_char = (char)ssm.get();
       if (ss_char != ssm_char) {
         throw ParseException();
@@ -132,13 +131,19 @@ namespace pql {
 
   std::string ParserState::ParseExpression(Query& q) {
     std::string expression;
+    ParserState::Expect("\"");
     ParserState::EatWhiteSpaces();
     expression = IsValidExpression(q);
     ParserState::EatWhiteSpaces();
+    ParserState::Expect("\"");
     return expression;
   }
 
   std::string ParserState::IsValidExpression(Query& q) {
+    if (ParserState::Peek() == '\"') {
+      throw ParseException();
+    }
+
     std::stringstream s;
     std::string expression;
     int bracket_count = 0;
@@ -152,10 +157,10 @@ namespace pql {
       // Check that char is expected 
 
       if (IsDigit(next_char) && expected_next) {
-        s << ParserState::Next();
+        s << ParserState::ParseInteger();
         incomplete_operator = false;
       } else if (IsLetter(next_char) && expected_next) {
-        s << ParserState::Next();
+        s << ParserState::ParseName();
         incomplete_operator = false;
       } else if (IsOperator(next_char) && expected_next) {
         s << ParserState::Next();
@@ -167,8 +172,7 @@ namespace pql {
         s << ParserState::Next();
         bracket_count--;
       } else {
-        q.SetSemanticallyInvalid();
-        break;
+        throw ParseException();
       }
 
       // Set expected_next bool
@@ -176,18 +180,17 @@ namespace pql {
       curr_char = next_char;
       next_char = ParserState::Peek();
       if (IsDigit(curr_char)) {
-        expected_next = IsDigit(next_char) || IsOperator(next_char) || IsCloseBracket(next_char);
+        expected_next = IsOperator(next_char) || IsCloseBracket(next_char);
       } else if (IsLetter(curr_char)) {
-        expected_next = IsDigit(next_char) || IsLetter(next_char) || IsOperator(next_char) || IsCloseBracket(next_char);
+        expected_next = IsOperator(next_char) || IsCloseBracket(next_char);
       } else if (IsOperator(curr_char)) {
         expected_next = IsDigit(next_char) || IsLetter(next_char) || IsOpenBracket(next_char);
       } else if (IsOpenBracket(curr_char)) {
-        expected_next = IsDigit(next_char) || IsLetter(next_char);
+        expected_next = IsDigit(next_char) || IsLetter(next_char) || IsOpenBracket(next_char);
       } else if (IsCloseBracket(curr_char)) {
         expected_next = IsOperator(next_char) || IsCloseBracket(next_char);
       } else {
-        q.SetSemanticallyInvalid();
-        break;
+        throw ParseException();
       }
     }
 
@@ -195,16 +198,8 @@ namespace pql {
       s >> expression;
       return expression;
     } else {
-      q.SetSemanticallyInvalid();
+      throw ParseException();
     }
-
-    while (ParserState::Peek() != '\\') {
-      ParserState::Next();
-    }
-
-    return "";
   }
-
-
 
 }

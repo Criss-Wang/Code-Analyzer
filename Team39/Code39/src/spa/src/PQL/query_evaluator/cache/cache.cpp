@@ -4,7 +4,6 @@
 #include <stack>
 
 #include "cache.h"
-#include "../../../PKB/tables/table.h"
 
 using namespace std;
 
@@ -339,10 +338,32 @@ namespace pql_cache {
         //check used_var in LMT
       if (last_modified_table.find(used_var) != last_modified_table.end()) {
         for (const int left : last_modified_table[used_var]) {
-          pair_cache_[pql::kAffects].insert(make_pair(left, assign_stmt));
+          
+            pair_cache_[pql::kAffects].insert(make_pair(left, assign_stmt));
+          
         }
       }
     }
+  }
+
+  bool CheckSubsetBetweenTables(unordered_map<int, unordered_set<int>>& x, unordered_map<int, unordered_set<int>>& y) {
+    //A table x is considered a subset of table y 
+    //if there does not exist a pair <key, val> that exist in  x but not in y
+    for (auto it = x.begin(); it != x.end(); it++) {
+      //check the existence of the key 
+      if (y.find(it->first) == y.end()) {
+        return false;
+      }
+
+      //check the existence of the value
+      for (const int elem_x : it->second) {
+        if (y[it->first].find(elem_x) == y[it->first].end()) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   void Cache::ComputeAffectsRelationship(cfg::GraphNode& head) {
@@ -409,7 +430,7 @@ namespace pql_cache {
         last_modified_stack.push(move(last_modified_table));
         //we do a move here since moving is faster than copying and last_modified_table_else will not be reference anymore
         last_modified_table = move(last_modified_table_else);
-        
+
         shared_ptr<cfg::GraphNode> if_node = move(ptr_stack.top());
         ptr_stack.pop();
         curr = if_node->GetAlternative();
@@ -429,7 +450,8 @@ namespace pql_cache {
         unordered_map<int, unordered_set<int >> before_last_modified_table = move(last_modified_stack.top());
         last_modified_stack.pop();
 
-        if (last_modified_table == before_last_modified_table) {
+        if (CheckSubsetBetweenTables(last_modified_table, before_last_modified_table)) {
+          last_modified_table = move(before_last_modified_table); //beforeLMT is a superset of LMT
           curr = while_node->GetAlternative();
         } else {
           MergeTable(last_modified_table, before_last_modified_table);

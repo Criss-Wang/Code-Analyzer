@@ -36,9 +36,9 @@ void TestWrapper::parse(std::string filename) {
     Parser parser(input, pkb);
     parser.Validate();
     parser.Populate(pkb);
-  } catch (exception e) {
+  } catch (exception& e) {
     //Force the autotester to stop running
-    cerr << e.what();
+    cout << e.what() << endl;
     exit(0);
   }  
 }

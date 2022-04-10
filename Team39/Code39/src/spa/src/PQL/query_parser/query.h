@@ -1,5 +1,7 @@
 #pragma once
+
 #include <memory>
+#include <unordered_map>
 
 #include "token.h"
 #include "../query_evaluator/clause/clause.h"
@@ -21,26 +23,33 @@ namespace pql {
 
   bool IsHash(char c);
 
+  template <typename T>
+  bool WithinUnorderedSet(std::unordered_set<T>* set, T t);
+
+  std::string RemoveQuotationMarks(std::string& ident);
+
   AttrIdentifier GetAttributeByString(const std::string& attr);
 
     
   class Query {
     private:
-      std::vector <pql::Synonym> declarations;
-      std::map <std::string, pql::Synonym> synonyms;
-      std::vector <pql::Synonym> used_synonyms;
-      std::vector <pql::AttrRef> attr_refs;
-      std::vector <std::shared_ptr<pql_clause::Clause>> clauses;
-      bool is_boolean = false;
-      bool is_semantically_valid = true;
+      std::vector <pql::Synonym> declarations_;
+      std::unordered_map <std::string, pql::Synonym> synonyms_;
+      std::vector <pql::Synonym> used_synonyms_;
+      std::vector <pql::AttrRef> attr_refs_;
+      std::vector <std::shared_ptr<pql_clause::Clause>> clauses_;
+      bool is_boolean_ = true;
+      bool is_semantically_valid_ = true;
     public:
       void SetSemanticallyInvalid();
 
-      bool IsValid(RelationshipTypes relationship, const std::string& left, const std::string& right);
+      bool IsValidRelationshipArgument(const std::string& argument, bool is_synonym, std::unordered_set<EntityIdentifier> *domain);
+
+      bool IsValidRelationship(RelationshipTypes relationship, const std::string& left, bool is_synonym_left, const std::string& right, bool is_synonym_right);
 
       bool SynonymDeclared(const std::string &name);
 
-      Synonym GetSynonymByName(const std::string &name);
+      std::shared_ptr<Synonym> GetSynonymByName(const std::string &name);
 
       static bool IsAttrStringValid(const std::string& attribute);
 
@@ -72,8 +81,7 @@ namespace pql {
 
       void AddPattern(EntityIdentifier syn_entity, std::string synonym, std::string left, std::string expression, bool exact);
 
-      void AddWith(std::shared_ptr<AttrRef> left_attr, std::string left_entity, bool is_attr_ref_left,
-                   std::shared_ptr<AttrRef> right_attr, std::string right_entity, bool is_attr_ref_right);
+      void AddWith(std::tuple<std::shared_ptr<AttrRef>, std::string, int>& left, std::tuple<std::shared_ptr<AttrRef>, std::string, int>& right);
 
       std::vector <std::shared_ptr<pql_clause::Clause>> GetClauses();
 

@@ -4,43 +4,23 @@
 
 #include<stack>
 
-vector<string> AppendToVector(vector<string> v, vector<string> vars) {
-  for (auto var : vars) {
-    if (find(begin(v), end(v), var) == end(v)) {
-      v.push_back(var);
-    }
-  }
-  return v;
-}
+#define PROC_TOKENS_SIZE 2
+#define INDEX_OF_PROC_NAME 1
 
 Procedure::Procedure(vector<Token>& tokens, vector<shared_ptr<Stmt>>& stmt_lst) {
-  int expected_size = 2;
 
-  if (tokens.size() != expected_size) {
-
+  if (tokens.size() != PROC_TOKENS_SIZE) {
     throw InvalidSyntaxException();
   }
-  const int kIndexOfProcName = 1;
-  proc_name_ = tokens.at(kIndexOfProcName).text_;
-  stmt_lst_ = stmt_lst;
+
+  if (tokens.at(INDEX_OF_PROC_NAME).type_ != TokenType::NAME && tokens.at(INDEX_OF_PROC_NAME).type_ != TokenType::LETTER) {
+    throw InvalidSyntaxException();
+  }
+  proc_name_ = tokens.at(INDEX_OF_PROC_NAME).text_;
+  stmt_lst_ = move(stmt_lst);
 
   for (shared_ptr<Stmt> stmt : stmt_lst_) {
-    if (typeid(*stmt) == typeid(ReadStmt)) {
-      modifies_p_ = AppendToVector(modifies_p_, { (*stmt).GetVar() });
-    } else if (typeid(*stmt) == typeid(PrintStmt) || typeid(*stmt) == typeid(IfStmt) || typeid(*stmt) == typeid(WhileStmt)) {
-      uses_p_ = AppendToVector(uses_p_, { (*stmt).GetVar() });
-    } else if (typeid(*stmt) == typeid(CallStmt)) {
-      called_procedures_ = AppendToVector(called_procedures_, { (*stmt).GetVar() });
-    } else if (typeid(*stmt) == typeid(AssignStmt)) {
-      vector<string> vars = (*stmt).GetVar();
-
-      const int kIndexOfLhsVar = 0;
-      const int kIndexOfFristRhsVar = 1;
-      string lhs_var = vars.at(kIndexOfLhsVar);
-      vector<string> rhs_var(vars.begin() + kIndexOfFristRhsVar, vars.end());
-      modifies_p_ = AppendToVector(modifies_p_, { lhs_var });
-      uses_p_ = AppendToVector(uses_p_, rhs_var);
-    }
+    stmt->PopulateRelationships(uses_p_, modifies_p_, called_procedures_);
   }
 }
 
@@ -48,19 +28,8 @@ std::string Procedure::GetProcName() {
   return proc_name_;
 }
 
-vector<string> Procedure::GetCalledProcedures() {
+unordered_set<string> Procedure::GetCalledProcedures() {
   return called_procedures_;
-}
-
-void Procedure::Validate() {
-  bool is_valid = isalpha(proc_name_[0]);
-  if (!is_valid) {
-    throw InvalidSyntaxException();
-  }
-
-  for (shared_ptr<Stmt> stmt : stmt_lst_) {
-    (*stmt).Validate();
-  }
 }
 
 void Procedure::PopulateEntities(Pkb& pkb) {
@@ -77,18 +46,30 @@ void Procedure::PopulateEntities(Pkb& pkb) {
   // Populate ProcRangeTable
   int start_stmt_num = (*stmt_lst_.at(kIndexOfFirstStmtNum)).GetStmtNum();
   int end_stmt_num = (*stmt_lst_.at(kIndexOfLastStmtNum)).GetStmtNum();
-  pkb.AddInfoToTable(TableIdentifier::kProcedure, proc_name_, pair<int, int>(start_stmt_num, end_stmt_num));
+  pkb.AddInfoToTable(TableIdentifier::kProcedure, proc_name_, make_pair(start_stmt_num, end_stmt_num));
 
   // Populate CallsTable, ModifiesProcToVariablesTable, UsesProcToVariablesTable
   if (!called_procedures_.empty()) {
-    pkb.AddInfoToTable(TableIdentifier::kCalls, proc_name_, called_procedures_);
+    vector<string> called_procedures;
+    for (string p : called_procedures_) {
+      called_procedures.push_back(p);
+    }
+    pkb.AddInfoToTable(TableIdentifier::kCalls, proc_name_, called_procedures);
   }
 
   if (!modifies_p_.empty()) {
-    pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, proc_name_, modifies_p_);
+    vector<string> modifies_p;
+    for (string v : modifies_p_) {
+      modifies_p.push_back(v);
+    }
+    pkb.AddInfoToTable(TableIdentifier::kModifiesProcToVar, proc_name_, modifies_p);
   }
 
   if (!uses_p_.empty()) {
-    pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, proc_name_, uses_p_);
+    vector<string> uses_p;
+    for (string v : uses_p_) {
+      uses_p.push_back(v);
+    }
+    pkb.AddInfoToTable(TableIdentifier::kUsesProcToVar, proc_name_, uses_p);
   }
 }

@@ -38,6 +38,8 @@ namespace pql_table {
     public:
       Predicate(std::string& first, std::string& second, std::vector<std::pair<int, int>>& pairs);
 
+      int GetPredSize();
+
       bool equal(Predicate &p);
   };
 }

@@ -5,7 +5,7 @@
 #include "../../../../spa/src/PQL/query_evaluator/solver/predicate.h"
 #include "../../../../spa/src/PQL/query_evaluator/query_evaluator_exceptions.h"
 #include "../../../../spa/src/PQL/query_parser/token.h"
-#include "../../../../spa/src/Utility/Entity.h"
+#include "../../../../spa/src/Utility/entity.h"
 #include "catch.hpp"
 
 using namespace std;

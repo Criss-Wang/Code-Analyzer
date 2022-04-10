@@ -1,6 +1,7 @@
-#include "clause.h"
 #include <memory>
 #include <utility>
+
+#include "clause.h"
 
 namespace pql_clause {
   class WithClause : public Clause {

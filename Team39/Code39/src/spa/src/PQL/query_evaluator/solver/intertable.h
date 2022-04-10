@@ -19,6 +19,8 @@ namespace pql_table {
 
       InterTable(std::vector<std::string>& header, std::vector<std::vector<int>>& rows);
 
+      InterTable(std::vector<std::string>&& header, std::vector<std::vector<int>>&& rows);
+
     public:
       int GetColNum();
 
@@ -36,7 +38,7 @@ namespace pql_table {
 
       InterTable MergeAndFilter(InterTable& t1, Predicate& pred);
 
-      bool equal(InterTable& t);
+      bool equal(InterTable t);
   }; 
 }
 

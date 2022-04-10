@@ -10,58 +10,172 @@
 #define INDEX_OF_STMT_TYPE 0
 #define INDEX_OF_EQUAL_OP 1
 
+const unordered_set<string> ReadPrintCallSet = { "read", "print", "call" };
 
-stack<int> populateFollowsRelationship(stack<int> previous, Pkb& pkb, int stmt_num) {
+//This is for assgin, call, print, read stmt only
+shared_ptr<Stmt> GenerateStmtEntity(vector<Token>& stmt_tokens, int stmt_num) {
+  if (stmt_tokens.at(INDEX_OF_EQUAL_OP).text_ == "=") {
+    return make_shared<AssignStmt>(stmt_tokens, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "read") {
+    return make_shared<ReadStmt>(stmt_tokens, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "print") {
+    return make_shared<PrintStmt>(stmt_tokens, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "call") {
+    return make_shared<CallStmt>(stmt_tokens, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "while") {
+    return make_shared<WhileStmt>(stmt_tokens, stmt_num);
+  } else {
+    return make_shared<IfStmt>(stmt_tokens, stmt_num);
+  }
+}
+
+CFGToken GenerateCfgTokens(vector<Token>& stmt_tokens, int stmt_num) {
+  if (stmt_tokens.at(INDEX_OF_EQUAL_OP).text_ == "=") {
+    return CFGToken(CFGTokenType::kAssign, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "read") {
+    return CFGToken(CFGTokenType::kRead, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "print") {
+    return CFGToken(CFGTokenType::kPrint, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "call") {
+    return CFGToken(CFGTokenType::kCall, stmt_num);
+  } else if (stmt_tokens.at(INDEX_OF_STMT_TYPE).text_ == "while") {
+    return CFGToken(CFGTokenType::kWhile, 0);;
+  } else {
+    return CFGToken(CFGTokenType::kIf, 0);
+  }
+}        
+
+void PopulateFollowsRelationship(stack<int>& previous, Pkb& pkb, int& stmt_num) {
 
   if (!previous.empty()) {
     if (stmt_num == previous.top()) {
-      return previous;
+      return;
     } else {
       // Add previous stmt num and current stmt num to FollowsTable
       pkb.AddInfoToTable(TableIdentifier::kFollows, previous.top(), stmt_num);
       previous.pop();
     }
   }
-
   previous.push(stmt_num);
 
-  return previous;
 }
 
-void populateNextRelationship(stack<int> previous, Pkb& pkb, int stmt_num) {
-  if (!previous.empty() && stmt_num != previous.top()) {
-    // Add previous stmt num and current stmt num to NextTable
-    pkb.AddInfoToTable(TableIdentifier::kNext, previous.top(), vector<int>{ stmt_num });
-    //cout << "Next: (" << previous.top() << " ," << stmt_num << ")" << endl;
-  }
-}
-
-stack<vector<int>> populateParentRelationship(stack<int> parent, stack<vector<int>> children, int stmt_num) {
+void AddChild(stack<int>& parent, stack<vector<int>>& children, int& stmt_num) {
   if (!parent.empty()) {
     children.top().push_back(stmt_num);
   }
-
-  return children;
 }
 
-stack<int> populateNextRelationshipForIf(stack<int> last_stmt_nums_in_if, Pkb& pkb, int stmt_num) {
+void PopulateParentRelationship(stack<int>& parent, stack<vector<int>>& children, Pkb& pkb) {
+  if (!parent.empty()) {
+    // Add parent stmt num and current stmt num to ParentTable
+    if (!children.top().empty()) {
+      pkb.AddInfoToTable(TableIdentifier::kParent, parent.top(), children.top());
+    }
+    parent.pop();
+    children.pop();
+  }
+}
+
+void PopulateNextRelationshipForIf(stack<vector<pair<int, int>>>& last_stmts_in_if, Pkb& pkb, int& stmt_num) {
   // Add the last stmt num in then/else container and current stmt num to Next Table
-  pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), vector<int>{ stmt_num });
-  //cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
+  vector<pair<int, int>> last_stmts = move(last_stmts_in_if.top());
+  for (int i = 0; i < last_stmts.size(); i++) {
+    if (last_stmts.at(i).second == 0) {
+      pkb.AddInfoToTable(TableIdentifier::kNext, last_stmts.at(i).first, vector<int>{ stmt_num });
+    } else {
+      vector<int> stmt_nums = { last_stmts.at(i).second, stmt_num };
+      pkb.AddInfoToTable(TableIdentifier::kNext, last_stmts.at(i).first, stmt_nums);
+    }
+  }
+  last_stmts_in_if.pop();
+}
 
-  last_stmt_nums_in_if.pop();
+void PopulateNextRelationshipForWhile(stack<int>& while_stmt_num, stack<vector<pair<int, int>>>& last_stmt_nums_in_if, bool& is_prev_stmt_while, Pkb& pkb) {
+  if (is_prev_stmt_while) {
+    const int kNextStmtNum = while_stmt_num.top() + 1;
+    // No stmt after while loop, add stmt num of while and first stmt num in container to Next Table
+    pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), vector<int>{kNextStmtNum});
+    while_stmt_num.pop();
+    is_prev_stmt_while = false;
+  }
 
-  pkb.AddInfoToTable(TableIdentifier::kNext, last_stmt_nums_in_if.top(), vector<int>{ stmt_num });
-  //cout << "Next: (" << last_stmt_nums_in_if.top() << " ," << stmt_num << ")" << endl;
+  // Find all while loops in if containers which are still waiting for next stmt and add them to Next Table
+  while (!last_stmt_nums_in_if.empty()) {
+    for (int i = 0; i < last_stmt_nums_in_if.top().size(); i++) {
+      pair<int, int> stmt = last_stmt_nums_in_if.top().at(i);
+      if (stmt.second != 0) {
+        pkb.AddInfoToTable(TableIdentifier::kNext, stmt.first, vector<int>{stmt.second});
+      }
+    }
+    last_stmt_nums_in_if.pop();
+  }
+}
 
-  last_stmt_nums_in_if.pop();
+void PopulateNextRelationship(stack<int>& previous, Pkb& pkb, int& stmt_num, stack<vector<pair<int, int>>>& last_stmt_nums_in_if,
+  stack<int>& while_stmt_num, bool& is_prev_stmt_if, bool& is_prev_stmt_while) {
 
-  return last_stmt_nums_in_if;
+  if (is_prev_stmt_if) {
+    PopulateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
+    is_prev_stmt_if = false;
+  } else if (is_prev_stmt_while) {
+    const int kNextStmtNum = while_stmt_num.top() + 1;
+    vector<int> next_stmt_nums_for_while = { kNextStmtNum, stmt_num };
+    // Add stmt num of while and next stmt num to Next Table
+    pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), next_stmt_nums_for_while);
+    while_stmt_num.pop();
+    is_prev_stmt_while = false;
+  } else {
+    if (!previous.empty() && stmt_num != previous.top()) {
+      // Add previous stmt num and current stmt num to NextTable
+      pkb.AddInfoToTable(TableIdentifier::kNext, previous.top(), vector<int>{ stmt_num });
+    }
+  }
+}
+
+void UpdateNextRelForIfInIf(bool& is_prev_stmt_while, bool& is_prev_stmt_if, stack<vector<pair<int, int>>>& last_stmt_nums_in_if,
+  int& previous_stmt_num, stack<int>& while_stmt_num) {
+
+  if (is_prev_stmt_while) {
+    const int kNextStmtNum = previous_stmt_num + 1;
+    last_stmt_nums_in_if.top().push_back({ previous_stmt_num, kNextStmtNum });
+    while_stmt_num.pop();
+    is_prev_stmt_while = false;
+  } else if (is_prev_stmt_if) {
+    vector<pair<int, int>> last_stmts = move(last_stmt_nums_in_if.top());
+    last_stmt_nums_in_if.pop();
+    for (pair<int, int> s : last_stmts) {
+      last_stmt_nums_in_if.top().push_back(s);
+    }
+    is_prev_stmt_if = false;
+  } else {
+    last_stmt_nums_in_if.top().push_back({ previous_stmt_num, 0 }); // 0 is used to represent that the stmt is not while
+  }
+}
+
+void UpdateNextRelForIfInWhile(bool& is_prev_stmt_while, bool& is_prev_stmt_if, stack<vector<pair<int, int>>>& last_stmt_nums_in_if,
+  int& previous_stmt_num, stack<int>& while_stmt_num, Pkb& pkb) {
+
+  if (is_prev_stmt_if) {
+    // Add the last stmt num in then/else container and stmt num of while to Next Table
+    PopulateNextRelationshipForIf(last_stmt_nums_in_if, pkb, while_stmt_num.top());
+    is_prev_stmt_if = false;
+  } else if (is_prev_stmt_while) {
+    while_stmt_num.pop();
+    // Add the stmt num of while and next stmt num to Next Table
+    const int kNextStmtNum = previous_stmt_num + 1;
+    vector<int> next_stmt_nums = { kNextStmtNum, while_stmt_num.top() };
+    pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, next_stmt_nums);
+    is_prev_stmt_while = false;
+  } else {
+    // Add the last stmt num in container and stmt num of while to Next Table
+    pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, vector<int>{ while_stmt_num.top() });
+  }
 }
 
 Parser::Parser(const std::string& input, Pkb& pkb) {
-
-  vector<Token> tokens_lst = tokenizer_.parse(input);
+  tokenizer_ = Tokenizer(input);
+  vector<Token> tokens_lst = move(tokenizer_.tokens_list_);
 
   vector<Token> proc_tokens = {};
   vector<shared_ptr<Stmt>> stmt_lst = {};
@@ -82,20 +196,18 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
   // Stores relevant stmt num for Next relationship
   stack<int> while_stmt_num;
   stack<int> if_stmt_num;
-  stack<int> last_stmt_nums_in_if;
+  stack<vector<pair<int, int>>> last_stmt_nums_in_if;
   bool is_prev_stmt_if = false;
   bool is_prev_stmt_while = false;
-  vector<int> next_stmt_nums_for_if = {};
-  vector<int> next_stmt_nums_for_while = {};
 
   // 1st round of sytax validation which involves curly brackets
   int curly_bracket_count = 0;
   int if_else_stmts = 0;
   bool is_new_container = true;
 
-
   for (auto token = begin(tokens_lst); token != end(tokens_lst); ++token) {
-    if (token->text_ == "}") {
+
+    if (token->type_ == TokenType::RIGHT_CURLY) {
 
       if (is_new_container) {
         throw InvalidSyntaxException();
@@ -107,82 +219,54 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         previous.pop();
       }
 
-      bool has_two_more_tokens = token != end(tokens_lst) - 1 && token != end(tokens_lst) - 2;
-      bool is_else_stmt = has_two_more_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == TokenType::LEFT_CURLY;
+      bool has_at_least_two_tokens = token != end(tokens_lst) - 1 && token != end(tokens_lst) - 2;
+      bool is_else_stmt = has_at_least_two_tokens && next(token, 1)->text_ == "else" && next(token, 2)->type_ == TokenType::LEFT_CURLY;
       
       if (is_else_stmt) {
         if_else_stmts -= 1;
-        token++;
-        token++;
+        token += 2;
         is_new_container = true;
 
-        int next_stmt_num = stmt_num + 1;
-        previous.push(next_stmt_num);
+        int next_stmt_num_in_else = stmt_num + 1;
+        previous.push(next_stmt_num_in_else);
         cfg_tokens.push_back(CFGToken(CFGTokenType::kThenEnd, 0));
 
-        // Add the next stmt num in 'else' container and stmt num of if to Next Table
-        next_stmt_nums_for_if.push_back(next_stmt_num);
-        pkb.AddInfoToTable(TableIdentifier::kNext, if_stmt_num.top(), next_stmt_nums_for_if);
-        //cout << "Next: (" << if_stmt_num.top() << " ," << next_stmt_num << ")" << endl;
+        // Add the next stmt num in 'else' and 'then' container and stmt num of if to Next Table
+        int next_stmt_num_in_then = if_stmt_num.top() + 1;
+        pkb.AddInfoToTable(TableIdentifier::kNext, if_stmt_num.top(), vector<int>{next_stmt_num_in_then, next_stmt_num_in_else});
 
         if_stmt_num.pop();
 
-        last_stmt_nums_in_if.push(previous_stmt_num);
-        if (is_prev_stmt_while) {
-          while_stmt_num.pop();
-          is_prev_stmt_while = false;
-        }
+        UpdateNextRelForIfInIf(is_prev_stmt_while, is_prev_stmt_if, last_stmt_nums_in_if, previous_stmt_num, while_stmt_num);
+        continue;
 
-      } else {
-        curly_bracket_count -= 1;
-
-        if (!parent.empty()) {
-          // Add parent stmt num and current stmt num to ParentTable
-          if (!children.top().empty()) {
-            pkb.AddInfoToTable(TableIdentifier::kParent, parent.top(), children.top());
-          }
-          parent.pop();
-          children.pop();
-        }
-
-        if (end_tokens.empty() && is_prev_stmt_while) {
-          // No stmt after while loop, add stmt num of while and first stmt num in container to Next Table
-          pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), next_stmt_nums_for_while);
-          //cout << "Next: (" << while_stmt_num.top() << " ," << next_stmt_nums_for_while.at(0) << ")" << endl;
-          while_stmt_num.pop();
-          is_prev_stmt_while = false;
-        }
-
-        if (!end_tokens.empty()) {
-          if (end_tokens.top() == "if") {
-            cfg_tokens.push_back(CFGToken(CFGTokenType::kElseEnd, 0));
-            last_stmt_nums_in_if.push(previous_stmt_num);
-            is_prev_stmt_if = true;
-
-            if (is_prev_stmt_while) {
-              while_stmt_num.pop();
-              is_prev_stmt_while = false;
-            }
-
-          } else if (end_tokens.top() == "while") {
-            cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileEnd, 0));
-
-            if (is_prev_stmt_if) {
-              // Add the last stmt num in then/else container and stmt num of while to Next Table
-              last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, while_stmt_num.top());
-              is_prev_stmt_if = false;
-            } else {
-              // Add the last stmt num in container and stmt num of while to Next Table
-              pkb.AddInfoToTable(TableIdentifier::kNext, previous_stmt_num, vector<int>{ while_stmt_num.top() });
-              //cout << "Next: (" << previous_stmt_num << " ," << while_stmt_num.top() << ")" << endl;
-            }
-
-            is_prev_stmt_while = true;
-          }
-          end_tokens.pop();
-
-        }
       }
+
+      curly_bracket_count -= 1;
+
+      PopulateParentRelationship(parent, children, pkb);
+
+      if (end_tokens.empty()) {
+        PopulateNextRelationshipForWhile(while_stmt_num, last_stmt_nums_in_if, is_prev_stmt_while, pkb);
+        continue;
+
+      } 
+      
+      if (end_tokens.top() == "if") {
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kElseEnd, 0));
+        UpdateNextRelForIfInIf(is_prev_stmt_while, is_prev_stmt_if, last_stmt_nums_in_if, previous_stmt_num, while_stmt_num);
+
+        is_prev_stmt_if = true;
+        end_tokens.pop();
+
+      } else if (end_tokens.top() == "while") {
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kWhileEnd, 0));
+        UpdateNextRelForIfInWhile(is_prev_stmt_while, is_prev_stmt_if, last_stmt_nums_in_if, previous_stmt_num, while_stmt_num, pkb);
+
+        is_prev_stmt_while = true;
+        end_tokens.pop();
+      }
+
     } else if (token != end(tokens_lst) - 1 && (next(token, 1)->text_ == "=" || token->text_ == "read" 
       || token->text_ == "print" || token->text_ == "call")) {
       stmt_num += 1;
@@ -193,71 +277,13 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         token++;
       }
 
-      if (is_prev_stmt_if) {
-        last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
-        is_prev_stmt_if = false;
-      } else if (is_prev_stmt_while) {
-        next_stmt_nums_for_while.push_back(stmt_num);
-        // Add stmt num of while and next stmt num to Next Table
-        pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), next_stmt_nums_for_while);
-        //cout << "Next: (" << while_stmt_num.top() << " ," << stmt_num << ")" << endl;
-        while_stmt_num.pop();
-        is_prev_stmt_while = false;
-      } else {
-        populateNextRelationship(previous, pkb, stmt_num);
-      }
+      PopulateNextRelationship(previous, pkb, stmt_num, last_stmt_nums_in_if, while_stmt_num, is_prev_stmt_if, is_prev_stmt_while);
 
-      children = populateParentRelationship(parent, children, stmt_num);
-      previous = populateFollowsRelationship(previous, pkb, stmt_num);
+      AddChild(parent, children, stmt_num);
+      PopulateFollowsRelationship(previous, pkb, stmt_num);
 
-      if (tokens.at(INDEX_OF_EQUAL_OP).text_ == "=") {
-        stmt_lst.push_back(make_shared<AssignStmt>(AssignStmt(tokens, stmt_num)));
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kAssign, stmt_num));
-
-      } else if (tokens.at(INDEX_OF_STMT_TYPE).text_ == "read") {
-        stmt_lst.push_back(make_shared<ReadStmt>(ReadStmt(tokens, stmt_num)));
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kRead, stmt_num));
-
-      } else if (tokens.at(INDEX_OF_STMT_TYPE).text_ == "print") {
-        stmt_lst.push_back(make_shared<PrintStmt>(PrintStmt(tokens, stmt_num)));
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kPrint, stmt_num));
-
-      } else {
-        stmt_lst.push_back(make_shared<CallStmt>(CallStmt(tokens, stmt_num)));
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kCall, stmt_num));
-
-      }
-
-    } else if (token->text_ == "procedure") {
-      //cout << "proc" << endl;
-      is_new_container = true;
-      vector<Token> tokens;
-      while (token->type_ != TokenType::LEFT_CURLY && token != end(tokens_lst) - 1) {
-        tokens.push_back(*token);
-        token++;
-      }
-
-      if (!proc_tokens.empty()) {
-        proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
-        proc_tokens = {};
-        stmt_lst = {};
-
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-        cfg::CFG::GenerateCfg(cfg_tokens);
-        // TODO: change return type of GenerateCfg to CFG
-        //pkb.AddCfg(CFG::GenerateCfg(cfg_tokens));
-
-      }
-      
-      proc_tokens = tokens;
-      curly_bracket_count += 1;
-
-      // reset values for next procedure
-      cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
-      previous = {};
-      parent = {};
-      children = {};
-      children.push({});
+      stmt_lst.push_back(move(GenerateStmtEntity(tokens, stmt_num)));
+      cfg_tokens.push_back(move(GenerateCfgTokens(tokens, stmt_num)));
 
     } else if (token->text_ == "while" || token->text_ == "if") {
       stmt_num += 1;
@@ -268,53 +294,66 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
         token++;
       }
 
-      if (is_prev_stmt_if) {
-        last_stmt_nums_in_if = populateNextRelationshipForIf(last_stmt_nums_in_if, pkb, stmt_num);
-        is_prev_stmt_if = false;
-      } else if (is_prev_stmt_while) {
-        next_stmt_nums_for_while.push_back(stmt_num);
-        // Add stmt num of while and next stmt num to Next Table
-        pkb.AddInfoToTable(TableIdentifier::kNext, while_stmt_num.top(), next_stmt_nums_for_while);
-        //cout << "Next: (" << while_stmt_num.top() << " ," << stmt_num << ")" << endl;
-        while_stmt_num.pop();
-        is_prev_stmt_while = false;
-      } else {
-        populateNextRelationship(previous, pkb, stmt_num);
-      }
+      PopulateNextRelationship(previous, pkb, stmt_num, last_stmt_nums_in_if, while_stmt_num, is_prev_stmt_if, is_prev_stmt_while);
 
-      children = populateParentRelationship(parent, children, stmt_num);
-      previous = populateFollowsRelationship(previous, pkb, stmt_num);
+      AddChild(parent, children, stmt_num);
+      PopulateFollowsRelationship(previous, pkb, stmt_num);
       parent.push(stmt_num);
       children.push({});
       previous.push(stmt_num + 1);
 
-      if (tokens.at(INDEX_OF_STMT_TYPE).text_ == "while") {
-        stmt_lst.push_back(make_shared<WhileStmt>(WhileStmt(tokens, stmt_num)));
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kWhile, stmt_num));
-        end_tokens.push("while");
+      stmt_lst.push_back(move(GenerateStmtEntity(tokens, stmt_num)));
+      cfg_tokens.push_back(move(GenerateCfgTokens(tokens, stmt_num)));
 
-        // Add the stmt num of while and next stmt num to Next Table
-        int next_stmt_num = stmt_num + 1;
-        next_stmt_nums_for_while = { next_stmt_num };
-        //cout << "Next: (" << stmt_num << " ," << next_stmt_num << ")" << endl;
+      if (tokens.at(INDEX_OF_STMT_TYPE).text_ == "while") {
+        end_tokens.push("while");
 
         while_stmt_num.push(stmt_num);
 
       } else {
-        stmt_lst.push_back(make_shared<IfStmt>(IfStmt(tokens, stmt_num)));
         if_else_stmts += 1;
 
-        cfg_tokens.push_back(CFGToken(CFGTokenType::kIf, stmt_num));
         end_tokens.push("if");
 
-        // Add the stmt num of if and next stmt num to Next Table
-        int next_stmt_num = stmt_num + 1;
-        next_stmt_nums_for_if = { next_stmt_num };
-        //cout << "Next: (" << stmt_num << " ," << next_stmt_num << ")" << endl;
-
         if_stmt_num.push(stmt_num);
+        last_stmt_nums_in_if.push({});
       }
 
+      curly_bracket_count += 1;
+
+    } else if (token->text_ == "procedure") {
+      is_new_container = true;
+      vector<Token> tokens;
+      while (token->type_ != TokenType::LEFT_CURLY && token != end(tokens_lst) - 1) {
+        tokens.push_back(*token);
+        token++;
+      }
+
+      if (!proc_tokens.empty()) {
+        // create Procedure and cfg for previous procedure
+        proc_lst_.push_back(move(Procedure(proc_tokens, stmt_lst)));
+        proc_tokens = {};
+        stmt_lst = {};
+
+        cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
+
+        cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
+        pkb.AddCfg(make_shared<cfg::CFG>(move(cfg)));
+
+        // reset values for next procedure
+        cfg_tokens = { CFGToken(CFGTokenType::kStart, 0) };
+        previous = {};
+        parent = {};
+        children = {};
+        children.push({});
+        while_stmt_num = {};
+        if_stmt_num = {};
+        last_stmt_nums_in_if = {};
+        is_prev_stmt_if = false;
+        is_prev_stmt_while = false;
+      }
+
+      proc_tokens = tokens;
       curly_bracket_count += 1;
 
     } else {
@@ -324,9 +363,9 @@ Parser::Parser(const std::string& input, Pkb& pkb) {
 
   proc_lst_.push_back(Procedure(proc_tokens, stmt_lst));
   cfg_tokens.push_back(CFGToken(CFGTokenType::kEnd, 0));
-  cfg::CFG::GenerateCfg(cfg_tokens);
-  // TODO: change return type of GenerateCfg to CFG
-  //pkb.AddCfg(CFG::GenerateCfg(cfg_tokens));
+
+  cfg::CFG cfg = cfg::CFG::GenerateCfg(cfg_tokens);
+  pkb.AddCfg(make_shared<cfg::CFG>(move(cfg)));
 
   if (curly_bracket_count != 0 || if_else_stmts != 0) {
     throw InvalidSyntaxException();
@@ -400,10 +439,12 @@ void Parser::Validate() {
   vector<vector<string>> called_procedures_set = {};
 
   for (Procedure proc : proc_lst_) {
-    proc.Validate();
-
     procedures.push_back(proc.GetProcName());
-    called_procedures_set.push_back(proc.GetCalledProcedures());
+    vector<string> calls;
+    for (string call : proc.GetCalledProcedures()) {
+      calls.push_back(call);
+    }
+    called_procedures_set.push_back(calls);
   }
 
   ValidateProcedureCalls(procedures, called_procedures_set);

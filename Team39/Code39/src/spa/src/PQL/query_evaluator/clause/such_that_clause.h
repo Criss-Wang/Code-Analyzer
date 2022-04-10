@@ -11,9 +11,9 @@ namespace pql_clause {
     public:
       SuchThatClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
           Clause{} {
-        left_ = left;
+        left_ = move(left); 
         is_synonym_left_ = is_synonym_left;
-        right_ = right;
+        right_ = move(right);
         is_synonym_right_ = is_synonym_right;
       }
 
@@ -57,40 +57,46 @@ namespace pql_clause {
     public:
       FollowsClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
           SuchThatClause{ left, is_synonym_left, right, is_synonym_right } {
-          type_ = pql::RelationshipTypes::kFollows;
+        type_ = pql::RelationshipTypes::kFollows;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
+
   };
 
   class FollowsTClause : public SuchThatClause {
     public:
       FollowsTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kFollowsT;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kFollowsT;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
-
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
       int GetPriority() override;
   };
 
   class ParentClause : public SuchThatClause {
     public:
       ParentClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kParent;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kParent;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };
@@ -98,13 +104,15 @@ namespace pql_clause {
   class ParentTClause : public SuchThatClause {
     public:
       ParentTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kParentT;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kParentT;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };
@@ -112,13 +120,15 @@ namespace pql_clause {
   class UsesSClause : public SuchThatClause {
     public:
       UsesSClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kUsesS;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kUsesS;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };
@@ -126,13 +136,15 @@ namespace pql_clause {
   class ModifiesSClause : public SuchThatClause {
     public:
       ModifiesSClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kModifiesS;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kModifiesS;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };
@@ -141,12 +153,14 @@ namespace pql_clause {
     public:
       UsesPClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kUsesP;
+        type_ = pql::RelationshipTypes::kUsesP;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };
@@ -160,7 +174,9 @@ namespace pql_clause {
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };
@@ -169,12 +185,14 @@ namespace pql_clause {
     public:
       CallsClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kCalls;
+        type_ = pql::RelationshipTypes::kCalls;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };
@@ -182,13 +200,15 @@ namespace pql_clause {
   class CallsTClause : public SuchThatClause {
     public:
       CallsTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kCallsT;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kCallsT;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };
@@ -196,13 +216,15 @@ namespace pql_clause {
   class NextClause : public SuchThatClause {
     public:
       NextClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kNext;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kNext;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };
@@ -210,13 +232,15 @@ namespace pql_clause {
   class NextTClause : public SuchThatClause {
     public:
       NextTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kNextT;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kNextT;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };
@@ -224,13 +248,15 @@ namespace pql_clause {
   class AffectsClause : public SuchThatClause {
     public:
       AffectsClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kAffects;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kAffects;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };
@@ -238,13 +264,15 @@ namespace pql_clause {
   class AffectsTClause : public SuchThatClause {
     public:
       AffectsTClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
-          type_ = pql::RelationshipTypes::kAffectsT;
+          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
+        type_ = pql::RelationshipTypes::kAffectsT;
       }
 
     public:
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates);
+          std::vector<pql_table::Predicate>& predicates) {
+        SuchThatClause::Evaluate(cache, domain, predicates);
+      };
 
       int GetPriority() override;
   };

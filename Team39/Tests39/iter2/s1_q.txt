@@ -1,0 +1,185 @@
+1 - Boolean return for syntactically invalid query
+read r;
+Select Boolean such that Modifies(r, "read")
+
+5000
+2 - Boolean return for semantically invalid query, synonym not declared 
+stmt s;
+Select BOOLEAN such that Modifies(r, "read")
+FALSE
+5000
+3 - Semantically invalid query, synonym declared more than once
+stmt s, s, s;
+Select BOOLEAN such that Modifies(r, "read")
+FALSE
+5000
+4 - Valid boolean return
+read r;
+Select BOOLEAN such that Modifies(r, "story")
+TRUE
+5000
+5 - Valid boolean return
+assign a;
+Select BOOLEAN pattern a(_, "22")
+FALSE
+5000
+6 - Synonym that is named BOOLEAN
+print BOOLEAN;
+Select BOOLEAN 
+5, 7, 10, 19
+5000
+7 - Meaningless query
+assign a;
+Select BOOLEAN with 3 = a.stmt#
+TRUE
+5000
+8 - Meaningless query
+assign a;
+Select BOOLEAN with a.stmt# = 3
+TRUE
+5000
+9 - Meaningless query
+
+Select BOOLEAN with 12 = 12
+TRUE
+5000
+10 - Meaningless query
+
+Select BOOLEAN with 1000000000000000000 = 1000000000000000000
+TRUE
+5000
+11 - Meaningless query
+
+Select BOOLEAN with "Abc" = "Abc"
+TRUE
+5000
+12 - Valid tuple return using synonym only
+if ifs; assign a; 
+Select <ifs, a> such that Parent(ifs, a)
+2 3, 2 4, 2 14, 9 11
+5000
+13 - Valid tuple return using attributes 
+procedure p; print pn;
+Select <p.procName, pn.varName> such that Uses(pn, "print")
+procedure print, k print, Procedure print
+5000
+14 - Valid tuple return using synonym and attributes
+read r; while w;
+Select <r, r.varName> such that Parent*(w, r)
+13 story 
+5000
+15 - Tuple return for repeat of same synonym
+assign a;
+Select <a, a.stmt#> pattern a(_, _"f * cenX"_)
+11 11
+5000
+16 - Tuple return for repeat of same synonym
+read r;
+Select <r, r>
+1 1, 13 13, 18 18, 20 20
+5000
+17 - Tuple return for syntactically invalid query
+stmt s;
+Select <s.stmt>
+
+5000
+18 - Tuple return for semantically invalid query
+constant c;
+Select <c.stmt#>
+
+5000
+19 - Syntactically invalid use of multi clause
+assign a, a1;
+Select <a, a1> pattern a ("p", _"cenX"_ ) and pattern a1 ("xxxx", _"xy"_)
+
+5000
+20 - Valid synonym return with multiple such that clauses
+stmt s;
+Select s such that Uses(s, "while") such that Uses(s, "while")
+2, 6, 8, 9 
+5000
+21 - Valid synonym return with multiple such that clauses
+stmt s;
+Select s such that Uses(s, "while") such that Uses(s, "z")
+2, 6, 9
+5000
+22 - Valid tuple return with multiple assign pattern clauses
+assign a, a1;
+Select <a, a1> pattern a ("p", _"cenX"_ ) pattern a1 ("xxxx", _"xy"_)
+11 14
+5000
+23 - Valid boolean return with multiple such that and assign pattern clauses
+assign a; if ifs1, ifs2; while w;
+Select BOOLEAN such that Parent(ifs1, a) pattern a ("x", _ ) such that Parent*(ifs1, ifs2)
+TRUE
+5000
+24 - Find all vairiables modified by the procedure named k
+variable v; procedure p;
+Select <p.procName, v> such that Modifies(p, v) with p.procName = "k"
+k procedure, k print, k abc 
+5000
+25 - Find all variables modified and used by a procedure
+variable v; procedure p;
+Select <p, v> such that Modifies(p,v) and Uses(p,v)
+procedure while, procedure z, procedure p, procedure y, procedure print, procedure procedure, procedure x, procedure xxxx
+5000
+26 - Find assign with subpattern 289 * 444 in containter of containter
+stmt s, s1; assign a;
+Select <s, s1.stmt#, a> such that Parent*(s, s1) pattern a (_, _"289 * 444"_) such that Parent(s1, a)
+6 9 11, 2 9 11
+5000
+27 - Valid synonym return with with clause
+stmt s; constant c;
+Select s such that Uses(s, "while") with s.stmt# = c.value
+2, 9
+5000
+28 - Valid tuple return with with clause
+stmt s; constant c;
+Select <s, c> such that Uses(s, "while") with s.stmt# = c.value
+2 2, 9 9
+5000
+29 - Find read, print statement that modify or uses same variable
+read r; print p;
+Select <r.varName, r, p.stmt#> with r.varName=p.varName
+z 1 19, procedure 20 5 
+5000
+30 - Valid boolean return with with clause 
+stmt s; procedure p;
+Select BOOLEAN such that Uses(s, "while") with p.procName = "  procedure  "
+TRUE
+5000
+31 - Syntactically invalid with clause
+stmt s;
+Select BOOLEAN such that with p.procName = "procedure"
+
+5000
+32 - Semantically invalid with clause 
+stmt s; procedure p;
+Select BOOLEAN such that Uses(s, "while") with p.procName = s.stmt#
+FALSE
+5000
+33 - Semantically invalid with clause as p is not declared.
+stmt s;
+Select BOOLEAN such that Uses(s, "while") with p.procName = "procedure"
+FALSE
+5000
+34 - Valid synonym return with such that and explicit and. Similar to 14 
+stmt s;
+Select s such that Uses(s, "while") and Uses(s, "z")
+2, 6, 9 
+5000
+35 - Valid tuple return with pattern and explicit and. Similar to 15
+assign a, a1;
+Select <a, a1> pattern a ("p", _"cenX"_ ) and a1 ("xxxx", _"xy"_)
+11 14
+5000
+36 - Syntactically invalid use of explicit and
+stmt s;
+Select s such that Uses(s, "while") and such that Uses(s, "z")
+
+5000
+37 - Semantically invalid use of explicit and
+stmt s;
+Select BOOLEAN such that Uses(s, "z") and Modifies(_, "z")
+FALSE
+5000

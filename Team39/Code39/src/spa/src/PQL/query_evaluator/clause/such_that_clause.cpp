@@ -2,7 +2,6 @@
 #include <set>
 
 #include "such_that_clause.h"
-#include "../query_evaluator_exceptions.h"
 
 #define INVALID_INDEX -1
 #define WILDCARD 0
@@ -184,129 +183,60 @@ namespace pql_clause {
     (this->*fn)(cache, domain, predicates);
   }
 
-  void FollowsClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
   int FollowsClause::GetPriority() {
     return SECOND_HIGHEST_PRIORITY;
-  }
-
-  void FollowsTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
   int FollowsTClause::GetPriority() {
     return THIRD_HIGHEST_PRIORITY;
   }
 
-  void ParentClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
   int ParentClause::GetPriority() {
     return SECOND_HIGHEST_PRIORITY;
-  }
-
-  void ParentTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
   int ParentTClause::GetPriority() {
     return THIRD_HIGHEST_PRIORITY;
   }
 
-  void CallsClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
   int CallsClause::GetPriority() {
     return SECOND_HIGHEST_PRIORITY;
-  }
-
-  void CallsTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
   int CallsTClause::GetPriority() {
     return THIRD_HIGHEST_PRIORITY;
   }
 
-  void UsesSClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
   int UsesSClause::GetPriority() {
     return THIRD_HIGHEST_PRIORITY;
-  }
-
-  void ModifiesSClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
   int ModifiesSClause::GetPriority() {
     return SECOND_HIGHEST_PRIORITY;
   }
 
-  void UsesPClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
   int UsesPClause::GetPriority() {
     return THIRD_HIGHEST_PRIORITY;
-  }
-
-  void ModifiesPClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
   int ModifiesPClause::GetPriority() {
     return THIRD_HIGHEST_PRIORITY;
   }
 
-  void NextClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
   int NextClause::GetPriority() {
     return SECOND_HIGHEST_PRIORITY;
-  }
-
-  void NextTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-     std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
   int NextTClause::GetPriority() {
     return THIRD_HIGHEST_PRIORITY;
   }
 
-  void AffectsClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
-  }
-
   int AffectsClause::GetPriority() {
     return LOWEST_PRIORITY;
-  }
-
-  void AffectsTClause::Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-      std::vector<pql_table::Predicate>& predicates) {
-    SuchThatClause::Evaluate(cache, domain, predicates);
   }
 
   int AffectsTClause::GetPriority() {
     return LOWEST_PRIORITY;
   }
 }
+

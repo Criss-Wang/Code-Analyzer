@@ -1,0 +1,40 @@
+procedure procedure {
+     read z; 
+	if ((read == 0) || (print ==0) ) then { 
+	      x  = 10000; 
+		y = x * z * t + (5 + 4); 
+		print procedure;  
+	} else{
+		while (while!= 0) { 
+			print print; 
+			while = while + 1; 
+			if ((while == 0) &&(z > 9)) then{ 
+				print p; 
+				p = 289 * 444 + (f * cenX); 
+				call k; 
+			} else {
+				read story; 
+			}
+		}
+		xxxx = xy + (99 * (((4) + y) * 9));
+		call procedure;
+	} 
+}
+
+procedure k {
+	call Procedure;
+	if ( !(telephone == bye) ) then 	{
+		x = 2 + xxxx;
+	} else {
+		while ( we == 2 ) {
+			print = (8 * d / (9 + (w % 3) - 1) + print);
+			while (Hello != 99) {
+				Bye = 3;
+			}
+		}
+	}
+}
+
+procedure Procedure {
+	print z; 
+}
