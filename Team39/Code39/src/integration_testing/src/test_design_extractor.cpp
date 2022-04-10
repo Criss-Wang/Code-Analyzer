@@ -97,7 +97,7 @@ TEST_CASE("Test Nested Population for Parent") {
     REQUIRE(!pkb.IsRelationshipHolds(pql::RelationshipTypes::kParentT, 10, 12));
 
     vector<int> parents_of_4 = pkb.GetRelFirstArgument(pql::RelationshipTypes::kParentT, 4);
-    vector<int> expected_parents = {3, 1};
+    vector<int> expected_parents = {1, 3};
     vector<int> invalid_parents = {};
     REQUIRE(parents_of_4 == expected_parents);
     REQUIRE(parents_of_4 != invalid_parents);
