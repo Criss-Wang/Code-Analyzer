@@ -1,5 +1,6 @@
-#include <map>
-#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include "such_that_clause.h"
 
@@ -9,38 +10,39 @@
 #define SYNONYM 2
 #define SECOND_HIGHEST_PRIORITY 1
 #define THIRD_HIGHEST_PRIORITY 2
-#define LOWEST_PRIORITY 3
+#define SECOND_LOWEST_PRIORITY 3
+#define LOWEST_PRIORITY 4
 
 namespace pql_clause {
   typedef void (SuchThatClause::*EvaluateFn)(pql_cache::Cache&, std::unordered_map<std::string, std::vector<int>>&, std::vector<pql_table::Predicate>&);
 
-  const map<int, EvaluateFn> WildcardEvaluateFnMap = {
+  const std::unordered_map<int, EvaluateFn> WildcardEvaluateFnMap = {
     { WILDCARD, &SuchThatClause::EvaluateWildWild },
     { ENTITY  , &SuchThatClause::EvaluateWildEnt  },
     { SYNONYM , &SuchThatClause::EvaluateWildSyn  }
   };
 
-  const map<int, EvaluateFn> EntEvaluateFnMap = {
+  const std::unordered_map<int, EvaluateFn> EntEvaluateFnMap = {
     { WILDCARD, &SuchThatClause::EvaluateEntWild  },
     { ENTITY  , &SuchThatClause::EvaluateEntEnt   },
     { SYNONYM , &SuchThatClause::EvaluateEntSyn   }
   };
 
-  const map<int, EvaluateFn> SynEvaluateFnMap = {
+  const std::unordered_map<int, EvaluateFn> SynEvaluateFnMap = {
     { WILDCARD, &SuchThatClause::EvaluateSynWild  },
     { ENTITY  , &SuchThatClause::EvaluateSynEnt   },
     { SYNONYM , &SuchThatClause::EvaluateSynSyn   }
   };
 
-  const map<int, map<int, EvaluateFn>> EvaluateFnMap = {
+  const std::unordered_map<int, unordered_map<int, EvaluateFn>> EvaluateFnMap = {
     { WILDCARD, WildcardEvaluateFnMap },
     { ENTITY, EntEvaluateFnMap },
     { SYNONYM,  SynEvaluateFnMap }
   };
 
-  const std::set<pql::RelationshipTypes> LeftProcedureTypeSet { pql::kCalls, pql::kCallsT, pql::kModifiesP, pql::kUsesP };
-  const std::set<pql::RelationshipTypes> RightProcedureTypeSet{ pql::kCalls, pql::kCallsT };
-  const std::set<pql::RelationshipTypes> RightVariableTypeSet{ pql::kModifiesS, pql::kModifiesP, pql::kUsesS, pql::kUsesP };
+  const std::unordered_set<pql::RelationshipTypes> LeftProcedureTypeSet { pql::kCalls, pql::kCallsT, pql::kModifiesP, pql::kUsesP };
+  const std::unordered_set<pql::RelationshipTypes> RightProcedureTypeSet{ pql::kCalls, pql::kCallsT };
+  const std::unordered_set<pql::RelationshipTypes> RightVariableTypeSet{ pql::kModifiesS, pql::kModifiesP, pql::kUsesS, pql::kUsesP };
 
   std::vector<std::string> SuchThatClause::GetInvovledSynonyms() {
     std::vector<std::string> res;
@@ -183,60 +185,26 @@ namespace pql_clause {
     (this->*fn)(cache, domain, predicates);
   }
 
-  int FollowsClause::GetPriority() {
-    return SECOND_HIGHEST_PRIORITY;
-  }
+  const unordered_map<pql::RelationshipTypes, int> PriorityMap = {
+    { pql::RelationshipTypes::kFollows, SECOND_HIGHEST_PRIORITY }, 
+    { pql::RelationshipTypes::kFollowsT, SECOND_LOWEST_PRIORITY },
+    { pql::RelationshipTypes::kParent, SECOND_HIGHEST_PRIORITY },
+    { pql::RelationshipTypes::kParentT, SECOND_LOWEST_PRIORITY },
+    { pql::RelationshipTypes::kCalls, SECOND_HIGHEST_PRIORITY },
+    { pql::RelationshipTypes::kCallsT, THIRD_HIGHEST_PRIORITY },
+    { pql::RelationshipTypes::kUsesS, THIRD_HIGHEST_PRIORITY },
+    { pql::RelationshipTypes::kModifiesS, SECOND_HIGHEST_PRIORITY },
+    { pql::RelationshipTypes::kUsesP, SECOND_LOWEST_PRIORITY },
+    { pql::RelationshipTypes::kModifiesP, SECOND_LOWEST_PRIORITY },
+    { pql::RelationshipTypes::kNext, SECOND_HIGHEST_PRIORITY },
+    { pql::RelationshipTypes::kNextT, SECOND_LOWEST_PRIORITY },
+    { pql::RelationshipTypes::kAffects, LOWEST_PRIORITY },
+    { pql::RelationshipTypes::kAffectsT, LOWEST_PRIORITY },
+  };
+  
 
-  int FollowsTClause::GetPriority() {
-    return THIRD_HIGHEST_PRIORITY;
-  }
-
-  int ParentClause::GetPriority() {
-    return SECOND_HIGHEST_PRIORITY;
-  }
-
-  int ParentTClause::GetPriority() {
-    return THIRD_HIGHEST_PRIORITY;
-  }
-
-  int CallsClause::GetPriority() {
-    return SECOND_HIGHEST_PRIORITY;
-  }
-
-  int CallsTClause::GetPriority() {
-    return THIRD_HIGHEST_PRIORITY;
-  }
-
-  int UsesSClause::GetPriority() {
-    return THIRD_HIGHEST_PRIORITY;
-  }
-
-  int ModifiesSClause::GetPriority() {
-    return SECOND_HIGHEST_PRIORITY;
-  }
-
-  int UsesPClause::GetPriority() {
-    return THIRD_HIGHEST_PRIORITY;
-  }
-
-  int ModifiesPClause::GetPriority() {
-    return THIRD_HIGHEST_PRIORITY;
-  }
-
-  int NextClause::GetPriority() {
-    return SECOND_HIGHEST_PRIORITY;
-  }
-
-  int NextTClause::GetPriority() {
-    return THIRD_HIGHEST_PRIORITY;
-  }
-
-  int AffectsClause::GetPriority() {
-    return LOWEST_PRIORITY;
-  }
-
-  int AffectsTClause::GetPriority() {
-    return LOWEST_PRIORITY;
+  int SuchThatClause::GetPriority() {
+    return PriorityMap.at(type_);
   }
 }
 
