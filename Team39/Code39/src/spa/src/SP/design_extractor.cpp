@@ -77,7 +77,6 @@ void PopulateNestedModifiesOrUses(RelListTable& parent_star_table, Table<int, ve
       tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
     }
 
-    if (tmp_lst.empty()) return;
     bool success = t.UpdateKeyWithNewValue(parent_stmt, tmp_lst);
   }
 }
@@ -96,7 +95,6 @@ void PopulateReverseNestedModifiesOrUses(RelListTable& child_star_table, Table<i
       tmp_lst.erase(unique(tmp_lst.begin(), tmp_lst.end()), tmp_lst.end());
     }
 
-    if (tmp_lst.empty()) return;
     bool success = t.UpdateKeyWithNewValue(var, tmp_lst);
   }
 }
