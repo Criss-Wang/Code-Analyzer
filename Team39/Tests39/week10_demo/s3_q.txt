@@ -8,10 +8,10 @@ assign a;
 Select BOOLEAN pattern a(_, "x"_)
 
 5000
-3 - Semantically invalid expression
+3 - Syntatically invalid expression
 assign a;
 Select BOOLEAN pattern a (_, "+ 100")
-FALSE
+
 5000
 4 - Select assign statements with x on LHS
 assign a;

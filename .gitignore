@@ -758,3 +758,14 @@ Team39/Tests30/out.xml
 Team39/Tests30/run_query_affects_basic.bat
 Team39/Tests30/run_query_next_basic.bat
 Team39/Tests39/sp/valid_programs/Simple_source_stress.txt
+Team39/invalid_sem_out.xml
+Team39/invalid_syntax_out.xml
+Team39/next_and_affects_out.xml
+Team39/pql_stress_test_out.xml
+Team39/s1_out.xml
+Team39/s2_out.xml
+Team39/s3_out.xml
+Team39/s4_out.xml
+Team39/sample_out.xml
+Team39/system test.txt
+Team39/Tests39.zip
