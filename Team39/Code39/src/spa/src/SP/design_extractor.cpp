@@ -22,6 +22,9 @@ int Dfs(RelListTable& table_to_refer, RelListTable& table_to_update, int key) {
       // Merge the vectors of children
       vector<int> value = table_to_update.GetValueByKey(end_val);
       ans.insert(ans.end(), value.begin(), value.end());
+      // Remove duplicate elements
+      sort(ans.begin(), ans.end());
+      ans.erase(unique(ans.begin(), ans.end()), ans.end());
     }
   }
 
@@ -110,8 +113,8 @@ void PopulateReverseNestedModifiesOrUses(RelListTable& child_star_table, Table<i
   }
 }
 
-void PopulateNestedModifiesPOrUsesP(RelListTable& calls_star_table, Table<int, vector<int>>& t) {
-  for (const int proc : t.GetKeyLst()) {
+void PopulateNestedModifiesPOrUsesP(RelListTable& calls_star_table, RelListTable& t) {
+  for (const int proc : calls_star_table.GetKeyLst()) {
     // Get the variables
     vector<int> variables = {};
     if (t.KeyExistsInTable(proc)) {
@@ -145,11 +148,12 @@ void PopulateNestedModifiesPOrUsesP(RelListTable& calls_star_table, Table<int, v
   }
 }
 
-void PopulateReverseNestedModifiesPOrUsesP(RelListTable& called_by_star_table, Table<int, vector<int>>& t) {
+void PopulateReverseNestedModifiesPOrUsesP(RelListTable& called_by_star_table, RelListReverseTable& t) {
   for (const int var : t.GetKeyLst()) {
     // Get the procedures associated with the variable
     vector<int> procedures = t.GetValueByKey(var);
-    int initial_procedures_size = procedures.size();
+    vector<int> ans = vector(procedures);
+    int initial_procedures_size = ans.size();
 
     for (const int proc : procedures) {
       // Check if the procedure is called by others
@@ -159,16 +163,16 @@ void PopulateReverseNestedModifiesPOrUsesP(RelListTable& called_by_star_table, T
       }
 
       // Merge the vectors with new values
-      procedures.insert(procedures.end(), callers.begin(), callers.end());
+      ans.insert(ans.end(), callers.begin(), callers.end());
     }
 
     // Remove duplicate elements
-    sort(procedures.begin(), procedures.end());
-    procedures.erase(unique(procedures.begin(), procedures.end()), procedures.end());
+    sort(ans.begin(), ans.end());
+    ans.erase(unique(ans.begin(), ans.end()), ans.end());
 
     // Update the key with new vector
-    if (initial_procedures_size != procedures.size()) {
-      t.UpdateKeyWithNewValue(var, procedures);
+    if (initial_procedures_size != ans.size()) {
+      t.UpdateKeyWithNewValue(var, ans);
     }
   }
 }
