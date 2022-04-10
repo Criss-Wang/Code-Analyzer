@@ -4,23 +4,13 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <stack>
 
-#include "../../query_parser/token.h"
-#include "../../../PKB/pkb.h"
-#include "../../../Utility/CFG/control_flow_graph.h"
+#include "generator.h"
 
 //Cache computes the Next* and Affect relationship
 //It will stores the computed result to speed up the evaulaution process
 namespace pql_cache {
-  struct hash_pair_fn {
-    std::size_t operator() (const std::pair<int, int>& p) const {
-      std::size_t h1 = std::hash<int>{}(p.first);
-      std::size_t h2 = std::hash<int>{}(p.second);
-
-      return h1 ^ h2;
-    }
-  };
-
   const unordered_set<pql::RelationshipTypes> cache_store_type = {
     pql::kNextT, pql::kAffects, pql::kAffectsT
   };
@@ -41,6 +31,7 @@ namespace pql_cache {
       std::unordered_map<pql::RelationshipTypes, bool> inverse_rel_cache_boolean_;
 
       Pkb* pkb_;
+      Generator generator_;
 
     public:
       Cache(Pkb* pkb) {
@@ -52,9 +43,15 @@ namespace pql_cache {
           rel_cache_boolean_[type] = false;
           inverse_rel_cache_boolean_[type] = false;
         }
+
+        generator_.pkb_ = pkb;
+        generator_.affects_pair_domain_ = &pair_cache_[pql::RelationshipTypes::kAffects];
       }
 
     public:
+    /*-------------------------------------------------------API for domain---------------------------------------------------------*/
+      unordered_set<int> GetAllEntity(const EntityIdentifier entity_identifier);
+
     /*-------------------------------------------------------API for clause----------------------------------------------------------*/
       bool IsComputeRelHolds(pql::RelationshipTypes type, int left, int right);
 
@@ -99,20 +96,12 @@ namespace pql_cache {
       void GenerateNextTOrAffectsTInverseRelDomain(pql::RelationshipTypes type);
 
       void GenerateNextTOrAffectsTPairDomain(pql::RelationshipTypes type);
-
-      static unordered_map<int, unordered_set<int>> PopulateStarRelationship(unordered_map<int, unordered_set<int>>& rel_table);
     /*---------------------------------------------------------Affect---------------------------------------------------------------*/
       void GenerateAffectsRelDomain(pql::RelationshipTypes type);
 
       void GenerateAffectsInverseRelDomain(pql::RelationshipTypes type);
 
       void GenerateAffectsPairDomain(pql::RelationshipTypes type);
-
-      void ComputeAffectsRelationship(cfg::GraphNode& head);
-
-      void ConstructAndAddAssignAffectPair(int assign_stmt, std::unordered_map<int, std::unordered_set<int>>& last_modified_table);
-      
-      static void MergeTable(unordered_map<int, unordered_set<int>>& dst, unordered_map<int, unordered_set<int>>& src);      
   };
 }
 

@@ -18,6 +18,10 @@ namespace pql_clause {
       }
 
     public:
+      std::vector<std::string> GetInvovledSynonyms() override;
+
+      int GetPriority();
+
       void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates);
  
@@ -50,17 +54,11 @@ namespace pql_clause {
   };
 
   class FollowsClause : public SuchThatClause {
-  public:
+    public:
       FollowsClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
           SuchThatClause{ left, is_synonym_left, right, is_synonym_right } {
         type_ = pql::RelationshipTypes::kFollows;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class FollowsTClause : public SuchThatClause {
@@ -69,12 +67,6 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
         type_ = pql::RelationshipTypes::kFollowsT;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class ParentClause : public SuchThatClause {
@@ -83,12 +75,6 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
         type_ = pql::RelationshipTypes::kParent;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class ParentTClause : public SuchThatClause {
@@ -97,12 +83,6 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
         type_ = pql::RelationshipTypes::kParentT;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class UsesSClause : public SuchThatClause {
@@ -111,12 +91,6 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
         type_ = pql::RelationshipTypes::kUsesS;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class ModifiesSClause : public SuchThatClause {
@@ -125,12 +99,6 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
         type_ = pql::RelationshipTypes::kModifiesS;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class UsesPClause : public SuchThatClause {
@@ -139,26 +107,14 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
         type_ = pql::RelationshipTypes::kUsesP;
       }
-
-  public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class ModifiesPClause : public SuchThatClause {
     public:
       ModifiesPClause(std::string left, bool is_synonym_left, std::string right, bool is_synonym_right) :
-          SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
-        type_ = pql::RelationshipTypes::kModifiesP;
+        SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
+          type_ = pql::RelationshipTypes::kModifiesP;
       }
-
-  public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class CallsClause : public SuchThatClause {
@@ -167,12 +123,6 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) {
         type_ = pql::RelationshipTypes::kCalls;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class CallsTClause : public SuchThatClause {
@@ -181,12 +131,6 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
         type_ = pql::RelationshipTypes::kCallsT;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class NextClause : public SuchThatClause {
@@ -195,12 +139,6 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
         type_ = pql::RelationshipTypes::kNext;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class NextTClause : public SuchThatClause {
@@ -209,12 +147,6 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
         type_ = pql::RelationshipTypes::kNextT;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class AffectsClause : public SuchThatClause {
@@ -223,12 +155,6 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
         type_ = pql::RelationshipTypes::kAffects;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 
   class AffectsTClause : public SuchThatClause {
@@ -237,11 +163,5 @@ namespace pql_clause {
           SuchThatClause(left, is_synonym_left, right, is_synonym_right) { 
         type_ = pql::RelationshipTypes::kAffectsT;
       }
-
-    public:
-      void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
-          std::vector<pql_table::Predicate>& predicates) {
-        SuchThatClause::Evaluate(cache, domain, predicates);
-      };
   };
 }

@@ -16,3 +16,12 @@ enum class EntityIdentifier {
   kIdent,
   kStmtNumber
 };
+
+struct hash_pair_fn {
+  std::size_t operator() (const std::pair<int, int>& p) const {
+    std::size_t h1 = std::hash<int>{}(p.first);
+    std::size_t h2 = std::hash<int>{}(p.second);
+
+    return h1 ^ h2;
+  }
+};

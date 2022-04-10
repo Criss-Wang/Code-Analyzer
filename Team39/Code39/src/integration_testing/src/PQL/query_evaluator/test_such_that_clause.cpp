@@ -2307,7 +2307,7 @@ TEST_CASE("Checks the correctness of Next* clause when two synonyms are involved
 
 /*------------------------------------------------Affects------------------------------------------------------------*/
 TEST_CASE("Checks the correctness of Affects clause when both arguments are wildcard") {
-  unordered_set<pair<int, int>, pql_cache::hash_pair_fn> affects_pair = {
+  unordered_set<pair<int, int>, hash_pair_fn> affects_pair = {
     make_pair(10,15), make_pair(10, 21), make_pair(10,22), make_pair(11,16), make_pair(11, 21), make_pair(11,23),
     make_pair(12,17), make_pair(12, 22), make_pair(12,23), make_pair(15,15), make_pair(15, 21), make_pair(15,22),
     make_pair(16,16), make_pair(16, 21), make_pair(16,23), make_pair(17,17), make_pair(17, 22), make_pair(17,23),

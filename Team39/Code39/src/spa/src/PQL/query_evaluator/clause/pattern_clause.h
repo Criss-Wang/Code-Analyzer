@@ -7,17 +7,21 @@ namespace pql_clause {
    public:
     std::string pattern_synonym_name_;
     std::string left_;
-    bool is_synonymy_left_;
+    bool is_synonym_left_;
 
     public:
       PatternClause(std::string pattern_synonym_name, std::string left, bool is_synonym_left) :
         Clause{} {
         pattern_synonym_name_ = pattern_synonym_name;
         left_ = std::move(left);
-        is_synonymy_left_ = is_synonym_left;
+        is_synonym_left_ = is_synonym_left;
       }
 
     public:
+      std::vector<std::string> GetInvovledSynonyms() override;
+
+      int GetPriority() override;
+
       virtual void Evaluate(pql_cache::Cache& cache, std::unordered_map<std::string, std::vector<int>>& domain,
         std::vector<pql_table::Predicate>& predicates) = 0;
 
