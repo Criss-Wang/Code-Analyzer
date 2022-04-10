@@ -1,7 +1,6 @@
 #include <map>
 #include <memory>
 #include <unordered_map>
-#include <stack>
 
 #include "cache.h"
 
@@ -335,12 +334,10 @@ namespace pql_cache {
     vector<int> used_vars = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kUsesS, assign_stmt);
 
     for (int& used_var : used_vars) {
-        //check used_var in LMT
+      //check used_var in LMT
       if (last_modified_table.find(used_var) != last_modified_table.end()) {
         for (const int left : last_modified_table[used_var]) {
-          
-            pair_cache_[pql::kAffects].insert(make_pair(left, assign_stmt));
-          
+          pair_cache_[pql::kAffects].insert(make_pair(left, assign_stmt));
         }
       }
     }
@@ -366,9 +363,107 @@ namespace pql_cache {
     return true;
   }
 
+  typedef void (Cache::*ComputeAffectsRelationshipForToken)(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+      stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack);
+
+  void Cache::ComputeAffectsRelationshipForStmt(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+      stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack) {
+     int start = curr->GetStart();
+     int end = curr->GetEnd();
+
+     for (int curr_stmt = start; curr_stmt <= end; curr_stmt++) {
+       //only 4 possible types: assign, call, print, read
+        EntityIdentifier curr_type = curr->GetStmtType(curr_stmt);
+
+        if (curr_type == EntityIdentifier::kAssign) {
+          int modvar = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt)[0];
+          ConstructAndAddAssignAffectPair(curr_stmt, last_modified_table);
+          //Add LastModified(modvar, curr_stmt)
+          last_modified_table[modvar] = unordered_set<int>{ curr_stmt };
+        }
+
+        if (curr_type == EntityIdentifier::kRead) {
+          int read_var = pkb_->GetStringAttribute(curr_type, curr_stmt);
+          last_modified_table.erase(read_var);
+        }
+
+        if (curr_type == EntityIdentifier::kCall) {
+          vector<int> call_modvars = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt);
+          for (int& call_modvar : call_modvars) {
+            last_modified_table.erase(call_modvar);
+          }
+        }
+      }
+     curr = curr->GetNext();
+  }
+
+  void Cache::ComputeAffectsRelationshipForIf(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+      stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack) {
+    unordered_map<int, unordered_set<int>> last_modified_table_else = last_modified_table;
+    //we push this copy for else branch later
+    last_modified_stack.push(move(last_modified_table_else));
+    ptr_stack.push(curr);
+    curr = curr->GetNext();
+  }
+
+  void Cache::ComputeAffectsRelationshipForWhile(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+      stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack) {
+    unordered_map<int, unordered_set<int>> before_last_modified_table = last_modified_table;
+    last_modified_stack.push(move(before_last_modified_table));
+    ptr_stack.push(curr);
+    curr = curr->GetNext();
+  }
+
+  void Cache::ComputeAffectsRelationshipForThenEnd(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+      stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack) {
+    unordered_map<int, unordered_set<int>> last_modified_table_else = move(last_modified_stack.top());
+    last_modified_stack.pop();
+    //store the current LMT to be merge after else branch is finish
+    last_modified_stack.push(move(last_modified_table));
+    //we do a move here since moving is faster than copying and last_modified_table_else will not be reference anymore
+    last_modified_table = move(last_modified_table_else);
+
+    shared_ptr<cfg::GraphNode> if_node = move(ptr_stack.top());
+    ptr_stack.pop();
+    curr = if_node->GetAlternative();
+  }
+
+  void Cache::ComputeAffectsRelationshipForIfEnd(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+      stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack) {
+    unordered_map<int, unordered_set<int >> last_modified_table_then = move(last_modified_stack.top());
+    last_modified_stack.pop();
+    MergeTable(last_modified_table, last_modified_table_then);
+    curr = curr->GetNext();
+  }
+
+  void Cache::ComputeAffectsRelationshipForWhileEnd(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+      stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack) {
+    shared_ptr<cfg::GraphNode> while_node = move(ptr_stack.top());
+    ptr_stack.pop();
+    unordered_map<int, unordered_set<int >> before_last_modified_table = move(last_modified_stack.top());
+    last_modified_stack.pop();
+
+    if (CheckSubsetBetweenTables(last_modified_table, before_last_modified_table)) {
+      last_modified_table = move(before_last_modified_table); //beforeLMT is a superset of LMT
+      curr = while_node->GetAlternative();
+    } else {
+      MergeTable(last_modified_table, before_last_modified_table);
+      curr = while_node;
+    }
+  }
+
+  const unordered_map<cfg::NodeType, ComputeAffectsRelationshipForToken> ComputeAffectsRelForTokenMap = {
+    { cfg::NodeType::STMT, &Cache::ComputeAffectsRelationshipForStmt },
+    { cfg::NodeType::IF, &Cache::ComputeAffectsRelationshipForIf },
+    { cfg::NodeType::WHILE, &Cache::ComputeAffectsRelationshipForWhile },
+    { cfg::NodeType::THENEND, &Cache::ComputeAffectsRelationshipForThenEnd },
+    { cfg::NodeType::WHILEEND, &Cache::ComputeAffectsRelationshipForWhileEnd },
+    { cfg::NodeType::IFEND, &Cache::ComputeAffectsRelationshipForIfEnd },
+  };
+
   void Cache::ComputeAffectsRelationship(cfg::GraphNode& head) {
     //LMT maps the variable to the stmt that modifies it  
-    //It is mapped to a vector because we could have multiple assign statements modifying same variable
+    //It is mapped to an unordered_set because we could have multiple assign statements modifying same variable
     //e.g. if (1==1) then {a = a + 1;} else {a = a + 1;}
     unordered_map<int, unordered_set<int>> last_modified_table;
     stack<unordered_map<int, unordered_set<int>>> last_modified_stack;
@@ -377,87 +472,8 @@ namespace pql_cache {
     shared_ptr<cfg::GraphNode> curr = head.GetNext();
 
     while (curr->GetNodeType() != cfg::NodeType::END) {
-      if (curr->GetNodeType() == cfg::NodeType::STMT) {
-        int start = curr->GetStart();
-        int end = curr->GetEnd();
-
-        for (int curr_stmt = start; curr_stmt <= end; curr_stmt++) {
-          //only 4 possible types: assign, call, print, read
-          EntityIdentifier curr_type = curr->GetStmtType(curr_stmt);
-
-          if (curr_type == EntityIdentifier::kAssign) {
-            int modvar = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt)[0];
-            ConstructAndAddAssignAffectPair(curr_stmt, last_modified_table);
-            //Add LastModified(modvar, curr_stmt)
-            last_modified_table[modvar] = unordered_set<int>{ curr_stmt };
-          }
-
-          if (curr_type == EntityIdentifier::kRead) {
-            int read_var = pkb_->GetStringAttribute(curr_type, curr_stmt);
-            last_modified_table.erase(read_var);
-          }
-
-          if (curr_type == EntityIdentifier::kCall) {
-            vector<int> call_modvars = pkb_->GetRelSecondArgument(pql::RelationshipTypes::kModifiesS, curr_stmt);
-            for (int& call_modvar : call_modvars) {
-              last_modified_table.erase(call_modvar);
-            }
-          }
-        }
-
-        curr = curr->GetNext();
-
-      } else if (curr->GetNodeType() == cfg::NodeType::IF) {
-
-        unordered_map<int, unordered_set<int>> last_modified_table_else = last_modified_table;
-        //we push this copy for else branch later
-        last_modified_stack.push(move(last_modified_table_else));
-        ptr_stack.push(curr);
-        curr = curr->GetNext();
-
-      } else if (curr->GetNodeType() == cfg::NodeType::WHILE) {
-        //make a copy
-        unordered_map<int, unordered_set<int>> before_last_modified_table = last_modified_table;
-        last_modified_stack.push(move(before_last_modified_table));
-        ptr_stack.push(curr);
-        curr = curr->GetNext();
-
-      } else if (curr->GetNodeType() == cfg::NodeType::THENEND) {
-
-        unordered_map<int, unordered_set<int>> last_modified_table_else = move(last_modified_stack.top());
-        last_modified_stack.pop();
-        //store the current LMT to be merge after else branch is finish
-        last_modified_stack.push(move(last_modified_table));
-        //we do a move here since moving is faster than copying and last_modified_table_else will not be reference anymore
-        last_modified_table = move(last_modified_table_else);
-
-        shared_ptr<cfg::GraphNode> if_node = move(ptr_stack.top());
-        ptr_stack.pop();
-        curr = if_node->GetAlternative();
-
-      } else if (curr->GetNodeType() == cfg::NodeType::IFEND) {
-        
-        unordered_map<int, unordered_set<int >> last_modified_table_then = move(last_modified_stack.top());
-        last_modified_stack.pop();
-        MergeTable(last_modified_table, last_modified_table_then);
-        curr = curr->GetNext();
-
-      } else {
-        //It will be WhileEnd until this point
-
-        shared_ptr<cfg::GraphNode> while_node = move(ptr_stack.top());
-        ptr_stack.pop();
-        unordered_map<int, unordered_set<int >> before_last_modified_table = move(last_modified_stack.top());
-        last_modified_stack.pop();
-
-        if (CheckSubsetBetweenTables(last_modified_table, before_last_modified_table)) {
-          last_modified_table = move(before_last_modified_table); //beforeLMT is a superset of LMT
-          curr = while_node->GetAlternative();
-        } else {
-          MergeTable(last_modified_table, before_last_modified_table);
-          curr = while_node;
-        }
-      }
+      ComputeAffectsRelationshipForToken fn = ComputeAffectsRelForTokenMap.at(curr->GetNodeType());
+      (this->*fn)(curr, last_modified_table, last_modified_stack, ptr_stack);
     }
   }
 }

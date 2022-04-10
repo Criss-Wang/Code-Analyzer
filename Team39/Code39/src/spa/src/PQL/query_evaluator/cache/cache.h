@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <stack>
 
 #include "../../query_parser/token.h"
 #include "../../../PKB/pkb.h"
@@ -116,6 +117,24 @@ namespace pql_cache {
       void ConstructAndAddAssignAffectPair(int assign_stmt, std::unordered_map<int, std::unordered_set<int>>& last_modified_table);
       
       static void MergeTable(unordered_map<int, unordered_set<int>>& dst, unordered_map<int, unordered_set<int>>& src);      
+
+      void ComputeAffectsRelationshipForStmt(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+          stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack);
+    
+      void ComputeAffectsRelationshipForIf(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+          stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack);
+
+      void ComputeAffectsRelationshipForWhile(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+          stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack);
+
+      void ComputeAffectsRelationshipForThenEnd(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+          stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack);
+
+      void ComputeAffectsRelationshipForIfEnd(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+          stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack);
+
+      void ComputeAffectsRelationshipForWhileEnd(shared_ptr<cfg::GraphNode>& curr, unordered_map<int, unordered_set<int>>& last_modified_table,
+          stack<unordered_map<int, unordered_set<int>>>& last_modified_stack, stack<shared_ptr<cfg::GraphNode>>& ptr_stack);
   };
 }
 
