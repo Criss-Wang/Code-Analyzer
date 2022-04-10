@@ -3,54 +3,53 @@
 
 using namespace std;
 
-int Dfs(shared_ptr<RelListTable> table_to_refer, shared_ptr<RelListTable> table_to_update, int key) {
-  if (table_to_update->KeyExistsInTable(key)) {
+int Dfs(RelListTable& table_to_refer, RelListTable& table_to_update, int key) {
+  if (table_to_update.KeyExistsInTable(key)) {
     return key;
   }
 
-  if (!table_to_refer->KeyExistsInTable(key)) {
+  if (!table_to_refer.KeyExistsInTable(key)) {
     return key;
   }
 
-  vector<int> children_lst = table_to_refer->GetValueByKey(key);
+  vector<int> children_lst = table_to_refer.GetValueByKey(key);
   vector<int> ans;
   for (int child_key : children_lst) {
     int end_val = Dfs(table_to_refer, table_to_update, child_key);
     ans.push_back(end_val);
     // Add the children of the current key if the key exists
-    if (table_to_update->KeyExistsInTable(end_val)) {
+    if (table_to_update.KeyExistsInTable(end_val)) {
       // Merge the vectors of children
-      vector<int> value = table_to_update->GetValueByKey(end_val);
+      vector<int> value = table_to_update.GetValueByKey(end_val);
       ans.insert(ans.end(), value.begin(), value.end());
     }
   }
 
   // Add into "cache" if ans is not empty. That means the current key must have children
   if (!ans.empty()) {
-    table_to_update->AddKeyValuePair(key, ans);
+    table_to_update.AddKeyValuePair(key, ans);
   }
 
   return key;
 }
 
-void PopulateForPOrC(shared_ptr<RelListTable> table_to_refer, shared_ptr<RelListTable> table_to_update) {
-  for (int& key : table_to_refer->GetKeyLst()) {
+void PopulateForPOrC(RelListTable& table_to_refer, RelListTable& table_to_update) {
+  for (int& key : table_to_refer.GetKeyLst()) {
     Dfs(table_to_refer, table_to_update, key);
   }
 }
 
-template<typename T1, typename T2>
-void PopulateForF(T1 table_to_refer, T2 table_to_update) {
+void PopulateForF(RelTable& table_to_refer, RelListTable& table_to_update) {
   // While the stmt_1 exists in the table, keep adding stmt_2 such that follows*(stmt_1, stmt_2) holds into the vector
-  for (const int key : table_to_refer->GetKeyLst()) {
+  for (const int key : table_to_refer.GetKeyLst()) {
     int stmt_1 = key;
     vector<int> follows_star_of_stmt;
-    while (table_to_refer->KeyExistsInTable(stmt_1)) {
-      int stmt_2 = table_to_refer->GetValueByKey(stmt_1);
+    while (table_to_refer.KeyExistsInTable(stmt_1)) {
+      int stmt_2 = table_to_refer.GetValueByKey(stmt_1);
       follows_star_of_stmt.push_back(stmt_2);
       stmt_1 = stmt_2;
     }
-    table_to_update->AddKeyValuePair(key, follows_star_of_stmt);
+    table_to_update.AddKeyValuePair(key, follows_star_of_stmt);
   }
 }
 
@@ -294,16 +293,16 @@ int PopulateNestedRelationships(Pkb& pkb) {
     shared_ptr<EntityVarsTable> caller_table = pkb.GetCallerTable();
 
     // Populate nested follows
-    PopulateForF<shared_ptr<RelTable>, shared_ptr<RelListTable>>(follows_table, follows_star_table);
-    PopulateForF<shared_ptr<RelTable>, shared_ptr<RelListTable>>(follows_before_table, follows_before_star_table);
+    PopulateForF(*follows_table, *follows_star_table);
+    PopulateForF(*follows_before_table, *follows_before_star_table);
 
     // Populate nested parent
-    PopulateForPOrC(parent_table, parent_star_table);
-    PopulateForPOrC(child_table, child_star_table);
+    PopulateForPOrC(*parent_table, *parent_star_table);
+    PopulateForPOrC(*child_table, *child_star_table);
 
     // Populate nested calls
-    PopulateForPOrC(calls_table, calls_star_table);
-    PopulateForPOrC(called_by_table, called_by_star_table);
+    PopulateForPOrC(*calls_table, *calls_star_table);
+    PopulateForPOrC(*called_by_table, *called_by_star_table);
 
     // Populate modifies
     PopulateNestedModifiesOrUses(*parent_star_table, *modifies_stmt_to_variables_table);
