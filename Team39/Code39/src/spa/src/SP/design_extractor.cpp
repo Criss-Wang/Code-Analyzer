@@ -22,6 +22,9 @@ int Dfs(RelListTable& table_to_refer, RelListTable& table_to_update, int key) {
       // Merge the vectors of children
       vector<int> value = table_to_update.GetValueByKey(end_val);
       ans.insert(ans.end(), value.begin(), value.end());
+      // Remove duplicate elements
+      sort(ans.begin(), ans.end());
+      ans.erase(unique(ans.begin(), ans.end()), ans.end());
     }
   }
 
@@ -53,21 +56,21 @@ void PopulateForF(RelTable& table_to_refer, RelListTable& table_to_update) {
   }
 }
 
-void PopulateNestedModifiesOrUses(RelListTable& parent_star_table, Table<int, vector<int>>& t) {
+void PopulateNestedModifiesOrUses(RelListTable& parent_star_table, RelListTable& stmt_to_variables_table) {
   for (const int parent_stmt: parent_star_table.GetKeyLst()) {
     vector<int> variables_lst;
-    if (t.KeyExistsInTable(parent_stmt)) {
-      variables_lst = t.GetValueByKey(parent_stmt);
+    if (stmt_to_variables_table.KeyExistsInTable(parent_stmt)) {
+      variables_lst = stmt_to_variables_table.GetValueByKey(parent_stmt);
     }
     vector<int> tmp_lst(variables_lst);
 
     for (const int child_stmt: parent_star_table.GetValueByKey(parent_stmt)) {
-      if (!t.KeyExistsInTable(child_stmt)) {
+      if (!stmt_to_variables_table.KeyExistsInTable(child_stmt)) {
         continue;
       }
 
       // Get the variables associated with the statement number
-      vector<int> variables_lst_of_child_stmt = t.GetValueByKey(child_stmt);
+      vector<int> variables_lst_of_child_stmt = stmt_to_variables_table.GetValueByKey(child_stmt);
 
       // Merge two vectors
       tmp_lst.insert(tmp_lst.end(), variables_lst_of_child_stmt.begin(), variables_lst_of_child_stmt.end());
@@ -79,13 +82,13 @@ void PopulateNestedModifiesOrUses(RelListTable& parent_star_table, Table<int, ve
     if (tmp_lst.empty()) {
       continue;
     }
-    bool success = t.UpdateKeyWithNewValue(parent_stmt, tmp_lst);
+    bool success = stmt_to_variables_table.UpdateKeyWithNewValue(parent_stmt, tmp_lst);
   }
 }
 
-void PopulateReverseNestedModifiesOrUses(RelListTable& child_star_table, Table<int, vector<int>>& t) {
-  for (const int var: t.GetKeyLst()) {
-    vector<int> stmts_lst = t.GetValueByKey(var);
+void PopulateReverseNestedModifiesOrUses(RelListTable& child_star_table, RelListReverseTable& variable_to_stmts_table) {
+  for (const int var: variable_to_stmts_table.GetKeyLst()) {
+    vector<int> stmts_lst = variable_to_stmts_table.GetValueByKey(var);
     vector<int> tmp_lst(stmts_lst);
     for (const int stmt: stmts_lst) {
       if (!child_star_table.KeyExistsInTable(stmt)) {
@@ -106,16 +109,16 @@ void PopulateReverseNestedModifiesOrUses(RelListTable& child_star_table, Table<i
     if (tmp_lst.empty()) {
       continue;
     }
-    bool success = t.UpdateKeyWithNewValue(var, tmp_lst);
+    bool success = variable_to_stmts_table.UpdateKeyWithNewValue(var, tmp_lst);
   }
 }
 
-void PopulateNestedModifiesPOrUsesP(RelListTable& calls_star_table, Table<int, vector<int>>& t) {
-  for (const int proc : t.GetKeyLst()) {
+void PopulateNestedModifiesPOrUsesP(RelListTable& calls_star_table, RelListTable& proc_to_variables_table) {
+  for (const int proc : calls_star_table.GetKeyLst()) {
     // Get the variables
     vector<int> variables = {};
-    if (t.KeyExistsInTable(proc)) {
-      variables = t.GetValueByKey(proc);
+    if (proc_to_variables_table.KeyExistsInTable(proc)) {
+      variables = proc_to_variables_table.GetValueByKey(proc);
     }
 
     int initial_variables_size = variables.size();
@@ -128,10 +131,10 @@ void PopulateNestedModifiesPOrUsesP(RelListTable& calls_star_table, Table<int, v
     vector<int> called_procedures = calls_star_table.GetValueByKey(proc);
     for (const int called_proc : called_procedures) {
       // Merge the vectors with new values
-      if (!t.KeyExistsInTable(called_proc)) {
+      if (!proc_to_variables_table.KeyExistsInTable(called_proc)) {
         continue;
       }
-      vector<int> new_variables = t.GetValueByKey(called_proc);
+      vector<int> new_variables = proc_to_variables_table.GetValueByKey(called_proc);
       variables.insert(variables.end(), new_variables.begin(), new_variables.end());
     }
     // Remove duplicate elements
@@ -140,16 +143,17 @@ void PopulateNestedModifiesPOrUsesP(RelListTable& calls_star_table, Table<int, v
 
     // Update the key with new vector
     if (variables.size() > initial_variables_size) {
-      t.UpdateKeyWithNewValue(proc, variables);
+      proc_to_variables_table.UpdateKeyWithNewValue(proc, variables);
     }
   }
 }
 
-void PopulateReverseNestedModifiesPOrUsesP(RelListTable& called_by_star_table, Table<int, vector<int>>& t) {
-  for (const int var : t.GetKeyLst()) {
+void PopulateReverseNestedModifiesPOrUsesP(RelListTable& called_by_star_table, RelListReverseTable& variable_to_procs_table) {
+  for (const int var : variable_to_procs_table.GetKeyLst()) {
     // Get the procedures associated with the variable
-    vector<int> procedures = t.GetValueByKey(var);
-    int initial_procedures_size = procedures.size();
+    vector<int> procedures = variable_to_procs_table.GetValueByKey(var);
+    vector<int> ans = vector(procedures);
+    int initial_procedures_size = ans.size();
 
     for (const int proc : procedures) {
       // Check if the procedure is called by others
@@ -159,22 +163,22 @@ void PopulateReverseNestedModifiesPOrUsesP(RelListTable& called_by_star_table, T
       }
 
       // Merge the vectors with new values
-      procedures.insert(procedures.end(), callers.begin(), callers.end());
+      ans.insert(ans.end(), callers.begin(), callers.end());
     }
 
     // Remove duplicate elements
-    sort(procedures.begin(), procedures.end());
-    procedures.erase(unique(procedures.begin(), procedures.end()), procedures.end());
+    sort(ans.begin(), ans.end());
+    ans.erase(unique(ans.begin(), ans.end()), ans.end());
 
     // Update the key with new vector
-    if (initial_procedures_size != procedures.size()) {
-      t.UpdateKeyWithNewValue(var, procedures);
+    if (initial_procedures_size != ans.size()) {
+      variable_to_procs_table.UpdateKeyWithNewValue(var, ans);
     }
   }
 }
 
 void PopulateNestedModifiesSOrUsesSForCalls(EntityVarsTable caller_table, RelListTable& child_star_table,
-  Table<int, vector<int>> proc_to_variables_table, Table<int, vector<int>>& t, Pkb& pkb) {
+  RelListTable& proc_to_variables_table, RelListTable& stmt_to_variables_table, Pkb& pkb) {
   // Get the call statements
   vector<int> call_stmts = caller_table.GetKeyLst();
   // Then loop through and get the specific procedure called at that statement
@@ -189,7 +193,7 @@ void PopulateNestedModifiesSOrUsesSForCalls(EntityVarsTable caller_table, RelLis
     vector<int> variables_idx = proc_to_variables_table.GetValueByKey(proc_idx);
 
     // Update the statement to variables table
-    t.AddKeyValuePair(call_stmt, variables_idx);
+    stmt_to_variables_table.AddKeyValuePair(call_stmt, variables_idx);
 
     // Check the parents and update the relevant statement with the new variables
     if (!child_star_table.KeyExistsInTable(call_stmt)) {
@@ -200,10 +204,10 @@ void PopulateNestedModifiesSOrUsesSForCalls(EntityVarsTable caller_table, RelLis
 
     for (const int parent : parents) {
       // Try getting the variables associated with parent
-      if (!t.KeyExistsInTable(parent)) {
+      if (!stmt_to_variables_table.KeyExistsInTable(parent)) {
         continue;
       }
-      vector<int> parent_variables_idx = t.GetValueByKey(parent);
+      vector<int> parent_variables_idx = stmt_to_variables_table.GetValueByKey(parent);
 
       // Otherwise merge the vectors with new values
       parent_variables_idx.insert(parent_variables_idx.end(), variables_idx.begin(), variables_idx.end());
@@ -212,17 +216,17 @@ void PopulateNestedModifiesSOrUsesSForCalls(EntityVarsTable caller_table, RelLis
       parent_variables_idx.erase(unique(parent_variables_idx.begin(), parent_variables_idx.end()), parent_variables_idx.end());
 
       try {
-        t.UpdateKeyWithNewValue(parent, parent_variables_idx);
+        stmt_to_variables_table.UpdateKeyWithNewValue(parent, parent_variables_idx);
       } catch (InvalidKeyException& e) {
         // Means that there are no variables associated with parent statement
-        t.AddKeyValuePair(parent, variables_idx);
+        stmt_to_variables_table.AddKeyValuePair(parent, variables_idx);
       }
     }
   }
 }
 
 void PopulateReverseNestedModifiesSOrUsesSForCalls(EntityVarsTable caller_table, RelListTable& child_star_table,
-  Table<int, vector<int>> proc_to_variables_table, Table<int, vector<int>>& t, Pkb& pkb) {
+  RelListTable& proc_to_variables_table, RelListReverseTable& variable_to_stmts_table, Pkb& pkb) {
   // First get the call statements
   vector<int> call_stmts = caller_table.GetKeyLst();
   // Then loop through and get the specific procedure called at that statement
@@ -239,17 +243,17 @@ void PopulateReverseNestedModifiesSOrUsesSForCalls(EntityVarsTable caller_table,
     // Loop through the variables
     for (const int var_idx : variables_idx) {
       // Get the stmts associated with this variable
-      if (!t.KeyExistsInTable(var_idx)) {
+      if (!variable_to_stmts_table.KeyExistsInTable(var_idx)) {
         continue;
       }
 
       // Ensure that duplicates are not added
-      vector<int> stmts_to_update = t.GetValueByKey(var_idx);
+      vector<int> stmts_to_update = variable_to_stmts_table.GetValueByKey(var_idx);
       if (find(stmts_to_update.begin(), stmts_to_update.end(), call_stmt) == stmts_to_update.end()) {
         stmts_to_update.push_back(call_stmt);
       }
 
-      t.UpdateKeyWithNewValue(var_idx, stmts_to_update);
+      variable_to_stmts_table.UpdateKeyWithNewValue(var_idx, stmts_to_update);
 
       // Get the parents of the current call statement
       if (!child_star_table.KeyExistsInTable(call_stmt)) {
@@ -263,7 +267,7 @@ void PopulateReverseNestedModifiesSOrUsesSForCalls(EntityVarsTable caller_table,
         }
       }
 
-      t.UpdateKeyWithNewValue(var_idx, stmts_to_update);
+      variable_to_stmts_table.UpdateKeyWithNewValue(var_idx, stmts_to_update);
     }
   }
 }
